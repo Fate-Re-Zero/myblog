@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1.redis 是单线程还是多线程?    单线程：主要是指网络IO以及键值对的读写是由单线程来完成的,(面对多个客户端的的读写操作，redis接收网络请求和处理这些读写命令是由一个线程来完成) redis4.0之前，redis是完全单线程的。  redis4.0时，其实redis引入了多线程的，但是额外的线程也是用于一些后台处理, 例如：数据持久化，集群数据同步，删除过期的对象等操作是由额外的线">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis数据结构和基本概念">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="1.redis 是单线程还是多线程?    单线程：主要是指网络IO以及键值对的读写是由单线程来完成的,(面对多个客户端的的读写操作，redis接收网络请求和处理这些读写命令是由一个线程来完成) redis4.0之前，redis是完全单线程的。  redis4.0时，其实redis引入了多线程的，但是额外的线程也是用于一些后台处理, 例如：数据持久化，集群数据同步，删除过期的对象等操作是由额外的线">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-06-11T12:00:38.000Z">
+<meta property="article:modified_time" content="2022-08-13T09:53:16.762Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>redis数据结构和基本概念</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/06/12/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E5%92%8CMemcached/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/06/09/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&text=redis数据结构和基本概念"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&is_video=false&description=redis数据结构和基本概念"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis数据结构和基本概念&body=Check out this article: https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&name=redis数据结构和基本概念&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        redis数据结构和基本概念
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-06-11T12:00:38.000Z" itemprop="datePublished">2022-06-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="leancloud-visitors" data-flag-title="redis数据结构和基本概念" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>1.redis 是单线程还是多线程?<br>    单线程：主要是指网络IO以及键值对的读写是由单线程来完成的,(面对多个客户端的的读写操作，redis接收网络请求和处理这些读写命令是由一个线程来完成)</p>
+<pre><code>redis4.0之前，redis是完全单线程的。
+
+redis4.0时，其实redis引入了多线程的，但是额外的线程也是用于一些后台处理,
+例如：数据持久化，集群数据同步，删除过期的对象等操作是由额外的线程来完成的
+但是核心流程还是单线程，也就是接受命令，解析命令，执行命令，写回结果这些操作还是由主线程来完成；
+
+这也是为什么有些人说redis4.0是单线程的，因为他们指的是核心流程是单线程的。
+这边的核心流程指的是 redis 正常处理客户端请求的流程，通常包括：接收命令、解析命令、执行命令、返回结果等。
+
+而在redis6.0版本又一次引入了多线程的概念，与4.0不同的是，这次的多线程会涉及到核心流程
+
+redis 6.0 中，多线程主要用于网络 I/O 阶段，也就是接收命令和写回结果阶段，而在执行命令阶段，还是由单线程串行执行。由于执行时还是串行，因此无需考虑并发安全问题。
+
+值得注意的时，redis 中的多线程组不会同时存在“读”和“写”，这个多线程组只会同时“读”或者同时“写”。
+</code></pre>
+<p>redis 6.0 加入多线程 I/O 之后，处理命令的核心流程如下:<br>1、当有读事件到来时，主线程将该客户端连接放到全局等待读队列<br>2、读取数据：1）主线程将等待读队列的客户端连接通过轮询调度算法分配给 I/O 线程处理；2）同时主线程也会自己负责处理一个客户端连接的读事件；3）当主线程处理完该连接的读事件后，会自旋等待所有 I/O 线程处理完毕<br>3、命令执行：主线程按照事件被加入全局等待读队列的顺序（这边保证了执行顺序是正确的），串行执行客户端命令，然后将客户端连接放到全局等待写队列<br>4、写回结果：跟等待读队列处理类似，主线程将等待写队列的客户端连接使用轮询调度算法分配给 I/O 线程处理，同时自己也会处理一个，当主线程处理完毕后，会自旋等待所有 I/O 线程处理完毕，最后清空队列。</p>
+<p>相关源码在 networking.c，核心的方法是：<br>IOThreadMain、handleClientsWithPendingReadsUsingThreads、<br>handleClientsWithPendingWritesUsingThreads</p>
+<p>为什么 redis 是单线程?<br>1.单线程可以避免上下文切换，加锁等带来的额外性能消耗；<br>2.随着互联网的不断发展，对缓存的性能要求也越来越高了，redis也开始逐步往多线程发展，例如：redis6.0就对核心流程引入了多线程，主要用于解决redis在网络I/O上的性能瓶颈，对于核心命令执行阶段，目前还是单线程的；</p>
+<p>因为 redis 是完全基于内存操作的，通常情况下CPU不会是redis的瓶颈，redis 的瓶颈最有可能是机器内存的大小或者网络带宽。<br>既然CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了，因为如果使用多线程的话会更复杂，同时需要引入上下文切换、加锁等等，会带来额外的性能消耗。<br>而随着近些年互联网的不断发展，大家对于缓存的性能要求也越来越高了，因此 redis 也开始在逐渐往多线程方向发展。<br>最近的 6.0 版本就对核心流程引入了多线程，主要用于解决 redis 在网络 I/O 上的性能瓶颈。而对于核心的命令执行阶段，目前还是单线程的。</p>
+<p>redis 为什么使用单进程、单线程也很快?<br>1、基于内存的操作<br>2、使用了 I/O 多路复用模型，select、epoll 等，基于 reactor 模式开发了自己的网络事件处理器</p>
+<p>Reacor模式是一种事件驱动机制，他逆转了事件处理的流程，不再是主动地等事件就绪，而是它提前注册好的回调函数，当有对应事件发生时就调用回调函数。 由陈硕所述，Reactor即为非阻塞IO + IO复用，单个Reactor的逻辑大致如下<br>它的核心思想就是利用IO复用技术来监听套接字上的读写事件，一旦某个fd上发生相应事件，就反过来处理该套接字上的回调函数。</p>
+<p>3、单线程可以避免不必要的上下文切换和竞争条件，减少了这方面的性能消耗。<br>4、以上这三点是 redis 性能高的主要原因，其他的还有一些小优化，例如：对数据结构进行了优化，简单动态字符串、压缩列表等。</p>
+<p>redis 在项目中的使用场景？<br>缓存、分布式锁、排行榜（zset）、计数（incrby）、消息队列（stream）、地理位置（geo）、访客统计（hyperloglog）等</p>
+<p>redis常见的数据结构？<br>常见的5种：<br>String：字符串，最基础的数据类型。<br>List：列表。<br>Hash：哈希对象。<br>Set：集合。<br>Sorted Set：有序集合，Set 的基础上加了个分值。<br>高级的4种：<br>HyperLogLog：通常用于基数统计。使用少量固定大小的内存，来统计集合中唯一元素的数量。统计结果不是精确值，而是一个带有0.81%标准差（standard error）的近似值。所以，HyperLogLog适用于一些对于统计结果精确度要求不是特别高的场景，例如网站的UV统计。<br>Geo：redis 3.2 版本的新特性。可以将用户给定的地理位置信息储存起来， 并对这些信息进行操作：获取2个位置的距离、根据给定地理位置坐标获取指定范围内的地理位置集合。<br>Bitmap：位图。<br>Stream：主要用于消息队列，类似于 kafka，可以认为是 pub/sub 的改进版。提供了消息的持久化和主备复制功能，可以让任何客户端访问任何时刻的数据，并且能记住每一个客户端的访问位置，还能保证消息不丢失。</p>
+<p>Sorted Set底层数据结构?</p>
+<p>Sorted Set（有序集合）当前有两种编码实现：ziplist、skiplist</p>
+<p>ziplist：使用压缩列表实现，当保存的元素长度都小于64字节，同时数量小于128时，使用该编码方式，否则会使用 skiplist。这两个参数可以通过 zset-max-ziplist-entries、zset-max-ziplist-value 来自定义修改。</p>
+<p>ziplist数据结构：<br>    (1).zlbytes：记录了压缩列表占用的内存字节数，在对压缩列表进行内存重分配，或者计算zlend的位置时使用。它本身占了4个字节；<br>    (2).zltail：记录了尾节点（entry）至起始节点（entry）的偏移量。通过这个偏移量，可以快速确定最后一个entry节点的地址;<br>    (3).zllen：记录了entry节点的数量。当zllen的值小于65535时，这个值就表示节点的数量。当zllen的值大于65535时，节点的真实数量需要遍历整个压缩列表才能得出;<br>    (4).entry：压缩列表中所包含的每个节点。每个节点的长度根据该节点的内容来决定;<br>    (5).zlend：特殊值0XFF(255)，标记了压缩列表的末端。表示该压缩列表到此为止;<br>ziplist的entry节点的结构：<br>    (1).prev_entry_len：记录前驱节点的长度;<br>    (2).encoding：记录当前节点的value成员的数据类型以及长度;<br>    (3).value：根据encoding来保存字节数组或整数<br>ziplist的特点：<br>    (1).压缩列表ziplist结构本身就是一个连续的内存块，由表头（记录了压缩列表的一些信息，比如zlbytes压缩列表占用的内存字节<br>    数，zltail起始节点到尾结点的偏移量，zllen记录了entry节点的个数）、若干个entry节点和压缩列表尾部标识符zlend组成，通过(8种)一系列编码规则，提高内存的利用率，使用于存储整数和短字符串；<br>    (2).压缩列表ziplist结构的缺点是：每次插入或删除一个元素时，都需要进行频繁的进行内存的扩展或减小，然后还需要进行内存的<br>    整理，造成严重效率的损失，所以redis默认情况下在元素个数小于128时才使用ziplist,在元素大于128时使用skiplist;</p>
+<p>skiplist：zset实现，一个zset同时包含一个字典（dict）和一个跳跃表（zskiplist）</p>
+<p>skiplist数据结构：<br>    (1).是一个多层链表的数据结构，每个节点的level是通过一定的概率随机产生的（使用抛硬币的方式）;<br>    (2).每一层都是一个有序的链表，默认是升序;<br>    (3).最底层(Level 1)的链表包含所有元素;<br>    (4).跳跃表的空间复杂度为 O(n);<br>    (5).跳跃表支持平均O(logN)、最坏O(N)复杂度的节点查找;<br>    在大部分情况下，跳跃表的效率可以和平衡树相媲美，并且因为跳跃表的实现比平衡树要来得更为简单，所以有不少程序都使用跳跃表来代替平衡树;<br>    跳跃表 vs 红黑树<br>    红黑可以说是二叉查找树的一种变形，红黑在查找，插入，删除也是近似O(logn)的时间复杂度，但学过红黑树的都知道，<br>    红黑树比跳跃表复杂多了。<br>    但红黑树插入，删除结点时，是通过调整结构来保持红黑树的平衡，比起跳跃表直接通过一个随机数来决定跨越几层，在时间复杂度的花销上是要高于跳跃表的。<br>    当然，红黑树并不是一定比跳跃表差，在有些场合红黑树会是更好的选择，所以选择一种数据结构，关键还得看场合。<br>    总上所述，维护一组有序的集合，并且希望在查找、插入、删除等操作上尽可能快，那么跳跃表会是不错的选择。</p>
+<p>Sorted Set为什么同时使用字典和跳跃表？<br>    主要是为了性能。<br>    单独使用字典：在执行范围型操作，比如zrank、zrange，字典需要进行排序，至少需要O(NlogN)的时间复杂度及额外O(N)的内存空间。<br>    单独使用跳跃表：根据成员查找分值操作的复杂度从O(1)上升为O(logN)。</p>
+<p>Sorted Set为什么使用跳跃表，而不是红黑树？<br>    1）跳表的性能和红黑树差不多;<br>    2）跳表更容易实现和调试;<br>    3）红黑树插入，删除结点时，是通过调整结构来保持红黑树的平衡，比起跳跃表直接通过一个随机数来决定跨越几层，在时间复杂度的花销上是要高于跳跃表的；</p>
+<p>Hash 对象底层结构?<br>    Hash对象当前有两种编码：ziplist、hashtable<br>    ziplist：使用压缩列表实现，每当有新的键值对要加入到哈希对象时，程序会先将保存了键的节点推入到压缩列表的表尾，然后再将保存了值的节点推入到压缩列表表尾。<br>    因此：<br>    1）保存了同一键值对的两个节点总是紧挨在一起，保存键的节点在前，保存值的节点在后；<br>    2）先添加到哈希对象中的键值对会被放在压缩列表的表头方向，而后来添加的会被放在表尾方向。<br>    hashtable：使用字典作为底层实现，哈希对象中的每个键值对都使用一个字典键值来保存，跟 java 中的 HashMap 类似。</p>
+<p>Redis的网络事件处理器？<br>    redis 基于 reactor 模式开发了自己的网络事件处理器，由4个部分组成：套接字、I/O 多路复用程序、文件事件分派器<br>    （dispatcher）、以及事件处理器；<br>    套接字：socket 连接，也就是客户端连接。当一个套接字准备好执行连接、写入、读取、关闭等操作时， 就会产生一个相应的文件事件。因为一个服务器通常会连接多个套接字， 所以多个文件事件有可能会并发地出现；</p>
+<pre><code>I/O 多路复用程序：提供 select、epoll、evport、kqueue 的实现，会根据当前系统自动选择最佳的方式。负责监听多个套接字，当套接字产生事件时，会向文件事件分派器传送那些产生了事件的套接字；
+
+当多个文件事件并发出现时， I/O 多路复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字：当上一个套接字产生的事件被处理完毕之后，才会继续传送下一个套接字；
+
+文件事件分派器：接收 I/O 多路复用程序传来的套接字， 并根据套接字产生的事件的类型， 调用相应的事件处理器；
+
+事件处理器：事件处理器就是一个个函数， 定义了某个事件发生时， 服务器应该执行的动作。
+例如：建立连接、命令查询、命令写入、连接关闭等等；
+</code></pre>
+<p>Redis 删除过期键的策略（缓存失效策略、数据过期策略）？<br>    定时删除：在设置键的过期时间的同时，创建一个定时器，让定时器在键的过期时间来临时，立即执行对键的删除操作。对内存最友好，对 CPU 时间最不友好。</p>
+<pre><code>惰性删除：放任键过期不管，但是每次获取键时，都检査键是否过期，如果过期的话，就删除该键；如果没有过期，就返回该键。对 CPU 时间最友好，对内存最不友好。
+
+定期删除：每隔一段时间，默认100ms，程序就对数据库进行一次检査，删除里面的过期键。至 于要删除多少过期键，以及要检査多少个数据库，则由算法决定。前两种策略的折中，对 CPU 时间和内存的友好程度较平衡。
+
+Redis 使用惰性删除和定期删除。
+</code></pre>
+<p>Redis的内存淘汰（驱逐）策略？</p>
+<pre><code>当 redis 的内存空间（maxmemory 参数配置）已经用满时，redis 将根据配置的驱逐策略（maxmemory-policy 参数配置），进行相应的动作。
+
+当前 redis 的淘汰策略有8种：
+
+noeviction：默认策略，不淘汰任何 key，直接返回错误
+
+allkeys-lru：在所有的 key 中，使用 LRU 算法淘汰部分 key
+
+allkeys-lfu：在所有的 key 中，使用 LFU 算法淘汰部分 key
+
+allkeys-random：在所有的 key 中，随机淘汰部分 key
+
+volatile-lru：在设置了过期时间的 key 中，使用 LRU 算法淘汰部分 key
+
+volatile-lfu：在设置了过期时间的 key 中，使用 LFU 算法淘汰部分 key
+
+volatile-random：在设置了过期时间的 key 中，随机淘汰部分 key
+
+volatile-ttl：在设置了过期时间的 key 中，挑选 TTL（time to live，剩余时间）短的 key 淘汰
+</code></pre>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&text=redis数据结构和基本概念"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&is_video=false&description=redis数据结构和基本概念"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis数据结构和基本概念&body=Check out this article: https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构和基本概念"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/11/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&name=redis数据结构和基本概念&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

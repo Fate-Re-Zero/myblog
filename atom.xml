@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>祥祥要起飞</title>
+  
+  <subtitle>Stay Hungry . Stay Foolish</subtitle>
+  <link href="https://fate-re-zero.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://fate-re-zero.github.io/"/>
+  <updated>2022-10-29T01:58:57.067Z</updated>
+  <id>https://fate-re-zero.github.io/</id>
+  
+  <author>
+    <name>祥祥要起飞</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>HTTP协议</title>
+    <link href="https://fate-re-zero.github.io/2022/10/29/%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%86%85%E5%AE%B9/HTTP%E5%8D%8F%E8%AE%AE/"/>
+    <id>https://fate-re-zero.github.io/2022/10/29/%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%86%85%E5%AE%B9/HTTP%E5%8D%8F%E8%AE%AE/</id>
+    <published>2022-10-29T01:58:38.000Z</published>
+    <updated>2022-10-29T01:58:57.067Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>算法分类与总结</title>
+    <link href="https://fate-re-zero.github.io/2022/10/29/%E7%AE%97%E6%B3%95/%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB%E4%B8%8E%E6%80%BB%E7%BB%93/"/>
+    <id>https://fate-re-zero.github.io/2022/10/29/%E7%AE%97%E6%B3%95/%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB%E4%B8%8E%E6%80%BB%E7%BB%93/</id>
+    <published>2022-10-29T01:30:38.000Z</published>
+    <updated>2022-11-09T12:18:51.291Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;二进制相关&quot;&gt;&lt;a href=&quot;#二进制相关&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>全知识点复习</title>
+    <link href="https://fate-re-zero.github.io/2022/10/07/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/"/>
+    <id>https://fate-re-zero.github.io/2022/10/07/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/</id>
+    <published>2022-10-07T02:30:38.000Z</published>
+    <updated>2022-10-25T08:39:57.851Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;JAVA基础：&lt;br&gt;    基础：&lt;br&gt;        1.面向对象的三个基本特征：封装、继承和多态;&lt;br&gt;            继承：子类继承父类的属性和方法,使得子类具有父类相同的行为;&lt;br&gt;           </summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL事务</title>
+    <link href="https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/"/>
+    <id>https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/</id>
+    <published>2022-09-27T06:30:38.000Z</published>
+    <updated>2022-10-07T02:35:41.873Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;什么是事务&quot;&gt;&lt;a href=&quot;#什么是事务&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL索引优化</title>
+    <link href="https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/"/>
+    <id>https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/</id>
+    <published>2022-09-27T06:30:38.000Z</published>
+    <updated>2022-10-07T03:16:33.481Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL添加索引的语句&quot;&gt;&lt;a href=&quot;#MySQL添加索引的语句&quot; class=&quot;headerlink&quot; title=&quot;MySQL添加索引的语句&quot;&gt;&lt;/a&gt;MySQL添加索引的语句&lt;/h3&gt;&lt;p&gt;1.添加PRIMARY</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL性能调优</title>
+    <link href="https://fate-re-zero.github.io/2022/09/26/MySql/MySQL%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"/>
+    <id>https://fate-re-zero.github.io/2022/09/26/MySql/MySQL%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/</id>
+    <published>2022-09-26T06:30:38.000Z</published>
+    <updated>2022-10-07T03:05:35.454Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;MySQL调优的理解&quot;&gt;&lt;a href=&quot;#MySQL调优的理解&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Zookeeper</title>
+    <link href="https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/"/>
+    <id>https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/</id>
+    <published>2022-09-25T14:30:38.000Z</published>
+    <updated>2022-09-26T05:22:38.138Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;理解&quot;&gt;&lt;a href=&quot;#理解&quot; class=&quot;headerlink&quot; title=&quot;理解&quot;&gt;&lt;/a&gt;理解&lt;/h3&gt;&lt;p&gt;小岛(Island)——ZK Server Cluster&lt;/p&gt;
+&lt;p&gt;议员(Senator)——ZK</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>GC优化理解及思考</title>
+    <link href="https://fate-re-zero.github.io/2022/09/23/JVM/GC%E4%BC%98%E5%8C%96%E7%90%86%E8%A7%A3%E5%8F%8A%E6%80%9D%E8%80%83/"/>
+    <id>https://fate-re-zero.github.io/2022/09/23/JVM/GC%E4%BC%98%E5%8C%96%E7%90%86%E8%A7%A3%E5%8F%8A%E6%80%9D%E8%80%83/</id>
+    <published>2022-09-23T12:55:38.000Z</published>
+    <updated>2022-09-23T13:25:16.117Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;确定优化目标&quot;&gt;&lt;a href=&quot;#确定优化目标&quot; class=&quot;headerlink&quot; title=&quot;确定优化目标&quot;&gt;&lt;/a&gt;确定优化目标&lt;/h3&gt;&lt;p&gt;明确应用程序的系统需求是性能优化的基础：&lt;br&gt;     高可用，可用性达到几个9;&lt;br&gt;    </summary>
+        
+      
+    
+    
+    
+    
+    <category term="JVM" scheme="https://fate-re-zero.github.io/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>IO多路复用解析</title>
+    <link href="https://fate-re-zero.github.io/2022/09/21/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"/>
+    <id>https://fate-re-zero.github.io/2022/09/21/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/</id>
+    <published>2022-09-21T08:04:38.000Z</published>
+    <updated>2022-09-22T15:36:44.877Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Socket&quot;&gt;&lt;a href=&quot;#Socket&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="IO" scheme="https://fate-re-zero.github.io/tags/IO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Redis</title>
+    <link href="https://fate-re-zero.github.io/2022/09/21/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/Redis/"/>
+    <id>https://fate-re-zero.github.io/2022/09/21/redis%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/Redis/</id>
+    <published>2022-09-21T06:30:38.000Z</published>
+    <updated>2022-10-09T01:00:14.732Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;影响从数据库获取数据速度的主要因素&quot;&gt;&lt;a href=&quot;#影响从数据库获取数据速度的主要因素&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-AOP的具体实现</title>
+    <link href="https://fate-re-zero.github.io/2022/09/20/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-AOP%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/"/>
+    <id>https://fate-re-zero.github.io/2022/09/20/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-AOP%E7%9A%84%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/</id>
+    <published>2022-09-20T08:38:38.000Z</published>
+    <updated>2022-09-21T06:04:36.495Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;容器启动-切面类-切入点-advice-通知-扫描创建代理类阶段-准备AOP相关对象的BeanDefinition&quot;&gt;&lt;a href=&quot;#容器启动-切面类-切入点-advice-通知-扫描创建代理类阶段-准备AOP相关对象的BeanDefinition&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-读完源码后的自我感悟和理解</title>
+    <link href="https://fate-re-zero.github.io/2022/09/20/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E8%AF%BB%E5%AE%8C%E6%BA%90%E7%A0%81%E5%90%8E%E7%9A%84%E8%87%AA%E6%88%91%E6%84%9F%E6%82%9F%E5%92%8C%E7%90%86%E8%A7%A3/"/>
+    <id>https://fate-re-zero.github.io/2022/09/20/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E8%AF%BB%E5%AE%8C%E6%BA%90%E7%A0%81%E5%90%8E%E7%9A%84%E8%87%AA%E6%88%91%E6%84%9F%E6%82%9F%E5%92%8C%E7%90%86%E8%A7%A3/</id>
+    <published>2022-09-20T01:20:38.000Z</published>
+    <updated>2022-09-20T08:51:23.742Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;IOC容器的创建过程与Bean的注入&quot;&gt;&lt;a href=&quot;#IOC容器的创建过程与Bean的注入&quot; class=&quot;headerlink&quot; title=&quot;IOC容器的创建过程与Bean的注入&quot;&gt;&lt;/a&gt;IOC容器的创建过程与Bean的注入&lt;/h3&gt;&lt;h3</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring常见的面试题</title>
+    <link href="https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E9%9D%A2%E8%AF%95%E9%A2%98/"/>
+    <id>https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E9%9D%A2%E8%AF%95%E9%A2%98/</id>
+    <published>2022-09-15T01:34:38.000Z</published>
+    <updated>2022-09-15T02:50:09.732Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;spring是什么&quot;&gt;&lt;a href=&quot;#spring是什么&quot; class=&quot;headerlink&quot; title=&quot;spring是什么&quot;&gt;&lt;/a&gt;spring是什么&lt;/h3&gt;&lt;h3 id=&quot;spring的优缺点&quot;&gt;&lt;a href=&quot;#spring的优缺点&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring是如何解决循环依赖的</title>
+    <link href="https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84/"/>
+    <id>https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84/</id>
+    <published>2022-09-15T01:23:38.000Z</published>
+    <updated>2022-10-08T04:49:49.783Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;何为循环依赖&quot;&gt;&lt;a href=&quot;#何为循环依赖&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-BeanPostProcessor</title>
+    <link href="https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-BeanPostProcessor/"/>
+    <id>https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-BeanPostProcessor/</id>
+    <published>2022-09-15T01:23:38.000Z</published>
+    <updated>2022-09-20T10:09:49.346Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;BeanPostProcessor&quot;&gt;&lt;a href=&quot;#BeanPostProcessor&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-BeanFactoryPostProcessor</title>
+    <link href="https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-BeanFactoryPostProcessor/"/>
+    <id>https://fate-re-zero.github.io/2022/09/15/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-BeanFactoryPostProcessor/</id>
+    <published>2022-09-15T01:18:38.000Z</published>
+    <updated>2022-09-21T02:18:39.597Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;BeanFactoryPostProcessor&quot;&gt;&lt;a href=&quot;#BeanFactoryPostProcessor&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring常见的知识点</title>
+    <link href="https://fate-re-zero.github.io/2022/09/14/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9/"/>
+    <id>https://fate-re-zero.github.io/2022/09/14/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E7%9F%A5%E8%AF%86%E7%82%B9/</id>
+    <published>2022-09-14T08:59:38.000Z</published>
+    <updated>2022-10-08T04:40:32.281Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;深拷贝与浅拷贝&quot;&gt;&lt;a href=&quot;#深拷贝与浅拷贝&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-通过FactoryMethod创建对象</title>
+    <link href="https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E9%80%9A%E8%BF%87FactoryMethod%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1/"/>
+    <id>https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E9%80%9A%E8%BF%87FactoryMethod%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1/</id>
+    <published>2022-09-13T08:59:38.000Z</published>
+    <updated>2022-09-13T15:27:20.646Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;通过FactoryMethod创建对象&quot;&gt;&lt;a href=&quot;#通过FactoryMethod创建对象&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-通过Supplier创建对象</title>
+    <link href="https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E9%80%9A%E8%BF%87Supplier%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1/"/>
+    <id>https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E9%80%9A%E8%BF%87Supplier%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1/</id>
+    <published>2022-09-13T07:35:38.000Z</published>
+    <updated>2022-09-13T07:59:37.045Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;通过Supplier创建对象&quot;&gt;&lt;a href=&quot;#通过Supplier创建对象&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring源码-InstantiationAwareBeanPostProcessor</title>
+    <link href="https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"/>
+    <id>https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/</id>
+    <published>2022-09-13T06:27:38.000Z</published>
+    <updated>2022-09-13T08:00:32.072Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;InstantiationAwareBeanPostProcessor&quot;&gt;&lt;a href=&quot;#InstantiationAwareBeanPostProcessor&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="spring" scheme="https://fate-re-zero.github.io/tags/spring/"/>
+    
+  </entry>
+  
+</feed>
