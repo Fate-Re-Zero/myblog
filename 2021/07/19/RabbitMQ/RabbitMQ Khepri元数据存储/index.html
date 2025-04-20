@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="元数据存储的作用元数据存储是RabbitMQ记录除队列和流消息外所有信息的数据库，包括：● 内部数据存储中的用户和权限（“内部”指代的是在RabbitMQ内部定义的用户，而非外部系统如LDAP定义的用户）● 虚拟主机● 拓扑结构：交换机、队列、绑定关系● 运行时参数和策略  RabbitMQ支持两种不同的库来提供该数据库：    Mnesia   Khepri每次只能使用其中之一。以下是它们的详细">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ Khepri元数据存储">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="元数据存储的作用元数据存储是RabbitMQ记录除队列和流消息外所有信息的数据库，包括：● 内部数据存储中的用户和权限（“内部”指代的是在RabbitMQ内部定义的用户，而非外部系统如LDAP定义的用户）● 虚拟主机● 拓扑结构：交换机、队列、绑定关系● 运行时参数和策略  RabbitMQ支持两种不同的库来提供该数据库：    Mnesia   Khepri每次只能使用其中之一。以下是它们的详细">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210719-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210719-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210719-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210719-4.png">
+<meta property="article:published_time" content="2021-07-19T05:19:27.000Z">
+<meta property="article:modified_time" content="2025-04-19T12:41:17.401Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210719-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RabbitMQ Khepri元数据存储</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/26/ElasticSearch%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/19/RabbitMQ/spring-rabbit%E7%9A%84%E5%BA%94%E7%94%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&text=RabbitMQ Khepri元数据存储"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&is_video=false&description=RabbitMQ Khepri元数据存储"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ Khepri元数据存储&body=Check out this article: https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&name=RabbitMQ Khepri元数据存储&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">元数据存储的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mnesia"><span class="toc-number">2.</span> <span class="toc-text">Mnesia</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Khepri"><span class="toc-number">3.</span> <span class="toc-text">Khepri</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E6%8F%90%E7%A4%BA"><span class="toc-number">4.</span> <span class="toc-text">重要提示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E6%96%B0%E8%8A%82%E7%82%B9%E4%B8%8A%E5%90%AF%E7%94%A8Khepri"><span class="toc-number">5.</span> <span class="toc-text">在新节点上启用Khepri</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%AE%A1%E7%90%86UI"><span class="toc-number">6.</span> <span class="toc-text">使用管理UI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E4%B8%8EKhepri"><span class="toc-number">7.</span> <span class="toc-text">集群与Khepri</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RabbitMQ Khepri元数据存储
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-19T05:19:27.000Z" itemprop="datePublished">2021-07-19</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" class="leancloud-visitors" data-flag-title="RabbitMQ Khepri元数据存储" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="元数据存储的作用"><a href="#元数据存储的作用" class="headerlink" title="元数据存储的作用"></a>元数据存储的作用</h3><p>元数据存储是RabbitMQ记录除队列和流消息外所有信息的数据库，包括：<br>● 内部数据存储中的用户和权限（“内部”指代的是在RabbitMQ内部定义的用户，而非外部系统如LDAP定义的用户）<br>● 虚拟主机<br>● 拓扑结构：交换机、队列、绑定关系<br>● 运行时参数和策略</p>
+<p><img src="/images/RabbitMQ/20210719-1.png" alt="image-20210719-1"></p>
+<p>RabbitMQ支持两种不同的库来提供该数据库：  </p>
+<ol>
+<li>Mnesia  </li>
+<li>Khepri<br>每次只能使用其中之一。以下是它们的详细介绍。  </li>
+</ol>
+<h3 id="Mnesia"><a href="#Mnesia" class="headerlink" title="Mnesia"></a>Mnesia</h3><p>Mnesia是最初的后端，也是RabbitMQ 3.13.x版本之前唯一使用的后端。该库是Erlang/OTP标准发行版的一部分。<br>它效率较高，支持事务和集群复制，提供备份和恢复的API，并且作为原生的Erlang/OTP库，能够完美集成到任何Erlang应用中。<br>Mnesia的弱点在于其故障恢复特性，尤其是在网络分区的情况下。其复制算法假设使用Mnesia的系统可以承受在网络分区的一侧丢弃所有数据，但这并不总是成立，也不符合许多技术运维团队的期望。<br>对于Mnesia，如果两个节点在一段时间内无法通信，且数据库在一侧被更新（例如声明了一个队列），则由RabbitMQ负责解决数据冲突。<br>为了解决这个问题，RabbitMQ引入了网络分区处理策略。但这些策略并非根本解决方案，且难以推理。</p>
+<h3 id="Khepri"><a href="#Khepri" class="headerlink" title="Khepri"></a>Khepri</h3><p><img src="/images/RabbitMQ/20210719-2.png" alt="image-20210719-2"></p>
+<p>Khepri是RabbitMQ 4.0.x开始全面支持的元数据存储。它由RabbitMQ团队开发，并大量复用了仲裁队列和流功能的工作成果。<br>实际上，这些组件均基于Raft共识算法。因此，在连接丢失的情况下，其行为有明确定义且更易于推理。由于所有组件和子系统使用相同的算法，其行为也保持一致。<br>最终目标是完全切换到Khepri并停止使用Mnesia。然而，Khepri的使用与Mnesia相比是一个重大变化（尽管它是内部组件），因为它会影响集群或网络出现问题时用户可见的多个部分行为。</p>
+<p>提示<br>Khepri将在RabbitMQ 4.1.0中成为默认后端。<br>Mnesia仍将得到支持。现有的RabbitMQ部署在升级到4.1.x版本后将继续使用Mnesia，直到管理员显式启用Khepri。<br>Mnesia的支持将在未来版本（可能是4.2.0）中移除。因此，RabbitMQ团队鼓励用户使用Khepri测试其工作负载和应用，以使其真正成熟，成为RabbitMQ未来的默认（且唯一）元数据存储。</p>
+<h3 id="重要提示"><a href="#重要提示" class="headerlink" title="重要提示"></a>重要提示</h3><p>尽管Khepri在RabbitMQ4.0.x中得到全面支持，但它没有Mnesia长达17年的广泛使用历史。我们鼓励所有RabbitMQ用户在在生产环境中采用Khepri之前对其进行全面测试。<br>从4.0.x升级到未来版本时，可以保持Khepri的启用状态。<br>特性标志子系统使用“稳定”和“实验性”来标识特性标志的成熟度。<br>实验性特性标志在两种情况下使用：  </p>
+<ol>
+<li>在开发早期引入变更以获取反馈。这些变更可能会被撤销，启用此类特性标志的RabbitMQ节点可能无法升级，且可能不提供支持。  </li>
+<li>用于RabbitMQ团队已承诺并提供支持的功能，直到其准备就绪并默认启用，可能替代旧系统。<br>RabbitMQ 3.13.x中的Khepri属于第一类。但请放心，RabbitMQ 4.0及更高版本中的Khepri属于第二类，因此得到全面支持。 </li>
+</ol>
+<h3 id="在新节点上启用Khepri"><a href="#在新节点上启用Khepri" class="headerlink" title="在新节点上启用Khepri"></a>在新节点上启用Khepri</h3><p>● 使用CLI工具</p>
+<ol>
+<li>启动新的RabbitMQ节点（方法自选）。以下示例直接执行rabbitmq-server命令：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>此时节点使用Mnesia作为元数据存储后端。<br>2. 启用khepri_db特性标志： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 启用Khepri</span><br><span class="line">rabbitmqctl enable_feature_flag --experimental khepri_db</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用管理UI"><a href="#使用管理UI" class="headerlink" title="使用管理UI"></a>使用管理UI</h3><ol>
+<li>启动新的RabbitMQ节点（方法自选）。  </li>
+<li>启用管理插件： <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure></li>
+<li>打开并登录管理UI。  </li>
+<li>导航至“Admin &gt; Feature Flags”。  </li>
+<li>勾选“I understand the risk”并点击“Enable”按钮。</li>
+</ol>
+<p><img src="/images/RabbitMQ/20210719-3.png" alt="image-20210719-3"></p>
+<h3 id="集群与Khepri"><a href="#集群与Khepri" class="headerlink" title="集群与Khepri"></a>集群与Khepri</h3><p>当RabbitMQ节点集群化时，它们调用元数据存储后端创建或扩展集群。这对Mnesia和Khepri均适用。<br>因此，基于Khepri的RabbitMQ集群的形成或扩展方式与Mnesia相同。<br>● 何时启用Khepri<br>可在集群创建前后启用Khepri。<br>如果集群创建后启用Khepri，第一步是将集群视图从Mnesia同步到Khepri。<br>● 注意事项<br>由于使用Raft共识算法，所有涉及元数据存储更新的操作（有时甚至查询）需要多数节点可用。</p>
+<p><img src="/images/RabbitMQ/20210719-4.png" alt="image-20210719-4"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">元数据存储的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mnesia"><span class="toc-number">2.</span> <span class="toc-text">Mnesia</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Khepri"><span class="toc-number">3.</span> <span class="toc-text">Khepri</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E6%8F%90%E7%A4%BA"><span class="toc-number">4.</span> <span class="toc-text">重要提示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E6%96%B0%E8%8A%82%E7%82%B9%E4%B8%8A%E5%90%AF%E7%94%A8Khepri"><span class="toc-number">5.</span> <span class="toc-text">在新节点上启用Khepri</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%AE%A1%E7%90%86UI"><span class="toc-number">6.</span> <span class="toc-text">使用管理UI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E4%B8%8EKhepri"><span class="toc-number">7.</span> <span class="toc-text">集群与Khepri</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&text=RabbitMQ Khepri元数据存储"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&is_video=false&description=RabbitMQ Khepri元数据存储"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ Khepri元数据存储&body=Check out this article: https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&title=RabbitMQ Khepri元数据存储"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/&name=RabbitMQ Khepri元数据存储&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

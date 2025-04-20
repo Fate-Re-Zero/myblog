@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Socket就是对网络中不同主机上的应用进程之间进行双向通信的端点的抽象。一个套接字就是网络上进程通信的一端，提供了应用层进程利用网络协议交换数据的机制。从所处的地位来讲，套接字上联应用进程，下联网络协议栈，是应用程序通过网络协议进行通信的接口，是应用程序与网络协议栈进行交互的接口; FD：file descriptor文件描述符,非负整数.”一切皆文件”,Linux中的一切资源都可以通过文件的方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IO多路复用解析">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Socket就是对网络中不同主机上的应用进程之间进行双向通信的端点的抽象。一个套接字就是网络上进程通信的一端，提供了应用层进程利用网络协议交换数据的机制。从所处的地位来讲，套接字上联应用进程，下联网络协议栈，是应用程序通过网络协议进行通信的接口，是应用程序与网络协议栈进行交互的接口; FD：file descriptor文件描述符,非负整数.”一切皆文件”,Linux中的一切资源都可以通过文件的方">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-09-21T08:04:38.000Z">
+<meta property="article:modified_time" content="2025-04-20T14:17:58.400Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>IO多路复用解析</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/09/02/rabbitMQ%E5%AE%9E%E7%8E%B0%E5%B9%BF%E6%92%AD/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&text=IO多路复用解析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&is_video=false&description=IO多路复用解析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=IO多路复用解析&body=Check out this article: https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&name=IO多路复用解析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Socket"><span class="toc-number">1.</span> <span class="toc-text">Socket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FD%EF%BC%9Afile-descriptor"><span class="toc-number">2.</span> <span class="toc-text">FD：file descriptor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81"><span class="toc-number">3.</span> <span class="toc-text">用户态和内核态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E5%87%BD%E6%95%B0read%E5%92%8Cwrite%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">系统调用函数read和write的核心流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9E"><span class="toc-number">5.</span> <span class="toc-text">同步阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="toc-number">6.</span> <span class="toc-text">同步非阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select"><span class="toc-number">7.</span> <span class="toc-text">select</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll-select%E7%9A%84%E5%A2%9E%E5%BC%BA%E7%89%88%E6%9C%AC"><span class="toc-number">8.</span> <span class="toc-text">epoll(select的增强版本)</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        IO多路复用解析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-09-21T08:04:38.000Z" itemprop="datePublished">2021-09-21</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/" class="leancloud-visitors" data-flag-title="IO多路复用解析" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Redis/" rel="tag">Redis</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="Socket"><a href="#Socket" class="headerlink" title="Socket"></a>Socket</h3><p>就是对网络中不同主机上的应用进程之间进行双向通信的端点的抽象。一个套接字就是网络上进程通信的一端，提供了应用层进程利用网络协议交换数据的机制。从所处的地位来讲，套接字上联应用进程，下联网络协议栈，是应用程序通过网络协议进行通信的接口，是应用程序与网络协议栈进行交互的接口;</p>
+<h3 id="FD：file-descriptor"><a href="#FD：file-descriptor" class="headerlink" title="FD：file descriptor"></a>FD：file descriptor</h3><p>文件描述符,非负整数.”一切皆文件”,Linux中的一切资源都可以通过文件的方式访问和管理,而FD就类似于文件的索引(符号),指向某个资源,<br>内核(kernel)利用FD来访问和管理资源;</p>
+<h3 id="用户态和内核态"><a href="#用户态和内核态" class="headerlink" title="用户态和内核态"></a>用户态和内核态</h3><p>现在的Linux操作系统会分为用户空间和内核空间;<br>用户态：当进程或者线程运行在用户空间的时候就处于用户态,在用户空间下只能执行一些相对安全的cpu指令;<br>内核态：当进程或者线程运行在内核空间的时候就处于内核态,在内核态可以执行一些比较危险的特权指令,这样做的目的是为了整个系统的安全考虑,避免应用程序瞎搞,把整个操作系统给搞挂了;但是内核空间它也将一些socket的相关能力进行封装,会通过像read和write这些函数提供出来供用户空间使用,这些函数也称为系统调用函数;当我们在用户态调用这些函数后,系统会切换到内核态,由内核来完成相应的socket操作,最终将执行的结果返回给我们;</p>
+<h3 id="系统调用函数read和write的核心流程"><a href="#系统调用函数read和write的核心流程" class="headerlink" title="系统调用函数read和write的核心流程"></a>系统调用函数read和write的核心流程</h3><p>read：当我们在用户空间调用read函数的时候,数据会先从网卡拷贝到内核空间,也就是socket缓冲区,然后再从内核空间拷贝到用户空间;<br>write：与read函数相反,由用户空间拷贝到内核空间,然后再拷贝到网卡上;</p>
+<h3 id="同步阻塞"><a href="#同步阻塞" class="headerlink" title="同步阻塞"></a>同步阻塞</h3><p>线程阻塞等待与就绪socket建立连接,严格的按照与建立Socket建立连接顺序来进行数据的读写;<br>单线程:如果某个socket发生了阻塞,会影响到其他socket的处理;<br>多线程:客户端较多时,会造成资源的浪费,全部socket中每个时刻可能只有几个就绪。同时线程的调度,上下文的切换甚至线程栈内存资源的占用都可能成为系统的瓶颈;</p>
+<h3 id="同步非阻塞"><a href="#同步非阻塞" class="headerlink" title="同步非阻塞"></a>同步非阻塞</h3><p>同步非阻塞IO需要我们在用户空间下不断的去遍历所有监听的socket的FD,调用read函数来检查数据是否到来;<br>优点:相对于同步阻塞,单个socket的阻塞不会影响到其他socket;<br>缺点:同步非阻塞它需要不断去遍历调用read函数来检查是否有数据到来,调用read函数会有一个用户态切换到内核态的开销,如果socket较多的情况下,这个开销是很大的;</p>
+<h3 id="select"><a href="#select" class="headerlink" title="select"></a>select</h3><p>当用户空间调用select函数时,会先将所有监听socket的FD拷贝一份到内核空间,然后阻塞当前用户空间调用select函数的线程程,内核空间会检查当前所有FD中没有就绪的,如果有就会返回就绪的FD集合,没有则阻塞当前检查进程,当有数据包到达后,socket接收到中断信号,会检查当前socket对应的等待队列是否有进程正在阻塞等待,如果有的话则会唤醒阻塞的内核进程,内核进程则会去遍历一遍所有的FD,然后检查到某些FD就绪之后,然后将相应的FD集合返回给用户空间,用户空间根据集合，遍历一遍所有的FD那些是就绪的,然后对就绪的FD进行数据的读写;<br>优点：select相对于同步非阻塞,将检查所有监听的socket对应的FD是否就绪下沉到了操作系统层面,从而避免了在用户空间进行大量的read函数造成用户态与内核态切换的系统开销;<br>缺点：每个进程打开的FD有一定的上限,由FD_SETSIZE设置，默认值是1024;<br>     每次调用select需要将所有的FD从用户态拷贝到内核态;如果这个FD集合是比较大的，这个也是会造成一定的开销的;<br>     用户空间接受到返回FD集合需要遍历一遍所有的FD获取就绪的FD,这里会造成一个O(n)遍历的开销;</p>
+<h3 id="epoll-select的增强版本"><a href="#epoll-select的增强版本" class="headerlink" title="epoll(select的增强版本)"></a>epoll(select的增强版本)</h3><p>epoll有三个系统调用函数:<br>1.epoll_create(int size):用于创建一个给定size大小的epoll;<br>2.epoll_ctl:用于注册一个FD的读事件或者写事件到epoll;<br>3.epoll_wait:类似与select,用于获取就绪FD事件;<br>首先我们会在我们用户空间调用epoll_create函数来创建epoll,epoll中主要有三个数据结构,分别是用一个红黑树结构来维护所有的FD来达到一个快速查找FD的效果，第二个就是一个List结构用来维护所有就绪的FD列表,第三个就是一个队列结构来维护遍历所有FD发现没有FD就绪而阻塞的进程,方便后续有Socket接收到数据包来唤醒进程;<br>接着调用epoll_ctl函数,会将FD添加到内核空间的红黑树上;FD添加完成后;<br>接着调用epoll_wait函数,用户空间调用epoll_wait的线程会被阻塞,内核空间会检查所有的FD是否有就绪的,有则添加就绪事件<br>到就绪列表,没有,则进程让出cpu,将进程添加到阻塞队列;当有数据包到达后,socket接收到中断信号,会将对应事件添加到就序列表,并唤醒阻塞的进程,然后会将就绪列表中的事件集合返回给用户空间,用户空间进行相应的事件处理;</p>
+<p>优点：直接将FD维护在内核空间的红黑树上,避免了从用户态将FD拷贝到内核态;<br>     通过就绪列表直接就可以获取到那些FD是就绪的,避免了遍历所有的FD来获取就绪的FD;<br>缺点：跨平台性不够好,目前只支持Linux,像macOS等操作系统不支持;<br>      在监听连接数和事件较少的场景下,select可能会更好,epoll所解决的问题是FD较多的情况下,在FD较少的情况下,由于select的实现更加简单,其他的性能是可能会更好的;</p>
+<p>水平触发和边缘触发<br>LT:水平触发,默认。epoll_wait检测到事件后,如果该事件没有被处理完毕,后续每次epoll_wait调用都会返回该事件,水平触发相对来说更注重<br>安全性一点,但是他每次都需要检查事件是否处理完毕;<br>ET:边缘触发,epoll_wait检测到事件后,只会在当次返回该事件,不管该事件是否被处理完毕,边缘触发相对来说更注重性能一点;</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Socket"><span class="toc-number">1.</span> <span class="toc-text">Socket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FD%EF%BC%9Afile-descriptor"><span class="toc-number">2.</span> <span class="toc-text">FD：file descriptor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81"><span class="toc-number">3.</span> <span class="toc-text">用户态和内核态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E5%87%BD%E6%95%B0read%E5%92%8Cwrite%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">系统调用函数read和write的核心流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9E"><span class="toc-number">5.</span> <span class="toc-text">同步阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="toc-number">6.</span> <span class="toc-text">同步非阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select"><span class="toc-number">7.</span> <span class="toc-text">select</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll-select%E7%9A%84%E5%A2%9E%E5%BC%BA%E7%89%88%E6%9C%AC"><span class="toc-number">8.</span> <span class="toc-text">epoll(select的增强版本)</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&text=IO多路复用解析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&is_video=false&description=IO多路复用解析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=IO多路复用解析&body=Check out this article: https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&title=IO多路复用解析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/&name=IO多路复用解析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

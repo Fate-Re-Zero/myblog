@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="消息队列Message Queue(MQ）消息队列中间件是分布式系统中重要的组件，主要解决应用耦合，异步消息，流量削锋等问题。实现高性能，高可用，可伸缩和最终一致性架构。是大型分布式系统不可缺少的中间件。目前在生产环境，使用较多的消息队列有ActiveMQ，RabbitMQ，ZeroMQ，Kafka，MetaMQ，RocketMQ等。 消息队列能做什么事情？● 异构系统间调用解耦  ● 基于”订阅">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ有哪些优势">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="消息队列Message Queue(MQ）消息队列中间件是分布式系统中重要的组件，主要解决应用耦合，异步消息，流量削锋等问题。实现高性能，高可用，可伸缩和最终一致性架构。是大型分布式系统不可缺少的中间件。目前在生产环境，使用较多的消息队列有ActiveMQ，RabbitMQ，ZeroMQ，Kafka，MetaMQ，RocketMQ等。 消息队列能做什么事情？● 异构系统间调用解耦  ● 基于”订阅">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220112-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220112-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220112-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220112-4.png">
+<meta property="article:published_time" content="2022-01-12T02:01:31.000Z">
+<meta property="article:modified_time" content="2025-04-20T15:03:08.742Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RocketMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220112-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RocketMQ有哪些优势</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/01/12/RocketMQ/RocketMQ%E7%9A%84%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/09/21/Redis/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E8%A7%A3%E6%9E%90/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&text=RocketMQ有哪些优势"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&is_video=false&description=RocketMQ有哪些优势"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ有哪些优势&body=Check out this article: https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&name=RocketMQ有哪些优势&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97Message-Queue-MQ%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">消息队列Message Queue(MQ）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88%E4%BA%8B%E6%83%85%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">消息队列能做什么事情？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E4%B8%8B%E4%BC%9A%E9%80%89%E6%8B%A9%E4%BD%BF%E7%94%A8RocketMQ"><span class="toc-number">3.</span> <span class="toc-text">在什么情况下会选择使用RocketMQ</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RocketMQ有哪些优势
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-01-12T02:01:31.000Z" itemprop="datePublished">2022-01-12</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/" class="leancloud-visitors" data-flag-title="RocketMQ有哪些优势" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="消息队列Message-Queue-MQ）"><a href="#消息队列Message-Queue-MQ）" class="headerlink" title="消息队列Message Queue(MQ）"></a>消息队列Message Queue(MQ）</h3><p>消息队列中间件是分布式系统中重要的组件，主要解决应用耦合，异步消息，流量削锋等问题。实现高性能，高可用，可伸缩和最终一致性架构。是大型分布式系统不可缺少的中间件。<br>目前在生产环境，使用较多的消息队列有ActiveMQ，RabbitMQ，ZeroMQ，Kafka，MetaMQ，RocketMQ等。</p>
+<h3 id="消息队列能做什么事情？"><a href="#消息队列能做什么事情？" class="headerlink" title="消息队列能做什么事情？"></a>消息队列能做什么事情？</h3><p>● 异构系统间调用解耦</p>
+<p><img src="/images/RocketMQ/20220112-1.png" alt="image-20220112-1"></p>
+<p>● 基于”订阅发布“的1对多的数据分发</p>
+<p><img src="/images/RocketMQ/20220112-2.png" alt="image-20220112-2"></p>
+<p>● 同步转异步的消息处理</p>
+<p><img src="/images/RocketMQ/20220112-3.png" alt="image-20220112-3"></p>
+<p>● 削峰、限流、日志处理</p>
+<p><img src="/images/RocketMQ/20220112-4.png" alt="image-20220112-4"></p>
+<h3 id="在什么情况下会选择使用RocketMQ"><a href="#在什么情况下会选择使用RocketMQ" class="headerlink" title="在什么情况下会选择使用RocketMQ"></a>在什么情况下会选择使用RocketMQ</h3><p>比较多款产品：Apache ActiveMQ、Kafka、RabbitMQ、RocketMQ</p>
+<p>● ActiveMQ：<a target="_blank" rel="noopener" href="http://activemq.apache.org/">http://activemq.apache.org/</a><br>Apache出品，历史悠久，支持多种语言的客户端和协议，支持多种语言Java, .NET, C++ 等，基于JMS Provider的实现<br>使用场景：啥都会点，但好像啥都没做好，不再推荐使用</p>
+<p>● Kafka：<a target="_blank" rel="noopener" href="http://kafka.apache.org/">http://kafka.apache.org/</a><br>是由Apache软件基金会开发的一个开源流处理平台，由Scala和Java编写。Kafka是一种高吞吐量的分布式发布订阅消息系统，它可以处理大规模的网站中的所有动作流数据(网页浏览，搜索和其他用户的行动)，副本集机制，实现数据冗余，保障数据尽量不丢失；支持多个生产者和消费者<br>适用场景：瞬时大流量应用，对消息延迟不敏感的应用场景</p>
+<p>● RabbitMQ：<a target="_blank" rel="noopener" href="http://www.rabbitmq.com/">http://www.rabbitmq.com/</a><br>是一个开源的AMQP实现，服务器端用Erlang语言编写，支持多种客户端，如：Python、Ruby、.NET、Java、JMS、C、用于在分布式系统中存储转发消息，在易用性、扩展性、高可用性等方面表现不错<br>适用场景：企业级应用，尤其是对数据可靠性要求高、对并发和延迟不敏感的用户。</p>
+<p>● RocketMQ：<a target="_blank" rel="noopener" href="http://rocketmq.apache.org/">http://rocketmq.apache.org/</a><br>阿里开源的一款的消息中间件, 纯Java开发，具有高吞吐量、高可用性、适合大规模分布式系统应用的特点, 性能强劲(零拷贝技术)，支持海量堆积,支持指定次数和时间间隔的失败消息重发,支持consumer端tag过滤、延迟消息等，在阿里内部进行大规模使用，适合在电商，互联网金融等领域使用<br>适用场景：低延迟应用，瞬时大流量处理效率不如Kafka</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97Message-Queue-MQ%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">消息队列Message Queue(MQ）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88%E4%BA%8B%E6%83%85%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">消息队列能做什么事情？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E4%B8%8B%E4%BC%9A%E9%80%89%E6%8B%A9%E4%BD%BF%E7%94%A8RocketMQ"><span class="toc-number">3.</span> <span class="toc-text">在什么情况下会选择使用RocketMQ</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&text=RocketMQ有哪些优势"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&is_video=false&description=RocketMQ有哪些优势"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ有哪些优势&body=Check out this article: https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&title=RocketMQ有哪些优势"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/12/RocketMQ/RocketMQ%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8A%BF/&name=RocketMQ有哪些优势&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

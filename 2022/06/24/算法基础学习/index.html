@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="算法基础学习：   打印整数的二进制数：   static void print(int num) {        for (int i &#x3D; 31; i &gt;&#x3D; 0; i–) {            System.out.print((num &amp; (1 &lt;&lt; i)) &#x3D;&#x3D; 0 ? “0” : “1”);        }        System.out.printl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="祥祥要起飞">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="算法基础学习：   打印整数的二进制数：   static void print(int num) {        for (int i &#x3D; 31; i &gt;&#x3D; 0; i–) {            System.out.print((num &amp; (1 &lt;&lt; i)) &#x3D;&#x3D; 0 ? “0” : “1”);        }        System.out.printl">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-06-24T13:21:49.431Z">
+<meta property="article:modified_time" content="2022-06-26T15:18:52.221Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>祥祥要起飞</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/07/01/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&text="><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&is_video=false&description="><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=&body=Check out this article: https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&name=&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Nacos-%E4%BD%95%E6%97%B6%E9%80%89%E6%8B%A9%E5%88%87%E6%8D%A2%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">Nacos 何时选择切换模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nacos%E6%94%AF%E6%8C%81%E4%B8%89%E7%A7%8D%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">Nacos支持三种部署模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E7%8E%AF%E5%A2%83"><span class="toc-number">3.</span> <span class="toc-text">预备环境</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-06-24T13:21:49.431Z" itemprop="datePublished">2022-06-24</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="leancloud-visitors" data-flag-title="" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>算法基础学习：<br>   打印整数的二进制数：<br>   static void print(int num) {<br>        for (int i = 31; i &gt;= 0; i–) {<br>            System.out.print((num &amp; (1 &lt;&lt; i)) == 0 ? “0” : “1”);<br>        }<br>        System.out.println();<br>    }</p>
+<pre><code>   // 左移  &lt;&lt;
+// 符号相当于取反加1
+// num &lt;&lt; n  num左移n位，大小变成num * 2的n次方；
+int a = 5;
+int b = ~a + 1;   // -5
+// 不带符号右移 &gt;&gt;&gt;
+// 带符号右移 &gt;&gt;
+int c = -5;
+print(c &gt;&gt;&gt; 1);  //01111111111111111111111111111101
+print(c &gt;&gt; 1);   //11111111111111111111111111111101    
+   
+   //选择排序
+// 思路:
+// 0 ~ 0-n（将1-n中的最小数放到第一位）
+// 1 ~ 1-n（将1-n中的最小数放到第二位）
+// 2 ~ 2-n（将1-n中的最小数放到第三位）
+// i ~ i-n（将1-n中的最小数放到第i位）
+public static void selectArr(int[] arr) &#123;
+    // 首先判断边界
+    if (arr == null || arr.length &lt; 2) &#123;
+        return;
+    &#125;
+    int n = arr.length;
+    for (int i = 0; i &lt; n; i++) &#123;
+        int minValueIndex = i;
+        for (int j = i + 1; j &lt; n; j++) &#123;
+            minValueIndex = arr[j] &lt; arr[minValueIndex] ? j : minValueIndex;
+        &#125;
+        swap(arr, i, minValueIndex);
+    &#125;
+&#125;
+
+// 冒泡排序
+// 思路：
+// 将每两个数进行比较，第一趟最大值到了最后一位
+// 第二趟去掉最后一位进行比较，第二趟最大值到了倒数第二位
+public static void bubbleSort(int[] arr) &#123;
+    if (arr == null || arr.length &lt; 2) &#123;
+        return;
+    &#125;
+    int n = arr.length;
+    for (int end = n -1; end &gt;= 0; end--) &#123;
+        for (int next = 1; next &lt;= end; next++) &#123;
+            if (arr[next -1] &gt; arr[next]) &#123;
+                swap(arr, next - 1, next);
+            &#125;
+        &#125;
+    &#125;
+&#125;
+
+// 插入排序
+// 思路：
+// 0 - 0 保证有序
+// 0 - 1 保证有序
+// 0 - 2 保证有序
+// 0 - n-1 保证有序
+public static void insertSort(int[] arr) &#123;
+    if (arr == null || arr.length &lt; 2) &#123;
+        return;
+    &#125;
+    int n = arr.length;
+    for (int i = 1; i &lt; n; i++) &#123;
+        int newNumIndex = i;
+        while (((newNumIndex - 1) &gt;= 0) &amp;&amp; arr[newNumIndex - 1] &gt; arr[newNumIndex]) &#123;
+            swap(arr, newNumIndex - 1, newNumIndex);
+            newNumIndex --;
+        &#125;
+    &#125;
+&#125;
+
+public static void insertSort2(int[] arr) &#123;    
+    if (arr == null || arr.length &lt; 2) &#123;
+        return;
+    &#125;
+    int n = arr.length;
+    for (int end = 1; end &lt; n; end++) &#123;
+        for (int pre = end - 1; pre &gt;= 0 &amp;&amp; arr[pre] &gt; arr[pre + 1]; pre --) &#123;
+            swap(arr, pre, pre + 1);
+        &#125;
+    &#125;
+&#125;
+
+private static void swap(int[] arr, int i, int minValueIndex) &#123;
+    int temp = arr[i];
+    arr[i] = arr[minValueIndex];
+    arr[minValueIndex] = temp;
+&#125;
+
+public static void printArray(int[] arr) &#123;
+    for (int i = 0; i &lt; arr.length; i++) &#123;
+        System.out.print(arr[i] + &quot; &quot;);
+    &#125;
+    System.out.println();
+&#125;
+</code></pre>
+<p>数据结构：<br>    类数组连续结构：在内存分配一整块连续区域，连续结构的优势，可以通过偏移量快速定位到要查询的数据，因为它是一块连续区域，每个元素的偏移量是固定的，通过计算偏移量就可以定位到对应的元素；但是增删元素效率低下，为了维持连续结构，插入位置的所有元素都需要向后移动一个元素位置的偏移量；（便于寻址，不便于增删数据）<br>    类链表跳转结构：元素分配在不连续的区域，通过记录下个节点的地址来组成数据结构，在查找元素时就不能通过偏移量来计算元素位置，<br>    但是增删元素效率高，只需要改变插入或者删除位置元素地址地址即可；（不便于寻址，便于增删数据）</p>
+<p>HashMap的key:按值传递和按引用传递；<br>    1.基本数据类型和String类型按值传递，即使两个变量引用地址不一样，作为HashMap的key获取到value是同一个值；<br>    2.引用数据类型按引用传递，两个变量引用地址不一样，作为HashMap的key获取到value不是同一个值；<br>    3.然后就是按值传递和按引用传递对于HashMap所占用的内存大小，按值传递单条数据在HashMap所占用的大小为当前数据的大小，<br>    按引用传递单条数据的大小为当前对象的引用大小；</p>
+<p>CAP模型：<br>    一致性（Consistency）：同一时刻的同一请求的实例返回的结果相同，所有的数据要求具有强一致性(Strong Consistency)<br>​    可用性（Availability）：所有实例的读写请求在一定时间内可以得到正确的响应<br>​    分区容错性（Partition tolerance）：在网络异常（光缆断裂、设备故障、宕机）的情况下，系统仍能提供正常的服务<br>​    以上三个特点就是CAP原则（又称CAP定理），但是三个特性不可能同时满足，所以分布式系统设计要考虑的是在满足P（分区容错性）的前提下选择C（一致性）还是A（可用性），即：CP或AP</p>
+<p>CP原则：一致性 + 分区容错性原则<br>​    CP 原则属于强一致性原则，要求所有节点可以查询的数据随时都要保持一直（同步中的数据不可查询），即：若干个节点形成一个逻辑的共享区域，某一个节点更新的数据都会立即同步到其他数据节点之中，当数据同步完成后才能返回成功的结果，但是在实际的运行过程中网络故障在所难免，如果此时若干个服务节点之间无法通讯时就会出现错误，从而牺牲了以可用性原则（A），例如关系型数据库中的事务。<br>AP原则：可用性原则 + 分区容错性原则<br>​    AP原则属于弱一致性原则，在集群中只要有存活的节点那么所发送来的所有请求都可以得到正确的响应，在进行数据同步处理操作中即便某些节点没有成功的实现数据同步也返回成功，这样就牺牲一致性原则（C 原则）。<br>​    使用场景：对于数据的同步一定会发出指令，但是最终的节点是否真的实现了同步，并不保证，可是却可以及时的得到数据更新成功的响应，可以应用在网络环境不是很好的场景中。</p>
+<p>Nacos支持CP和AP<br>​    Nacos无缝支持一些主流的开源生态，同时再阿里进行Nacos设计的时候重复的考虑到了市场化的运作（市面上大多都是以单一的实现形式为主，例如：Zookeeper使用的是 CP、而 Eureka采用的是AP），在Nacos中提供了两种模式的动态切换。</p>
+<h2 id="Nacos-何时选择切换模式"><a href="#Nacos-何时选择切换模式" class="headerlink" title="Nacos 何时选择切换模式"></a>Nacos 何时选择切换模式</h2><pre><code>1. 一般来说，如果不需要储存服务界别的信息且服务实例通过nacos-client注册，并能够保持心跳上报，那么就可以选择AP模式。如Spring Cloud 和 Dubbo，都适用于AP模式，AP模式为了服务的可用性减弱了一致性，因此AP模式下只支持注册临时实例。
+ 2. 如果需要在服务级别编辑或者储存配置信息，那么CP是必须的，K8S服务和DNS服务则是用于CP模式。CP模式下则支持注册持久化实例，此时则是以Raft协议为集群运行模式，该模式下注册实例之前必须先注册服务，如果服务不存在，则会返回错误。
+</code></pre>
+<ol start="3">
+<li>切换命令（默认是AP）：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT <span class="string">&#x27;$NACOS_SERVER:8848/nacos/v1/ns/operator/switches?entry=serverMode&amp;value=CP&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>注意：临时和持久化的区别主要在健康检查失败后的表现，持久化实例健康检查失败后会被标记成不健康，而临时实例会直接从列表中被删除。</p>
+<h2 id="Nacos支持三种部署模式"><a href="#Nacos支持三种部署模式" class="headerlink" title="Nacos支持三种部署模式"></a>Nacos支持三种部署模式</h2><ol>
+<li>单机模式 - 用于测试和单机试用</li>
+<li>集群模式 - 用于生产环境，确保高可用</li>
+<li>多集群模式 - 用于多数据中心场景</li>
+</ol>
+<h2 id="预备环境"><a href="#预备环境" class="headerlink" title="预备环境"></a>预备环境</h2><p>​    默认Nacos使用嵌入式数据库实现数据的存储，所以，如果启动多个默认配置下的Nacos节点，数据储存存在一致性问题，为了解决这个问题，Nacos采用了集中存储方式来支持集群化部署，目前仅支持MySql的存储。</p>
+<ol>
+<li>推荐使用Linux</li>
+<li>可以使用内部数据源或者外部数据源（推荐使用外部）MySql</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Nacos-%E4%BD%95%E6%97%B6%E9%80%89%E6%8B%A9%E5%88%87%E6%8D%A2%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">Nacos 何时选择切换模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Nacos%E6%94%AF%E6%8C%81%E4%B8%89%E7%A7%8D%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">Nacos支持三种部署模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E7%8E%AF%E5%A2%83"><span class="toc-number">3.</span> <span class="toc-text">预备环境</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&text="><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&is_video=false&description="><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=&body=Check out this article: https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&title="><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/&name=&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

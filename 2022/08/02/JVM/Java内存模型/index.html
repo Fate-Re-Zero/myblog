@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="存储器的层次结构  理解：cpu的存储和获取数据的速度相较于内存的速度要大约快上百个数量级，内存相较于硬盘要快上百个数量级，如果对存取速度比较高的时候，就可以将数据放在内存里，如果要求更快的话，可以将数据放在高速缓存里，但是即使是高速缓存(L3)相对于cpu来说也是非常慢的,其实在cpu内部还有两层高速缓存（L1和L2）,所以cpu在读数据的时候会先去高速缓存L1找，cpu从高速缓存中取数据非常快">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java内存模型">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="存储器的层次结构  理解：cpu的存储和获取数据的速度相较于内存的速度要大约快上百个数量级，内存相较于硬盘要快上百个数量级，如果对存取速度比较高的时候，就可以将数据放在内存里，如果要求更快的话，可以将数据放在高速缓存里，但是即使是高速缓存(L3)相对于cpu来说也是非常慢的,其实在cpu内部还有两层高速缓存（L1和L2）,所以cpu在读数据的时候会先去高速缓存L1找，cpu从高速缓存中取数据非常快">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/jvm/%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/jvm/%E5%90%8C%E6%AD%A5%E7%9B%91%E8%A7%86%E5%99%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/jvm/Java%E5%B9%B6%E5%8F%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.jpg">
+<meta property="article:published_time" content="2022-08-02T15:00:38.000Z">
+<meta property="article:modified_time" content="2022-08-14T09:06:44.722Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="JMM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/jvm/%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84.jpg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java内存模型</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/08/06/JVM/JVM%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&text=Java内存模型"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&is_video=false&description=Java内存模型"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java内存模型&body=Check out this article: https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&name=Java内存模型&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">存储器的层次结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%80%E8%87%B4%E6%80%A7%E7%A1%AC%E4%BB%B6%E5%B1%82%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-number">2.</span> <span class="toc-text">多线程一致性硬件层的支持</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E8%A1%8C"><span class="toc-number">3.</span> <span class="toc-text">缓存行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%AA%E5%85%B1%E4%BA%AB"><span class="toc-number">4.</span> <span class="toc-text">伪共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BC%93%E5%AD%98%E8%A1%8C%E7%9A%84%E5%AF%B9%E9%BD%90%E6%8F%90%E9%AB%98%E6%95%88%E7%8E%87"><span class="toc-number">5.</span> <span class="toc-text">使用缓存行的对齐提高效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="toc-number">6.</span> <span class="toc-text">指令重排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F%E8%AF%81%E6%98%8E"><span class="toc-number">7.</span> <span class="toc-text">指令重排序证明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E5%86%99"><span class="toc-number">8.</span> <span class="toc-text">合并写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E5%90%88%E5%B9%B6%E5%86%99%E6%8A%80%E6%9C%AF%E6%8F%90%E9%AB%98%E7%A8%8B%E5%BA%8F%E6%89%A7%E8%A1%8C%E6%95%88%E7%8E%87"><span class="toc-number">9.</span> <span class="toc-text">利用合并写技术提高程序执行效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E7%BA%A7%E5%88%AB%E4%BF%9D%E8%AF%81%E6%9C%89%E5%BA%8F"><span class="toc-number">10.</span> <span class="toc-text">硬件级别保证有序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">11.</span> <span class="toc-text">volatile实现细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lock%E5%89%8D%E7%BC%80%E6%8C%87%E4%BB%A4%E5%9C%A8cpu%E7%BA%A7%E5%88%AB%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">12.</span> <span class="toc-text">lock前缀指令在cpu级别做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">13.</span> <span class="toc-text">synchronized实现细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E5%B9%B6%E5%8F%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">14.</span> <span class="toc-text">Java并发内存模型</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java内存模型
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-02T15:00:38.000Z" itemprop="datePublished">2022-08-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" class="leancloud-visitors" data-flag-title="Java内存模型" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/JMM/" rel="tag">JMM</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="存储器的层次结构"><a href="#存储器的层次结构" class="headerlink" title="存储器的层次结构"></a>存储器的层次结构</h3><p><img src="/images/jvm/%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84.jpg"></p>
+<ul>
+<li>理解：cpu的存储和获取数据的速度相较于内存的速度要大约快上百个数量级，内存相较于硬盘要快上百个数量级，如果对存取速度比较高的时候，就可以将数据放在内存里，如果要求更快的话，可以将数据放在高速缓存里，但是即使是高速缓存(L3)相对于cpu来说也是非常慢的,其实在cpu内部还有两层高速缓存（L1和L2）,所以cpu在读数据的时候会先去高速缓存L1找，cpu从高速缓存中取数据非常快，如果L1中没有就回去L2中找，在没有就会去分别去L3，内存或者硬盘中找，找到后放入高速缓存中，下次取数据时直接从高速缓存中拿；</li>
+<li>注意：从存储器的层次结构可以了解到，最终cpu读取数据后会将数据缓存在L1和L2中，而每个cpu都有自己的高速缓存L1和L2,也就是主存或者L3中的数据会被加载到不同的cpu中，如果第一个cpu把某一个数据改为了1，另一个cpu把该数据改成了2，这时候就会存在数据不一致的问题</li>
+</ul>
+<h3 id="多线程一致性硬件层的支持"><a href="#多线程一致性硬件层的支持" class="headerlink" title="多线程一致性硬件层的支持"></a>多线程一致性硬件层的支持</h3><ol>
+<li>早期的cpu采用总线锁来解决这种数据不一致的问题，具体可以解释为某个cpu访问主存中的数据，就会给总线上一把锁，相当于在cpu和主存之间建了一道屏障，来使其他cpu此时不能操作同一份数据来达到数据一致，存在明显的缺陷，因为是对总线加锁，其他cpu同时也不能访问其他数据了，极大的影响了效率；    </li>
+<li>各种cpu厂商采用了各种各样的缓存一致性协议<br> intel的cpu使用的MESI缓存一致性协议<br> MESI:分别指四种状态，cpu缓存行(caceh line)标记四种状态<br> 1.Modified（被修改）:如果某个缓存行被某个cpu被修改过且只缓存在该CPU中，即与主存中的数据不一致，则将缓存行标记为Modified，该缓存行中的内存需要在未来的某个时间点写回主存。<br> 2.Exclusive（独享的）:该缓存行只被缓存在该CPU的缓存中，它是未被修改过的（clean)，与主存中数据一致。该状态可以在任何时刻当有其它CPU读取该内存时变成共享状态（shared)。<br> 3.Shared（共享的）:该状态意味着该缓存行可能被多个CPU缓存，并且各个缓存中的数据与主存数据一致（clean)，当有一个CPU修改该缓存行中，其它CPU中该缓存行可以被作废（变成无效状态（Invalid））。<br> 4.Invalid(无效的):该缓存是无效的（可能有其它CPU修改了该缓存行）。</li>
+</ol>
+<ul>
+<li>注意：虽然缓存一致性协议的效率比总线锁要高的,但是缓存一致性协议并不能满足所有场景保证一致性,比如：有些无法被缓存的数据，或者跨越多个缓存行的数据，无法使用缓存一致性协议,依然必须使用总线锁；现代CPU的数据一致性实现 = 缓存锁(MESI …) + 总线锁</li>
+</ul>
+<h3 id="缓存行"><a href="#缓存行" class="headerlink" title="缓存行"></a>缓存行</h3><ul>
+<li>理解：当cpu把某个数据读取到缓存中时,比如读取某个int类型的值,它并不是只是把这个int类型的值读取进缓存，而是把int数据所在的64字节的内存块读取进缓存,我们把这个64字节的内存块作为基本单位,称之为缓存行；（这个缓存行目前多数cpu厂商设置为64字节）</li>
+<li>硬件的设计上很多时候是按块来执行的，并不是一个字节一个字节来执行的，处理整个块会更加方便且在很多时候会更高效；</li>
+</ul>
+<h3 id="伪共享"><a href="#伪共享" class="headerlink" title="伪共享"></a>伪共享</h3><ul>
+<li>理解：同一个缓存行中同时有a和b两个数据，cpu1需要使用x,读取缓存行到自己的缓存中，cpu2需要使用y,同样也需要读取缓存行到自己的缓存中，这时如果cpu1修改x,就需要将cpu2的缓存行标记为Invalid失效的，cpu2就需要去主存中重写读取数据，同理cpu2如果修改了y数据，同样也会将cpu1的缓存行标记为Invalid，cpu1也会去主存中重新读取数据，但是实际上cpu1是不需要知道y数据的状态，cpu2也不需要知道x的状态，但是上面说的情况却让他们共享x,y数据，从而产生伪共享；</li>
+<li>一句话总结一下：位于同一缓存行的两个不同数据，被两个不同CPU锁定，产生互相影响的伪共享问题</li>
+</ul>
+<h3 id="使用缓存行的对齐提高效率"><a href="#使用缓存行的对齐提高效率" class="headerlink" title="使用缓存行的对齐提高效率"></a>使用缓存行的对齐提高效率</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CacheLinePadding</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">long</span> COUNT = <span class="number">10_0000_0000L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">long</span> p1, p2, p3, p4, p5, p6, p7; <span class="comment">// 占用缓存行前56位</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">long</span> x = <span class="number">0L</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">long</span> p9, p10, p11, p12, p13, p14, p15; <span class="comment">// 保证两个对象T的x属性不在一个缓存行中</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T[] arr = <span class="keyword">new</span> T[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        arr[<span class="number">0</span>] = <span class="keyword">new</span> T();</span><br><span class="line">        arr[<span class="number">1</span>] = <span class="keyword">new</span> T();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[<span class="number">0</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; COUNT; i++) &#123;</span><br><span class="line">                arr[<span class="number">1</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">            latch.countDown();</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        latch.await();</span><br><span class="line">        System.out.println((System.nanoTime() - start)/<span class="number">100_0000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="指令重排序"><a href="#指令重排序" class="headerlink" title="指令重排序"></a>指令重排序</h3><ul>
+<li>CPU为了提高指令执行效率，会在一条指令执行过程中（比如去内存读数据（慢100倍）），同时也会执行另一条指令，前提是，两条指令没有依赖关系，这种方式在单线程环境下可以提高cpu的执行效率，但是在多线程环境就会存在数据不一致的问题；</li>
+<li>虽然可以指令重排序，但并不意味可以随便排序，在JVM规范中规定了重排序必须遵循：<br>  1.hanppens-before原则<br>  2.as-if-serial 语义：不管如何重排序，单线程的执行结果不会改变</li>
+<li>这两条原则的规范，具体的实现还要看各大JVM厂商的具体实现；</li>
+</ul>
+<h3 id="指令重排序证明"><a href="#指令重排序证明" class="headerlink" title="指令重排序证明"></a>指令重排序证明</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Disorder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> x = <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> a = <span class="number">0</span>, b =<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">            a = <span class="number">0</span>; b = <span class="number">0</span>;</span><br><span class="line">            Thread one = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="comment">//由于线程one先启动，下面这句话让它等一等线程two. 读着可根据自己电脑的实际性能适当调整等待时间.</span></span><br><span class="line">                    <span class="comment">//shortWait(100000);</span></span><br><span class="line">                    a = <span class="number">1</span>;</span><br><span class="line">                    x = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            Thread other = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    b = <span class="number">1</span>;</span><br><span class="line">                    y = a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            one.start();other.start();</span><br><span class="line">            one.join();other.join();</span><br><span class="line">            String result = <span class="string">&quot;第&quot;</span> + i + <span class="string">&quot;次 (&quot;</span> + x + <span class="string">&quot;,&quot;</span> + y + <span class="string">&quot;）&quot;</span>;</span><br><span class="line">            <span class="keyword">if</span>(x == <span class="number">0</span> &amp;&amp; y == <span class="number">0</span>) &#123;</span><br><span class="line">                System.err.println(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//System.out.println(result);</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shortWait</span><span class="params">(<span class="keyword">long</span> interval)</span></span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">long</span> end;</span><br><span class="line">        <span class="keyword">do</span>&#123;</span><br><span class="line">            end = System.nanoTime();</span><br><span class="line">        &#125;<span class="keyword">while</span>(start + interval &gt;= end);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="合并写"><a href="#合并写" class="headerlink" title="合并写"></a>合并写</h3><ul>
+<li>CPU除了指令重排序之外，还对数据写入高速缓存L2进行了优化，添加了Write Combining Buffer，一般是4个字节，在写入L1的同时，也会写入WC Buffer，满了之后，再直接更新到L2</li>
+</ul>
+<p>###为什么需要合并写技术<br>    由于CPU的ALU算算术逻辑单元的处理速度非常快，而将数据写入到高速缓存L2的速度相对来说非常慢，所以添加了Write Combining Buffer，将数据先写入合并写缓冲区，满了之后再一次性写入到L2;</p>
+<h3 id="利用合并写技术提高程序执行效率"><a href="#利用合并写技术提高程序执行效率" class="headerlink" title="利用合并写技术提高程序执行效率"></a>利用合并写技术提高程序执行效率</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WriteCombining</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ITERATIONS = Integer.MAX_VALUE;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ITEMS = <span class="number">1</span> &lt;&lt; <span class="number">24</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MASK = ITEMS - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayA = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayB = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayC = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayD = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayE = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">byte</span>[] arrayF = <span class="keyword">new</span> <span class="keyword">byte</span>[ITEMS];</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">final</span> String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++) &#123;</span><br><span class="line">            System.out.println(i + <span class="string">&quot; SingleLoop duration (ns) = &quot;</span> + runCaseOne());</span><br><span class="line">            System.out.println(i + <span class="string">&quot; SplitLoop  duration (ns) = &quot;</span> + runCaseTwo());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">long</span> <span class="title">runCaseOne</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">int</span> i = ITERATIONS;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (--i != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> slot = i &amp; MASK;</span><br><span class="line">            <span class="keyword">byte</span> b = (<span class="keyword">byte</span>) i;</span><br><span class="line">            arrayA[slot] = b;</span><br><span class="line">            arrayB[slot] = b;</span><br><span class="line">            arrayC[slot] = b;</span><br><span class="line">            arrayD[slot] = b;</span><br><span class="line">            arrayE[slot] = b;</span><br><span class="line">            arrayF[slot] = b;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> System.nanoTime() - start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">long</span> <span class="title">runCaseTwo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">int</span> i = ITERATIONS;</span><br><span class="line">        <span class="keyword">while</span> (--i != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> slot = i &amp; MASK;</span><br><span class="line">            <span class="keyword">byte</span> b = (<span class="keyword">byte</span>) i;</span><br><span class="line">            arrayA[slot] = b;</span><br><span class="line">            arrayB[slot] = b;</span><br><span class="line">            arrayC[slot] = b;</span><br><span class="line">        &#125;</span><br><span class="line">        i = ITERATIONS;</span><br><span class="line">        <span class="keyword">while</span> (--i != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> slot = i &amp; MASK;</span><br><span class="line">            <span class="keyword">byte</span> b = (<span class="keyword">byte</span>) i;</span><br><span class="line">            arrayD[slot] = b;</span><br><span class="line">            arrayE[slot] = b;</span><br><span class="line">            arrayF[slot] = b;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> System.nanoTime() - start;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="硬件级别保证有序"><a href="#硬件级别保证有序" class="headerlink" title="硬件级别保证有序"></a>硬件级别保证有序</h3><ol>
+<li><p>硬件内存屏障 X86:<br> sfence: 在sfence指令前的写操作当必须在sfence指令后的写操作前完成。<br> lfence：在lfence指令前的读操作当必须在lfence指令后的读操作前完成。<br> mfence：在mfence指令前的读写操作当必须在mfence指令后的读写操作前完成。<br> 原子指令，如x86上的”lock …” 指令是一个Full Barrier，执行时会锁住内存子系统来确保执行顺序，甚至跨多个CPU。Software Locks通常使用了内存屏障或原子指令来实现变量可见性和保持程序顺序</p>
+</li>
+<li><p>JVM级别内存屏障如何规范（JSR133）<br> LoadLoad屏障： 对于这样的语句Load1; LoadLoad; Load2，在Load2及后续读取操作要读取的数据被访问前，保证Load1要读取的数据被读取完毕；<br> StoreStore屏障：对于这样的语句Store1; StoreStore; Store2，在Store2及后续写入操作执行前，保证Store1的写入操作对其它处理器可见；<br> LoadStore屏障：对于这样的语句Load1; LoadStore; Store2，在Store2及后续写入操作被刷出前，保证Load1要读取的数据被读取完毕；<br> StoreLoad屏障： 对于这样的语句Store1; StoreLoad; Load2，在Load2及后续所有读取操作执行前，保证Store1的写入对所有处理器可见；</p>
+</li>
+</ol>
+<h3 id="volatile实现细节"><a href="#volatile实现细节" class="headerlink" title="volatile实现细节"></a>volatile实现细节</h3><ol>
+<li>字节码层面<br> 会在对应的volatile标记的变量前加上访问标识符：0x0040 [volatile]:ACC_VOLATILE（可以通过Jclasslib查看字节码）</li>
+<li>JVM层面<br> （1）对于所有的volatile变量的写操作，前面加上StoreStoreBarrier，volatile写，后面加上StoreLoadBarrier<br> （2）对于所有的volatile变量的读操作，前面加上LoadLoadBarrier，volatile读，后面加上LoadStoreBarrier</li>
+<li>OS和硬件层面<br> 上述只是JVM规范中这样加上内存屏障，硬件底层也会有一些指令来完成volatile的实现：<br> hsdis - HotSpot Dis Assembler （HotSpot虚拟机的反汇编，这个工具是观察虚拟机编译好的那些字节码，在cpu级别到底使用什么样的汇编指令来完成的）在windows下是使用lock前缀指令实现的；</li>
+</ol>
+<h3 id="lock前缀指令在cpu级别做了什么"><a href="#lock前缀指令在cpu级别做了什么" class="headerlink" title="lock前缀指令在cpu级别做了什么"></a>lock前缀指令在cpu级别做了什么</h3><ol>
+<li>在早期的cpu中，lock前缀指令会进行显式的总线锁定；通过这种机制来达到数据一致；</li>
+<li>随着技术的发展及缓存一致性协议的应用,当数据满足被单个缓存行缓存的时候，Lock前缀指令会遵循缓存一致性协议给对应的缓存行标记上对应的状态，以MESI为例，分别对应着四种不同的状态，Modified（被修改），Exclusive（独享的）,Shared（共享的）,Invalid(无效的)分别对应的不同的处理方式，如果数据不满足被单个缓存行缓存的时候，lock前缀指令会进行显式的总线锁定；通过这种机制来达到数据一致；</li>
+</ol>
+<h3 id="synchronized实现细节"><a href="#synchronized实现细节" class="headerlink" title="synchronized实现细节"></a>synchronized实现细节</h3><ol>
+<li>字节码层面<br> synchronized方法：访问标识符标记为0x0020 [synchronized]:ACC_SYNCHRONIZED<br> synchronized代码块：monitorenter、monitorexit、monitorexit,注意这里为什么会有两个monitorexit，是因为一个发生异常退出，另一个是代码块正常执行完毕退出；</li>
+<li>JVM层面<br>(1).在HotSpot虚拟机中，Monitor底层是由C++实现的，它的实现对象是ObjectMonitor.<br>(2).ObjectMonitor对象的主要属性如下：<br> _count：记录该线程获取锁的次数（也就是前前后后，这个线程一共获取此锁多少次）；<br> _recursions：锁的重入次数；<br> _owner：The Owner拥有者，是持有该ObjectMonitor（监视器）对象的线程；<br> _EntryList：EntryList 监控集合，存放的是处于阻塞状态的线程队列，在多线程下，竞争失败的线程会进入 EntryList 队列；<br> _WaitSet：WaitSet 待授权集合，存放的是处于 wait 状态的线程队列,当线程执行了 wait() 方法之后,会进入 WaitSet 队列；<br>(3).监视器执行的流程如下：<br> 1.线程通过 CAS（对比并替换）尝试获取锁，如果获取成功，就将 _owner 字段设置为当前线程，说明当前线程已经持有锁，并将 _recursions 重入次数的属性 +1。如果获取失败则先通过自旋 CAS 尝试获取锁，如果还是失败则将当前线程放入到 EntryList 监控队列（阻塞）;<br> 2.当拥有锁的线程执行了 wait 方法之后，线程释放锁，将 owner 变量恢复为 null 状态，同时将该线程放入 WaitSet 待授权队列中等待被唤醒;<br> 3.当调用 notify 方法时，随机唤醒 WaitSet 队列中的某一个线程，当调用 notifyAll 时唤醒所有的 WaitSet 中的线程尝试获取锁;<br> 4.线程执行完释放了锁之后，会唤醒 EntryList 中的所有线程尝试获取锁;</li>
+<li>OS和硬件层面<br> X86 : lock cmpxchg<br><img src="/images/jvm/%E5%90%8C%E6%AD%A5%E7%9B%91%E8%A7%86%E5%99%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg"></li>
+</ol>
+<h3 id="Java并发内存模型"><a href="#Java并发内存模型" class="headerlink" title="Java并发内存模型"></a>Java并发内存模型</h3><p><img src="/images/jvm/Java%E5%B9%B6%E5%8F%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.jpg"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">存储器的层次结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%80%E8%87%B4%E6%80%A7%E7%A1%AC%E4%BB%B6%E5%B1%82%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-number">2.</span> <span class="toc-text">多线程一致性硬件层的支持</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E8%A1%8C"><span class="toc-number">3.</span> <span class="toc-text">缓存行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%AA%E5%85%B1%E4%BA%AB"><span class="toc-number">4.</span> <span class="toc-text">伪共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%BC%93%E5%AD%98%E8%A1%8C%E7%9A%84%E5%AF%B9%E9%BD%90%E6%8F%90%E9%AB%98%E6%95%88%E7%8E%87"><span class="toc-number">5.</span> <span class="toc-text">使用缓存行的对齐提高效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="toc-number">6.</span> <span class="toc-text">指令重排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F%E8%AF%81%E6%98%8E"><span class="toc-number">7.</span> <span class="toc-text">指令重排序证明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E5%86%99"><span class="toc-number">8.</span> <span class="toc-text">合并写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E5%90%88%E5%B9%B6%E5%86%99%E6%8A%80%E6%9C%AF%E6%8F%90%E9%AB%98%E7%A8%8B%E5%BA%8F%E6%89%A7%E8%A1%8C%E6%95%88%E7%8E%87"><span class="toc-number">9.</span> <span class="toc-text">利用合并写技术提高程序执行效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E7%BA%A7%E5%88%AB%E4%BF%9D%E8%AF%81%E6%9C%89%E5%BA%8F"><span class="toc-number">10.</span> <span class="toc-text">硬件级别保证有序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">11.</span> <span class="toc-text">volatile实现细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lock%E5%89%8D%E7%BC%80%E6%8C%87%E4%BB%A4%E5%9C%A8cpu%E7%BA%A7%E5%88%AB%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">12.</span> <span class="toc-text">lock前缀指令在cpu级别做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">13.</span> <span class="toc-text">synchronized实现细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E5%B9%B6%E5%8F%91%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">14.</span> <span class="toc-text">Java并发内存模型</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&text=Java内存模型"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&is_video=false&description=Java内存模型"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java内存模型&body=Check out this article: https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&title=Java内存模型"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/&name=Java内存模型&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一.垃圾回收器的分类: 二.GC性能指标:    (1).吞吐量：    (2).垃圾收集开销：    (3).暂停时间：    (4).收集频率：    (5).内存占用：    (6).快速： 三.吞吐量和停顿时间： 四.不同的垃圾回收器有哪些： 面试问题：Java常见的垃圾回收器有哪些？回答思路：实际上垃圾回收器根具体的JVM是紧密相连的，像不同的厂商，像Oracle,像IBM,像Redha">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾回收器">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一.垃圾回收器的分类: 二.GC性能指标:    (1).吞吐量：    (2).垃圾收集开销：    (3).暂停时间：    (4).收集频率：    (5).内存占用：    (6).快速： 三.吞吐量和停顿时间： 四.不同的垃圾回收器有哪些： 面试问题：Java常见的垃圾回收器有哪些？回答思路：实际上垃圾回收器根具体的JVM是紧密相连的，像不同的厂商，像Oracle,像IBM,像Redha">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-05-20T13:00:38.000Z">
+<meta property="article:modified_time" content="2022-05-22T12:16:01.942Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>垃圾回收器</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/05/18/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&text=垃圾回收器"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&is_video=false&description=垃圾回收器"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=垃圾回收器&body=Check out this article: https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&name=垃圾回收器&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        垃圾回收器
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-05-20T13:00:38.000Z" itemprop="datePublished">2022-05-20</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" class="leancloud-visitors" data-flag-title="垃圾回收器" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>一.垃圾回收器的分类:</p>
+<p>二.GC性能指标:<br>    (1).吞吐量：<br>    (2).垃圾收集开销：<br>    (3).暂停时间：<br>    (4).收集频率：<br>    (5).内存占用：<br>    (6).快速：</p>
+<p>三.吞吐量和停顿时间：</p>
+<p>四.不同的垃圾回收器有哪些：</p>
+<p>面试问题：Java常见的垃圾回收器有哪些？<br>回答思路：实际上垃圾回收器根具体的JVM是紧密相连的，像不同的厂商，像Oracle,像IBM,像Redhat也好实际上会考虑不同版本的JVM，不同版本的JVM就可以考虑使用不同版本的垃圾回收器，主流的垃圾回收器主要有：</p>
+<p>五.七款经典的垃圾回收器：</p>
+<p>六.七款经典的垃圾收集器与垃圾分代之间的关系：<br>    (1).新生代垃圾收集器：<br>    (2).老年代垃圾收集器：<br>    (3).整体垃圾收集器：</p>
+<p>七.垃圾收集器的组合关系：</p>
+<p>八.如何查看默认的垃圾回收器：<br>-XX:+PrintCommandLineFlags<br>jps ==&gt; jinfo -flag UseParallelGC 3556</p>
+<p>九.Serial回收器（串行回收）：<br>    (1).特点：单线程垃圾回收，Serial作用于新生代垃圾收集，使用的是复制算法；Serial Old作用于老年代垃圾收集，使用的是标记压缩算法<br>    (2).优势：<br>    (3).使用：-XX:+UseSerialGC<br>    (4).使用的算法：<br>    (5).垃圾回收器组合：</p>
+<p>十.ParNew回收器(并行回收)：<br>    (1).特点：<br>    (2).使用：<br>    (3).使用的算法:<br>    (4).垃圾回收器组合：</p>
+<p>十一.Parallel Scavenge回收器（吞吐量优先）：<br>    (1).<br>    (5).垃圾回收器组合：</p>
+<p>十二.Parallel Scavenge回收器参数配置：<br>    -XX:+UseParallelGC； -XX:+UseParallelOldGC<br>    -XX:MaxGCPauseMillis;(设置垃圾回收器的最大停顿时间，即STW时间，单位毫秒)<br>    -XX:GCTimeRatio;(垃圾收集时间占总时间的比例，取值范围(0,100),默认值99)<br>    -XX:+UseAdaptiveSizePolicy;(设置Parallel Scavenge收集器具有自适应调节策略)</p>
+<p>十三.CMS回收器(低延迟)：<br>    (1).特点：<br>    (2).工作环节：<br>    (3).弊端分析：</p>
+<p>十四.CMS垃圾收集器参数配置：<br>    -XX:+UseConcMarkSweepGC<br>    -XX:CMSlnitiatingOccupanyFraction(设置堆内存使用率的阈值，一旦达到阈值，便开始进行CMS回收)<br>    -XX:UseCMSCompactAtFullCollection(用于指定在执行完Full GC后对内存空间进行压缩整理，以避免内存碎片产生)<br>    -XX:CMSFullGCsBeforeCompaction(设置进行多少次Full GC后对内存空间进行压缩整理)<br>    -XX:ParallelCMSThreads(设置CMS的线程数量，CMS默认启动线程数是：（年轻代并行收集器的线程数 + 3）/4)</p>
+<p>十五.G1垃圾回收器（区域分代化）：<br>    (1).概述：<br>    (2).特点：</p>
+<p>十六.G1回收器的优势：<br>    (1).并行与并发：<br>    (2).分代收集：<br>    (3).空间整合：<br>    (4).可预测的停顿时间模型(即：软实时soft real-time)</p>
+<p>十七.G1垃圾收集器的缺点：<br>    (1).</p>
+<p>十八.G1垃圾收集器参数配置：</p>
+<p>十九.G1分区Region：<br>    (1).特点:<br>    (2).Bump - the -pointor:分配对象时使用指针碰撞<br>    (3).TLAB: 针对与一个Region为每个线程分配一个TLAB，保证线程共享资源的时候可以并行的去执行</p>
+<p>二十.G1回收器垃圾回收过程：<br>    (1).年轻代GC(Young GC)<br>    (2).老年代并发标记过程(Concurrent Marking)<br>    (3).混合回收(Mixed GC)<br>    (4).如果需要，单线程，独占式，高强度的Full GC还是继续存在。它针对GC的评估失败提供了一种失败保护机制，即强力回收<br>    (5).young GC -&gt; young GC + Concurrent Marking -&gt; Mixed GC<br>    (6).回收细节:<br>    young GC 暂停所有应用程序线程，启动多线程执行年轻代回收，然后Eden区移动存活对象到Survivor区间活着老年区间，也有可能两个区间都会涉及到；<br>    当堆内存使用达到一定阈值(默认45%)时，开始老年代并发标记过程；<br>    标记完成马上开始混合回收过程。对于一个混合回收期，G1 GC从老年区间存活对象到空闲区间，这些空闲空间也就成为了老年代的一部分。和年轻代不同，老年代的G1回收器和其他GC不同，G1的老年代回收器不需要整个老年代被回收，依次扫描只需要回收一部分最具回收价值的老年代的Region就可以了。同时这个老年代的Region是和年轻代一起被回收的</p>
+<p>二十一.记忆集(Remembered Set)与写屏障(Write Barrier)：<br>    (1).记忆集：<br>    注意:在GC Root的枚举范围加入Remembered Set，可以保证不进行全局扫描，也不会有遗漏; </p>
+<p>二十二.G1各阶段回收细节：<br>    (1).年轻代GC：</p>
+<p>二十三.GC分析工具：GCViewer，EasyGC(easygc.io)</p>
+<p>个版本JDK默认的垃圾回收器：</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&text=垃圾回收器"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&is_video=false&description=垃圾回收器"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=垃圾回收器&body=Check out this article: https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&title=垃圾回收器"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/&name=垃圾回收器&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

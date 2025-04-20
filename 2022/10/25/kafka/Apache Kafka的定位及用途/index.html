@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Kafka官方网站将Apache Kafka表述为一种高性能、分布式的消息发布与订阅系统，同时也是一个强大的流式处理平台。它被设计用于处理实时数据流，能够以高吞吐量在系统组件之间可靠地传输数据。Kafka不仅允许生产者发布消息到多个主题上，还允许消费者订阅这些主题并进行消息的拉取，这一机制支持了数据的解耦、冗余存储及实时处理。Kafka的核心优势在于其高度可扩展性、持久化特性和容错能力。通过在集群">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Kafka的定位及用途">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Kafka官方网站将Apache Kafka表述为一种高性能、分布式的消息发布与订阅系统，同时也是一个强大的流式处理平台。它被设计用于处理实时数据流，能够以高吞吐量在系统组件之间可靠地传输数据。Kafka不仅允许生产者发布消息到多个主题上，还允许消费者订阅这些主题并进行消息的拉取，这一机制支持了数据的解耦、冗余存储及实时处理。Kafka的核心优势在于其高度可扩展性、持久化特性和容错能力。通过在集群">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-4.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-5.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-6.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-7.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-8.webp">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-9.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-10.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221025-11.png">
+<meta property="article:published_time" content="2022-10-25T01:42:46.000Z">
+<meta property="article:modified_time" content="2025-03-23T03:10:30.372Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221025-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Apache Kafka的定位及用途</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/10/26/kafka/Kafka%E7%9A%84%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/10/07/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&text=Apache Kafka的定位及用途"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&is_video=false&description=Apache Kafka的定位及用途"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Apache Kafka的定位及用途&body=Check out this article: https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&name=Apache Kafka的定位及用途&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E7%9A%84Kafka"><span class="toc-number">1.</span> <span class="toc-text">开发人员的Kafka</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%91%E7%AE%A1%E7%90%86%E4%BA%BA%E5%91%98%E4%BB%8B%E7%BB%8DKafka"><span class="toc-number">2.</span> <span class="toc-text">向管理人员介绍Kafka</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number"></span> <span class="toc-text">Kafka的应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E8%81%9A%E5%90%88"><span class="toc-number">0.1.</span> <span class="toc-text">日志聚合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%B6%88%E6%81%AF%E6%80%BB%E7%BA%BF"><span class="toc-number">0.2.</span> <span class="toc-text">微服务架构消息总线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%A9%E8%81%94%E7%BD%91%E6%95%B0%E6%8D%AE%E6%80%BB%E7%BA%BF"><span class="toc-number">0.3.</span> <span class="toc-text">物联网数据总线</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%B8%8D%E9%80%82%E5%90%88%E4%BD%BF%E7%94%A8Kafka"><span class="toc-number"></span> <span class="toc-text">什么时候不适合使用Kafka</span></a>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Apache Kafka的定位及用途
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-10-25T01:42:46.000Z" itemprop="datePublished">2022-10-25</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/" class="leancloud-visitors" data-flag-title="Apache Kafka的定位及用途" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>Kafka官方网站将Apache Kafka表述为一种高性能、分布式的消息发布与订阅系统，同时也是一个强大的流式处理平台。它被设计用于处理实时数据流，能够以高吞吐量在系统组件之间可靠地传输数据。Kafka不仅允许生产者发布消息到多个主题上，还允许消费者订阅这些主题并进行消息的拉取，这一机制支持了数据的解耦、冗余存储及实时处理。<br>Kafka的核心优势在于其高度可扩展性、持久化特性和容错能力。通过在集群中分布式的部署多个代理（brokers），Kafka能够轻易地处理极高的数据吞吐量，每秒处理数百万条消息，同时保证低延迟。数据在Kafka中是以日志的形式存储的，这使得即使在系统出现故障时也能保证数据不丢失，实现了高可用性。<br>作为流处理平台，Kafka集成了Kafka Streams库，该库使得开发者能够构建轻量级的实时流处理应用，直接在Kafka内部执行数据转换和聚合操作，无需依赖外部复杂系统。此外，Kafka与许多流行的流处理框架如Apache Spark、Flink等紧密集成，进一步丰富了其在大数据处理和分析领域的应用范围。<br>总而言之，Kafka不仅仅是一个消息队列，而是一个全面的分布式流式处理生态系统，广泛应用于日志聚合、实时监控数据分析、事件驱动架构以及大规模数据管道构建等多个领域，为企业提供了一站式的解决方案来应对现代数据处理的挑战。它有3个主要功能：</p>
+<p><img src="/images/kafka/20221025-1.png" alt="image-20221025-1"></p>
+<p>Kafka包含用于与其他系统发生交互的客户端。其中的一个客户端叫作生产者，它向Kafka Broker发送数据流。Kafka的另一个客户端叫作消费者，它从Broker读取和处理数据。数据的目的地不一定只有一个。生产者和消费者之间是完全解耦的，它们是独立运行的。我们将在后面的章节深入讲解这是如何做到的。<br>与其他消息平台一样，Kafka就像是（对于生产者）进入系统和（对于消费者或最终用户）离开系统的数据的中间人。消息的生产者和最终用户之间是分离的，因此可以实现松散的耦合。生产者可以发送任意的消息，但不知道是否有人订阅。此外，Kafka提供了适用于各种业务场景的消息传递方式。Kafka的消息至少可以采用以下3种传递方式<br>● 至少一次语义（At least once semantics）：在需要时发送消息，直到得到确认。<br>在这种情况下，Kafka允许消息的生产者多次发送相同的消息，并将其写入Broker。如果生产者没有收到消息写入Broker的确认，可以重新发送消息。对于那些不允许丢失消息的场景，如付款的场景，这是最安全的传递方式之一，尽管可能需要在消费者端做一些过滤确保幂等性。</p>
+<p><img src="/images/kafka/20221025-2.png" alt="image-20221025-1"></p>
+<p>● 至多一次语义（At most once semantics）：只发送一次消息，如果失败，不重新发送。<br>至多一次语义是指消息的生产者只发送一次消息，并且永远不进行重试。如果发送失败，生产者会继续发送其他消息，不再重新发送已经发送失败的消息。为什么有人可以接受消息丢失呢？试想一下，如果一个很受欢迎的网站正在跟踪访问者的页面浏览情况，那么在每天发生的数百万个页面浏览事件中遗漏掉一些是可接受的。保持系统正常运行，不需要等待确认，可能比丢失数据更重要。</p>
+<p><img src="/images/kafka/20221025-3.png" alt="image-20221025-1"></p>
+<p>● 精确一次语义（Exactly Once semantics）：消息的消费者只能读取一次消息。<br>Kafka在0.11.0版本中加入了精确一次语义（Exactly Once Semantics，EOS）。EOS在发布后引发了许多褒贬不一的讨论。EOS（见图 1.5）对于许多场景来说是很理想的语义。它似乎是对消息除重的一种逻辑上的保证，并让消息除重成为过去。但大多数开发人员认为在生产端发送消息并能够在消费端接收到同样的消息就已经足够了。</p>
+<p><img src="/images/kafka/20221025-4.png" alt="image-20221025-1"></p>
+<p>除传递各种语义之外，Broker的另一个作用是，即使消费端的应用程序因为发生故障或处于维护期而关闭，生产者也不需要等待消费者处理消息。当消费者重新上线并继续处理数据时，它们能够从之前离开的位置继续，而不会丢失任何信息。</p>
+<h2 id="开发人员的Kafka"><a href="#开发人员的Kafka" class="headerlink" title="开发人员的Kafka"></a>开发人员的Kafka</h2><p>为何软件工程师对Apache Kafka展现出浓厚兴趣？Kafka见证了其采纳率的急剧攀升，然而，市场对相关技术人才的需求却尚未得到充分满足。这一现状呼吁我们革新传统数据处理的思维模式。通过共享实践经验与教训，可以有效引导开发者理解Kafka为何成为其数据架构中极具吸引力的组件。<br>针对Kafka开发初学者，利用熟悉的原理解决新领域的挑战是入门的有效途径。例如，Java开发者可借力Spring框架的核心概念，如依赖注入，Spring for Apache Kafka（Spring-Kafka）项目已历经多次重大版本迭代，彰显了其成熟度与社区活跃度。同时，Kafka及其周边生态项目的工具集正持续扩张，为开发者提供了丰富资源。<br>在常规软件开发实践中，开发者常面临模块间高耦合的难题，修改单一应用可能波及众多关联系统，或在进行单元测试时遭遇构造大量模拟对象的困境。恰当地引入Kafka，能显著缓解此类问题。<br>以人力资源系统中员工提交带薪休假申请的场景为例，该流程通常涉及与薪资处理系统及项目管理系统（用于任务进度预测）的交互。若沿用传统的CRUD模式，这些系统间将形成紧密耦合。考虑如下疑问：薪资系统故障是否会影响项目管理系统的正常运行？通过集成Kafka，我们可以实现系统间的松耦合，它充当了工作流的中介，使得数据交换的界面统一为Kafka，大大减少了直接API调用和数据库访问的复杂性，从而增强了系统的弹性和可维护性。</p>
+<p><img src="/images/kafka/20221025-5.png" alt="image-20221025-1"></p>
+<p>有观点指出，存在更为优越且简化的替代方案，比如利用ETL（Extract, Transform, Load）过程将数据导入各应用的数据库中，理论上，此法仅需单一接口对接，看似简便。然而，必须考虑如下问题：一旦源头数据遭受损坏或变得陈旧，应如何应对？数据刷新的频率如何设定？可接受的数据延时或不一致性阈值为何？是否会出现数据副本老化乃至与源头数据显著偏差的情况，以至于重复执行相同处理流程时结果难以复现？究其根本，这些挑战的本质何在？Kafka便是为了解决此类问题而生。<br>另外，Kafka的自用性也是增强其信赖度的一个重要方面。以Kafka内部使用主题管理消费者偏移量为例，这一实践展示了其技术的内循环效益。尤其是在0.11版本及以后，通过引入内部主题机制，Kafka成功实现了端到端的精确一次处理语义，进一步彰显了其技术实力。此外，Kafka支持一个消息被多个消费者读取并衍生出多样化的处理结果，这种灵活性为其在复杂数据流处理场景中的应用提供了坚实基础。</p>
+<h2 id="向管理人员介绍Kafka"><a href="#向管理人员介绍Kafka" class="headerlink" title="向管理人员介绍Kafka"></a>向管理人员介绍Kafka</h2><p>Kafka的一项关键特性在于其能够高效地摄取大规模数据集，并确保这些数据对广泛的业务领域具有可用性。此特性赋予企业以高度的灵活性和开放性，通过促进信息的无障碍共享跨越所有业务范畴，虽然并未预设具体成果，但显著增强了数据的可访问性。高层管理者普遍认识到，随着数据量的指数级增长，企业亟需加速洞察提炼过程，旨在即刻从数据中提取价值，而非任其在存储介质中沉睡贬值。传统的批处理作业模式在处理速度上已显得捉襟见肘，限制了数据价值转换的时效性，而采用Kafka机制则成为了一种有效规避批处理局限性的策略。在此背景下，“快数据”（Fast Data）概念应运而生，它强调了数据价值实现的即时性，与“大数据”侧重于规模的愿景形成鲜明对比，揭示了数据价值实现的另一种维度。</p>
+<p><img src="/images/kafka/20221025-6.png" alt="image-20221025-1"></p>
+<p>对于众多企业级软件开发团队而言，部署应用程序于Java虚拟机（Java Virtual Machine, JVM）环境中乃是其技术栈中的成熟实践。尤其针对那些企业，它们在数据监控方面有着严格的本地化需求，选择在本地环境运行应用系统成为了不可或缺的驱动力。尽管如此，云端运算及托管服务方案亦展现出其独特的吸引力与价值，为不同规模和技术需求的企业提供了多样化的部署选项。<br>Apache Kafka作为一个分布式流处理平台，展现了出色的可扩展性能力，不仅支持传统的垂直扩展模式，更强调水平扩展的能力，以此克服单机性能上限的局限，确保了系统能够随着数据量和处理需求的增长而高效、线性地扩展。</p>
+<p><img src="/images/kafka/20221025-7.png" alt="image-20221025-1"></p>
+<p><img src="/images/kafka/20221025-8.webp" alt="image-20221025-1"></p>
+<p>也许学习Kafka最重要的原因之一是看看初创公司和其他行业的公司如何降低曾经令人望而却步的算力成本。分布式应用程序和架构不再依赖可能价值数百万美元的大型服务器或大型机，而以更少的财务支出向竞争对手快速逼近。</p>
+<h1 id="Kafka的应用场景"><a href="#Kafka的应用场景" class="headerlink" title="Kafka的应用场景"></a>Kafka的应用场景</h1><p>Kafka从一开始就支持高可用性和持久存储。Flume有一个Kafka通道，Kafka的复制特性和高可用性让Flume事件在代理（或运行它的服务器）发生崩溃时仍然对其他接收器可用。Kafka可用于构建健壮的应用程序，并帮助分布式应用程序处理在某些时候必然会发生的预期故障。</p>
+<h3 id="日志聚合"><a href="#日志聚合" class="headerlink" title="日志聚合"></a>日志聚合</h3><p>日志聚合技术在多种场景下展现出其重要性，尤其是在汇总分布式应用环境中的事件时。此过程涉及将日志信息封装为消息，随后投递至Apache Kafka这一消息中间件，进而使不同应用程序能够根据其特定逻辑需求，从相应的主题中订阅并处理这些消息。Kafka之所以成为跨服务器或事件源头汇总事件的核心平台，得益于其处理大规模数据流的能力。众多机构利用这些汇聚的日志事件，不仅进行审计追踪，还有效识别故障模式及趋势。此外，Kafka广泛融入各类日志管理系统，充当数据摄入的桥梁。<br>鉴于日志处理规模庞大，如何在确保服务器资源高效利用的同时维持高性能，成为一大挑战。特别是在高消息吞吐量场景下，逐条消息处理易引发系统负载过重的问题，因每条消息处理均伴随着时间与资源开销。为应对这一挑战，Kafka采取了消息批处理策略，在数据传输与持久化阶段均采用批量操作，显著提升了效率。加之其采用的日志追加写入机制，相较于频繁的随机读写操作，能够以更高的磁盘I/O效率执行，进一步巩固了其在高并发日志处理场景下的稳定性与性能表现。</p>
+<p><img src="/images/kafka/20221025-9.png" alt="image-20221025-1"></p>
+<h3 id="微服务架构消息总线"><a href="#微服务架构消息总线" class="headerlink" title="微服务架构消息总线"></a>微服务架构消息总线</h3><p>在过去，微服务架构中各个服务之间的通信主要依赖于像REST（Representational State Transfer）这样的同步API接口来进行信息交换。RESTful API以其简洁性和无状态性的特点，成为实现服务间直接交互的主流技术，允许服务以资源的形式进行组织和访问。这种方式简化了服务间的调用逻辑，促进了服务的独立部署与扩展。<br>然而，随着系统复杂度的增加以及对高并发、高性能、低延迟需求的日益增长，传统的基于REST的同步通信模式开始面临挑战。特别是在需要处理大量实时数据流、事件驱动的场景下，这种模式可能不足以高效地支持服务间的数据传递与处理。<br>因此，现在越来越多的微服务架构倾向于采用Apache Kafka这样的分布式流处理平台作为服务间通信的桥梁。Kafka不仅仅是一个消息队列，更是一个强大的发布-订阅消息系统，它允许微服务异步地通过事件来通信。这意味着服务可以产生事件并将其发布到Kafka主题中，而其他服务则可以根据需要订阅这些主题，从而消费这些事件。这种模式解耦了服务间的直接依赖，提高了系统的可扩展性、弹性和容错能力。<br>利用Kafka，微服务可以避免直接绑定到特定的API接口上，转而通过事件驱动的方式进行交互，使得系统设计更加灵活。每个服务可以根据其处理能力自主决定何时从Kafka中读取和处理消息，这不仅优化了资源利用，也使得系统能够更好地应对流量峰值。<br>Kafka凭借其高吞吐量、低延迟、可持久化和容错性等特性，已经成为现代微服务架构中不可或缺的一环。它不仅帮助开发者快速可靠地获取和处理数据，还促进了微服务间的解耦和异步通信，为构建大规模分布式系统提供了强有力的支持。通过将Kafka整合进微服务架构，开发者能够更快地响应市场变化，实现服务的快速迭代与部署，同时保持系统的稳定性和可维护性。</p>
+<p><img src="/images/kafka/20221025-10.png" alt="image-20221025-1"></p>
+<h3 id="物联网数据总线"><a href="#物联网数据总线" class="headerlink" title="物联网数据总线"></a>物联网数据总线</h3><p>利用Kafka的Streams API，端到端工作负载的实施者均能受益于Kafka内置的消息传递保障机制。这一API简化了确保消息从事务初始化至完成仅被处理一次的过程，无需开发者额外实现复杂的自定义逻辑，从而提升了处理流程的可靠性和易用性。<br>随着时代发展，物联网（IoT）设备的数量呈持续增长趋势。这些设备频繁地生成并传输数据，尤其在连接至Wi-Fi或蜂窝网络的瞬间，数据传输量会急剧上升，这对数据处理系统的效率与扩展性提出了更高要求。Kafka凭借其在高效处理大规模数据流方面的卓越能力，成为应对这一挑战的理想工具。无论是来自信标、车辆、智能手机或其他物联网终端的数据，Kafka都能有效应对，确保数据不仅被可靠处理，还能据此触发相应的业务动作，展现了其在数据密集型应用场景中的核心价值。<br>上述仅为Kafka广泛应用场景的冰山一角，其实际应用范畴远不止于此。接续的讨论将进一步深入Kafka的基本原理与核心特性，为探索和实现更多创新应用场景奠定坚实基础。</p>
+<p><img src="/images/kafka/20221025-11.png" alt="image-20221025-1"></p>
+<h1 id="什么时候不适合使用Kafka"><a href="#什么时候不适合使用Kafka" class="headerlink" title="什么时候不适合使用Kafka"></a>什么时候不适合使用Kafka</h1><p>尽管Apache Kafka已在多种创新应用场景中证明其价值，但它并非所有任务处理场景下的最优解。以下情形推荐考虑采用其他技术或工具：</p>
+<ol>
+<li>批处理与历史数据分析需求：当你仅关注月度或年度数据汇总，且无需即时查询、迅速响应或数据重处理功能时，全年运行Kafka可能过于资源密集。在此类需求下，定期调度的任务（如cron作业）可能是更高效的选择。值得注意的是，‘批次大小’这一概念在不同应用场景中的界定存在显著差异，需依据具体需求灵活设定。</li>
+<li>随机查询场景：若数据访问模式主要涉及随机查找，Kafka的线性读写优化可能无法发挥最大效用，特别是考虑到其索引机制与传统关系型数据库中的索引设计有本质区别，后者更擅长于支持复杂查询与快速定位。</li>
+<li>严格消息顺序保证：确保Kafka主题中的消息维持严格顺序，要求特殊的配置与限制，比如单一生产者及单一分区设置，这在高并发或大规模数据流中可能导致瓶颈。虽然通过架构调整可应对此类挑战，但对于要求极端顺序一致性的场景，这种约束可能引入扩展性和性能上的潜在问题。</li>
+<li>大消息体处理：Kafka默认配置对消息大小的限制（1MB），意味着处理超大消息时需谨慎评估其对系统内存的影响，尤其是考虑页面缓存的有效利用。在需要传输大量归档数据时，探索替代方案以优化存储与传输效率显得尤为重要，尽管Kafka在理论上可被配置以适应此类需求，但其可能并非最适宜的技术选型。<br>综上所述，在面对上述特定场景时，尽管利用Kafka实现目标功能在技术上可行，但从效率、成本及系统设计的简洁性考量，评估并选用更为匹配的工具或策略将更为明智。</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E7%9A%84Kafka"><span class="toc-number">1.</span> <span class="toc-text">开发人员的Kafka</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%91%E7%AE%A1%E7%90%86%E4%BA%BA%E5%91%98%E4%BB%8B%E7%BB%8DKafka"><span class="toc-number">2.</span> <span class="toc-text">向管理人员介绍Kafka</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number"></span> <span class="toc-text">Kafka的应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E8%81%9A%E5%90%88"><span class="toc-number">0.1.</span> <span class="toc-text">日志聚合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%B6%88%E6%81%AF%E6%80%BB%E7%BA%BF"><span class="toc-number">0.2.</span> <span class="toc-text">微服务架构消息总线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%A9%E8%81%94%E7%BD%91%E6%95%B0%E6%8D%AE%E6%80%BB%E7%BA%BF"><span class="toc-number">0.3.</span> <span class="toc-text">物联网数据总线</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%B8%8D%E9%80%82%E5%90%88%E4%BD%BF%E7%94%A8Kafka"><span class="toc-number"></span> <span class="toc-text">什么时候不适合使用Kafka</span></a>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&text=Apache Kafka的定位及用途"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&is_video=false&description=Apache Kafka的定位及用途"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Apache Kafka的定位及用途&body=Check out this article: https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&title=Apache Kafka的定位及用途"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/10/25/kafka/Apache%20Kafka%E7%9A%84%E5%AE%9A%E4%BD%8D%E5%8F%8A%E7%94%A8%E9%80%94/&name=Apache Kafka的定位及用途&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

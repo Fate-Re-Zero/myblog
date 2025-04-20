@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="消息队列简介消息队列（Message Queue，简称MQ）是一种用于在分布式系统中传递消息的中间件技术。它通过异步通信的方式，将消息的生产者和消费者解耦，使得系统之间的交互更加灵活和高效。消息队列的核心思想是：生产者将消息发送到队列中，消费者从队列中获取并处理消息，而无需直接与对方进行实时交互。  消息队列的特点  异步通信：生产者和消费者不需要同时在线，消息可以被暂时存储。 解耦：生产者和消费">
+<meta property="og:type" content="article">
+<meta property="og:title" content="消息队列与RabbitMQ">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="消息队列简介消息队列（Message Queue，简称MQ）是一种用于在分布式系统中传递消息的中间件技术。它通过异步通信的方式，将消息的生产者和消费者解耦，使得系统之间的交互更加灵活和高效。消息队列的核心思想是：生产者将消息发送到队列中，消费者从队列中获取并处理消息，而无需直接与对方进行实时交互。  消息队列的特点  异步通信：生产者和消费者不需要同时在线，消息可以被暂时存储。 解耦：生产者和消费">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210701-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210701-2.png">
+<meta property="article:published_time" content="2021-07-01T00:41:28.000Z">
+<meta property="article:modified_time" content="2025-04-18T14:57:29.781Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210701-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>消息队列与RabbitMQ</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/01/RabbitMQ/RabbitMQ4%E9%9D%A9%E5%91%BD%E6%80%A7%E5%8F%98%E5%8C%96/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/06/12/Redis/redis%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%E5%92%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&text=消息队列与RabbitMQ"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&is_video=false&description=消息队列与RabbitMQ"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=消息队列与RabbitMQ&body=Check out this article: https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&name=消息队列与RabbitMQ&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">消息队列简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="toc-number">2.</span> <span class="toc-text">RabbitMQ关键概念</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        消息队列与RabbitMQ
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-01T00:41:28.000Z" itemprop="datePublished">2021-07-01</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/" class="leancloud-visitors" data-flag-title="消息队列与RabbitMQ" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="消息队列简介"><a href="#消息队列简介" class="headerlink" title="消息队列简介"></a>消息队列简介</h3><p>消息队列（Message Queue，简称MQ）是一种用于在分布式系统中传递消息的中间件技术。它通过异步通信的方式，将消息的生产者和消费者解耦，使得系统之间的交互更加灵活和高效。消息队列的核心思想是：生产者将消息发送到队列中，消费者从队列中获取并处理消息，而无需直接与对方进行实时交互。</p>
+<p><img src="/images/RabbitMQ/20210701-1.png" alt="image-20210701-1"></p>
+<p>消息队列的特点</p>
+<ol>
+<li>异步通信：生产者和消费者不需要同时在线，消息可以被暂时存储。</li>
+<li>解耦：生产者和消费者之间没有直接依赖关系，降低了系统的耦合性。</li>
+<li>削峰填谷：在高并发场景下，消息队列可以缓冲请求，避免系统过载。</li>
+<li>可靠性：支持消息持久化、重试机制等，确保消息不会丢失。</li>
+<li>扩展性：可以通过增加消费者来提高系统的处理能力。</li>
+</ol>
+<p>消息队列的应用场景</p>
+<ol>
+<li>异步处理<br>例如用户注册后发送欢迎邮件或短信，这些操作不需要实时完成，可以通过消息队列异步处理。</li>
+<li>应用解耦<br>不同服务之间通过消息队列进行通信，减少直接调用的依赖。</li>
+<li>流量削峰<br>在秒杀、抢购等高并发场景中，消息队列可以平滑处理瞬间涌入的大量请求。</li>
+<li>日志处理<br>收集系统日志并发送到消息队列，后续由消费者进行分析和存储。</li>
+<li>分布式事务<br>在分布式系统中，通过消息队列实现最终一致性。</li>
+</ol>
+<h3 id="RabbitMQ关键概念"><a href="#RabbitMQ关键概念" class="headerlink" title="RabbitMQ关键概念"></a>RabbitMQ关键概念</h3><p>RabbitMQ是开源消息队列中间件，遵循AMQP协议。它功能强大,支持多种消息模式，如点对点、发布-订阅等。具备高可用、可扩展特性，在分布式系统中实现高效异步通信，广泛用于Web应用、微服务等场景。<br><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/">https://www.rabbitmq.com/</a><br>RabbitMQ的关键概念<br>RabbitMQ 是一个开源的消息代理（Message Broker），它实现了高级消息队列协议（AMQP）。以下是 RabbitMQ 的关键概念：</p>
+<ol>
+<li>Producer（生产者）<br>生产者是发送消息的应用程序。它将消息发送到 RabbitMQ 的交换器（Exchange）。</li>
+<li>Consumer（消费者）<br>消费者是接收消息的应用程序。它从队列中获取消息并进行处理。</li>
+<li>Queue（队列）<br>队列是存储消息的缓冲区。消息被生产者发送到交换器后，最终会被路由到一个或多个队列中。</li>
+<li>Exchange（交换器）<br>交换器负责接收生产者发送的消息，并根据绑定规则将消息路由到一个或多个队列。常见的交换器类型包括：<br>○ Direct Exchange：根据路由键（Routing Key）精确匹配。<br>○ Fanout Exchange：广播消息到所有绑定的队列。<br>○ Topic Exchange：根据模式匹配路由键。<br>○ Headers Exchange：根据消息头属性进行匹配。</li>
+<li>Binding（绑定）<br>绑定是交换器和队列之间的连接规则。它定义了消息如何从交换器路由到队列。</li>
+<li>Routing Key（路由键）<br>路由键是生产者发送消息时附带的一个键值，交换器根据路由键和绑定规则决定消息的去向。</li>
+<li>Message（消息）<br>消息是生产者发送的数据单元，包含有效载荷（Payload）和可选的元数据（如路由键、消息头等）。</li>
+<li>Broker（代理）<br>RabbitMQ 本身就是一个消息代理，负责接收、存储和分发消息。</li>
+<li>Virtual Host（虚拟主机）<br>虚拟主机是对 RabbitMQ 的逻辑隔离，允许在同一物理实例上运行多个独立的消息环境。</li>
+</ol>
+<p>执行流程图</p>
+<p><img src="/images/RabbitMQ/20210701-2.png" alt="image-20210701-2"></p>
+<p>流程说明</p>
+<ol>
+<li>Producer 发送消息<br>生产者将消息发送到 RabbitMQ 的交换器（Exchange），并附带一个路由键（Routing Key）。</li>
+<li>Exchange 路由消息<br>交换器根据路由键和绑定规则（Binding Rules）决定消息的去向。</li>
+<li>消息进入 Queue<br>消息被路由到一个或多个队列（Queue）中。</li>
+<li>Consumer 消费消息<br>消费者从队列中获取消息并进行处理。</li>
+<li>RabbitMQ Broker 的作用<br>RabbitMQ 作为消息代理，负责管理交换器、队列和绑定规则，并确保消息的可靠传递。</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">消息队列简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="toc-number">2.</span> <span class="toc-text">RabbitMQ关键概念</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&text=消息队列与RabbitMQ"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&is_video=false&description=消息队列与RabbitMQ"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=消息队列与RabbitMQ&body=Check out this article: https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&title=消息队列与RabbitMQ"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/01/RabbitMQ/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8ERabbitMQ/&name=消息队列与RabbitMQ&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

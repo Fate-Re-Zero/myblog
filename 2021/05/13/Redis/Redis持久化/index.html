@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="为什么要持久化Redis是一个内存数据库，如果没有配置持久化，redis重启后数据就全丢失因此开启redis的持久化功能，将数据保存到磁盘上，当redis重启后，可以从磁盘中恢复数据。两种持久化方式    - RDB (Redis DataBase) 全量二进制备份    - AOF (append only file）增量日志 RDB持久化介绍在指定的时间间隔内将内存中的数据集快照写入磁盘，默认">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis持久化">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="为什么要持久化Redis是一个内存数据库，如果没有配置持久化，redis重启后数据就全丢失因此开启redis的持久化功能，将数据保存到磁盘上，当redis重启后，可以从磁盘中恢复数据。两种持久化方式    - RDB (Redis DataBase) 全量二进制备份    - AOF (append only file）增量日志 RDB持久化介绍在指定的时间间隔内将内存中的数据集快照写入磁盘，默认">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-05-13T01:12:16.000Z">
+<meta property="article:modified_time" content="2025-04-20T14:08:48.616Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Redis持久化</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/06/11/Redis/Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/05/12/Redis/Redis6%E6%96%B0%E7%89%B9%E6%80%A7/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&text=Redis持久化"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&is_video=false&description=Redis持久化"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Redis持久化&body=Check out this article: https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&name=Redis持久化&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">为什么要持久化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">RDB持久化介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-number">3.</span> <span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">4.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF-Append-Only-File-%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%8B%E7%BB%8D"><span class="toc-number">5.</span> <span class="toc-text">AOF(Append Only File)持久化介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="toc-number">6.</span> <span class="toc-text">核心原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E5%BC%8F"><span class="toc-number">7.</span> <span class="toc-text">同步方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF%E9%87%8D%E5%86%99"><span class="toc-number">8.</span> <span class="toc-text">AOF重写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E5%86%99%E8%A7%A6%E5%8F%91%E9%85%8D%E7%BD%AE"><span class="toc-number">9.</span> <span class="toc-text">重写触发配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E6%8F%90%E4%BE%9B%E4%BA%86%E4%B8%8D%E5%90%8C%E7%9A%84%E6%8C%81%E4%B9%85%E6%80%A7%E9%80%89%E9%A1%B9"><span class="toc-number">10.</span> <span class="toc-text">Redis提供了不同的持久性选项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">11.</span> <span class="toc-text">RDB的优缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">12.</span> <span class="toc-text">AOF的优缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%81%9A"><span class="toc-number">13.</span> <span class="toc-text">生产环境应该怎么做</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis4-0%E5%90%8E%E5%BC%80%E5%A7%8B%E7%9A%84rewrite%E6%94%AF%E6%8C%81%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="toc-number">14.</span> <span class="toc-text">Redis4.0后开始的rewrite支持混合模式</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Redis持久化
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-05-13T01:12:16.000Z" itemprop="datePublished">2021-05-13</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/" class="leancloud-visitors" data-flag-title="Redis持久化" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Redis/" rel="tag">Redis</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="为什么要持久化"><a href="#为什么要持久化" class="headerlink" title="为什么要持久化"></a>为什么要持久化</h3><p>Redis是一个内存数据库，如果没有配置持久化，redis重启后数据就全丢失因此开启redis的持久化功能，将数据保存到磁盘上，当redis重启后，可以从磁盘中恢复数据。<br>两种持久化方式<br>    - RDB (Redis DataBase) 全量二进制备份<br>    - AOF (append only file）增量日志</p>
+<h3 id="RDB持久化介绍"><a href="#RDB持久化介绍" class="headerlink" title="RDB持久化介绍"></a>RDB持久化介绍</h3><p>在指定的时间间隔内将内存中的数据集快照写入磁盘，默认的文件名为dump.rdb<br>● RDB快照的应用场景</p>
+<ul>
+<li>save<br>会阻塞当前Redis服务器，执行save命令期间，Redis不能处理其他命令，直到RDB过程完成为止</li>
+<li>bgsave<br>fork创建子进程，RDB持久化过程由子进程负责，会在后台异步进行快照操作，快照同时还可以响应客户端请求</li>
+<li>自动化触发<br>配置文件来完成，配置触发Redis的RDB持久化条件比如”save m n”。表示m秒内数据集存在n次修改时，自动触发bgsave</li>
+<li>主从架构<br>从服务器同步数据的时候，会发送sync执行同步操作，master主服务器就会执行bgsave</li>
+</ul>
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><p>● RDB文件紧凑，全量备份，适合用于进行备份和灾难恢复<br>● 在恢复大数据集时的速度比 AOF 的恢复速度要快<br>● 生成的是一个紧凑压缩的二进制文件</p>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p>● 每次快照是一次全量备份，fork子进程进行后台操作，子进程存在开销<br>● 在快照持久化期间修改的数据不会被保存，可能丢失数据</p>
+<p>###关于RDB的关键配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Redis.conf</span><br><span class="line"><span class="meta">#</span><span class="bash">持久化文件名称</span> </span><br><span class="line">dbfilename lixiang.rdb #持久化文件存储路径 </span><br><span class="line">dir /usr/local/redis/data </span><br><span class="line"><span class="meta">#</span><span class="bash">持久化策略, M秒内有个n个key改动，执行快照</span> </span><br><span class="line">save 3600 1   </span><br><span class="line">save 300 100 </span><br><span class="line">save 60 10000 </span><br><span class="line"><span class="meta">#</span><span class="bash">导出rdb数据库文件压缩字符串和对象,默认是yes，会浪费CPU但是节省空间</span> </span><br><span class="line">rdbcompression yes </span><br><span class="line"><span class="meta">#</span><span class="bash"> 导入时是否检查</span> </span><br><span class="line">rdbchecksum yes </span><br></pre></td></tr></table></figure>
+
+<h3 id="AOF-Append-Only-File-持久化介绍"><a href="#AOF-Append-Only-File-持久化介绍" class="headerlink" title="AOF(Append Only File)持久化介绍"></a>AOF(Append Only File)持久化介绍</h3><p>追加文件的方式，文件容易被人读懂以独立日志的方式记录每次写命令， 重启时再重新执行AOF文件中的命令达到恢复数据的目的写入过程宕机，也不影响之前的数据，可以通过 redis-check-aof检查修复问题</p>
+<h3 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h3><p>Redis每次写入命令会追加到aof_buf（缓冲区）<br>新增x1:v1 <br>新增x2:v2 <br>删除x2 <br>新增x3:v3 <br>覆盖x4:v4 <br>AOF缓冲区根据对应的策略向硬盘做同步操作<br>高频AOF会带来影响，特别是每次刷盘</p>
+<h3 id="同步方式"><a href="#同步方式" class="headerlink" title="同步方式"></a>同步方式</h3><p>提供了3种同步方式，在性能和安全性方面做出平衡<br>● appendfsync always<br>每次有数据修改发生时都会写入AOF文件，消耗性能多<br>● appendfsync everysec<br>每秒钟同步一次，该策略为AOF的缺省策略。<br>● appendfsync no<br>不主从同步，由操作系统自动调度刷磁盘，性能是最好的，但是最不安全</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes </span><br><span class="line">appendfilename &quot;appendonly.aof&quot; </span><br><span class="line">appendfsync everysec </span><br></pre></td></tr></table></figure>
+
+<h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><p>● 好处</p>
+<ul>
+<li>AOF文件越来越大，需要定期对AOF文件进行重写达到压缩</li>
+<li>旧的AOF文件含有无效命令会被忽略，保留最新的数据命令</li>
+<li>多条写命令可以合并为一个</li>
+<li>AOF重写降低了文件占用空间</li>
+<li>更小的AOF文件可以更快地被Redis加载</li>
+</ul>
+<p>示例:<br>新增x1:v1<br>覆盖x1:v2<br>覆盖x1:v3<br>覆盖x1:v4<br>删除x1<br>新增x1:v5<br>Rewrite以后<br>新增x4:v5</p>
+<h3 id="重写触发配置"><a href="#重写触发配置" class="headerlink" title="重写触发配置"></a>重写触发配置</h3><p>● 手动触发：bgrewriteaof <br>● 自动触发：<br>    - auto-aof-rewrite-percentage 100<br>    - Redis记住上次重写时AOF日志的大小,比如上一次重写后50mb,当增长率达到100%,也就是AOF文件达到50+50=100mb后,就会自动触发rewrite.60mb = 120mb<br>    - auto-aof-rewrite-min-size 50mb<br>    - 设置触发Rewrite的最小尺寸</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 是否开启aof</span> </span><br><span class="line">appendonly yes </span><br><span class="line"><span class="meta">#</span><span class="bash"> 文件名称</span> </span><br><span class="line">appendfilename &quot;appendonly.aof&quot; </span><br><span class="line"><span class="meta">#</span><span class="bash"> 同步方式,每秒同步</span> </span><br><span class="line">appendfsync everysec </span><br><span class="line"><span class="meta">#</span><span class="bash"> aof重写期间是否同步</span> </span><br><span class="line">no-appendfsync-on-rewrite no </span><br><span class="line"><span class="meta">#</span><span class="bash"> 重写触发配置</span> </span><br><span class="line">auto-aof-rewrite-percentage 100 </span><br><span class="line">auto-aof-rewrite-min-size 50mb </span><br><span class="line"><span class="meta">#</span><span class="bash"> 加载aof时如果有错如何处理</span> </span><br><span class="line"><span class="meta">#</span><span class="bash"> yes表示如果aof尾部文件出问题，写<span class="built_in">log</span>记录并继续执行。no表示提示写入等待修复后写入</span> </span><br><span class="line">aof-load-truncated yes </span><br></pre></td></tr></table></figure>
+
+<h3 id="Redis提供了不同的持久性选项"><a href="#Redis提供了不同的持久性选项" class="headerlink" title="Redis提供了不同的持久性选项"></a>Redis提供了不同的持久性选项</h3><p>RDB持久化以指定的时间间隔执行数据集的时间点快照。<br>AOF持久化记录服务器接收的每个写入操作，将在服务器启动时再次读取，重建原始数据集。使用与Redis协议本身相同的格式以仅追加方式记录命令，当文件太大时，Redis能够重写</p>
+<h3 id="RDB的优缺点"><a href="#RDB的优缺点" class="headerlink" title="RDB的优缺点"></a>RDB的优缺点</h3><p>● 优点</p>
+<ul>
+<li>RDB最大限度地提高了Redis的性能，父进程不需要参与磁盘I/O</li>
+<li>RDB文件紧凑，全量备份，适合用于进行备份和灾难恢复</li>
+<li>在恢复大数据集时的速度比 AOF 的恢复速度要快</li>
+<li>生成的是一个紧凑压缩的二进制文件<br>● 缺点</li>
+<li>如果您需要在Redis停止工作时（例如断电后）将数据丢失的可能性降至最低，则RDB并不好</li>
+<li>RDB经常需要fork才能使用子进程持久存储在磁盘上。如果数据集很大，Fork可能会非常耗时</li>
+</ul>
+<h3 id="AOF的优缺点"><a href="#AOF的优缺点" class="headerlink" title="AOF的优缺点"></a>AOF的优缺点</h3><p>● 优点</p>
+<ul>
+<li>数据更加安全</li>
+<li>当Redis AOF文件太大时，Redis能够在后台自动重写AOF</li>
+<li>AOF以易于理解和解析的格式，一个接一个地包含所有操作的日志<br>● 缺点</li>
+<li>AOF文件通常比同一数据集的等效RDB文件大</li>
+<li>根据确切的fsync策略，恢复的时候AOF可能比RDB慢</li>
+</ul>
+<h3 id="生产环境应该怎么做"><a href="#生产环境应该怎么做" class="headerlink" title="生产环境应该怎么做"></a>生产环境应该怎么做</h3><p>● AOF通常作为RDB的补充使用<br>● 如果Redis中的数据并不是特别敏感或者可以通过其它方式重写生成数据,集群中可以关闭AOF持久化，靠集群的备份方式保证可用性<br>● 自己制定策略定期检查Redis的情况，然后可以手动触发备份、重写数据</p>
+<h3 id="Redis4-0后开始的rewrite支持混合模式"><a href="#Redis4-0后开始的rewrite支持混合模式" class="headerlink" title="Redis4.0后开始的rewrite支持混合模式"></a>Redis4.0后开始的rewrite支持混合模式</h3><p>就是RDB和AOF一起用<br>直接将rdb持久化的方式来操作将二进制内容覆盖到aof文件中,rdb是二进制，所以很小，有写入的话还是继续append追加到文件原始命令，等下次文件过大的时候再次rewrite</p>
+<p>默认是开启状态<br>AOF日志↓↓↓↓ <br>新增x1:v1 <br>覆盖x1:v2 <br>覆盖x1:v3 <br>覆盖x1:v4 <br>删除x1 <br>新增x1:v5 <br>新增x2:v6 <br>混合模式Rewrite以后<br>RDB部分(二进制压缩表达): <br>x1:v5 <br>x2:v6 <br>========================= <br>AOF日志:↓↓↓ <br>新增x3:v7 </p>
+<p>● 好处</p>
+<ul>
+<li>混合持久化结合了RDB持久化和AOF持久化的优点,采取了rdb的文件小易于灾难恢复，同时结合AOF，增量的数据以AOF方式保存了，数据更少的丢失坏处</li>
+<li>前部分是RDB格式，是二进制，所以阅读性较差<br>● 数据恢复</li>
+<li>先看是否存在aof文件，若存在则先按照aof文件恢复，aof比rdb全，且aof文件也rewrite成rdb二进制格式</li>
+<li>若aof不存在，则才会查找rdb是否存在</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">为什么要持久化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">RDB持久化介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-number">3.</span> <span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">4.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF-Append-Only-File-%E6%8C%81%E4%B9%85%E5%8C%96%E4%BB%8B%E7%BB%8D"><span class="toc-number">5.</span> <span class="toc-text">AOF(Append Only File)持久化介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="toc-number">6.</span> <span class="toc-text">核心原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E5%BC%8F"><span class="toc-number">7.</span> <span class="toc-text">同步方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF%E9%87%8D%E5%86%99"><span class="toc-number">8.</span> <span class="toc-text">AOF重写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E5%86%99%E8%A7%A6%E5%8F%91%E9%85%8D%E7%BD%AE"><span class="toc-number">9.</span> <span class="toc-text">重写触发配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E6%8F%90%E4%BE%9B%E4%BA%86%E4%B8%8D%E5%90%8C%E7%9A%84%E6%8C%81%E4%B9%85%E6%80%A7%E9%80%89%E9%A1%B9"><span class="toc-number">10.</span> <span class="toc-text">Redis提供了不同的持久性选项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">11.</span> <span class="toc-text">RDB的优缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">12.</span> <span class="toc-text">AOF的优缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%81%9A"><span class="toc-number">13.</span> <span class="toc-text">生产环境应该怎么做</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis4-0%E5%90%8E%E5%BC%80%E5%A7%8B%E7%9A%84rewrite%E6%94%AF%E6%8C%81%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="toc-number">14.</span> <span class="toc-text">Redis4.0后开始的rewrite支持混合模式</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&text=Redis持久化"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&is_video=false&description=Redis持久化"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Redis持久化&body=Check out this article: https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&title=Redis持久化"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/05/13/Redis/Redis%E6%8C%81%E4%B9%85%E5%8C%96/&name=Redis持久化&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

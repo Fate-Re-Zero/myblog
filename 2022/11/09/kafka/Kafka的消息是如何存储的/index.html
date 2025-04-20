@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="整体结构Topic（主题）：是最顶层的概念，类似于一个消息的类别或频道，是消息的集合。例如，在一个电商系统中，可以有“订单主题”“用户行为主题”等，不同类型的消息会被归类到不同的主题下。Partition（分区）：每个主题可以被划分为一个或多个分区，图中展示了Partition 0、Partition 1、Partition 2。分区主要用于实现数据的并行处理和存储，同一主题下的不同分区可以分布">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka的消息是如何存储的">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="整体结构Topic（主题）：是最顶层的概念，类似于一个消息的类别或频道，是消息的集合。例如，在一个电商系统中，可以有“订单主题”“用户行为主题”等，不同类型的消息会被归类到不同的主题下。Partition（分区）：每个主题可以被划分为一个或多个分区，图中展示了Partition 0、Partition 1、Partition 2。分区主要用于实现数据的并行处理和存储，同一主题下的不同分区可以分布">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221109-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221109-2.png">
+<meta property="article:published_time" content="2022-11-09T00:41:28.000Z">
+<meta property="article:modified_time" content="2025-03-23T04:28:12.163Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221109-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Kafka的消息是如何存储的</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/08/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E5%90%8C%E6%AD%A5%E4%B8%8E%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&text=Kafka的消息是如何存储的"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&is_video=false&description=Kafka的消息是如何存储的"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka的消息是如何存储的&body=Check out this article: https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&name=Kafka的消息是如何存储的&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">整体结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%86%85%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">分区内的结构</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Kafka的消息是如何存储的
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-09T00:41:28.000Z" itemprop="datePublished">2022-11-09</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/" class="leancloud-visitors" data-flag-title="Kafka的消息是如何存储的" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><img src="/images/kafka/20221109-1.png" alt="image-20221102-1"></p>
+<h3 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h3><p>Topic（主题）：是最顶层的概念，类似于一个消息的类别或频道，是消息的集合。例如，在一个电商系统中，可以有“订单主题”“用户行为主题”等，不同类型的消息会被归类到不同的主题下。<br>Partition（分区）：每个主题可以被划分为一个或多个分区，图中展示了Partition 0、Partition 1、Partition 2。分区主要用于实现数据的并行处理和存储，同一主题下的不同分区可以分布在不同的服务器（broker）上，从而实现水平扩展。比如一个“日志主题”可能有多个分区，大量的日志消息会根据一定规则分配到不同分区，提高处理效率。分区内的消息是有序的，这对于一些需要保证消息顺序的场景很重要。</p>
+<h3 id="分区内的结构"><a href="#分区内的结构" class="headerlink" title="分区内的结构"></a>分区内的结构</h3><p>Segment（段）：分区中的数据进一步划分为多个段，如图中的Segment 0、Segment 1、Segment N。每个段是一个独立的文件（在磁盘上存储），当分区中的消息数据量增加到一定程度（如段文件大小达到阈值或经过一定时间），就会进行滚动更新，开启新段文件存储后续消息。这种划分方式便于数据管理和维护，比如方便进行数据清理、备份等操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ pwd  </span><br><span class="line">/bitnami/kafka/data</span><br><span class="line"></span><br><span class="line">$ ls   </span><br><span class="line">__consumer_offsets-<span class="number">0</span>   __consumer_offsets-<span class="number">2</span>   __consumer_offsets-<span class="number">30</span>  __consumer_offsets-<span class="number">41</span>  __consumer_offsets-<span class="number">8</span></span><br><span class="line">__consumer_offsets-<span class="number">1</span>   __consumer_offsets-<span class="number">20</span>  __consumer_offsets-<span class="number">31</span>  __consumer_offsets-<span class="number">42</span>  __consumer_offsets-<span class="number">9</span></span><br><span class="line">__consumer_offsets-<span class="number">10</span>  __consumer_offsets-<span class="number">21</span>  __consumer_offsets-<span class="number">32</span>  __consumer_offsets-<span class="number">43</span>  cleaner-offset-checkpoint</span><br><span class="line">__consumer_offsets-<span class="number">11</span>  __consumer_offsets-<span class="number">22</span>  __consumer_offsets-<span class="number">33</span>  __consumer_offsets-<span class="number">44</span>  log-start-offset-checkpoint</span><br><span class="line">__consumer_offsets-<span class="number">12</span>  __consumer_offsets-<span class="number">23</span>  __consumer_offsets-<span class="number">34</span>  __consumer_offsets-<span class="number">45</span>  meta.properties</span><br><span class="line">__consumer_offsets-<span class="number">13</span>  __consumer_offsets-<span class="number">24</span>  __consumer_offsets-<span class="number">35</span>  __consumer_offsets-<span class="number">46</span>  orders-<span class="number">0</span></span><br><span class="line">__consumer_offsets-<span class="number">14</span>  __consumer_offsets-<span class="number">25</span>  __consumer_offsets-<span class="number">36</span>  __consumer_offsets-<span class="number">47</span>  recovery-point-offset-checkpoint</span><br><span class="line">__consumer_offsets-<span class="number">15</span>  __consumer_offsets-<span class="number">26</span>  __consumer_offsets-<span class="number">37</span>  __consumer_offsets-<span class="number">48</span>  replication-offset-checkpoint</span><br><span class="line">__consumer_offsets-<span class="number">16</span>  __consumer_offsets-<span class="number">27</span>  __consumer_offsets-<span class="number">38</span>  __consumer_offsets-<span class="number">49</span></span><br><span class="line">__consumer_offsets-<span class="number">17</span>  __consumer_offsets-<span class="number">28</span>  __consumer_offsets-<span class="number">39</span>  __consumer_offsets-<span class="number">5</span></span><br><span class="line">__consumer_offsets-<span class="number">18</span>  __consumer_offsets-<span class="number">29</span>  __consumer_offsets-<span class="number">4</span>   __consumer_offsets-<span class="number">6</span></span><br><span class="line">__consumer_offsets-<span class="number">19</span>  __consumer_offsets-<span class="number">3</span>   __consumer_offsets-<span class="number">40</span>  __consumer_offsets-<span class="number">7</span></span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line"><span class="number">00000000000000000000.</span>index  <span class="number">00000000000000000000.</span>log  <span class="number">00000000000000000000.</span>timeindex  leader-epoch-checkpoint  partition.metadata</span><br><span class="line"></span><br><span class="line">$ pwd</span><br><span class="line">/bitnami/kafka/data/orders-<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>段内的文件类型：<br>以下是对 Kafka 中这些文件的详细解释：</p>
+<ol>
+<li><p>00000000000000000000.index<br>● 功能：这是一个稀疏索引文件，与对应的 00000000000000000000.log 文件配合使用。<br>● 工作原理：它不是为分区内的每一条消息都创建索引，而是按照一定的间隔为消息创建索引。该文件存储了消息在 .log 文件中的偏移量（offset）以及该偏移量消息在 .log 文件中的物理位置信息。当需要查找某条消息时，Kafka 首先在 .index 文件中通过二分查找找到小于或等于目标偏移量的最大索引项，然后根据索引项中的物理位置，到 .log 文件中从这个位置开始顺序查找，直到找到目标消息。这样可以在一定程度上提高查找消息的效率，同时避免为每条消息都创建索引而导致的文件过大问题。<br><img src="/images/kafka/20221109-2.png" alt="image-20221102-1"><br>示例：其中以索引文件中元数据 3,497 为例，依次在数据文件中表示第 3 个 message (在全局 partiton 表示第 368772 个 message)、以及该消息的物理偏移地址为497。</p>
+</li>
+<li><p>00000000000000000000.log<br>● 功能：这是存储实际消息的文件，是分区内消息的主要存储位置。<br>● 工作原理：当生产者发送消息到 Kafka 分区时，消息会按照一定的顺序存储在这个 .log 文件中。消费者在读取消息时，会从该文件中获取所需的消息内容。根据存储策略，消息会不断追加到该文件中，直到该文件达到一定大小或满足其他条件（如存储时长），此时会创建新的 .log 文件来存储后续的消息。</p>
+</li>
+<li><p>00000000000000000000.timeindex<br>● 功能：该文件可能是一个时间索引文件，用于根据消息的时间戳来查找消息。<br>● 工作原理：它可以帮助用户或系统在需要查找特定时间范围内的消息时，根据时间戳快速定位消息所在的位置。它存储了时间戳和相应的消息偏移量或物理位置的对应关系，以便更方便地从 .log 文件中找出特定时间点或时间段内发送的消息，这对于需要按照时间维度来处理消息的场景非常有用，例如监控系统中查找某段时间内的日志记录。</p>
+</li>
+<li><p>leader-epoch-checkpoint<br>● 功能：该文件主要用于记录分区的领导者（leader）的纪元信息和相应的起始偏移量，以保证数据一致性和故障恢复时的正确处理。<br>● 工作原理：在 Kafka 集群中，分区会有一个领导者负责处理该分区的读写操作。当领导者发生变化时，这个文件会记录下不同领导者的纪元（epoch）以及在该领导者开始负责时的起始偏移量。这样，在发生故障恢复或副本同步时，副本可以根据该文件的信息确保自己的同步进度正确，避免数据不一致或重复消费的问题。例如，当旧的领导者故障，新的领导者上任，会更新该文件，副本根据新领导者的纪元信息进行数据同步。</p>
+</li>
+<li><p>partition.metadata<br>● 功能：存储了分区的一些元数据信息。</p>
+</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">整体结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%86%85%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">分区内的结构</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&text=Kafka的消息是如何存储的"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&is_video=false&description=Kafka的消息是如何存储的"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka的消息是如何存储的&body=Check out this article: https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&title=Kafka的消息是如何存储的"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/&name=Kafka的消息是如何存储的&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

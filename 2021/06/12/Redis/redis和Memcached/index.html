@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="关于redis和Memcached的比较：(1).数据结构：     Memcached：主要支持简单的 key-value 数据结构，类似于 Redis 里的 String；     Redis：总共有9种，常见的5种，高级的4种：     String：字符串，最基础的数据类型；     List：列表;     Hash：哈希对象；     Set：集合；     Sorted Set：有序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis和Memcached">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="关于redis和Memcached的比较：(1).数据结构：     Memcached：主要支持简单的 key-value 数据结构，类似于 Redis 里的 String；     Redis：总共有9种，常见的5种，高级的4种：     String：字符串，最基础的数据类型；     List：列表;     Hash：哈希对象；     Set：集合；     Sorted Set：有序">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-06-12T02:00:38.000Z">
+<meta property="article:modified_time" content="2025-04-20T14:18:51.814Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>redis和Memcached</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/06/12/Redis/redis%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%E5%92%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&text=redis和Memcached"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&is_video=false&description=redis和Memcached"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis和Memcached&body=Check out this article: https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&name=redis和Memcached&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Eredis%E5%92%8CMemcached%E7%9A%84%E6%AF%94%E8%BE%83%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">关于redis和Memcached的比较：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        redis和Memcached
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-06-12T02:00:38.000Z" itemprop="datePublished">2021-06-12</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/06/12/Redis/redis%E5%92%8CMemcached/" class="leancloud-visitors" data-flag-title="redis和Memcached" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Redis/" rel="tag">Redis</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="关于redis和Memcached的比较："><a href="#关于redis和Memcached的比较：" class="headerlink" title="关于redis和Memcached的比较："></a>关于redis和Memcached的比较：</h3><pre><code>(1).数据结构：
+    Memcached：主要支持简单的 key-value 数据结构，类似于 Redis 里的 String；
+    Redis：总共有9种，常见的5种，高级的4种：
+    String：字符串，最基础的数据类型；
+    List：列表;
+    Hash：哈希对象；
+    Set：集合；
+    Sorted Set：有序集合，Set 的基础上加了个分值；
+
+    HyperLogLog：通常用于基数统计。使用少量固定大小的内存，来统计集合中唯一元素的数量。统计结果不是精确值，而是一个带有0.81%标准差（standard error）的近似值。所以，HyperLogLog适用于一些对于统计结果精确度要求不是特别高的场景，
+    例如网站的UV统计；
+
+    Geo：redis 3.2 版本的新特性。可以将用户给定的地理位置信息储存起来， 并对这些信息进行操作：获取2个位置的距离、根据
+    给定地理位置坐标获取指定范围内的地理位置集合；
+
+    Bitmap：位图；
+
+    Stream：主要用于消息队列，类似于 kafka，可以认为是 pub/sub 的改进版。提供了消息的持久化和主备复制功能，可以让任何客户端访问任何时刻的数据，并且能记住每一个客户端的访问位置，还能保证消息不丢失。
+
+(2).数据存储：
+    Memcached：数据全部存在内存中，重启实例会导致数据全部丢失;
+    Redis：通常全部存在内存中，同时支持持久化到磁盘上;
+
+(3).持久化:
+    Memcached：不支持;
+    Redis：AOF、RDB、混合持久化;
+
+(4).灾难恢复:
+    Memcached：实例挂掉后，数据不可恢复;
+    Redis：实例挂掉后可以通过RDB、AOF恢复 ，但是还是会有数据丢失问题;
+
+(5).事件处理（事件库）:
+    Memcached：使用 Libevent 库;
+
+    Redis：自己封装了简易事件库 AeEvent;
+
+(6).过期键删除策略:
+    常见的有以下三种：
+
+    定时删除：在设置键的过期时间的同时，创建一个定时器，让定时器在键的过期时间来临时，立即执行对键的删除操作。对内存最友好，对 CPU 时间最不友好;
+
+    惰性删除：放任键过期不管，但是每次获取键时，都检査键是否过期，如果过期的话，就删除该键；如果没有过期，就返回该键。对 CPU 时间最优化，对内存最不友好;
+
+    定期删除：每隔一段时间，默认100ms，程序就对数据库进行一次检査，删除里面的过期键。至 于要删除多少过期键，以及要检査多少个数据库，则由算法决定。前两种策略的折中，对 CPU 时间和内存的友好程度较平衡;
+
+    Memcached：惰性删除
+
+    Redis：惰性删除+定期删除
+
+(7).内存驱淘汰(驱逐)策略:
+    当内存空间已经用满时，服务实例将将根据配置的驱逐策略，进行相应的动作。
+
+    memcached：主要为 LRU 算法
+
+    redis：当前总共有以下8种：
+
+    noeviction：默认策略，不淘汰任何 key，直接返回错误
+
+    allkeys-lru：在所有的 key 中，使用 LRU 算法淘汰部分 key
+
+    allkeys-lfu：在所有的 key 中，使用 LFU 算法淘汰部分 key
+
+    allkeys-random：在所有的 key 中，随机淘汰部分 key
+
+    volatile-lru：在设置了过期时间的 key 中，使用 LRU 算法淘汰部分 key
+
+    volatile-lfu：在设置了过期时间的 key 中，使用 LFU 算法淘汰部分 key
+
+    volatile-random：在设置了过期时间的 key 中，随机淘汰部分 key
+
+    volatile-ttl：在设置了过期时间的 key 中，挑选 TTL（time to live，剩余时间）短的 key 淘汰
+
+(8).性能：
+    首先，影响性能比较的因素有很多，网络带宽、CPU、内存等等，所以其实很多测试并不能完全说明问题，可能在这个条件下 Redis 快，而在另一个条件下是 Memcached 快；
+
+    Redis 作者 antirez 在 12 年左右在 Stack Overflow 上谈过两者的性能问题，他是这么说的：由于 Redis 只使用单核，而 Memcached 可以使用多核，所以在比较上：在处理小数据时，平均每一个核上 Redis 比 Memcached 性能更高，而在 100k 左右的大数据时， Memcached 性能要高于 Redis；
+
+    antirez 的这个说法是按“CPU 单核”维度来比较，但是我们在实际的使用中，肯定是按“实例”维度来使用，所以接下来
+    我们探讨下对于两者在“实例”维度的比较；
+
+    按“实例”维度进行比较时，个人认为由于 Memcached 多线程的特性，在 Redis 6.0 之前，通常情况下 Memcached 性能是要高于 Redis 的，同时实例的 CPU 核数越多，Memcached 的性能优势越大；
+
+    而在 Redis 6.0 支持 I/O 多线程后，当 Redis 关闭持久化后，两者在性能上可能会比较接近
+
+(9).关于两者的技术选型，该如何选择？
+    看完上面的比较，其实不难做出选择，99%的人、场景，或者说 Redis 能支持的场景，使用 Redis 基本不会有问题；
+
+    而且就最近几年的发展来看，Redis 可谓风光无限，而 Memcached 则是已经逐渐跟不上 Redis 脚步了，这也侧面
+    反映了当前大家的选择都是趋向于使用 Redis；
+
+    而关于使用 Memcached 的场景，我自己了解到的一些线上真实使用场景都是对于性能有非常高的要求；
+
+    Redis 6.0 支持的 I/O 阶段多线程目前根据官方说法至少能提升性能1倍，随着 Redis 在性能上的不断优化，可能后续 Memcached 的使用场景会越来越少了
+</code></pre>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Eredis%E5%92%8CMemcached%E7%9A%84%E6%AF%94%E8%BE%83%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">关于redis和Memcached的比较：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&text=redis和Memcached"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&is_video=false&description=redis和Memcached"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis和Memcached&body=Check out this article: https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&title=redis和Memcached"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/12/Redis/redis%E5%92%8CMemcached/&name=redis和Memcached&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

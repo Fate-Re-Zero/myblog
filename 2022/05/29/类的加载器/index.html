@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一.类加载器的分类：    启动类加载器(引导类加载器，Bootstrap ClassLoader)：加载一些java核心类的jar包及扩展类加载器和系统类加载器    扩展类加载器(Extension ClassLoader)：主要用于加载(D:\jdk1.8\jre\lib\ext，C:\WINDOWS\Sun\Java\lib\ext)    下的jar包    系统类加载器(应用程序类加载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="类的加载器">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一.类加载器的分类：    启动类加载器(引导类加载器，Bootstrap ClassLoader)：加载一些java核心类的jar包及扩展类加载器和系统类加载器    扩展类加载器(Extension ClassLoader)：主要用于加载(D:\jdk1.8\jre\lib\ext，C:\WINDOWS\Sun\Java\lib\ext)    下的jar包    系统类加载器(应用程序类加载">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-05-29T02:00:38.000Z">
+<meta property="article:modified_time" content="2022-07-31T13:36:55.634Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>类的加载器</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/06/01/OOM%E5%B8%B8%E8%A7%81%E5%90%84%E7%A7%8D%E5%9C%BA%E6%99%AF%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/05/27/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&text=类的加载器"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&is_video=false&description=类的加载器"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=类的加载器&body=Check out this article: https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&name=类的加载器&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        类的加载器
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-05-29T02:00:38.000Z" itemprop="datePublished">2022-05-29</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/" class="leancloud-visitors" data-flag-title="类的加载器" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>一.类加载器的分类：<br>    启动类加载器(引导类加载器，Bootstrap ClassLoader)：加载一些java核心类的jar包及扩展类加载器和系统类加载器<br>    扩展类加载器(Extension ClassLoader)：主要用于加载(D:\jdk1.8\jre\lib\ext，C:\WINDOWS\Sun\Java\lib\ext)<br>    下的jar包<br>    系统类加载器(应用程序类加载器，Application ClassLoader)：父类加载器为扩展类加载器，它负责加载环境变量classpath<br>    或系统属性java.class.path指定路径下的类库，可以通过ClassLoader.getSystemClassLoader()来获取该类的加载器<br>    用户自定义加载器(User ClassLoader)：java开发者可以自定义类加载器来实现类库的动态加载，加载源可以是本地的jar包，也可以是<br>    网络上的远程资源</p>
+<p>二.ClassLoader源码解析：<br>    重要的方法:loadClass() 、 findClass() 、 defineClass() 、 preDefineClass()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="keyword">boolean</span> resolve)</span><br><span class="line">        <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (getClassLoadingLock(name)) &#123;</span><br><span class="line">            <span class="comment">// First, check if the class has already been loaded</span></span><br><span class="line">            Class&lt;?&gt; c = findLoadedClass(name);</span><br><span class="line">            <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">long</span> t0 = System.nanoTime();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (parent != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        c = parent.loadClass(name, <span class="keyword">false</span>);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        c = findBootstrapClassOrNull(name);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">                    <span class="comment">// ClassNotFoundException thrown if class not found</span></span><br><span class="line">                    <span class="comment">// from the non-null parent class loader</span></span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// If still not found, then invoke findClass in order</span></span><br><span class="line">                    <span class="comment">// to find the class.</span></span><br><span class="line">                    <span class="keyword">long</span> t1 = System.nanoTime();</span><br><span class="line">                    c = findClass(name);</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// this is the defining class loader; record the stats</span></span><br><span class="line">                    sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);</span><br><span class="line">                    sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);</span><br><span class="line">                    sun.misc.PerfCounter.getFindClasses().increment();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (resolve) &#123;</span><br><span class="line">                resolveClass(c);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> c;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>三.Class.forName是一个静态方法与ClassLoader.loadClass<br>    区别：Class.forName是一个静态方法，该方法将Class加载到内存的同时，会执行类的初始化；<br>    ClassLoader.loadClass是一个实例方法，该方法将Class文件加载到内存时，并不会执行类的初始化，直到这个类第一次使用时<br>    才会初始化</p>
+<p>四.双亲委派机制：<br>    (1).定义：双亲委派机制的的具体体现为：当前ClassLoader加载类时会先检查他的父类加载器命名空间中是否加载过该类型，加载了，直接返回该类，没有加载，继续检查父类加载器，直到引导类加载器，如果父类加载器任务能够完成加载任务，则成功返回，只有父类加载器无法完成此加载任务时，才会自己去加载；<br>    (2).为什么要使用双亲委派机制：<br>        避免了类的重复加载，确保一个类是全局唯一性的，通过这种层级关系避免了类的重复加载；<br>        保护程序安全，防止核心API被随意篡改(例如在src下创建java.lang包，编写自己的String类)；<br>        补充：在一个类加载器的命名空间中，同一个类型的类只会有一个；<br>        注意：同一个类型由不同的类加载器加载，执行类型转换时会发生异常；<br>    (3).双亲委派机制的弊端：<br>        底层ClassLoader可以通过parent属性来获取父类的所加载的类，但是顶层ClassLoader无法访问底层ClassLoader所加载的类</p>
+<p>五.在代码层面双亲委派机制是如何体现的：<br>    主要体现在loadClass方法中，会先检查当前ClassLoader命名空间中是否加载过该类型，加载过，直接返回，否则会调用<br>    当前ClassLoader的parent也就是父加载器的loadClass方法，直到parent为null，会去检查引导类加载器是否加载过该类型，如果父类加载器任务能够完成加载任务，则成功返回，只有父类加载器无法完成此加载任务时，才会自己去加载；</p>
+<p>六.双亲委派机制对java核心类库的保护:<br>    在findClass方法中会调用defineClass方法，该方法中会调用defineClass方法，最终会调用preDefineClass方法，该方法会对加载类进行检查，对java核心类库的保护</p>
+<p>七.破坏双亲委派机制的行为有哪些:<br>    (1).第一次双亲委派机制的破坏：自定义类加载器重写loadClass方法破坏双亲委派机制，解决建议：不推荐重写loadClass方法，<br>    建议重写findClass方法，保证双亲委派机制；<br>    (2).第二次双亲委派机制的破坏：顶层ClassLoader加载的基础类(如JNDI)，无法加载第三方提供的一些代码实现，解决方法：<br>    使用线程上下文加载器,通过Launcher类将线程的上下文加载器设置为系统类加载器，再通过系统类加载器去加载第三方代码实现；<br>    (3).第三次双亲委派机制的破坏：代码的热替换，模块的热部署</p>
+<p>八.线程上下文类加载器:<br>    Launcher() —&gt; Thread.currentThread().setContextClassLoader(this.loader);</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Launcher</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Launcher.ExtClassLoader var1;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            var1 = Launcher.ExtClassLoader.getExtClassLoader();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException var10) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;Could not create extension class loader&quot;</span>, var10);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.loader = Launcher.AppClassLoader.getAppClassLoader(var1);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException var9) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;Could not create application class loader&quot;</span>, var9);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Thread.currentThread().setContextClassLoader(<span class="keyword">this</span>.loader);</span><br><span class="line">        String var2 = System.getProperty(<span class="string">&quot;java.security.manager&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (var2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            SecurityManager var3 = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="string">&quot;&quot;</span>.equals(var2) &amp;&amp; !<span class="string">&quot;default&quot;</span>.equals(var2)) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    var3 = (SecurityManager)<span class="keyword">this</span>.loader.loadClass(var2).newInstance();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IllegalAccessException var5) &#123;</span><br><span class="line">                    ;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InstantiationException var6) &#123;</span><br><span class="line">                    ;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (ClassNotFoundException var7) &#123;</span><br><span class="line">                    ;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (ClassCastException var8) &#123;</span><br><span class="line">                    ;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                var3 = <span class="keyword">new</span> SecurityManager();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (var3 == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;Could not create SecurityManager: &quot;</span> + var2);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            System.setSecurityManager(var3);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>九.沙箱安全机制：<br>    保证程序安全<br>    保护Java原生的JDK代码</p>
+<p>十.Java9新特性关于双亲委派机制的改变：<br>    (1).扩展类加载器(Extension ClassLoader)变成了PlatformClassLoader(平台类加载器)；<br>    (2).可以通过ClassLoader.getPlatformClassLoader()获取平台类加载器；<br>    (3).删除了URLClassLoader;<br>    (4).引导类加载更名为BootClassLoader并集成进java API；</p>
+<p>-XX:+TraceClassLoading：打印当前加载的类</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&text=类的加载器"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&is_video=false&description=类的加载器"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=类的加载器&body=Check out this article: https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&title=类的加载器"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/29/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%99%A8/&name=类的加载器&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="笔记：    估算线程数：        线程数 &#x3D; cpu 可用核数 &#x2F; 1 - 阻塞系数（io密集型接近1, 计算密集型接近0） 阻塞系数没有定量的值，只有定性的分析 提升QPS：     提高并发数：         1.能用多线程用多线程；         2.增加各种连接数：tomcat,mysql,redis等等；         3.服务无状态，便于横向扩展，扩机器；">
+<meta property="og:type" content="website">
+<meta property="og:title" content="祥祥要起飞">
+<meta property="og:url" content="https://fate-re-zero.github.io/%E7%AC%94%E8%AE%B0.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="笔记：    估算线程数：        线程数 &#x3D; cpu 可用核数 &#x2F; 1 - 阻塞系数（io密集型接近1, 计算密集型接近0） 阻塞系数没有定量的值，只有定性的分析 提升QPS：     提高并发数：         1.能用多线程用多线程；         2.增加各种连接数：tomcat,mysql,redis等等；         3.服务无状态，便于横向扩展，扩机器；">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-06-25T16:04:34.849Z">
+<meta property="article:modified_time" content="2022-06-25T16:04:34.849Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>祥祥要起飞</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="particles-js" style="width: 100%;height: 100%;position: fixed; top: 0; left: 0; bottom: 0; right: 0;"></div>
+    
+    
+    <div class="content index py4">
+        
+          <header id="header">
+  <a href="/">
+  
+    
+      <div id="logo" style="background-image: url(/images/logo.png);"></div>
+    
+  
+    <div id="title">
+      <h1>祥祥要起飞</h1>
+    </div>
+  </a>
+  <div id="nav">
+    <ul>
+      <li class="icon">
+        <a href="#"><i class="fas fa-bars fa-2x"></i></a>
+      </li>
+       
+        <li><a href="/">Home</a></li>
+       
+        <li><a href="/archives/">Writing</a></li>
+       
+        <li><a href="/search/">Search</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  
+
+  <div class="content" itemprop="articleBody">
+      
+          <p>笔记：<br>    估算线程数：<br>        线程数 = cpu 可用核数 / 1 - 阻塞系数（io密集型接近1, 计算密集型接近0） 阻塞系数没有定量的值，只有定性的分析</p>
+<pre><code>提升QPS：
+    提高并发数：
+        1.能用多线程用多线程；
+        2.增加各种连接数：tomcat,mysql,redis等等；
+        3.服务无状态，便于横向扩展，扩机器；
+        4.让服务能力对等，不要让所有的请求都请求到一个eureka上，（serviceURL打乱顺序）；
+    减少响应时间：
+        1.异步（最终一致性，不需要及时），流量削峰MQ;
+        2.缓存（减少db读取，减少磁盘io,读多写少）；
+        3.数据库优化；
+        4.多的数据，分批次返回，分页；
+        5.减少调用链；
+        6.长连接，不要轮询；
+
+项目上的细节：
+    1.验证码使用数字类型的运算生成，不要使用字符串处理，大概可以提升10倍性能，(int)((Math.random() * 9 + 1) * Math.pow(10, 5)) 替代 (Math.random() + &quot;&quot;).subString(2, 8);
+    2.短信模板是存内存还是存redis:短信模板一般非常有限，一般公司都是创建几条短信模板，而且一条短信模板所占的内存大概几十B,所以可以直接放在内存中，如果放在redis中，每次请求redis会有网络IO，反而产生更多的资源消耗；
+</code></pre>
+
+        
+  </div>
+</article>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

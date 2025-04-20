@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="###事务：    用户定义的一系列数据库操作，这些操作可以视为一个完整的逻辑处理工作单元，要么全部执行，要么全部不执行，是不可分割的工作单元 ###分布式事务：    分布式事务是指会涉及到操作多个数据库（服务）的事务。其实就是将同一个数据库（服务）事务的概念扩大到了对多个数据库（服务）的事务。目的是为了保证分布式系统中的数据一致性。 ###XA规范：    总之一句话：就X&#x2F;Open DTP组">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="###事务：    用户定义的一系列数据库操作，这些操作可以视为一个完整的逻辑处理工作单元，要么全部执行，要么全部不执行，是不可分割的工作单元 ###分布式事务：    分布式事务是指会涉及到操作多个数据库（服务）的事务。其实就是将同一个数据库（服务）事务的概念扩大到了对多个数据库（服务）的事务。目的是为了保证分布式系统中的数据一致性。 ###XA规范：    总之一句话：就X&#x2F;Open DTP组">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-07-17T09:00:38.000Z">
+<meta property="article:modified_time" content="2022-07-18T15:29:33.030Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>分布式事务</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/07/17/MySql/MySql%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/07/17/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%AD%E7%9A%84%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&text=分布式事务"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&is_video=false&description=分布式事务"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=分布式事务&body=Check out this article: https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&name=分布式事务&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        分布式事务
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-17T09:00:38.000Z" itemprop="datePublished">2022-07-17</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" class="leancloud-visitors" data-flag-title="分布式事务" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>###事务：<br>    用户定义的一系列数据库操作，这些操作可以视为一个完整的逻辑处理工作单元，要么全部执行，要么全部不执行，是不可分割的工作单元</p>
+<p>###分布式事务：<br>    分布式事务是指会涉及到操作多个数据库（服务）的事务。其实就是将同一个数据库（服务）事务的概念扩大到了对多个数据库（服务）的事务。目的是为了保证分布式系统中的数据一致性。</p>
+<p>###XA规范：<br>    总之一句话：就X/Open DTP组织定义的事务协调者与数据库之间的接口规范（即接口函数），事务协调者用它来通知数据库事务的开始，结束以及提交、回滚等。<br>    XA接口函数由数据库厂商提供；<br>    XA规范的实现：<br>    分布式集群情况下，一般加代理层来充当TM的角色，实现对事务的支持。<br>    二阶段提交协议（2PC)和三阶段提交协议（3PC)就是根据这一思想衍生出来的。<br>    两阶段提交主要保证了分布式事务的原子性：即所有节点要么全做要么全年不做</p>
+<p>###二阶段提交的缺点：<br>    1.单点故障：（协调者故障，事务失败）；<br>    2.阻塞资源：（占用数据库连接，性能低下，执行完一阶段提交之后，参与者需要保持数据库连接来保证二阶段的提交或者回滚）<br>    3.数据不一致：（二阶段参与者中部分节点出错造成数据不一致）</p>
+<p>###2pc缺点的解决：<br>    1.多节点部署协调者；<br>    2.记录undolog,在一阶段的时候就执行commit操作并释放资源，二阶段成功，则删除undolog,失败则使用undolog回滚数据并删除undolog;<br>    3.人工介入，使用脚本，要么将数据前滚成都commit成功的状态，要么回滚成初始没有执行的状态；</p>
+<p>###三阶段提交：<br>    1.can commit：参与者检查sql是否可以执行成功，将检查结果返回给协调者；<br>    2.pre commit：如果一阶段的返回结果都是成功，协调者发送指令通知参与者执行sql,参与者执行sql,并向协调者反馈执行结果<br>    3.do commit：协调者根据二阶段的sql执行结果，如果全部成功，则发送commit指令通知参与者提交，否则发送回滚命令；</p>
+<p>###3pc相对与2pc解决的问题：<br>    1.can commmit阶段减少了因为sql出错而占用数据库资源的情况<br>    2.每个参与者都有一个超时的机制，也就是参与者子规定时间内没有收到协调者的指令，则执行abort commit放弃提交；</p>
+<p>###TCC(Try Confirm Cancel)解决方案：<br>    1.第一正常执行业务逻辑，可以包含多种的数据库操作（redis,mysql），并且落库commit;<br>    2.如果一阶段存在某个流程出错，则对已经执行成功的流程执行逆操作使数据还原到执行之前；<br>    3.如果一阶段全部执行成功，则事务正常结束；</p>
+<p>###最大努力通知方案：<br>    在我们去调用第三方支付系统（支付宝，微信，华为应用内支付）的时候，我方app调用充值接口，调起支付页面，我方App发起支付请求，第三方支付系统完成支付后，第三方需要将充值结果回调给我方的后端系统，我方后端系统更新充值状态； 但是这里就会存在事务问题，第三方充值系统需要保证回调到我方系统，第三方充值系统是我们无法左右的，不可能说让别人改代码配合我们左二阶段，三阶段提交的，所以说第三方支付系统一般为了保证接口能够回调到我方系统，会多次重试回调我方系统（所以说是尽我最大的努力去通知你），但是不是一直重试，这样话黑客不断充值1分钱，不断让系统进行通知，系统很容易崩溃，然后第三不光会重试回调，并且提供主动查询第三方系统支付系统充值结果的接口供调用方使用，第三方支付系统一般会采用这种方案来保证了整个支付流程完整调用完成；</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&text=分布式事务"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&is_video=false&description=分布式事务"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=分布式事务&body=Check out this article: https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&title=分布式事务"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/&name=分布式事务&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

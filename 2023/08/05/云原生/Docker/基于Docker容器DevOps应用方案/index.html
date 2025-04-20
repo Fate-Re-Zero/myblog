@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、企业业务代码发布方式1.1 传统方式 以物理机或虚拟机为颗粒度部署 部署环境比较复杂，需要有先进的自动化运维手段 出现问题后重新部署成本大，一般采用集群方式部署 部署后以静态方式展现  1.2 容器化方式 以容器为颗粒度部署 部署方式简单，启动速度快 一次构建可到处运行 出现故障后，可随时恢复 可同时部署多套环境（测试、预发布、生产环境等）  二、企业业务代码发布逻辑图      三、企业业务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Docker容器DevOps应用方案">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、企业业务代码发布方式1.1 传统方式 以物理机或虚拟机为颗粒度部署 部署环境比较复杂，需要有先进的自动化运维手段 出现问题后重新部署成本大，一般采用集群方式部署 部署后以静态方式展现  1.2 容器化方式 以容器为颗粒度部署 部署方式简单，启动速度快 一次构建可到处运行 出现故障后，可随时恢复 可同时部署多套环境（测试、预发布、生产环境等）  二、企业业务代码发布逻辑图      三、企业业务">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/基于Docker容器DevOps应用方案企业业务代码发布系统.assets/image-20220223152003734.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/基于Docker容器DevOps应用方案企业业务代码发布系统.assets/image-20220223163453076.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224134917428.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224134941802.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224135000130.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224135021076.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224140418176.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224140436172.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141530225.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141610569.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141720927.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224142031988.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224142955854.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8ED/images/Docker/r%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224173833454.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174018298.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174041874.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174442874.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174507233.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174541367.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174601389.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174735575.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174855779.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180711917.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180732745.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180754614.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180842212.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181602622.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181626286.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181656604.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181746808.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181829179.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210606310.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210748207.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210823231.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224211329307.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212308684.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212411414.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212543257.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212622017.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212928853.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224213022249.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214012429.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214041517.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214133277.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214217988.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214317316.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214329349.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214412283.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214442366.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214812077.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214922182.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215008239.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215019932.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215857618.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220023637.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220323445.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220502686.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220529911.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220733835.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221320500.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221347030.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221416358.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221609980.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221643648.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221754566.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221832480.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221901770.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224222146699.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223418318.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223855433.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223917897.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224224014013.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224225051498.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231004637.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231659567.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231808502.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224233231807.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224233433469.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014415364.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014449916.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014608778.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014711014.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014217956.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014302077.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014131634.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014949917.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225013841677.png">
+<meta property="article:published_time" content="2023-08-05T12:01:06.000Z">
+<meta property="article:modified_time" content="2025-03-16T14:45:14.669Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Docker/基于Docker容器DevOps应用方案企业业务代码发布系统.assets/image-20220223152003734.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>基于Docker容器DevOps应用方案</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/16/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4Node%E7%AE%A1%E7%90%86/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/08/02/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E7%94%9F%E6%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E9%83%A8%E7%BD%B2/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&text=基于Docker容器DevOps应用方案"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&is_video=false&description=基于Docker容器DevOps应用方案"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于Docker容器DevOps应用方案&body=Check out this article: https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&name=基于Docker容器DevOps应用方案&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E6%96%B9%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">一、企业业务代码发布方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%BC%A0%E7%BB%9F%E6%96%B9%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 传统方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%AE%B9%E5%99%A8%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 容器化方式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E9%80%BB%E8%BE%91%E5%9B%BE"><span class="toc-number">2.</span> <span class="toc-text">二、企业业务代码发布逻辑图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E5%B7%A5%E5%85%B7%E5%8F%8A%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">3.</span> <span class="toc-text">三、企业业务代码发布工具及流程图</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 流程图</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2"><span class="toc-number">4.</span> <span class="toc-text">四、企业业务代码发布系统环境部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E4%B8%BB%E6%9C%BA%E8%A7%84%E5%88%92"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 主机规划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E4%B8%BB%E6%9C%BA%E5%87%86%E5%A4%87"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 主机准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E4%B8%BB%E6%9C%BA%E5%90%8D%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 主机名配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E4%B8%BB%E6%9C%BAIP%E5%9C%B0%E5%9D%80%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 主机IP地址配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-3-%E4%B8%BB%E6%9C%BA%E5%90%8D%E4%B8%8EIP%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3 主机名与IP地址解析配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-4-%E4%B8%BB%E6%9C%BA%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.2.4.</span> <span class="toc-text">4.2.4 主机安全设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-5-%E4%B8%BB%E6%9C%BA%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="toc-number">4.2.5.</span> <span class="toc-text">4.2.5 主机时间同步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E4%B8%BB%E6%9C%BA%E4%B8%AD%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 主机中工具安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-1-dev%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.1.</span> <span class="toc-text">4.3.1 dev主机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-2-gitlab-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.2.</span> <span class="toc-text">4.3.2 gitlab-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-1-%E8%8E%B7%E5%8F%96YUM%E6%BA%90"><span class="toc-number">4.3.2.1.</span> <span class="toc-text">4.3.2.1 获取YUM源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-2-gitlab-ce%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.2.2.</span> <span class="toc-text">4.3.2.2 gitlab-ce安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-3-gitlab-ce%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.2.3.</span> <span class="toc-text">4.3.2.3 gitlab-ce配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-4-%E5%90%AF%E5%8A%A8gitlab-ce"><span class="toc-number">4.3.2.4.</span> <span class="toc-text">4.3.2.4 启动gitlab-ce</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-5-%E8%AE%BF%E9%97%AEgitlab-ce"><span class="toc-number">4.3.2.5.</span> <span class="toc-text">4.3.2.5 访问gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-3-jenkins-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.3.</span> <span class="toc-text">4.3.3 jenkins-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-1-jdk%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.1.</span> <span class="toc-text">4.3.3.1 jdk安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-2-jenkins%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.2.</span> <span class="toc-text">4.3.3.2 jenkins安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-1-%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.2.1.</span> <span class="toc-text">4.3.3.2.1 安装</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-2-jenkins%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.3.2.2.</span> <span class="toc-text">4.3.3.2.2 jenkins配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-3-jenkins%E5%90%AF%E5%8A%A8"><span class="toc-number">4.3.3.2.3.</span> <span class="toc-text">4.3.3.2.3 jenkins启动</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-4-jenkins%E8%AE%BF%E9%97%AE"><span class="toc-number">4.3.3.2.4.</span> <span class="toc-text">4.3.3.2.4 jenkins访问</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-5-jenkins%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.3.2.5.</span> <span class="toc-text">4.3.3.2.5 jenkins初始化配置</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-3-git%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.3.</span> <span class="toc-text">4.3.3.3 git安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-4-maven%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.4.</span> <span class="toc-text">4.3.3.4 maven安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-4-1-%E8%8E%B7%E5%8F%96maven%E5%AE%89%E8%A3%85%E5%8C%85"><span class="toc-number">4.3.3.4.1.</span> <span class="toc-text">4.3.3.4.1 获取maven安装包</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-4-2-maven%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.4.2.</span> <span class="toc-text">4.3.3.4.2 maven安装</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-5-docker%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.5.</span> <span class="toc-text">4.3.3.5 docker安装</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-4-harbor-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.4.</span> <span class="toc-text">4.3.4 harbor-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-1-docker%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.4.1.</span> <span class="toc-text">4.3.4.1 docker安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-2-docker-compose%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.4.2.</span> <span class="toc-text">4.3.4.2 docker-compose安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-2-1-%E8%8E%B7%E5%8F%96docker-compose%E6%96%87%E4%BB%B6"><span class="toc-number">4.3.4.2.1.</span> <span class="toc-text">4.3.4.2.1 获取docker-compose文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-2-2-docker-compose%E5%AE%89%E8%A3%85%E5%8F%8A%E6%B5%8B%E8%AF%95"><span class="toc-number">4.3.4.2.2.</span> <span class="toc-text">4.3.4.2.2 docker-compose安装及测试</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-3-harbor%E9%83%A8%E7%BD%B2"><span class="toc-number">4.3.4.3.</span> <span class="toc-text">4.3.4.3 harbor部署</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-3-1-harbor%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E8%8E%B7%E5%8F%96"><span class="toc-number">4.3.4.3.1.</span> <span class="toc-text">4.3.4.3.1 harbor部署文件获取</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-3-2-harbor%E9%83%A8%E7%BD%B2"><span class="toc-number">4.3.4.3.2.</span> <span class="toc-text">4.3.4.3.2 harbor部署</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-5-web-server"><span class="toc-number">4.3.5.</span> <span class="toc-text">4.3.5 web-server</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-%E5%B7%A5%E5%85%B7%E9%9B%86%E6%88%90%E9%85%8D%E7%BD%AE"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 工具集成配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-1-%E9%85%8D%E7%BD%AEdocker%E4%B8%BB%E6%9C%BA%E4%BD%BF%E7%94%A8harbor"><span class="toc-number">4.4.1.</span> <span class="toc-text">4.4.1 配置docker主机使用harbor</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-1-jenkins-server"><span class="toc-number">4.4.1.1.</span> <span class="toc-text">4.4.1.1 jenkins-server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-2-harbor-server"><span class="toc-number">4.4.1.2.</span> <span class="toc-text">4.4.1.2 harbor-server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-3-web-server"><span class="toc-number">4.4.1.3.</span> <span class="toc-text">4.4.1.3 web-server</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-2-%E9%85%8D%E7%BD%AEjenkins%E4%BD%BF%E7%94%A8docker"><span class="toc-number">4.4.2.</span> <span class="toc-text">4.4.2 配置jenkins使用docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-3-%E5%AF%86%E9%92%A5%E9%85%8D%E7%BD%AE"><span class="toc-number">4.4.3.</span> <span class="toc-text">4.4.3 密钥配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-1-dev%E4%B8%BB%E6%9C%BA%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.1.</span> <span class="toc-text">4.4.3.1 dev主机至gitlab-ce</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-1-1-dev%E4%B8%BB%E6%9C%BA%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9"><span class="toc-number">4.4.3.1.1.</span> <span class="toc-text">4.4.3.1.1 dev主机生成密钥对</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-1-2-%E6%B7%BB%E5%8A%A0%E5%85%AC%E9%92%A5%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.1.2.</span> <span class="toc-text">4.4.3.1.2 添加公钥至gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-2-jenkins-server%E4%B8%BB%E6%9C%BA%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.2.</span> <span class="toc-text">4.4.3.2 jenkins-server主机至gitlab-ce</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-2-1-%E5%9C%A8jenkins-server%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9"><span class="toc-number">4.4.3.2.1.</span> <span class="toc-text">4.4.3.2.1 在jenkins-server生成密钥对</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-2-2-%E6%B7%BB%E5%8A%A0%E5%85%AC%E9%92%A5%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.2.2.</span> <span class="toc-text">4.4.3.2.2 添加公钥至gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-3-%E9%85%8D%E7%BD%AEjenkins-sever%E4%B8%BB%E6%9C%BA%E7%9A%84%E7%A7%81%E9%92%A5%E5%88%B0%E5%87%AD%E6%8D%AE%E5%88%97%E8%A1%A8"><span class="toc-number">4.4.3.3.</span> <span class="toc-text">4.4.3.3 配置jenkins-sever主机的私钥到凭据列表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-5-jenkins%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="toc-number">4.5.</span> <span class="toc-text">4.5 jenkins插件安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-1-maven-integration"><span class="toc-number">4.5.1.</span> <span class="toc-text">4.5.1 maven integration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-2-git-parameter"><span class="toc-number">4.5.2.</span> <span class="toc-text">4.5.2 git parameter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-3-gitlab"><span class="toc-number">4.5.3.</span> <span class="toc-text">4.5.3 gitlab</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-4-Generic-Webhook-Trigger"><span class="toc-number">4.5.4.</span> <span class="toc-text">4.5.4 Generic Webhook Trigger</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-5-ssh"><span class="toc-number">4.5.5.</span> <span class="toc-text">4.5.5 ssh</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-6-jenkins%E5%85%A8%E5%B1%80%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.</span> <span class="toc-text">4.6 jenkins全局工具配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-1-JDK%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.1.</span> <span class="toc-text">4.6.1 JDK配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-2-Git%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.2.</span> <span class="toc-text">4.6.2 Git配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-3-Maven%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.3.</span> <span class="toc-text">4.6.3 Maven配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-7-jenkins%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="toc-number">4.7.</span> <span class="toc-text">4.7 jenkins系统配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-7-1-%E6%B7%BB%E5%8A%A0jenkins-server%E8%AE%BF%E9%97%AEweb-server%E5%87%AD%E6%8D%AE"><span class="toc-number">4.7.1.</span> <span class="toc-text">4.7.1 添加jenkins-server访问web-server凭据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-7-2-%E9%85%8D%E7%BD%AEssh%E5%8D%8F%E8%AE%AE%E8%BF%9E%E6%8E%A5%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.7.2.</span> <span class="toc-text">4.7.2 配置ssh协议连接主机</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E9%A1%B9%E7%9B%AE%E5%8F%91%E5%B8%83"><span class="toc-number">5.</span> <span class="toc-text">五、企业业务代码项目发布</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2-mariadb%E5%8F%8A%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 数据库管理系统部署 mariadb及创建项目数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E8%8E%B7%E5%8F%96"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 项目代码获取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E4%BF%AE%E6%94%B9"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 项目代码修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E4%B8%8A%E4%BC%A0%E5%88%B0gitlab"><span class="toc-number">5.4.</span> <span class="toc-text">5.4 项目代码上传到gitlab</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-5-%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C%E5%9F%BA%E7%A1%80%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">5.5.</span> <span class="toc-text">5.5 构建项目运行基础应用容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-1-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95"><span class="toc-number">5.5.1.</span> <span class="toc-text">5.5.1 创建项目目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-2-%E7%94%9F%E6%88%90Dockerfile%E6%96%87%E4%BB%B6"><span class="toc-number">5.5.2.</span> <span class="toc-text">5.5.2 生成Dockerfile文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-3-%E4%BD%BF%E7%94%A8docker-build%E6%9E%84%E5%BB%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">5.5.3.</span> <span class="toc-text">5.5.3 使用docker build构建容器镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-4-%E6%8E%A8%E9%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%87%B3harbor%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">5.5.4.</span> <span class="toc-text">5.5.4 推送容器镜像至harbor容器镜像仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-5-%E9%AA%8C%E8%AF%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="toc-number">5.5.5.</span> <span class="toc-text">5.5.5 验证容器镜像可用性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-6-%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%8A%E5%8F%91%E5%B8%83"><span class="toc-number">5.6.</span> <span class="toc-text">5.6 项目构建及发布</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-1-%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%8A%E5%8F%91%E5%B8%83%E6%AD%A5%E9%AA%A4"><span class="toc-number">5.6.1.</span> <span class="toc-text">5.6.1 项目构建及发布步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-2-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E4%BB%BB%E5%8A%A1"><span class="toc-number">5.6.2.</span> <span class="toc-text">5.6.2 创建项目任务</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        基于Docker容器DevOps应用方案
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-08-05T12:01:06.000Z" itemprop="datePublished">2023-08-05</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/" class="leancloud-visitors" data-flag-title="基于Docker容器DevOps应用方案" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Docker/" rel="tag">Docker</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、企业业务代码发布方式"><a href="#一、企业业务代码发布方式" class="headerlink" title="一、企业业务代码发布方式"></a>一、企业业务代码发布方式</h1><h2 id="1-1-传统方式"><a href="#1-1-传统方式" class="headerlink" title="1.1 传统方式"></a>1.1 传统方式</h2><ul>
+<li>以物理机或虚拟机为颗粒度部署</li>
+<li>部署环境比较复杂，需要有先进的自动化运维手段</li>
+<li>出现问题后重新部署成本大，一般采用集群方式部署</li>
+<li>部署后以静态方式展现</li>
+</ul>
+<h2 id="1-2-容器化方式"><a href="#1-2-容器化方式" class="headerlink" title="1.2 容器化方式"></a>1.2 容器化方式</h2><ul>
+<li>以容器为颗粒度部署</li>
+<li>部署方式简单，启动速度快</li>
+<li>一次构建可到处运行</li>
+<li>出现故障后，可随时恢复</li>
+<li>可同时部署多套环境（测试、预发布、生产环境等）</li>
+</ul>
+<h1 id="二、企业业务代码发布逻辑图"><a href="#二、企业业务代码发布逻辑图" class="headerlink" title="二、企业业务代码发布逻辑图"></a>二、企业业务代码发布逻辑图</h1><img src="/images/Docker/基于Docker容器DevOps应用方案企业业务代码发布系统.assets/image-20220223152003734.png" alt="image-20220223152003734" style="zoom:200%;">
+
+
+
+
+
+<h1 id="三、企业业务代码发布工具及流程图"><a href="#三、企业业务代码发布工具及流程图" class="headerlink" title="三、企业业务代码发布工具及流程图"></a>三、企业业务代码发布工具及流程图</h1><h2 id="3-1-工具"><a href="#3-1-工具" class="headerlink" title="3.1 工具"></a>3.1 工具</h2><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>工具</th>
+<th>工具用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>git</td>
+<td>用于提交业务代码或克隆业务代码仓库</td>
+</tr>
+<tr>
+<td>2</td>
+<td>gitlab</td>
+<td>用于存储业务代码</td>
+</tr>
+<tr>
+<td>3</td>
+<td>jenkins</td>
+<td>用于利用插件完成业务代码编译、构建、推送至Harbor容器镜像仓库及项目部署</td>
+</tr>
+<tr>
+<td>4</td>
+<td>tomcat</td>
+<td>用于运行JAVA业务代码</td>
+</tr>
+<tr>
+<td>5</td>
+<td>maven</td>
+<td>用于编译业务代码</td>
+</tr>
+<tr>
+<td>6</td>
+<td>harbor</td>
+<td>用于存储业务代码构建的容器镜像存储</td>
+</tr>
+<tr>
+<td>7</td>
+<td>docker</td>
+<td>用于构建容器镜像，部署项目</td>
+</tr>
+</tbody></table>
+<h2 id="3-2-流程图"><a href="#3-2-流程图" class="headerlink" title="3.2 流程图"></a>3.2 流程图</h2><blockquote>
+<p>本次部署Java代码包。</p>
+</blockquote>
+<img src="/images/Docker/基于Docker容器DevOps应用方案企业业务代码发布系统.assets/image-20220223163453076.png" alt="image-20220223163453076" style="zoom:200%;">
+
+
+
+
+
+<h1 id="四、企业业务代码发布系统环境部署"><a href="#四、企业业务代码发布系统环境部署" class="headerlink" title="四、企业业务代码发布系统环境部署"></a>四、企业业务代码发布系统环境部署</h1><h2 id="4-1-主机规划"><a href="#4-1-主机规划" class="headerlink" title="4.1 主机规划"></a>4.1 主机规划</h2><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>主机名</th>
+<th>主机IP</th>
+<th>主机功能</th>
+<th>软件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>dev</td>
+<td>192.168.10.20</td>
+<td>开发者 项目代码 solo</td>
+<td>git</td>
+</tr>
+<tr>
+<td>2</td>
+<td>gitlab-server</td>
+<td>192.168.10.21</td>
+<td>代码仓库</td>
+<td>gitlab-ce</td>
+</tr>
+<tr>
+<td>3</td>
+<td>jenkins-server</td>
+<td>192.168.10.22</td>
+<td>编译代码、打包镜像、项目发布</td>
+<td>jenkins、docker、git</td>
+</tr>
+<tr>
+<td>4</td>
+<td>harbor-server</td>
+<td>192.168.10.23</td>
+<td>存储容器镜像</td>
+<td>harbor、docker</td>
+</tr>
+<tr>
+<td>5</td>
+<td>web-server</td>
+<td>192.168.10.24</td>
+<td>运行容器，项目上线</td>
+<td>docker</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-主机准备"><a href="#4-2-主机准备" class="headerlink" title="4.2 主机准备"></a>4.2 主机准备</h2><h3 id="4-2-1-主机名配置"><a href="#4-2-1-主机名配置" class="headerlink" title="4.2.1 主机名配置"></a>4.2.1 主机名配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hostnamectl set-hostname xxx</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>根据主机规划实施配置</p>
+</blockquote>
+<h3 id="4-2-2-主机IP地址配置"><a href="#4-2-2-主机IP地址配置" class="headerlink" title="4.2.2 主机IP地址配置"></a>4.2.2 主机IP地址配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/sysconfig/network-scripts/ifcfg-ens33</span></span><br><span class="line"><span class="comment"># cat /etc/sysconfig/network-scripts/ifcfg-ens33</span></span><br><span class="line"><span class="built_in">TYPE</span>=<span class="string">&quot;Ethernet&quot;</span></span><br><span class="line">PROXY_METHOD=<span class="string">&quot;none&quot;</span></span><br><span class="line">BROWSER_ONLY=<span class="string">&quot;no&quot;</span></span><br><span class="line">BOOTPROTO=<span class="string">&quot;none&quot;</span> 配置为静态IP</span><br><span class="line">DEFROUTE=<span class="string">&quot;yes&quot;</span></span><br><span class="line">IPV4_FAILURE_FATAL=<span class="string">&quot;no&quot;</span></span><br><span class="line">IPV6INIT=<span class="string">&quot;yes&quot;</span></span><br><span class="line">IPV6_AUTOCONF=<span class="string">&quot;yes&quot;</span></span><br><span class="line">IPV6_DEFROUTE=<span class="string">&quot;yes&quot;</span></span><br><span class="line">IPV6_FAILURE_FATAL=<span class="string">&quot;no&quot;</span></span><br><span class="line">IPV6_ADDR_GEN_MODE=<span class="string">&quot;stable-privacy&quot;</span></span><br><span class="line">NAME=<span class="string">&quot;ens33&quot;</span></span><br><span class="line">UUID=<span class="string">&quot;ec87533a-8151-4aa0-9d0f-1e970affcdc6&quot;</span></span><br><span class="line">DEVICE=<span class="string">&quot;ens33&quot;</span></span><br><span class="line">ONBOOT=<span class="string">&quot;yes&quot;</span></span><br><span class="line">IPADDR=<span class="string">&quot;192.168.10.2x&quot;</span>  把<span class="number">2</span>x替换为对应的IP地址</span><br><span class="line">PREFIX=<span class="string">&quot;24&quot;</span></span><br><span class="line">GATEWAY=<span class="string">&quot;192.168.10.2&quot;</span></span><br><span class="line">DNS1=<span class="string">&quot;119.29.29.29&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="4-2-3-主机名与IP地址解析配置"><a href="#4-2-3-主机名与IP地址解析配置" class="headerlink" title="4.2.3 主机名与IP地址解析配置"></a>4.2.3 主机名与IP地址解析配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/hosts</span></span><br><span class="line"><span class="comment"># cat /etc/hosts</span></span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::<span class="number">1</span>         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.20</span> dev</span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.21</span> gitlab<span class="literal">-server</span></span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.22</span> jenkins<span class="literal">-server</span></span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.23</span> harobr<span class="literal">-server</span></span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.24</span> web<span class="literal">-server</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="4-2-4-主机安全设置"><a href="#4-2-4-主机安全设置" class="headerlink" title="4.2.4 主机安全设置"></a>4.2.4 主机安全设置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl stop firewalld;systemctl disable firewalld</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># firewall-cmd --state</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sestatus</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="4-2-5-主机时间同步"><a href="#4-2-5-主机时间同步" class="headerlink" title="4.2.5 主机时间同步"></a>4.2.5 主机时间同步</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># crontab -e</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># crotab -l</span></span><br><span class="line"><span class="number">0</span> */<span class="number">1</span> * * * ntpdate time1.aliyun.com</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="4-3-主机中工具安装"><a href="#4-3-主机中工具安装" class="headerlink" title="4.3 主机中工具安装"></a>4.3 主机中工具安装</h2><h3 id="4-3-1-dev主机"><a href="#4-3-1-dev主机" class="headerlink" title="4.3.1 dev主机"></a>4.3.1 dev主机</h3><blockquote>
+<p>下载项目及上传代码至代码仓库</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install git</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-3-2-gitlab-server主机"><a href="#4-3-2-gitlab-server主机" class="headerlink" title="4.3.2 gitlab-server主机"></a>4.3.2 gitlab-server主机</h3><h4 id="4-3-2-1-获取YUM源"><a href="#4-3-2-1-获取YUM源" class="headerlink" title="4.3.2.1 获取YUM源"></a>4.3.2.1 获取YUM源</h4><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224134917428.png" alt="image-20220224134917428"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224134941802.png" alt="image-20220224134941802"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224135000130.png" alt="image-20220224135000130"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224135021076.png" alt="image-20220224135021076"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/yum.repos.d/gitlab.repo</span></span><br><span class="line">[<span class="type">gitlab</span>]</span><br><span class="line">name=gitlab<span class="literal">-ce</span></span><br><span class="line">baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab<span class="literal">-ce</span>/yum/el7</span><br><span class="line">enabled=<span class="number">1</span></span><br><span class="line">gpgcheck=<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-3-2-2-gitlab-ce安装"><a href="#4-3-2-2-gitlab-ce安装" class="headerlink" title="4.3.2.2 gitlab-ce安装"></a>4.3.2.2 gitlab-ce安装</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install gitlab-ce</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-3-2-3-gitlab-ce配置"><a href="#4-3-2-3-gitlab-ce配置" class="headerlink" title="4.3.2.3 gitlab-ce配置"></a>4.3.2.3 gitlab-ce配置</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/gitlab/gitlab.rb</span></span><br><span class="line"><span class="number">32</span> external_url <span class="string">&#x27;http://192.168.10.21&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-3-2-4-启动gitlab-ce"><a href="#4-3-2-4-启动gitlab-ce" class="headerlink" title="4.3.2.4 启动gitlab-ce"></a>4.3.2.4 启动gitlab-ce</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gitlab-ctl reconfigure</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gitlab-ctl status</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-3-2-5-访问gitlab-ce"><a href="#4-3-2-5-访问gitlab-ce" class="headerlink" title="4.3.2.5 访问gitlab-ce"></a>4.3.2.5 访问gitlab-ce</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/gitlab/initial_root_password</span></span><br><span class="line">......</span><br><span class="line"></span><br><span class="line">Password: znS4Bqlp0cfYUKg2dHzFiNCAN0GnhtnD4ENjEtEXMVE=</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224140418176.png" alt="image-20220224140418176"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224140436172.png" alt="image-20220224140436172"></p>
+<h3 id="4-3-3-jenkins-server主机"><a href="#4-3-3-jenkins-server主机" class="headerlink" title="4.3.3 jenkins-server主机"></a>4.3.3 jenkins-server主机</h3><h4 id="4-3-3-1-jdk安装"><a href="#4-3-3-1-jdk安装" class="headerlink" title="4.3.3.1 jdk安装"></a>4.3.3.1 jdk安装</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ls</span></span><br><span class="line"> jdk<span class="literal">-8u191</span><span class="literal">-linux</span><span class="literal">-x64</span>.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv jdk1.8.0_191 /usr/local/jdk</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/profile</span></span><br><span class="line"><span class="comment"># cat /etc/profile</span></span><br><span class="line">......</span><br><span class="line">export JAVA_HOME=/usr/local/jdk</span><br><span class="line">export PATH=<span class="variable">$</span>&#123;JAVA_HOME&#125;/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># source /etc/profile</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># java -version</span></span><br><span class="line">java version <span class="string">&quot;1.8.0_191&quot;</span></span><br><span class="line">Java(TM) SE Runtime Environment (build <span class="number">1.8</span>.<span class="number">0</span>_191<span class="literal">-b12</span>)</span><br><span class="line">Java HotSpot(TM) <span class="number">64</span><span class="literal">-Bit</span> Server VM (build <span class="number">25.191</span><span class="literal">-b12</span>, mixed mode)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-3-3-2-jenkins安装"><a href="#4-3-3-2-jenkins安装" class="headerlink" title="4.3.3.2 jenkins安装"></a>4.3.3.2 jenkins安装</h4><h5 id="4-3-3-2-1-安装"><a href="#4-3-3-2-1-安装" class="headerlink" title="4.3.3.2.1 安装"></a>4.3.3.2.1 安装</h5><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141530225.png" alt="image-20220224141530225"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141610569.png" alt="image-20220224141610569"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224141720927.png" alt="image-20220224141720927"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224142031988.png" alt="image-20220224142031988"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install jenkins</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="4-3-3-2-2-jenkins配置"><a href="#4-3-3-2-2-jenkins配置" class="headerlink" title="4.3.3.2.2 jenkins配置"></a>4.3.3.2.2 jenkins配置</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/init.d/jenkins</span></span><br><span class="line">在<span class="number">81</span>行下面添加如下内容：</span><br><span class="line"> <span class="number">82</span> /usr/local/jdk/bin/java</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/sysconfig/jenkins</span></span><br><span class="line">在<span class="number">19</span>行双引号中添加jdk中java命令路径</span><br><span class="line"> <span class="number">19</span> JENKINS_JAVA_CMD=<span class="string">&quot;/usr/local/jdk/bin/java&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h5 id="4-3-3-2-3-jenkins启动"><a href="#4-3-3-2-3-jenkins启动" class="headerlink" title="4.3.3.2.3 jenkins启动"></a>4.3.3.2.3 jenkins启动</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># chkconfig --list</span></span><br><span class="line"></span><br><span class="line">注：该输出结果只显示 SysV 服务，并不包含</span><br><span class="line">原生 systemd 服务。SysV 配置数据</span><br><span class="line">可能被原生 systemd 配置覆盖。</span><br><span class="line"></span><br><span class="line">      要列出 systemd 服务，请执行 <span class="string">&#x27;systemctl list-unit-files&#x27;</span>。</span><br><span class="line">      查看在具体 target 启用的服务请执行</span><br><span class="line">      <span class="string">&#x27;systemctl list-dependencies [target]&#x27;</span>。</span><br><span class="line"></span><br><span class="line">jenkins         <span class="number">0</span>:关    <span class="number">1</span>:关    <span class="number">2</span>:开    <span class="number">3</span>:开    <span class="number">4</span>:开    <span class="number">5</span>:开    <span class="number">6</span>:关</span><br><span class="line">netconsole      <span class="number">0</span>:关    <span class="number">1</span>:关    <span class="number">2</span>:关    <span class="number">3</span>:关    <span class="number">4</span>:关    <span class="number">5</span>:关    <span class="number">6</span>:关</span><br><span class="line">network         <span class="number">0</span>:关    <span class="number">1</span>:关    <span class="number">2</span>:开    <span class="number">3</span>:开    <span class="number">4</span>:开    <span class="number">5</span>:开    <span class="number">6</span>:关</span><br><span class="line"><span class="comment"># chkconfig jenkins on</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start jenkins</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h5 id="4-3-3-2-4-jenkins访问"><a href="#4-3-3-2-4-jenkins访问" class="headerlink" title="4.3.3.2.4 jenkins访问"></a>4.3.3.2.4 jenkins访问</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /var/lib/jenkins/secrets/initialAdminPassword</span></span><br><span class="line"><span class="number">3363</span>d658a1a5481bbe51a1ece1eb08ab</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224142955854.png" alt="image-20220224142955854"></p>
+<h5 id="4-3-3-2-5-jenkins初始化配置"><a href="#4-3-3-2-5-jenkins初始化配置" class="headerlink" title="4.3.3.2.5 jenkins初始化配置"></a>4.3.3.2.5 jenkins初始化配置</h5><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8ED/images/Docker/r%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224173833454.png" alt="image-20220224173833454"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174018298.png" alt="image-20220224174018298"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174041874.png" alt="image-20220224174041874"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174442874.png" alt="image-20220224174442874"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174507233.png" alt="image-20220224174507233"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174541367.png" alt="image-20220224174541367"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174601389.png" alt="image-20220224174601389"></p>
+<h4 id="4-3-3-3-git安装"><a href="#4-3-3-3-git安装" class="headerlink" title="4.3.3.3 git安装"></a>4.3.3.3 git安装</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install git</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-3-3-4-maven安装"><a href="#4-3-3-4-maven安装" class="headerlink" title="4.3.3.4 maven安装"></a>4.3.3.4 maven安装</h4><h5 id="4-3-3-4-1-获取maven安装包"><a href="#4-3-3-4-1-获取maven安装包" class="headerlink" title="4.3.3.4.1 获取maven安装包"></a>4.3.3.4.1 获取maven安装包</h5><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174735575.png" alt="image-20220224174735575"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224174855779.png" alt="image-20220224174855779"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="4-3-3-4-2-maven安装"><a href="#4-3-3-4-2-maven安装" class="headerlink" title="4.3.3.4.2 maven安装"></a>4.3.3.4.2 maven安装</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ls</span></span><br><span class="line">apache<span class="literal">-maven</span><span class="literal">-3</span>.<span class="number">8.4</span><span class="literal">-bin</span>.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tar xf apache-maven-3.8.4-bin.tar.gz</span></span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">apache<span class="literal">-maven</span><span class="literal">-3</span>.<span class="number">8.4</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv apache-maven-3.8.4 /usr/local/mvn</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/profile</span></span><br><span class="line">......</span><br><span class="line">export JAVA_HOME=/usr/local/jdk</span><br><span class="line">export MAVEN_HOME=/usr/local/mvn</span><br><span class="line">export PATH=<span class="variable">$</span>&#123;JAVA_HOME&#125;/bin:<span class="variable">$</span>&#123;MAVEN_HOME&#125;/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># source /etc/profile</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mvn -v</span></span><br><span class="line">Apache Maven <span class="number">3.8</span>.<span class="number">4</span> (<span class="number">9</span>b656c72d54e5bacbed989b64718c159fe39b537)</span><br><span class="line">Maven home: /usr/local/mvn</span><br><span class="line">Java version: <span class="number">1.8</span>.<span class="number">0</span>_191, vendor: Oracle Corporation, runtime: /usr/local/jdk/jre</span><br><span class="line">Default locale: zh_CN, platform encoding: UTF<span class="literal">-8</span></span><br><span class="line">OS name: <span class="string">&quot;linux&quot;</span>, version: <span class="string">&quot;3.10.0-1160.49.1.el7.x86_64&quot;</span>, arch: <span class="string">&quot;amd64&quot;</span>, family: <span class="string">&quot;unix&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h4 id="4-3-3-5-docker安装"><a href="#4-3-3-5-docker安装" class="headerlink" title="4.3.3.5 docker安装"></a>4.3.3.5 docker安装</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install docker-ce</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl enable docker</span></span><br><span class="line"><span class="comment"># systemctl start docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="4-3-4-harbor-server主机"><a href="#4-3-4-harbor-server主机" class="headerlink" title="4.3.4 harbor-server主机"></a>4.3.4 harbor-server主机</h3><h4 id="4-3-4-1-docker安装"><a href="#4-3-4-1-docker安装" class="headerlink" title="4.3.4.1 docker安装"></a>4.3.4.1 docker安装</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install docker-ce</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl enable docker</span></span><br><span class="line"><span class="comment"># systemctl start docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-3-4-2-docker-compose安装"><a href="#4-3-4-2-docker-compose安装" class="headerlink" title="4.3.4.2 docker-compose安装"></a>4.3.4.2 docker-compose安装</h4><h5 id="4-3-4-2-1-获取docker-compose文件"><a href="#4-3-4-2-1-获取docker-compose文件" class="headerlink" title="4.3.4.2.1 获取docker-compose文件"></a>4.3.4.2.1 获取docker-compose文件</h5><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180711917.png" alt="image-20220224180711917"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180732745.png" alt="image-20220224180732745"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180754614.png" alt="image-20220224180754614"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224180842212.png" alt="image-20220224180842212"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="4-3-4-2-2-docker-compose安装及测试"><a href="#4-3-4-2-2-docker-compose安装及测试" class="headerlink" title="4.3.4.2.2 docker-compose安装及测试"></a>4.3.4.2.2 docker-compose安装及测试</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ls</span></span><br><span class="line">docker<span class="literal">-compose</span><span class="literal">-linux</span><span class="literal">-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># chmod +x docker-compose-linux-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv docker-compose-linux-x86_64 /usr/bin/docker-compose</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose version</span></span><br><span class="line">Docker Compose version v2.<span class="number">2.3</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-3-4-3-harbor部署"><a href="#4-3-4-3-harbor部署" class="headerlink" title="4.3.4.3 harbor部署"></a>4.3.4.3 harbor部署</h4><h5 id="4-3-4-3-1-harbor部署文件获取"><a href="#4-3-4-3-1-harbor部署文件获取" class="headerlink" title="4.3.4.3.1 harbor部署文件获取"></a>4.3.4.3.1 harbor部署文件获取</h5><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181602622.png" alt="image-20220224181602622"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181626286.png" alt="image-20220224181626286"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181656604.png" alt="image-20220224181656604"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181746808.png" alt="image-20220224181746808"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224181829179.png" alt="image-20220224181829179"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget https://github.com/goharbor/harbor/releases/download/v2.4.1/harbor-offline-installer-v2.4.1.tgz</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h5 id="4-3-4-3-2-harbor部署"><a href="#4-3-4-3-2-harbor部署" class="headerlink" title="4.3.4.3.2 harbor部署"></a>4.3.4.3.2 harbor部署</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ls</span></span><br><span class="line">harbor<span class="literal">-offline</span><span class="literal">-installer</span><span class="literal">-v2</span>.<span class="number">4.1</span>.tgz</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tar xf harbor-offline-installer-v2.4.1.tgz -C /home</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd /home</span></span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">harbor</span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">home</span>]<span class="comment"># cd harbor/</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># ls</span></span><br><span class="line">common.sh  harbor.v2.<span class="number">4.1</span>.tar.gz  harbor.yml.tmpl  install.sh  LICENSE  prepare</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv harbor.yml.tmpl harbor.yml</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># vim harbor.yml</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># cat harbor.yml</span></span><br><span class="line"><span class="comment"># Configuration file of Harbor</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The IP address or hostname to access admin UI and registry service.</span></span><br><span class="line"><span class="comment"># DO NOT use localhost or 127.0.0.1, because Harbor needs to be accessed by external clients.</span></span><br><span class="line">hostname: <span class="number">192.168</span>.<span class="number">10.23</span> 修改</span><br><span class="line"></span><br><span class="line"><span class="comment"># http related config</span></span><br><span class="line">http:</span><br><span class="line">  <span class="comment"># port for http, default is 80. If https enabled, this port will redirect to https port</span></span><br><span class="line">  port: <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># https related config</span></span><br><span class="line"><span class="comment">#https: 注释</span></span><br><span class="line">  <span class="comment"># https port for harbor, default is 443</span></span><br><span class="line"><span class="comment">#  port: 443 注释</span></span><br><span class="line">  <span class="comment"># The path of cert and key files for nginx</span></span><br><span class="line"><span class="comment">#  certificate: /your/certificate/path 注释</span></span><br><span class="line"><span class="comment">#  private_key: /your/private/key/path 注释</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># ./prepare</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># ./install.sh</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># docker ps</span></span><br><span class="line">CONTAINER ID   IMAGE                                COMMAND                  CREATED              STATUS                        PORTS                                   NAMES</span><br><span class="line"><span class="number">12605</span>eae32bb   goharbor/harbor<span class="literal">-jobservice</span>:v2.<span class="number">4.1</span>    <span class="string">&quot;/harbor/entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           harbor<span class="literal">-jobservice</span></span><br><span class="line"><span class="number">85849</span>b46d56d   goharbor/nginx<span class="literal">-photon</span>:v2.<span class="number">4.1</span>         <span class="string">&quot;nginx -g &#x27;daemon of…&quot;</span>   About a minute ago   Up About a minute (healthy)   <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">80</span>-&gt;<span class="number">8080</span>/tcp, :::<span class="number">80</span>-&gt;<span class="number">8080</span>/tcp   nginx</span><br><span class="line"><span class="number">6</span>a18e370354f   goharbor/harbor<span class="literal">-core</span>:v2.<span class="number">4.1</span>          <span class="string">&quot;/harbor/entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           harbor<span class="literal">-core</span></span><br><span class="line">d115229ef49d   goharbor/harbor<span class="literal">-portal</span>:v2.<span class="number">4.1</span>        <span class="string">&quot;nginx -g &#x27;daemon of…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           harbor<span class="literal">-portal</span></span><br><span class="line">f5436556dd32   goharbor/harbor<span class="literal">-db</span>:v2.<span class="number">4.1</span>            <span class="string">&quot;/docker-entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           harbor<span class="literal">-db</span></span><br><span class="line"><span class="number">7</span>fb8c4945abe   goharbor/harbor<span class="literal">-registryctl</span>:v2.<span class="number">4.1</span>   <span class="string">&quot;/home/harbor/start.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           registryctl</span><br><span class="line">d073e5da1399   goharbor/redis<span class="literal">-photon</span>:v2.<span class="number">4.1</span>         <span class="string">&quot;redis-server /etc/r…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           redis</span><br><span class="line"><span class="number">7</span>c09362c986b   goharbor/registry<span class="literal">-photon</span>:v2.<span class="number">4.1</span>      <span class="string">&quot;/home/harbor/entryp…&quot;</span>   About a minute ago   Up About a minute (healthy)                                           registry</span><br><span class="line"><span class="number">55</span>d7f39909e3   goharbor/harbor<span class="literal">-log</span>:v2.<span class="number">4.1</span>           <span class="string">&quot;/bin/sh -c /usr/loc…&quot;</span>   About a minute ago   Up About a minute (healthy)   <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">1514</span>-&gt;<span class="number">10514</span>/tcp               harbor<span class="literal">-log</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="4-3-5-web-server"><a href="#4-3-5-web-server" class="headerlink" title="4.3.5 web-server"></a>4.3.5 web-server</h3><blockquote>
+<p>docker安装</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget -O /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install docker-ce</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl enable docker</span></span><br><span class="line"><span class="comment"># systemctl start docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="4-4-工具集成配置"><a href="#4-4-工具集成配置" class="headerlink" title="4.4 工具集成配置"></a>4.4 工具集成配置</h2><h3 id="4-4-1-配置docker主机使用harbor"><a href="#4-4-1-配置docker主机使用harbor" class="headerlink" title="4.4.1 配置docker主机使用harbor"></a>4.4.1 配置docker主机使用harbor</h3><h4 id="4-4-1-1-jenkins-server"><a href="#4-4-1-1-jenkins-server" class="headerlink" title="4.4.1.1 jenkins-server"></a>4.4.1.1 jenkins-server</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;insecure-registries&quot;</span>: [<span class="string">&quot;http://192.168.10.23&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># docker login 192.168.10.23</span></span><br><span class="line">Username: admin</span><br><span class="line">Password:</span><br><span class="line">WARNING! Your password will be stored unencrypted <span class="keyword">in</span> /root/.docker/config.json.</span><br><span class="line">Configure a credential helper to remove this warning. See</span><br><span class="line">https://docs.docker.com/engine/reference/commandline/login/<span class="comment">#credentials-store</span></span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-4-1-2-harbor-server"><a href="#4-4-1-2-harbor-server" class="headerlink" title="4.4.1.2 harbor-server"></a>4.4.1.2 harbor-server</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;insecure-registries&quot;</span>: [<span class="string">&quot;http://192.168.10.23&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># docker-compose down</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">harbor</span>]<span class="comment"># docker-compose up -d</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-4-1-3-web-server"><a href="#4-4-1-3-web-server" class="headerlink" title="4.4.1.3 web-server"></a>4.4.1.3 web-server</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;insecure-registries&quot;</span>: [<span class="string">&quot;http://192.168.10.23&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># docker login 192.168.10.23</span></span><br><span class="line">Username: admin</span><br><span class="line">Password:</span><br><span class="line">WARNING! Your password will be stored unencrypted <span class="keyword">in</span> /root/.docker/config.json.</span><br><span class="line">Configure a credential helper to remove this warning. See</span><br><span class="line">https://docs.docker.com/engine/reference/commandline/login/<span class="comment">#credentials-store</span></span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-4-2-配置jenkins使用docker"><a href="#4-4-2-配置jenkins使用docker" class="headerlink" title="4.4.2 配置jenkins使用docker"></a>4.4.2 配置jenkins使用docker</h3><blockquote>
+<p>在jenkins-server主机上配置</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">验证系统中是否有jenkins用户</span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># grep jenkins /etc/passwd</span></span><br><span class="line">jenkins:x:<span class="number">997</span>:<span class="number">995</span>:Jenkins Automation Server:/var/lib/jenkins:/bin/false</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">验证系统中是否有docker用户及用户组</span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># grep docker /etc/group</span></span><br><span class="line">docker:x:<span class="number">993</span>:</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">添加jenkins用户到docker用户组</span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># usermod -G docker jenkins</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># grep docker /etc/group</span></span><br><span class="line">docker:x:<span class="number">993</span>:jenkins</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">重启jenkins服务</span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># systemctl restart jenkins</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-4-3-密钥配置"><a href="#4-4-3-密钥配置" class="headerlink" title="4.4.3 密钥配置"></a>4.4.3 密钥配置</h3><h4 id="4-4-3-1-dev主机至gitlab-ce"><a href="#4-4-3-1-dev主机至gitlab-ce" class="headerlink" title="4.4.3.1 dev主机至gitlab-ce"></a>4.4.3.1 dev主机至gitlab-ce</h4><h5 id="4-4-3-1-1-dev主机生成密钥对"><a href="#4-4-3-1-1-dev主机生成密钥对" class="headerlink" title="4.4.3.1.1 dev主机生成密钥对"></a>4.4.3.1.1 dev主机生成密钥对</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> ~]<span class="comment"># ssh-keygen</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="4-4-3-1-2-添加公钥至gitlab-ce"><a href="#4-4-3-1-2-添加公钥至gitlab-ce" class="headerlink" title="4.4.3.1.2 添加公钥至gitlab-ce"></a>4.4.3.1.2 添加公钥至gitlab-ce</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> ~]<span class="comment"># cat /root/.ssh/id_rsa.pub</span></span><br><span class="line">ssh<span class="literal">-rsa</span> AAAAB3NzaC1yc2EAAAADAQABAAABAQCy2PdvT9qX55CLZzzaaEf06x8gl3yHGfdJSmAp9L1Fdtcbd3yz3U0lgdOwWpB8fQ/A3HoUUTWCb1iC5WJBOvqkoD8rJ2xC3HJ62zjOjmqcn2fEs09CzJj3bCfahuqPzaPkIOoH42/Y2QdImQ7xZOqqjS7aIc5T2FjDLG3bMhaYFyvx18b1qiPACuh67iniPQnL667MFZ/<span class="number">0</span>QGGVnQKwxop+SezhP9QqV1bvPk94eTdkERIBiY1CNcNmVryk6PzSKY8gfW++<span class="number">3</span>TGN9F+knhMXcswFOu6FzqxcA3G+hYg+Io2HJaDrsfHGZ6CP5T9QiOlIWlNxz05BOK3OFQ5BPeomA+jv root@dev</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210606310.png" alt="image-20220224210606310"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210748207.png" alt="image-20220224210748207"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224210823231.png" alt="image-20220224210823231"></p>
+<h4 id="4-4-3-2-jenkins-server主机至gitlab-ce"><a href="#4-4-3-2-jenkins-server主机至gitlab-ce" class="headerlink" title="4.4.3.2 jenkins-server主机至gitlab-ce"></a>4.4.3.2 jenkins-server主机至gitlab-ce</h4><h5 id="4-4-3-2-1-在jenkins-server生成密钥对"><a href="#4-4-3-2-1-在jenkins-server生成密钥对" class="headerlink" title="4.4.3.2.1 在jenkins-server生成密钥对"></a>4.4.3.2.1 在jenkins-server生成密钥对</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># ssh-keygen</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="4-4-3-2-2-添加公钥至gitlab-ce"><a href="#4-4-3-2-2-添加公钥至gitlab-ce" class="headerlink" title="4.4.3.2.2 添加公钥至gitlab-ce"></a>4.4.3.2.2 添加公钥至gitlab-ce</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># cat /root/.ssh/id_rsa.pub</span></span><br><span class="line">ssh<span class="literal">-rsa</span> AAAAB3NzaC1yc2EAAAADAQABAAABAQCyg3WaEm5yH9yva8Jm5wfTPwN3ROGMNPpAex8zYj+M1GesoMtE6gkiKHWydAJBiLuu/<span class="number">1</span>fBx6HlgzzxghVj9oK4DmTRZQh2IZY4+zZIGBRaDBuBO1f7+SdVE/jZoLd1a+yZ3FQmy37AlXUcIKxbrDBtefvJ31faziWyZKvT4BGFJCznRU6AOxOg1pe4bWbWI+dGnMIIq7IhtK+<span class="number">6</span>tY/w3OlF7xcWmrJP1oucpq33BYOrnRCL9EO5Zp2jcejDeG5UvXONG7CggT7FDhjwcCRZvX+AutDGAtgBckNXZjV9SDKWgDifCSDtDfV4Be4zb8b3hxtSMsbEY8YHxsThsmHrUkbz root@jenkins<span class="literal">-server</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224211329307.png" alt="image-20220224211329307"></p>
+<h4 id="4-4-3-3-配置jenkins-sever主机的私钥到凭据列表"><a href="#4-4-3-3-配置jenkins-sever主机的私钥到凭据列表" class="headerlink" title="4.4.3.3 配置jenkins-sever主机的私钥到凭据列表"></a>4.4.3.3 配置jenkins-sever主机的私钥到凭据列表</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># cat /root/.ssh/id_rsa</span></span><br><span class="line">----<span class="literal">-BEGIN</span> RSA PRIVATE KEY-----</span><br><span class="line">MIIEogIBAAKCAQEAsoN1mhJuch/cr2vCZucH0z8Dd0ThjDT6QHsfM2I/jNRnrKDL</span><br><span class="line">ROoJIih1snQCQYi7rv9Xwceh5YM88YIVY/aCuA5k0WUIdiGWOPs2SBgUWgwbgTtX</span><br><span class="line">+/knVRP42aC3dWvsmdxUJst+wJV1HCCsW6wwbXn7yd9X2s4lsmSr0+ARhSQs50VO</span><br><span class="line">gDsToNaXuG1m1iPnRpzCCKuyIbSvurWP8NzpRe8XFpqyT9aLnKat9wWDq50Qi/<span class="built_in">RD</span></span><br><span class="line">uWado3How3huVL1zjRuwoIE+xQ4Y8HAkWb1/gLrQxgLYAXJDV2Y1fUgyloA4nwkg</span><br><span class="line"><span class="number">7</span>Q31eAXuM2/G94cbUjLGxGPGB8bE4bJh61JG8wIDAQABAoIBAEOwy6BPyuelo1Y1</span><br><span class="line">g3LnujTlWRgZ23kCAb7/sPYYFEb/qAxysIGCSVJVi0PO76gQBDM4iftmCsLv/+UI</span><br><span class="line">UbolGK5Ybuxj5lB9LeyPfaba0qTOoINhkFxwvvRo7V0Ar3BsKzywqoxHb9nxEoZG</span><br><span class="line"><span class="number">8</span>XSVl4t7zPlgonzK3MqHmAxwk9QrIB/rnjolHGN6HvfK2Cwq5WN1crspwQ+XDbRS</span><br><span class="line">J5qoAtv6PJzrU6QhJl/zSMCb0MytlIhZi+V+<span class="number">1</span>yY/QhAYrWJgWypEwGlAXlVC90r4</span><br><span class="line">twX1W/sl63xzFF396WjM1478yqpttvID06dKTC9T3y/k8lLmRNXwqmTCIm7C/jxP</span><br><span class="line"><span class="number">9</span>wjXJUECgYEA4r1N4AML7JpvE7hBRkreSdIIwoppRkBwl6gt/AJj8yt2ydQ8PY4P</span><br><span class="line">X3s5ZkCfPzHX2XsVUUcQpsBFcU2PyG29+qzt3XOmlGYgJG11xPQbwi95/u9VSd5u</span><br><span class="line">AuaNNa2YPw2teuM0hKVAl5knfy0+YHcOCdU14gHCCWsD4uOz5Zg9jVMCgYEAyYzv</span><br><span class="line">SBvCqbZ4d5agTn+ZiOkmgKVT4UVnmZPivFXnCWiIbX2fi3ok7jU1hZAs6lf6VlTU</span><br><span class="line">EPV8T1LwjO9yhFmicepzSl9lJCMbMXHt20OsqN0oUQFpoTQ07pbBE2K8c1IuQUEi</span><br><span class="line">B2SoLHqv7Ym9jHQqvT3DVhTiC+H2LwsgVRvvi+ECgYAxaID0xJUvnMOBr5ABykTA</span><br><span class="line">H1WrVs/z8AzY71v942N2VM1Q07/AxhkRfF+YqZJKCgl4KbsOeAbn31QCiZ1AVrGk</span><br><span class="line">U1SOAiqVgd+VMIkOPwdhfEkARZT3QNIGLcktnkNj0g4wjhwen4gAwO37Z5eFG8xi</span><br><span class="line">ViSkuC9ZMAmrwmSsLk2TYwKBgHQh0tYXuMiVLUCq99+DQnJS9S53FKfel900Cxc9</span><br><span class="line"><span class="number">4</span>AvZwZJlKgLx9EmVOyukcVzuKH6KDk9fQ6tpPNXYOoHsK9+<span class="number">7</span>mYanBN4XpFmPLeCD</span><br><span class="line">U/<span class="number">9</span>QvyQ9ziFmtYEsOD/<span class="number">1</span>SmSgW6qZ3wOnigdnAeu6zA8b+GxmJCF7kuwJ3RIqNQ0V</span><br><span class="line">NafBAoGAXyynoTT2zugFq8jYRubxkMk7NdnTRAnGh+mlyrGGMsNLmPvfAw+<span class="number">6</span>yKph</span><br><span class="line"><span class="number">1</span>fVHKXHtSrgtK0CVOIcmaH3<span class="built_in">r</span>+LfG4Mfrjlq+<span class="number">8</span>qiKcepBFvO9cZLNKn11vqQtzs7m</span><br><span class="line">y+ydl4xTcCPoAMDsVeamJ3fv+<span class="number">9</span>nyXe5KqYtw+BJMjpP+PnNN2YQ=</span><br><span class="line">----<span class="literal">-END</span> RSA PRIVATE KEY-----</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212308684.png" alt="image-20220224212308684"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212411414.png" alt="image-20220224212411414"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212543257.png" alt="image-20220224212543257"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212622017.png" alt="image-20220224212622017"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224212928853.png" alt="image-20220224212928853"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224213022249.png" alt="image-20220224213022249"></p>
+<h2 id="4-5-jenkins插件安装"><a href="#4-5-jenkins插件安装" class="headerlink" title="4.5 jenkins插件安装"></a>4.5 jenkins插件安装</h2><h3 id="4-5-1-maven-integration"><a href="#4-5-1-maven-integration" class="headerlink" title="4.5.1 maven integration"></a>4.5.1 maven integration</h3><blockquote>
+<p>用于编译JAVA项目</p>
+</blockquote>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214012429.png" alt="image-20220224214012429"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214041517.png" alt="image-20220224214041517"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214133277.png" alt="image-20220224214133277"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214217988.png" alt="image-20220224214217988"></p>
+<h3 id="4-5-2-git-parameter"><a href="#4-5-2-git-parameter" class="headerlink" title="4.5.2 git parameter"></a>4.5.2 git parameter</h3><blockquote>
+<p>用于基于git版本提交进行参数构建项目</p>
+</blockquote>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214317316.png" alt="image-20220224214317316"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214329349.png" alt="image-20220224214329349"></p>
+<h3 id="4-5-3-gitlab"><a href="#4-5-3-gitlab" class="headerlink" title="4.5.3 gitlab"></a>4.5.3 gitlab</h3><blockquote>
+<p>用于jenkins-server拉取项目</p>
+</blockquote>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214412283.png" alt="image-20220224214412283"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214442366.png" alt="image-20220224214442366"></p>
+<h3 id="4-5-4-Generic-Webhook-Trigger"><a href="#4-5-4-Generic-Webhook-Trigger" class="headerlink" title="4.5.4 Generic Webhook Trigger"></a>4.5.4 Generic Webhook Trigger</h3><blockquote>
+<p>用于项目自动化构建</p>
+</blockquote>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214812077.png" alt="image-20220224214812077"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224214922182.png" alt="image-20220224214922182"></p>
+<h3 id="4-5-5-ssh"><a href="#4-5-5-ssh" class="headerlink" title="4.5.5 ssh"></a>4.5.5 ssh</h3><blockquote>
+<p>用于jenkins-server对web-server实施项目部署</p>
+</blockquote>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215008239.png" alt="image-20220224215008239"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215019932.png" alt="image-20220224215019932"></p>
+<h2 id="4-6-jenkins全局工具配置"><a href="#4-6-jenkins全局工具配置" class="headerlink" title="4.6 jenkins全局工具配置"></a>4.6 jenkins全局工具配置</h2><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224215857618.png" alt="image-20220224215857618"></p>
+<h3 id="4-6-1-JDK配置"><a href="#4-6-1-JDK配置" class="headerlink" title="4.6.1 JDK配置"></a>4.6.1 JDK配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># java -version</span></span><br><span class="line">java version <span class="string">&quot;1.8.0_191&quot;</span></span><br><span class="line">Java(TM) SE Runtime Environment (build <span class="number">1.8</span>.<span class="number">0</span>_191<span class="literal">-b12</span>)</span><br><span class="line">Java HotSpot(TM) <span class="number">64</span><span class="literal">-Bit</span> Server VM (build <span class="number">25.191</span><span class="literal">-b12</span>, mixed mode)</span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># echo $JAVA_HOME</span></span><br><span class="line">/usr/local/jdk</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220023637.png" alt="image-20220224220023637"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220323445.png" alt="image-20220224220323445"></p>
+<h3 id="4-6-2-Git配置"><a href="#4-6-2-Git配置" class="headerlink" title="4.6.2 Git配置"></a>4.6.2 Git配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># git version</span></span><br><span class="line">git version <span class="number">1.8</span>.<span class="number">3.1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220502686.png" alt="image-20220224220502686"></p>
+<h3 id="4-6-3-Maven配置"><a href="#4-6-3-Maven配置" class="headerlink" title="4.6.3 Maven配置"></a>4.6.3 Maven配置</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># mvn --version</span></span><br><span class="line">Apache Maven <span class="number">3.8</span>.<span class="number">4</span> (<span class="number">9</span>b656c72d54e5bacbed989b64718c159fe39b537)</span><br><span class="line">Maven home: /usr/local/mvn</span><br><span class="line">Java version: <span class="number">1.8</span>.<span class="number">0</span>_191, vendor: Oracle Corporation, runtime: /usr/local/jdk/jre</span><br><span class="line">Default locale: zh_CN, platform encoding: UTF<span class="literal">-8</span></span><br><span class="line">OS name: <span class="string">&quot;linux&quot;</span>, version: <span class="string">&quot;3.10.0-1160.49.1.el7.x86_64&quot;</span>, arch: <span class="string">&quot;amd64&quot;</span>, family: <span class="string">&quot;unix&quot;</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">jenkins</span>-<span class="type">server</span> ~]<span class="comment"># echo $MAVEN_HOME</span></span><br><span class="line">/usr/local/mvn</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220529911.png" alt="image-20220224220529911"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224220733835.png" alt="image-20220224220733835"></p>
+<h2 id="4-7-jenkins系统配置"><a href="#4-7-jenkins系统配置" class="headerlink" title="4.7 jenkins系统配置"></a>4.7 jenkins系统配置</h2><blockquote>
+<p>主要配置jenkins-server通过ssh协议连接web-server</p>
+</blockquote>
+<h3 id="4-7-1-添加jenkins-server访问web-server凭据"><a href="#4-7-1-添加jenkins-server访问web-server凭据" class="headerlink" title="4.7.1 添加jenkins-server访问web-server凭据"></a>4.7.1 添加jenkins-server访问web-server凭据</h3><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221320500.png" alt="image-20220224221320500"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221347030.png" alt="image-20220224221347030"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221416358.png" alt="image-20220224221416358"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221609980.png" alt="image-20220224221609980"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221643648.png" alt="image-20220224221643648"></p>
+<h3 id="4-7-2-配置ssh协议连接主机"><a href="#4-7-2-配置ssh协议连接主机" class="headerlink" title="4.7.2 配置ssh协议连接主机"></a>4.7.2 配置ssh协议连接主机</h3><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221754566.png" alt="image-20220224221754566"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221832480.png" alt="image-20220224221832480"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224221901770.png" alt="image-20220224221901770"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224222146699.png" alt="image-20220224222146699"></p>
+<h1 id="五、企业业务代码项目发布"><a href="#五、企业业务代码项目发布" class="headerlink" title="五、企业业务代码项目发布"></a>五、企业业务代码项目发布</h1><h2 id="5-1-数据库管理系统部署-mariadb及创建项目数据库"><a href="#5-1-数据库管理系统部署-mariadb及创建项目数据库" class="headerlink" title="5.1 数据库管理系统部署 mariadb及创建项目数据库"></a>5.1 数据库管理系统部署 mariadb及创建项目数据库</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># yum -y install mariadb mariadb-server</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># systemctl enable mariadb</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># systemctl start mariadb</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># mysqladmin -uroot password &#x27;abc123&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">web</span>-<span class="type">server</span> ~]<span class="comment"># mysql -uroot -pabc123</span></span><br><span class="line">Welcome to the MariaDB monitor.  Commands <span class="keyword">end</span> with ; or \g.</span><br><span class="line">Your MariaDB connection id is <span class="number">3</span></span><br><span class="line">Server version: <span class="number">5.5</span>.<span class="number">68</span><span class="literal">-MariaDB</span> MariaDB Server</span><br><span class="line"></span><br><span class="line">Copyright (c) <span class="number">2000</span>, <span class="number">2018</span>, Oracle, MariaDB Corporation Ab and others.</span><br><span class="line"></span><br><span class="line"><span class="built_in">Type</span> <span class="string">&#x27;help;&#x27;</span> or <span class="string">&#x27;\h&#x27;</span> <span class="keyword">for</span> help. <span class="built_in">Type</span> <span class="string">&#x27;\c&#x27;</span> to <span class="built_in">clear</span> the current input statement.</span><br><span class="line"></span><br><span class="line">MariaDB [(<span class="type">none</span>)]&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(<span class="type">none</span>)]&gt; create database <span class="keyword">if</span> not exists solo default charset utf8 collate utf8_general_ci;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(<span class="type">none</span>)]&gt; grant all on solo.* to <span class="string">&#x27;root&#x27;</span><span class="string">@&#x27;%&#x27; identified by &quot;123456&quot;;</span></span><br><span class="line"><span class="string">Query OK, 0 rows affected (0.00 sec)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">MariaDB [(none)]&gt; grant all on solo.* to &#x27;root&#x27;@&#x27;localhost&#x27; identified by &quot;123456&quot;;</span></span><br><span class="line"><span class="string">Query OK, 0 rows affected (0.00 sec)</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-2-项目代码获取"><a href="#5-2-项目代码获取" class="headerlink" title="5.2 项目代码获取"></a>5.2 项目代码获取</h2><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223418318.png" alt="image-20220224223418318"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone --recurse-submodules https://gitee.com/dl88250/solo.git</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-3-项目代码修改"><a href="#5-3-项目代码修改" class="headerlink" title="5.3 项目代码修改"></a>5.3 项目代码修改</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> ~]<span class="comment"># ls</span></span><br><span class="line">solo</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> ~]<span class="comment"># vim solo/src/main/resources/local.properties</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">dev</span> ~]<span class="comment"># cat solo/src/main/resources/local.properties</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Solo - A small and beautiful blogging system written in Java.</span></span><br><span class="line"><span class="comment"># Copyright (c) 2010-present, b3log.org</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Solo is licensed under Mulan PSL v2.</span></span><br><span class="line"><span class="comment"># You can use this software according to the terms and conditions of the Mulan PSL v2.</span></span><br><span class="line"><span class="comment"># You may obtain a copy of Mulan PSL v2 at:</span></span><br><span class="line"><span class="comment">#         http://license.coscl.org.cn/MulanPSL2</span></span><br><span class="line"><span class="comment"># THIS SOFTWARE IS PROVIDED ON AN &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.</span></span><br><span class="line"><span class="comment"># See the Mulan PSL v2 for more details.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Description: Solo local environment configurations.</span></span><br><span class="line"><span class="comment"># Version: 1.1.3.15, Mar 17, 2019</span></span><br><span class="line"><span class="comment"># Author: Liang Ding</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#### MySQL runtime ####</span></span><br><span class="line">runtimeDatabase=MYSQL</span><br><span class="line">jdbc.username=root</span><br><span class="line">jdbc.password=<span class="number">123456</span></span><br><span class="line">jdbc.driver=com.mysql.cj.jdbc.Driver</span><br><span class="line">jdbc.URL=jdbc:mysql://<span class="number">192.168</span>.<span class="number">10.24</span>:<span class="number">3306</span>/solo?useUnicode=yes&amp;characterEncoding=UTF<span class="literal">-8</span>&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</span><br><span class="line"></span><br><span class="line"><span class="comment">#### H2 runtime ####</span></span><br><span class="line"><span class="comment">#runtimeDatabase=H2</span></span><br><span class="line"><span class="comment">#jdbc.username=root</span></span><br><span class="line"><span class="comment">#jdbc.password=</span></span><br><span class="line"><span class="comment">#jdbc.driver=org.h2.Driver</span></span><br><span class="line"><span class="comment">#jdbc.URL=jdbc:h2:~/solo_h2/db;MODE=MYSQL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The minConnCnt MUST larger or equal to 3</span></span><br><span class="line">jdbc.minConnCnt=<span class="number">5</span></span><br><span class="line">jdbc.maxConnCnt=<span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The specific table name prefix</span></span><br><span class="line">jdbc.tablePrefix=b3_solo</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="5-4-项目代码上传到gitlab"><a href="#5-4-项目代码上传到gitlab" class="headerlink" title="5.4 项目代码上传到gitlab"></a>5.4 项目代码上传到gitlab</h2><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223855433.png" alt="image-20220224223855433"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224223917897.png" alt="image-20220224223917897"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224224014013.png" alt="image-20220224224014013"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git config --global user.name &quot;dev&quot;</span></span><br><span class="line"><span class="comment"># git config --global user.email &quot;dev@kubelixiang.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git remote remove origin</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git remote add origin git@192.168.10.21:root/solo.git</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git add -A .</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git commit -m &quot;new&quot;</span></span><br><span class="line">[<span class="type">master</span> <span class="number">3</span><span class="type">e39b0a</span>] new</span><br><span class="line"> <span class="number">1</span> file changed, <span class="number">1</span> insertion(+), <span class="number">1</span> deletion(-)</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git tag 1.0.0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git push origin 1.0.0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">dev</span> <span class="type">solo</span>]<span class="comment"># git push -u origin --all</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224225051498.png" alt="image-20220224225051498"></p>
+<h2 id="5-5-构建项目运行基础应用容器镜像"><a href="#5-5-构建项目运行基础应用容器镜像" class="headerlink" title="5.5 构建项目运行基础应用容器镜像"></a>5.5 构建项目运行基础应用容器镜像</h2><blockquote>
+<p>在harbor-server主机上操作</p>
+</blockquote>
+<h3 id="5-5-1-创建项目目录"><a href="#5-5-1-创建项目目录" class="headerlink" title="5.5.1 创建项目目录"></a>5.5.1 创建项目目录</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># mkdir tomcatdir</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># cd tomcatdir</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-5-2-生成Dockerfile文件"><a href="#5-5-2-生成Dockerfile文件" class="headerlink" title="5.5.2 生成Dockerfile文件"></a>5.5.2 生成Dockerfile文件</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># echo &quot;tomcat is running&quot; &gt;&gt; index.html</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># vim Dockerfile</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># cat Dockerfile</span></span><br><span class="line">FROM centos:centos7</span><br><span class="line"></span><br><span class="line">MAINTAINER <span class="string">&quot;www.kubelixiang.com&quot;</span></span><br><span class="line"></span><br><span class="line">ENV VERSION=<span class="number">8.5</span>.<span class="number">75</span></span><br><span class="line">ENV JAVA_HOME=/usr/local/jdk</span><br><span class="line">ENV TOMCAT_HOME=/usr/local/tomcat</span><br><span class="line"></span><br><span class="line">RUN yum <span class="literal">-y</span> install <span class="built_in">wget</span></span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">wget</span> https://dlcdn.apache.org/tomcat/tomcat<span class="literal">-8</span>/v<span class="variable">$</span>&#123;VERSION&#125;/bin/apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz -<span class="literal">-no</span><span class="literal">-check</span><span class="literal">-certificate</span></span><br><span class="line"></span><br><span class="line">RUN tar xf apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">mv</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125; /usr/local/tomcat</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">rm</span> <span class="literal">-rf</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz /usr/local/tomcat/webapps/*</span><br><span class="line"></span><br><span class="line">RUN mkdir /usr/local/tomcat/webapps/ROOT</span><br><span class="line"></span><br><span class="line">ADD ./index.html /usr/local/tomcat/webapps/ROOT/</span><br><span class="line"></span><br><span class="line">ADD ./jdk /usr/local/jdk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export TOMCAT_HOME=/usr/local/tomcat&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export JAVA_HOME=/usr/local/jdk&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$</span>&#123;TOMCAT_HOME&#125;/bin:<span class="variable">$</span>&#123;JAVA_HOME&#125;/bin:<span class="variable">$PATH</span>&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export CLASSPATH=.:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/dt.jar:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/tools.jar&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RUN source /etc/profile</span><br><span class="line"></span><br><span class="line">EXPOSE <span class="number">8080</span></span><br><span class="line"></span><br><span class="line">CMD [<span class="string">&quot;/usr/local/tomcat/bin/catalina.sh&quot;</span>,<span class="string">&quot;run&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># ls</span></span><br><span class="line">Dockerfile  index.html  jdk</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="5-5-3-使用docker-build构建容器镜像"><a href="#5-5-3-使用docker-build构建容器镜像" class="headerlink" title="5.5.3 使用docker build构建容器镜像"></a>5.5.3 使用docker build构建容器镜像</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># docker build -t 192.168.10.23/library/tomcat:8575 .</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-5-4-推送容器镜像至harbor容器镜像仓库"><a href="#5-5-4-推送容器镜像至harbor容器镜像仓库" class="headerlink" title="5.5.4 推送容器镜像至harbor容器镜像仓库"></a>5.5.4 推送容器镜像至harbor容器镜像仓库</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># docker images</span></span><br><span class="line">REPOSITORY                      TAG       IMAGE ID       CREATED              SIZE</span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.23</span>/library/tomcat    <span class="number">8575</span>      <span class="number">01</span>c433f8562d   About a minute ago   <span class="number">796</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># docker login 192.168.10.23</span></span><br><span class="line">Username: admin</span><br><span class="line">Password:</span><br><span class="line">WARNING! Your password will be stored unencrypted <span class="keyword">in</span> /root/.docker/config.json.</span><br><span class="line">Configure a credential helper to remove this warning. See</span><br><span class="line">https://docs.docker.com/engine/reference/commandline/login/<span class="comment">#credentials-store</span></span><br><span class="line"></span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> <span class="type">tomcatdir</span>]<span class="comment"># docker push 192.168.10.23/library/tomcat:8575</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231004637.png" alt="image-20220224231004637"></p>
+<h3 id="5-5-5-验证容器镜像可用性"><a href="#5-5-5-验证容器镜像可用性" class="headerlink" title="5.5.5 验证容器镜像可用性"></a>5.5.5 验证容器镜像可用性</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># docker run -d 192.168.10.23/library/tomcat:8575</span></span><br><span class="line">d5443961ca65311ca0d68d53d44be997f5d6fde2d78772173ac6927112f34579</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># docker ps</span></span><br><span class="line">CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS                 PORTS                                   NAMES</span><br><span class="line">d5443961ca65   <span class="number">192.168</span>.<span class="number">10.23</span>/library/tomcat:<span class="number">8575</span>    <span class="string">&quot;/usr/local/tomcat/b…&quot;</span>   <span class="number">3</span> seconds ago   Up <span class="number">2</span> seconds           <span class="number">8080</span>/tcp                                nifty_tesla</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># docker inspect d544</span></span><br><span class="line"></span><br><span class="line">获得：<span class="number">172.17</span>.<span class="number">0.2</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">harbor</span>-<span class="type">server</span> ~]<span class="comment"># curl http://172.17.0.2:8080</span></span><br><span class="line">tomcat is running</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="5-6-项目构建及发布"><a href="#5-6-项目构建及发布" class="headerlink" title="5.6 项目构建及发布"></a>5.6 项目构建及发布</h2><h3 id="5-6-1-项目构建及发布步骤"><a href="#5-6-1-项目构建及发布步骤" class="headerlink" title="5.6.1 项目构建及发布步骤"></a>5.6.1 项目构建及发布步骤</h3><p>第一步：jenkins获取项目代码</p>
+<p>第二步：jenkins对项目代码编译，由maven完成</p>
+<p>第三步：jenkins使用docker对编译完成的项目代码进行打包，打包成容器应用镜像</p>
+<p>第四步：jenkins把打包的容器应用镜像上传到harbor</p>
+<p>第五步：jenkins通过ssh插件完成对web-server进行运行容器应用镜像的操作</p>
+<h3 id="5-6-2-创建项目任务"><a href="#5-6-2-创建项目任务" class="headerlink" title="5.6.2 创建项目任务"></a>5.6.2 创建项目任务</h3><p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231659567.png" alt="image-20220224231659567"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224231808502.png" alt="image-20220224231808502"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224233231807.png" alt="image-20220224233231807"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220224233433469.png" alt="image-20220224233433469"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014415364.png" alt="image-20220225014415364"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014449916.png" alt="image-20220225014449916"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014608778.png" alt="image-20220225014608778"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014711014.png" alt="image-20220225014711014"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Dockerfile：</span><br><span class="line">REPOSITORY=<span class="number">192.168</span>.<span class="number">10.23</span>/library/solo:<span class="variable">$</span>&#123;Tag&#125;</span><br><span class="line"><span class="comment"># 构建镜像</span></span><br><span class="line"><span class="built_in">cat</span> &gt; Dockerfile &lt;&lt; EOF</span><br><span class="line">FROM <span class="number">192.168</span>.<span class="number">10.23</span>/library/tomcat:<span class="number">8575</span></span><br><span class="line">RUN <span class="built_in">rm</span> <span class="literal">-rf</span> /usr/local/tomcat/webapps/ROOT</span><br><span class="line"><span class="built_in">COPY</span> target/*.war /usr/local/tomcat/webapps/ROOT.war</span><br><span class="line">CMD [<span class="string">&quot;/usr/local/tomcat/bin/catalina.sh&quot;</span>, <span class="string">&quot;run&quot;</span>]</span><br><span class="line">EOF</span><br><span class="line">docker build <span class="literal">-t</span> <span class="variable">$REPOSITORY</span> .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上传镜像</span></span><br><span class="line">docker login <span class="number">192.168</span>.<span class="number">10.23</span> <span class="literal">-u</span> admin <span class="literal">-p</span> Harbor12345</span><br><span class="line">docker push <span class="variable">$REPOSITORY</span></span><br><span class="line">docker logout <span class="number">192.168</span>.<span class="number">10.23</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shell script:</span><br><span class="line">REPOSITORY=<span class="number">192.168</span>.<span class="number">10.23</span>/library/solo:<span class="variable">$</span>&#123;Tag&#125;</span><br><span class="line"><span class="comment"># 部署</span></span><br><span class="line">docker <span class="built_in">rm</span> <span class="operator">-f</span> blog<span class="literal">-solo</span> |true</span><br><span class="line">docker image <span class="built_in">rm</span> <span class="variable">$REPOSITORY</span> |true</span><br><span class="line">docker container run <span class="literal">-d</span> -<span class="literal">-name</span> blog<span class="literal">-solo</span> <span class="literal">-p</span> <span class="number">80</span>:<span class="number">8080</span> <span class="variable">$REPOSITORY</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014217956.png" alt="image-20220225014217956"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014302077.png" alt="image-20220225014302077"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014131634.png" alt="image-20220225014131634"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225014949917.png" alt="image-20220225014949917"></p>
+<p><img src="/images/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F.assets/image-20220225013841677.png" alt="image-20220225013841677"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E6%96%B9%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">一、企业业务代码发布方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%BC%A0%E7%BB%9F%E6%96%B9%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 传统方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%AE%B9%E5%99%A8%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 容器化方式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E9%80%BB%E8%BE%91%E5%9B%BE"><span class="toc-number">2.</span> <span class="toc-text">二、企业业务代码发布逻辑图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E5%B7%A5%E5%85%B7%E5%8F%8A%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">3.</span> <span class="toc-text">三、企业业务代码发布工具及流程图</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 流程图</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E5%8F%91%E5%B8%83%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2"><span class="toc-number">4.</span> <span class="toc-text">四、企业业务代码发布系统环境部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E4%B8%BB%E6%9C%BA%E8%A7%84%E5%88%92"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 主机规划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E4%B8%BB%E6%9C%BA%E5%87%86%E5%A4%87"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 主机准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E4%B8%BB%E6%9C%BA%E5%90%8D%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 主机名配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E4%B8%BB%E6%9C%BAIP%E5%9C%B0%E5%9D%80%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 主机IP地址配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-3-%E4%B8%BB%E6%9C%BA%E5%90%8D%E4%B8%8EIP%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3 主机名与IP地址解析配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-4-%E4%B8%BB%E6%9C%BA%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.2.4.</span> <span class="toc-text">4.2.4 主机安全设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-5-%E4%B8%BB%E6%9C%BA%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="toc-number">4.2.5.</span> <span class="toc-text">4.2.5 主机时间同步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E4%B8%BB%E6%9C%BA%E4%B8%AD%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 主机中工具安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-1-dev%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.1.</span> <span class="toc-text">4.3.1 dev主机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-2-gitlab-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.2.</span> <span class="toc-text">4.3.2 gitlab-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-1-%E8%8E%B7%E5%8F%96YUM%E6%BA%90"><span class="toc-number">4.3.2.1.</span> <span class="toc-text">4.3.2.1 获取YUM源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-2-gitlab-ce%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.2.2.</span> <span class="toc-text">4.3.2.2 gitlab-ce安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-3-gitlab-ce%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.2.3.</span> <span class="toc-text">4.3.2.3 gitlab-ce配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-4-%E5%90%AF%E5%8A%A8gitlab-ce"><span class="toc-number">4.3.2.4.</span> <span class="toc-text">4.3.2.4 启动gitlab-ce</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-5-%E8%AE%BF%E9%97%AEgitlab-ce"><span class="toc-number">4.3.2.5.</span> <span class="toc-text">4.3.2.5 访问gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-3-jenkins-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.3.</span> <span class="toc-text">4.3.3 jenkins-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-1-jdk%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.1.</span> <span class="toc-text">4.3.3.1 jdk安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-2-jenkins%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.2.</span> <span class="toc-text">4.3.3.2 jenkins安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-1-%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.2.1.</span> <span class="toc-text">4.3.3.2.1 安装</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-2-jenkins%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.3.2.2.</span> <span class="toc-text">4.3.3.2.2 jenkins配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-3-jenkins%E5%90%AF%E5%8A%A8"><span class="toc-number">4.3.3.2.3.</span> <span class="toc-text">4.3.3.2.3 jenkins启动</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-4-jenkins%E8%AE%BF%E9%97%AE"><span class="toc-number">4.3.3.2.4.</span> <span class="toc-text">4.3.3.2.4 jenkins访问</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-2-5-jenkins%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.3.2.5.</span> <span class="toc-text">4.3.3.2.5 jenkins初始化配置</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-3-git%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.3.</span> <span class="toc-text">4.3.3.3 git安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-4-maven%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.4.</span> <span class="toc-text">4.3.3.4 maven安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-4-1-%E8%8E%B7%E5%8F%96maven%E5%AE%89%E8%A3%85%E5%8C%85"><span class="toc-number">4.3.3.4.1.</span> <span class="toc-text">4.3.3.4.1 获取maven安装包</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-4-2-maven%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.4.2.</span> <span class="toc-text">4.3.3.4.2 maven安装</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-5-docker%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.3.5.</span> <span class="toc-text">4.3.3.5 docker安装</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-4-harbor-server%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.3.4.</span> <span class="toc-text">4.3.4 harbor-server主机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-1-docker%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.4.1.</span> <span class="toc-text">4.3.4.1 docker安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-2-docker-compose%E5%AE%89%E8%A3%85"><span class="toc-number">4.3.4.2.</span> <span class="toc-text">4.3.4.2 docker-compose安装</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-2-1-%E8%8E%B7%E5%8F%96docker-compose%E6%96%87%E4%BB%B6"><span class="toc-number">4.3.4.2.1.</span> <span class="toc-text">4.3.4.2.1 获取docker-compose文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-2-2-docker-compose%E5%AE%89%E8%A3%85%E5%8F%8A%E6%B5%8B%E8%AF%95"><span class="toc-number">4.3.4.2.2.</span> <span class="toc-text">4.3.4.2.2 docker-compose安装及测试</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-4-3-harbor%E9%83%A8%E7%BD%B2"><span class="toc-number">4.3.4.3.</span> <span class="toc-text">4.3.4.3 harbor部署</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-3-1-harbor%E9%83%A8%E7%BD%B2%E6%96%87%E4%BB%B6%E8%8E%B7%E5%8F%96"><span class="toc-number">4.3.4.3.1.</span> <span class="toc-text">4.3.4.3.1 harbor部署文件获取</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-4-3-2-harbor%E9%83%A8%E7%BD%B2"><span class="toc-number">4.3.4.3.2.</span> <span class="toc-text">4.3.4.3.2 harbor部署</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-5-web-server"><span class="toc-number">4.3.5.</span> <span class="toc-text">4.3.5 web-server</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-%E5%B7%A5%E5%85%B7%E9%9B%86%E6%88%90%E9%85%8D%E7%BD%AE"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 工具集成配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-1-%E9%85%8D%E7%BD%AEdocker%E4%B8%BB%E6%9C%BA%E4%BD%BF%E7%94%A8harbor"><span class="toc-number">4.4.1.</span> <span class="toc-text">4.4.1 配置docker主机使用harbor</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-1-jenkins-server"><span class="toc-number">4.4.1.1.</span> <span class="toc-text">4.4.1.1 jenkins-server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-2-harbor-server"><span class="toc-number">4.4.1.2.</span> <span class="toc-text">4.4.1.2 harbor-server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-3-web-server"><span class="toc-number">4.4.1.3.</span> <span class="toc-text">4.4.1.3 web-server</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-2-%E9%85%8D%E7%BD%AEjenkins%E4%BD%BF%E7%94%A8docker"><span class="toc-number">4.4.2.</span> <span class="toc-text">4.4.2 配置jenkins使用docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-3-%E5%AF%86%E9%92%A5%E9%85%8D%E7%BD%AE"><span class="toc-number">4.4.3.</span> <span class="toc-text">4.4.3 密钥配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-1-dev%E4%B8%BB%E6%9C%BA%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.1.</span> <span class="toc-text">4.4.3.1 dev主机至gitlab-ce</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-1-1-dev%E4%B8%BB%E6%9C%BA%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9"><span class="toc-number">4.4.3.1.1.</span> <span class="toc-text">4.4.3.1.1 dev主机生成密钥对</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-1-2-%E6%B7%BB%E5%8A%A0%E5%85%AC%E9%92%A5%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.1.2.</span> <span class="toc-text">4.4.3.1.2 添加公钥至gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-2-jenkins-server%E4%B8%BB%E6%9C%BA%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.2.</span> <span class="toc-text">4.4.3.2 jenkins-server主机至gitlab-ce</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-2-1-%E5%9C%A8jenkins-server%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9"><span class="toc-number">4.4.3.2.1.</span> <span class="toc-text">4.4.3.2.1 在jenkins-server生成密钥对</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-3-2-2-%E6%B7%BB%E5%8A%A0%E5%85%AC%E9%92%A5%E8%87%B3gitlab-ce"><span class="toc-number">4.4.3.2.2.</span> <span class="toc-text">4.4.3.2.2 添加公钥至gitlab-ce</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-3-3-%E9%85%8D%E7%BD%AEjenkins-sever%E4%B8%BB%E6%9C%BA%E7%9A%84%E7%A7%81%E9%92%A5%E5%88%B0%E5%87%AD%E6%8D%AE%E5%88%97%E8%A1%A8"><span class="toc-number">4.4.3.3.</span> <span class="toc-text">4.4.3.3 配置jenkins-sever主机的私钥到凭据列表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-5-jenkins%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="toc-number">4.5.</span> <span class="toc-text">4.5 jenkins插件安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-1-maven-integration"><span class="toc-number">4.5.1.</span> <span class="toc-text">4.5.1 maven integration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-2-git-parameter"><span class="toc-number">4.5.2.</span> <span class="toc-text">4.5.2 git parameter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-3-gitlab"><span class="toc-number">4.5.3.</span> <span class="toc-text">4.5.3 gitlab</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-4-Generic-Webhook-Trigger"><span class="toc-number">4.5.4.</span> <span class="toc-text">4.5.4 Generic Webhook Trigger</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-5-ssh"><span class="toc-number">4.5.5.</span> <span class="toc-text">4.5.5 ssh</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-6-jenkins%E5%85%A8%E5%B1%80%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.</span> <span class="toc-text">4.6 jenkins全局工具配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-1-JDK%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.1.</span> <span class="toc-text">4.6.1 JDK配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-2-Git%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.2.</span> <span class="toc-text">4.6.2 Git配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-3-Maven%E9%85%8D%E7%BD%AE"><span class="toc-number">4.6.3.</span> <span class="toc-text">4.6.3 Maven配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-7-jenkins%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="toc-number">4.7.</span> <span class="toc-text">4.7 jenkins系统配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-7-1-%E6%B7%BB%E5%8A%A0jenkins-server%E8%AE%BF%E9%97%AEweb-server%E5%87%AD%E6%8D%AE"><span class="toc-number">4.7.1.</span> <span class="toc-text">4.7.1 添加jenkins-server访问web-server凭据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-7-2-%E9%85%8D%E7%BD%AEssh%E5%8D%8F%E8%AE%AE%E8%BF%9E%E6%8E%A5%E4%B8%BB%E6%9C%BA"><span class="toc-number">4.7.2.</span> <span class="toc-text">4.7.2 配置ssh协议连接主机</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%BC%81%E4%B8%9A%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81%E9%A1%B9%E7%9B%AE%E5%8F%91%E5%B8%83"><span class="toc-number">5.</span> <span class="toc-text">五、企业业务代码项目发布</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2-mariadb%E5%8F%8A%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 数据库管理系统部署 mariadb及创建项目数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E8%8E%B7%E5%8F%96"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 项目代码获取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E4%BF%AE%E6%94%B9"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 项目代码修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E4%B8%8A%E4%BC%A0%E5%88%B0gitlab"><span class="toc-number">5.4.</span> <span class="toc-text">5.4 项目代码上传到gitlab</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-5-%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C%E5%9F%BA%E7%A1%80%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">5.5.</span> <span class="toc-text">5.5 构建项目运行基础应用容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-1-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95"><span class="toc-number">5.5.1.</span> <span class="toc-text">5.5.1 创建项目目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-2-%E7%94%9F%E6%88%90Dockerfile%E6%96%87%E4%BB%B6"><span class="toc-number">5.5.2.</span> <span class="toc-text">5.5.2 生成Dockerfile文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-3-%E4%BD%BF%E7%94%A8docker-build%E6%9E%84%E5%BB%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">5.5.3.</span> <span class="toc-text">5.5.3 使用docker build构建容器镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-4-%E6%8E%A8%E9%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%87%B3harbor%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">5.5.4.</span> <span class="toc-text">5.5.4 推送容器镜像至harbor容器镜像仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-5-%E9%AA%8C%E8%AF%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="toc-number">5.5.5.</span> <span class="toc-text">5.5.5 验证容器镜像可用性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-6-%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%8A%E5%8F%91%E5%B8%83"><span class="toc-number">5.6.</span> <span class="toc-text">5.6 项目构建及发布</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-1-%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%8A%E5%8F%91%E5%B8%83%E6%AD%A5%E9%AA%A4"><span class="toc-number">5.6.1.</span> <span class="toc-text">5.6.1 项目构建及发布步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-2-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E4%BB%BB%E5%8A%A1"><span class="toc-number">5.6.2.</span> <span class="toc-text">5.6.2 创建项目任务</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&text=基于Docker容器DevOps应用方案"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&is_video=false&description=基于Docker容器DevOps应用方案"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于Docker容器DevOps应用方案&body=Check out this article: https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&title=基于Docker容器DevOps应用方案"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/05/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/&name=基于Docker容器DevOps应用方案&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

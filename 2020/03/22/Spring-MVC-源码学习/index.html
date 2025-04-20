@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Spring MVC请求处理的流程(以下源码中注释了每一步干了那些事情) 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475protected void doDispa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring MVC 源码学习">
+<meta property="og:url" content="https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Spring MVC请求处理的流程(以下源码中注释了每一步干了那些事情) 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475protected void doDispa">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/MVC%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg">
+<meta property="article:published_time" content="2020-03-22T10:39:49.000Z">
+<meta property="article:modified_time" content="2021-05-17T12:35:52.792Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="MVC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/MVC%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring MVC 源码学习</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/05/10/Spring-IOC%E5%8E%9F%E7%90%86%E5%8F%8A%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&text=Spring MVC 源码学习"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&is_video=false&description=Spring MVC 源码学习"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring MVC 源码学习&body=Check out this article: https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&name=Spring MVC 源码学习&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E4%B8%8A%E8%BF%B0%E6%BA%90%E7%A0%81%E4%B8%AD%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">从上述源码中可以看到：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring MVC 源码学习
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-03-22T10:39:49.000Z" itemprop="datePublished">2020-03-22</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" class="leancloud-visitors" data-flag-title="Spring MVC 源码学习" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/MVC/" rel="tag">MVC</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>Spring MVC请求处理的流程(以下源码中注释了每一步干了那些事情)<br><img src="/images/MVC%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDispatch</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        HttpServletRequest processedRequest = request;</span><br><span class="line">        HandlerExecutionChain mappedHandler = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">boolean</span> multipartRequestParsed = <span class="keyword">false</span>;</span><br><span class="line">        WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ModelAndView mv = <span class="keyword">null</span>;</span><br><span class="line">                Object dispatchException = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 1.检查是否是文件上传请求</span></span><br><span class="line">                    processedRequest = <span class="keyword">this</span>.checkMultipart(request);</span><br><span class="line">                    multipartRequestParsed = processedRequest != request;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// 2.找到处理当前请求的处理器</span></span><br><span class="line">                    mappedHandler = <span class="keyword">this</span>.getHandler(processedRequest);</span><br><span class="line">                    <span class="keyword">if</span> (mappedHandler == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 如果没有找到则直接抛异常</span></span><br><span class="line">                        <span class="keyword">this</span>.noHandlerFound(processedRequest, response);</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 3.拿到当前处理器所有方法的适配器（相当于反射工具）</span></span><br><span class="line">                    HandlerAdapter ha = <span class="keyword">this</span>.getHandlerAdapter(mappedHandler.getHandler());</span><br><span class="line">                    <span class="comment">// 4.获取到方法的请求方式</span></span><br><span class="line">                    String method = request.getMethod();</span><br><span class="line">                    <span class="keyword">boolean</span> isGet = <span class="string">&quot;GET&quot;</span>.equals(method);</span><br><span class="line">                    <span class="keyword">if</span> (isGet || <span class="string">&quot;HEAD&quot;</span>.equals(method)) &#123;</span><br><span class="line">                        <span class="keyword">long</span> lastModified = ha.getLastModified(request, mappedHandler.getHandler());</span><br><span class="line">                        <span class="keyword">if</span> ((<span class="keyword">new</span> ServletWebRequest(request, response)).checkNotModified(lastModified) &amp;&amp; isGet) &#123;</span><br><span class="line">                            <span class="keyword">return</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> (!mappedHandler.applyPreHandle(processedRequest, response)) &#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// 5.使用适配器执行目标将目标方法执行完后的返回值作为视图名，不管目标方法是何种类型的返回值，最终适配器执行完后都是将执行后的信息封装到ModelAndView中并返回，</span></span><br><span class="line">                    mv = ha.handle(processedRequest, response, mappedHandler.getHandler());</span><br><span class="line">                    <span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// 6.如果没有视图名称返回一个默认的视图名称</span></span><br><span class="line">                    <span class="keyword">this</span>.applyDefaultViewName(processedRequest, mv);</span><br><span class="line">                    mappedHandler.applyPostHandle(processedRequest, response, mv);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception var20) &#123;</span><br><span class="line">                    dispatchException = var20;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Throwable var21) &#123;</span><br><span class="line">                    dispatchException = <span class="keyword">new</span> NestedServletException(<span class="string">&quot;Handler dispatch failed&quot;</span>, var21);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 7.将方法最终执行完成后的ModelAndView转发到对应的页面，而且ModelAndView中的数据可以在请求域中获取</span></span><br><span class="line">                <span class="keyword">this</span>.processDispatchResult(processedRequest, response, mappedHandler, mv, (Exception)dispatchException);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception var22) &#123;</span><br><span class="line">                <span class="keyword">this</span>.triggerAfterCompletion(processedRequest, response, mappedHandler, var22);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable var23) &#123;</span><br><span class="line">                <span class="keyword">this</span>.triggerAfterCompletion(processedRequest, response, mappedHandler, <span class="keyword">new</span> NestedServletException(<span class="string">&quot;Handler processing failed&quot;</span>, var23));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (mappedHandler != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (multipartRequestParsed) &#123;</span><br><span class="line">                <span class="keyword">this</span>.cleanupMultipart(processedRequest);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>结合源码详细解析一下上述主要步骤：<br>// 2.如何找到处理当前请求的处理器<br>mappedHandler = this.getHandler(processedRequest)返回目标方法的执行链（内部还封装了拦截器等信息）<br>handlerMappings:IOC容器启动时创键Controller对象扫描到每个处理器都能处理那些请求，保存在HanlerMaping的handlerMap中，每过来一个请求，拿到该请求对应的HandlerMapping的请求映射信息就行；<br>下面这段就是根据请求获取请求对应的HandlerMapping映射信息的源码<br>（目前MVC支持RequestMappingHandlerMapping、 BeanNameUrlHandlerMapping、 RouterFunctionMapping三种)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> HandlerExecutionChain <span class="title">getHandler</span><span class="params">(HttpServletRequest request)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.handlerMappings != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (HandlerMapping mapping : <span class="keyword">this</span>.handlerMappings) &#123;</span><br><span class="line">                HandlerExecutionChain handler = mapping.getHandler(request);</span><br><span class="line">                <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> handler;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>// 3.如何拿到当前处理器所有方法的适配器（相当于反射工具）<br>（目前MVC支持RequestMappingHandlerAdapter、 HandlerFunctionAdapter、 HttpRequestHandlerAdapter、 SimpleControllerHandlerAdapter四种)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> HandlerAdapter <span class="title">getHandlerAdapter</span><span class="params">(Object handler)</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.handlerAdapters != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (HandlerAdapter adapter : <span class="keyword">this</span>.handlerAdapters) &#123;</span><br><span class="line">                <span class="keyword">if</span> (adapter.supports(handler)) &#123;</span><br><span class="line">                    <span class="keyword">return</span> adapter;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ServletException(<span class="string">&quot;No adapter for handler [&quot;</span> + handler +</span><br><span class="line">                <span class="string">&quot;]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>DispatcherServlet中的几种引用类型的属性：Spring MVC的九大组件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** MultipartResolver used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> MultipartResolver multipartResolver;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/** LocaleResolver used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> LocaleResolver localeResolver;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** ThemeResolver used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> ThemeResolver themeResolver;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** List of HandlerMappings used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> List&lt;HandlerMapping&gt; handlerMappings;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** List of HandlerAdapters used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> List&lt;HandlerAdapter&gt; handlerAdapters;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** List of HandlerExceptionResolvers used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> List&lt;HandlerExceptionResolver&gt; handlerExceptionResolvers;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** RequestToViewNameTranslator used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> RequestToViewNameTranslator viewNameTranslator;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** FlashMapManager used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> FlashMapManager flashMapManager;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** List of ViewResolvers used by this servlet. */</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">private</span> List&lt;ViewResolver&gt; viewResolvers;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Spring MVC九大组件初始化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * This implementation calls &#123;<span class="doctag">@link</span> #initStrategies&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onRefresh</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        initStrategies(context);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Initialize the strategy objects that this servlet uses.</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;May be overridden in subclasses in order to initialize further strategy objects.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initStrategies</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">        initMultipartResolver(context);</span><br><span class="line">        initLocaleResolver(context);</span><br><span class="line">        initThemeResolver(context);</span><br><span class="line">        initHandlerMappings(context);</span><br><span class="line">        initHandlerAdapters(context);</span><br><span class="line">        initHandlerExceptionResolvers(context);</span><br><span class="line">        initRequestToViewNameTranslator(context);</span><br><span class="line">        initViewResolvers(context);</span><br><span class="line">        initFlashMapManager(context);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>MVC支持Rest风格原理(源码解析)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_METHOD_PARAM = <span class="string">&quot;_method&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String methodParam = DEFAULT_METHOD_PARAM;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doFilterInternal</span><span class="params">(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">    HttpServletRequest requestToUse = request;</span><br><span class="line">    <span class="keyword">if</span> (<span class="string">&quot;POST&quot;</span>.equals(request.getMethod()) &amp;&amp; request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) == <span class="keyword">null</span>) &#123;</span><br><span class="line">        String paramValue = request.getParameter(<span class="keyword">this</span>.methodParam);</span><br><span class="line">        <span class="keyword">if</span> (StringUtils.hasLength(paramValue)) &#123;</span><br><span class="line">            String method = paramValue.toUpperCase(Locale.ENGLISH);</span><br><span class="line">            <span class="keyword">if</span> (ALLOWED_METHODS.contains(method)) &#123;</span><br><span class="line">                requestToUse = <span class="keyword">new</span> HttpMethodRequestWrapper(request, method);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    filterChain.doFilter(requestToUse, response);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Simple &#123;<span class="doctag">@link</span> HttpServletRequest&#125; wrapper that returns the supplied method for</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> HttpServletRequest#getMethod()&#125;.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpMethodRequestWrapper</span> <span class="keyword">extends</span> <span class="title">HttpServletRequestWrapper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String method;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HttpMethodRequestWrapper</span><span class="params">(HttpServletRequest request, String method)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(request);</span><br><span class="line">        <span class="keyword">this</span>.method = method;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.method;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpServletRequestWrapper</span> <span class="keyword">extends</span> <span class="title">ServletRequestWrapper</span> <span class="keyword">implements</span> <span class="title">HttpServletRequest</span> </span>&#123;</span><br><span class="line">    、、、</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="从上述源码中可以看到："><a href="#从上述源码中可以看到：" class="headerlink" title="从上述源码中可以看到："></a>从上述源码中可以看到：</h3><p>MVC实现Rest风格的是通过HiddenHttpMethodFilter这个拦截器实现的，在该拦截器的doFilterInternal方法中通过获取到参数中”method”对应的属性值来拿到请求类型，然后调用HttpMethodRequestWrapper构造方法，而HttpMethodRequestWrapper继承了HttpServletRequest可以看出这里其实就是通过传入的request,method两个参数构造了一个request,而method就是我们所传的参数，从而达到对Rest四种请求方式的支持。</p>
+<p>@RequestParam(value = “”, required = false, defaultValue = “”)<br>@RequestHeader(value = “”, required = false, defaultValue = “”)<br>@CookieValue(value = “”, required = false)</p>
+<p>Spring MVC解决乱码问题<br>处理字符编码的Filter一定要在其他Filter之前，不然其他Filter已经获取的请求参数，此时再去处理字符编码没有任何意义</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CharacterEncodingFilter</span> <span class="keyword">extends</span> <span class="title">OncePerRequestFilter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">private</span> String encoding;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> forceRequestEncoding = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> forceResponseEncoding = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isForceResponseEncoding</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.forceResponseEncoding;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doFilterInternal</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">        String encoding = getEncoding();</span><br><span class="line">        <span class="keyword">if</span> (encoding != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (isForceRequestEncoding() || request.getCharacterEncoding() == <span class="keyword">null</span>) &#123;</span><br><span class="line">                request.setCharacterEncoding(encoding);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (isForceResponseEncoding()) &#123;</span><br><span class="line">                response.setCharacterEncoding(encoding);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        filterChain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>Spring MVC如何把数据带给页面<br>不管是传入Map, Model, MOdelMap,最终都是BindingAwareModelMap在工作，相当于在BindingAwareModelMap中保存的数据都放在请求域中</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E4%B8%8A%E8%BF%B0%E6%BA%90%E7%A0%81%E4%B8%AD%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">从上述源码中可以看到：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&text=Spring MVC 源码学习"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&is_video=false&description=Spring MVC 源码学习"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring MVC 源码学习&body=Check out this article: https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&title=Spring MVC 源码学习"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2020/03/22/Spring-MVC-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/&name=Spring MVC 源码学习&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

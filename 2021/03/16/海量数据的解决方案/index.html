@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1.1 海量数据的解决方案现在无论是企业的业务系统还是互联网上的网站程序都面临着数据量大的问题，这个问题如果解决不好将严重影响系统的运行速度，下面就针对这个问题的各种解决方案进行系统介绍。  1.1.1 缓存和页面静态化数据量大这个问题是最直接的解决方案就是使用缓存，缓存就是将从数据库中获取的结果暂时保存起来，在下次使用的时候无需重新到数据库中获取，这样可以大大降低数据库的压力。 缓存的使用方式可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="海量数据的解决方案">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="1.1 海量数据的解决方案现在无论是企业的业务系统还是互联网上的网站程序都面临着数据量大的问题，这个问题如果解决不好将严重影响系统的运行速度，下面就针对这个问题的各种解决方案进行系统介绍。  1.1.1 缓存和页面静态化数据量大这个问题是最直接的解决方案就是使用缓存，缓存就是将从数据库中获取的结果暂时保存起来，在下次使用的时候无需重新到数据库中获取，这样可以大大降低数据库的压力。 缓存的使用方式可">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-03-16T11:12:15.000Z">
+<meta property="article:modified_time" content="2021-04-02T09:18:41.301Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>海量数据的解决方案</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/03/20/ETL%E7%9B%91%E5%90%AC%E4%B8%9A%E5%8A%A1%E8%A1%A8%E5%88%86%E5%8F%91%E5%88%B0%E5%90%84%E4%B8%AA%E4%B8%9A%E5%8A%A1%E5%A4%84%E7%90%86service%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/ETL%E7%9B%91%E5%90%AC%E4%B8%9A%E5%8A%A1%E8%A1%A8%E5%88%86%E5%8F%91%E5%88%B0%E5%90%84%E4%B8%AAservice%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/03/02/dubbo%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/dubbo%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&text=海量数据的解决方案"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&is_video=false&description=海量数据的解决方案"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=海量数据的解决方案&body=Check out this article: https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&name=海量数据的解决方案&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">1.1 海量数据的解决方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1-%E7%BC%93%E5%AD%98%E5%92%8C%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">1.1.1 缓存和页面静态化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2%E7%BC%93%E5%AD%98%E4%B8%AD%E7%A9%BA%E6%95%B0%E6%8D%AE%E7%9A%84%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">1.1.2缓存中空数据的管理方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-3%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96"><span class="toc-number">4.</span> <span class="toc-text">1.1.3页面静态化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">1.2数据库优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1%E8%A1%A8%E7%BB%93%E6%9E%84%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">1.2.1表结构优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2SQL%E8%AF%AD%E5%8F%A5%E4%BC%98%E5%8C%96"><span class="toc-number">7.</span> <span class="toc-text">1.2.2SQL语句优化</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        海量数据的解决方案
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-03-16T11:12:15.000Z" itemprop="datePublished">2021-03-16</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="leancloud-visitors" data-flag-title="海量数据的解决方案" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="1-1-海量数据的解决方案"><a href="#1-1-海量数据的解决方案" class="headerlink" title="1.1 海量数据的解决方案"></a>1.1 海量数据的解决方案</h3><pre><code>现在无论是企业的业务系统还是互联网上的网站程序都面临着数据量大的问题，这个问题如果解决不好将严重影响系统的运行速度，下面就针对这个问题的各种解决方案进行系统介绍。
+</code></pre>
+<h3 id="1-1-1-缓存和页面静态化"><a href="#1-1-1-缓存和页面静态化" class="headerlink" title="1.1.1 缓存和页面静态化"></a>1.1.1 缓存和页面静态化</h3><pre><code>数据量大这个问题是最直接的解决方案就是使用缓存，缓存就是将从数据库中获取的结果暂时保存起来，在下次使用的时候无需重新到数据库中获取，这样可以大大降低数据库的压力。
+缓存的使用方式可以分为通过程序直接保存到内存中和使用缓存框架两种方式。程序直接操作主要是使用Map,尤其是ConcurrentHashMap，而常用的缓存框架有Ehcache,Memcache和redis等。缓存使用过程中最重要问题是什么时候创建缓存和缓存的失效机制。缓存可以在第一次获取的时候创键也可以在程序启动和缓存失效之后立即创键，缓存的失效可以定期失效，也可以在数据发生变化的时候失效，如果按数据发生变化让缓存失效，还可以分粗粒度失效和细粒度失效。
+</code></pre>
+<h3 id="1-1-2缓存中空数据的管理方法"><a href="#1-1-2缓存中空数据的管理方法" class="headerlink" title="1.1.2缓存中空数据的管理方法"></a>1.1.2缓存中空数据的管理方法</h3><pre><code>如果缓存是在第一次获取的时候创建的，那么在使用缓存的时候最好将没有数据的缓存使用特定的类型值来保存，因为这种方式下如果从缓存中获取不到数据就会从数据库中获取，如果数据库中本来就没有相应的数据就不会创建缓存，这样将每次都会查询数据库。比如有个专门保存文章评论的缓存，不同的评论按照不同文章的Id来保存，如果有一篇文章本来就没有评论，那么就没有相应的缓存或者缓存的值为null，这样程序在每次调用这篇文章的评论时都会查询数据库。这就没起到缓存的作用，我们可以创建一个专门的类（如NoComment）来保存没有评论的缓存，这样程序从缓存中查询后就可以知道是还没有创建缓存还是本来就没有评论内容。不过缓存也不是什么情况都适用，它主要用于数据变化不是很频繁的情况。而且如果是定期失效（数据修改时不失效）的失效机制，实时性要求也不能太高，因为这样缓存中的数据和真实数据可能会不一致。如果是文章的评论则关系不是很大，但如果是企业业务系统中要生成报表的数据则问题就大了。
+</code></pre>
+<h3 id="1-1-3页面静态化"><a href="#1-1-3页面静态化" class="headerlink" title="1.1.3页面静态化"></a>1.1.3页面静态化</h3><pre><code>跟缓存相似的另外一种技术叫页面静态化，它在原理上跟缓存非常相似，缓存是将从数据库中获取到的数据（当然也可以是别的任何可以序列化的东西）保存起来，而页面静态化是将程序最后生成的页面保存起来，使用页面静态化就不需要每次调用都重新生成页面了，这样不但不需要查询数据库，而且连应用程序处理都省了，所以页面静态化同时对数据量大和并发量高两大问题都有好处。页面静态化可以在程序中使用模板技术生成，如常用的Freemarker和Velocity都可以根据模板生成静态页面，另外也可以使用缓存服务器在应用服务器的上一层缓存生成的页面，如可以使用Squid,另外Nginx也提供了相应的功能。
+</code></pre>
+<h3 id="1-2数据库优化"><a href="#1-2数据库优化" class="headerlink" title="1.2数据库优化"></a>1.2数据库优化</h3><pre><code>要解决数据量大的问题，是避不开数据库优化的。数据库优化可以在不增加硬件的情况下提高处理效率，这是一种用技术换金钱的方式。数据库优化的方法非常多，常用的有表结构优化、SQL语句优化、分区和分表、索引优化、使用存储过程代替直接操作等，另外有时候合理使用冗余也能获得非常好的效果。
+</code></pre>
+<h3 id="1-2-1表结构优化"><a href="#1-2-1表结构优化" class="headerlink" title="1.2.1表结构优化"></a>1.2.1表结构优化</h3><pre><code>表结构优化是数据库中最基础也是最重要的，如果表结构优化得不合理，就可能导致严重的性能问题，具体怎么设计更合理也没有固定不变的准则，需要根据实际情况具体处理
+</code></pre>
+<h3 id="1-2-2SQL语句优化"><a href="#1-2-2SQL语句优化" class="headerlink" title="1.2.2SQL语句优化"></a>1.2.2SQL语句优化</h3><pre><code>SQL语句优化也是非常重要的，基础的SQL优化是语法层面的优化，不过更重要的是处理逻辑的优化，这也需要根据实际情况具体处理，而且要和索引缓存等配合使用。buguoSQL优化有一个通用的做法就是，首先要将涉及大数据的业务的SQL语句执行时间详细记录下来，其次通过仔细分析日志（同一条语句对不同条件的执行时间也可能不同，这点也需要仔细分析）找出需要优化的语句和其中的问题，然后再有的放矢地优化，而不是不分重点对每条语句都花同样的时间和精力优化。
+</code></pre>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">1.1 海量数据的解决方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1-%E7%BC%93%E5%AD%98%E5%92%8C%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">1.1.1 缓存和页面静态化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2%E7%BC%93%E5%AD%98%E4%B8%AD%E7%A9%BA%E6%95%B0%E6%8D%AE%E7%9A%84%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">1.1.2缓存中空数据的管理方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-3%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96"><span class="toc-number">4.</span> <span class="toc-text">1.1.3页面静态化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BC%98%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">1.2数据库优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1%E8%A1%A8%E7%BB%93%E6%9E%84%E4%BC%98%E5%8C%96"><span class="toc-number">6.</span> <span class="toc-text">1.2.1表结构优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2SQL%E8%AF%AD%E5%8F%A5%E4%BC%98%E5%8C%96"><span class="toc-number">7.</span> <span class="toc-text">1.2.2SQL语句优化</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&text=海量数据的解决方案"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&is_video=false&description=海量数据的解决方案"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=海量数据的解决方案&body=Check out this article: https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&title=海量数据的解决方案"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/03/16/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/&name=海量数据的解决方案&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

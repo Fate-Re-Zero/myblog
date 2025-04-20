@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="理解小岛(Island)——ZK Server Cluster 议员(Senator)——ZK Server 提议(Proposal)——ZNode Change(Create&#x2F;Delete&#x2F;SetData…) 提议编号(PID)——Zxid(ZooKeeper Transaction Id) 正式法令——所有ZNode及其数据 总统——ZK Server Leader ZAB协议原子广播协议:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="理解小岛(Island)——ZK Server Cluster 议员(Senator)——ZK Server 提议(Proposal)——ZNode Change(Create&#x2F;Delete&#x2F;SetData…) 提议编号(PID)——Zxid(ZooKeeper Transaction Id) 正式法令——所有ZNode及其数据 总统——ZK Server Leader ZAB协议原子广播协议:">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-25T14:30:38.000Z">
+<meta property="article:modified_time" content="2022-09-26T05:22:38.138Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Zookeeper</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/09/26/MySql/MySQL%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/09/23/JVM/GC%E4%BC%98%E5%8C%96%E7%90%86%E8%A7%A3%E5%8F%8A%E6%80%9D%E8%80%83/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&text=Zookeeper"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&is_video=false&description=Zookeeper"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Zookeeper&body=Check out this article: https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&name=Zookeeper&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">理解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">ZAB协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">3.</span> <span class="toc-text">Zookeeper分布式锁</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Zookeeper
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-25T14:30:38.000Z" itemprop="datePublished">2022-09-25</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/09/25/zookeeper/Zookeeper/" class="leancloud-visitors" data-flag-title="Zookeeper" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h3><p>小岛(Island)——ZK Server Cluster</p>
+<p>议员(Senator)——ZK Server</p>
+<p>提议(Proposal)——ZNode Change(Create/Delete/SetData…)</p>
+<p>提议编号(PID)——Zxid(ZooKeeper Transaction Id)</p>
+<p>正式法令——所有ZNode及其数据</p>
+<p>总统——ZK Server Leader</p>
+<h3 id="ZAB协议"><a href="#ZAB协议" class="headerlink" title="ZAB协议"></a>ZAB协议</h3><p>原子广播协议: 原子,要么成功,要么失败;广播：过半机制;<br>队列：FIFO,顺序性; 队列能够保证消息的顺序性;</p>
+<h3 id="Zookeeper分布式锁"><a href="#Zookeeper分布式锁" class="headerlink" title="Zookeeper分布式锁"></a>Zookeeper分布式锁</h3><p>首先要明确分布式锁要解决的：几个问题; (准确快速和压力)</p>
+<ol>
+<li>所有client只能有一个人能够获取到锁;</li>
+<li>锁释放问题,(获取锁的client异常了该如何释放锁和执行完毕释放锁);</li>
+<li>锁过期了该如何处理;</li>
+<li>获取到锁后执行的业务代码是否要加上分布式事务(可能会少卖);</li>
+<li>锁释放了该如何通知其他客户端;<br> 5.1 主动轮询,心跳 — 弊端：延迟,压力;<br> 5.2 watch 解决延迟问题 — 弊端：压力;<br> 5.3 sequence + watch：watch前一个客户端, 如果锁释放,zk只给前一个客户端发事件回调;</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%90%86%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">理解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">ZAB协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="toc-number">3.</span> <span class="toc-text">Zookeeper分布式锁</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&text=Zookeeper"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&is_video=false&description=Zookeeper"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Zookeeper&body=Check out this article: https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&title=Zookeeper"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/25/zookeeper/Zookeeper/&name=Zookeeper&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

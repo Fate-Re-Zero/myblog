@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Spring Cloud: 分布式微服务架构的一站式解决方案，是多种微服务架构落地技术的集合体，俗称微服务全家桶。 Spring Cloud 对应 Spring Boot详细版本查看：https:&#x2F;&#x2F;start.spring.io&#x2F;actuator&#x2F;info Spring Boot 与 Spring Cloud 对应版本的确定：![](&#x2F;images&#x2F;Spring Boot 与Spring Clo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Cloud初步学习">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Spring Cloud: 分布式微服务架构的一站式解决方案，是多种微服务架构落地技术的集合体，俗称微服务全家桶。 Spring Cloud 对应 Spring Boot详细版本查看：https:&#x2F;&#x2F;start.spring.io&#x2F;actuator&#x2F;info Spring Boot 与 Spring Cloud 对应版本的确定：![](&#x2F;images&#x2F;Spring Boot 与Spring Clo">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E7%89%88%E6%9C%AC%E5%AF%B9%E5%BA%94.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E9%A1%B9%E7%9B%AE%E7%BC%96%E7%A0%81%E8%AE%BE%E7%BD%AE.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E9%A1%B9%E7%9B%AE%E6%B3%A8%E8%A7%A3%E7%94%9F%E6%95%88%E6%BF%80%E6%B4%BB.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Java%E7%BC%96%E8%AF%91%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E8%BF%87%E6%BB%A4.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Maven%E4%B8%AD%E8%B7%B3%E8%BF%87%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95.jpg">
+<meta property="article:published_time" content="2021-04-11T06:28:50.000Z">
+<meta property="article:modified_time" content="2021-04-25T11:32:25.723Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/%E7%89%88%E6%9C%AC%E5%AF%B9%E5%BA%94.jpg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring Cloud初步学习</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/04/25/HashMap%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/03/20/ETL%E7%9B%91%E5%90%AC%E4%B8%9A%E5%8A%A1%E8%A1%A8%E5%88%86%E5%8F%91%E5%88%B0%E5%90%84%E4%B8%AA%E4%B8%9A%E5%8A%A1%E5%A4%84%E7%90%86service%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/ETL%E7%9B%91%E5%90%AC%E4%B8%9A%E5%8A%A1%E8%A1%A8%E5%88%86%E5%8F%91%E5%88%B0%E5%90%84%E4%B8%AAservice%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&text=Spring Cloud初步学习"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&is_video=false&description=Spring Cloud初步学习"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring Cloud初步学习&body=Check out this article: https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&name=Spring Cloud初步学习&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring Cloud初步学习
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-04-11T06:28:50.000Z" itemprop="datePublished">2021-04-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/" class="leancloud-visitors" data-flag-title="Spring Cloud初步学习" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>Spring Cloud: 分布式微服务架构的一站式解决方案，是多种微服务架构落地技术的集合体，俗称微服务全家桶。</p>
+<p>Spring Cloud 对应 Spring Boot详细版本查看：<a target="_blank" rel="noopener" href="https://start.spring.io/actuator/info">https://start.spring.io/actuator/info</a></p>
+<p>Spring Boot 与 Spring Cloud 对应版本的确定：<br>![](/images/Spring Boot 与Spring Cloud技术选择.jpg)</p>
+<p><img src="/images/%E7%89%88%E6%9C%AC%E5%AF%B9%E5%BA%94.jpg"></p>
+<p>服务注册中心：Eureka, Zookeeper, Consul, Nacos</p>
+<p>服务调用：Ribbon, LoadBalancer</p>
+<p>服务调用2：Feign, OpenFeign</p>
+<p>服务降级：Hystrix, resilience4j, sentienl</p>
+<p>服务网关：Zuul, Zuul2, gateway</p>
+<p>服务配置:Config, Nacos, 携程阿波罗</p>
+<p>服务总线：Bus, Nacos</p>
+<p>创建工程：<br>约定 &gt; 配置 &gt; 编码</p>
+<p>首先处理好项目环境： File Encoding<br><img src="/images/%E9%A1%B9%E7%9B%AE%E7%BC%96%E7%A0%81%E8%AE%BE%E7%BD%AE.jpg"></p>
+<p>项目注解生效激活： Annotation Processor<br><img src="/images/%E9%A1%B9%E7%9B%AE%E6%B3%A8%E8%A7%A3%E7%94%9F%E6%95%88%E6%BF%80%E6%B4%BB.jpg"></p>
+<p>Java编译版本选择：Java Compiler<br><img src="/images/Java%E7%BC%96%E8%AF%91%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9.jpg"></p>
+<p>文件类型过滤：File Types<br><img src="/images/%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E8%BF%87%E6%BB%A4.jpg"></p>
+<p>POM文件相关：<br>dependencyManagement：锁定版本，子模块不用重写版本号，需要其他版本只需要子模块单独定义即可，好处：全工程的jar包统一，并不实现引入，只是全局声明引入的版本号</p>
+<p>Maven中跳过单元测试：<br><img src="/images/Maven%E4%B8%AD%E8%B7%B3%E8%BF%87%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95.jpg"></p>
+<p>微服务模块</p>
+<p>1.建Module<br>2.改POM<br>3.写YML<br>4.主启动<br>5.业务类</p>
+<p>什么是服务治理：<br>Spring Cloud 封装了Netflix公司开发的Eureka模块来实现服务治理</p>
+<p>在传统的rpc远程调用框架中，管理每个服务与服务之间依赖关系比较复杂</p>
+<p>服务注册：</p>
+<p>服务发现：</p>
+<p>eureka自我保护机制：</p>
+<p>Spring Cloud Ribbon是基于Netflix Ribbon实现的一套客户端负载均衡的工具。</p>
+<p>简单地说，Ribbon是Netflix发布的开源项目，主要功能是提供客户端的负载均衡算法和服务调用。Ribbon客户端提供一系列完善的配置项如连接超时，重试等。简单的说，就是在配置文件中列出Load Balance(简称LB)后面所有的机器，Ribbon会自动的帮助你基于某种规则(如简单轮询，随机连接等)去连接这些机器。我们很容易使用Ribbon实现自定义的负载均衡算法。</p>
+<p>官网资料：<a target="_blank" rel="noopener" href="https://github.com/Netflix/ribbon/wiki/Getting-Started">https://github.com/Netflix/ribbon/wiki/Getting-Started</a></p>
+<p>源码：<a target="_blank" rel="noopener" href="https://github.com/Netflix/ribbon">https://github.com/Netflix/ribbon</a></p>
+<p>LB负载均衡(Load Balance)是什么<br>简单的说就是将用户的请求平摊的分配到多个服务上，从而达到系统的HA(高可用)。<br>常见的负载均衡有软件Nginx，LVS，硬件F5等。</p>
+<p>Ribbon本地负载均衡客户端 VS Nginx服务端负载均衡区别<br>Nginx是服务器负载均衡，客户端所有请求都会交给nginx,然后由nginx实现转发请求，及负载均衡是由服务器端实现的</p>
+<p>Ribbon本地负载均衡，在调用微服务接口的时候，会在注册中心上获取注册信息服务列表之后缓存到JVM本地，从而在本地实现RPC远程服务调用技术。</p>
+<p>集中式LB</p>
+<p>即在服务的消费方和提供方之间使用独立的LB设施(可以是硬件，如F5,也可以是软件，如nginx),由改设市负责把访问请求通过某种策略转发至服务提供方</p>
+<p>进程内LB</p>
+<p>将LB逻辑集成到消费方，消费方从服务注册中心获取有哪些地址可用，然后自己再从这些地址中选择出一个合适的服务器。</p>
+<p>Ribbon就属于进程内的LB,它就是一个类库，集成于消费发进程，消费方通过它来获取到服务提供方地址。</p>
+<p>一句话：负载均衡 + RestTemplate调用</p>
+<p>架构说明：Ribbon其实就是一个软负载均衡客户端组件，它可以和其他所需请求的客户端结合使用，和eureka结合只是其中的一个实例。</p>
+<p>Feign:是一个声明式的web服务客户端，让编写Web服务客户端变得非常容易，</p>
+<p>OpenFeign:</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&text=Spring Cloud初步学习"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&is_video=false&description=Spring Cloud初步学习"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring Cloud初步学习&body=Check out this article: https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&title=Spring Cloud初步学习"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/04/11/Spring-Cloud%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/&name=Spring Cloud初步学习&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

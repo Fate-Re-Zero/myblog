@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="123456789101112131415161718192021222324rm -rf &#x2F;home&#x2F;kafka&#x2F; mkdir &#x2F;home&#x2F;kafka&#x2F;cd &#x2F;home&#x2F;kafkacat &gt; docker-compose.yaml &lt;&lt;-&amp;#x27;EOF&amp;#x27;version: &quot;2&quot;services:  zookeeper:    image: do">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker部署Kafka 3.9">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="123456789101112131415161718192021222324rm -rf &#x2F;home&#x2F;kafka&#x2F; mkdir &#x2F;home&#x2F;kafka&#x2F;cd &#x2F;home&#x2F;kafkacat &gt; docker-compose.yaml &lt;&lt;-&amp;#x27;EOF&amp;#x27;version: &quot;2&quot;services:  zookeeper:    image: do">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-10-30T06:12:22.000Z">
+<meta property="article:modified_time" content="2025-03-23T03:53:55.443Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Docker部署Kafka 3.9</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/01/kafka/Java%E7%A8%8B%E5%BA%8F%E6%8E%A5%E5%85%A5Kakfa/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/10/29/%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%86%85%E5%AE%B9/HTTP%E5%8D%8F%E8%AE%AE/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&text=Docker部署Kafka 3.9"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&is_video=false&description=Docker部署Kafka 3.9"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker部署Kafka 3.9&body=Check out this article: https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&name=Docker部署Kafka 3.9&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%BB%E9%A2%98Topic"><span class="toc-number">1.</span> <span class="toc-text">创建主题Topic</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%B8%BB%E9%A2%98%E8%AF%A6%E7%BB%86%E5%86%85%E5%AE%B9"><span class="toc-number">2.</span> <span class="toc-text">查看主题详细内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E5%86%85%E5%AE%B9%E8%A7%A3%E9%87%8A"><span class="toc-number">2.1.</span> <span class="toc-text">输出内容解释:</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Docker部署Kafka 3.9
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-10-30T06:12:22.000Z" itemprop="datePublished">2022-10-30</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/" class="leancloud-visitors" data-flag-title="Docker部署Kafka 3.9" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /home/kafka/ </span><br><span class="line">mkdir /home/kafka/</span><br><span class="line">cd /home/kafka</span><br><span class="line">cat &gt; docker-compose.yaml &lt;&lt;-<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">version: <span class="string">&quot;2&quot;</span></span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line">  zookeeper:</span><br><span class="line">    image: docker.io/bitnami/zookeeper:<span class="number">3.9</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;2181:2181&quot;</span></span><br><span class="line">    environment:</span><br><span class="line">      - ALLOW_ANONYMOUS_LOGIN=yes</span><br><span class="line">  kafka:</span><br><span class="line">    image: docker.io/bitnami/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    hostname: kafka</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;9092:9092&quot;</span></span><br><span class="line">    environment:</span><br><span class="line">      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:<span class="number">2181</span></span><br><span class="line">    depends_on:</span><br><span class="line">      - zookeeper</span><br><span class="line">EOF</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose down</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=<span class="keyword">public</span> --add-port=<span class="number">9092</span>/tcp --permanent</span><br><span class="line">firewall-cmd  --reload</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建主题Topic"><a href="#创建主题Topic" class="headerlink" title="创建主题Topic"></a>创建主题Topic</h2><p>Kafka的主题（Topic）是Kafka中用于分类和发布消息的逻辑通道。它类似于一个消息队列，生产者向特定主题发布消息，消费者则订阅这些主题来接收消息。每个主题可以有多个分区（Partition），以支持并行处理和扩展性。简而言之，Topic是Kafka中消息流转的基本单位和核心概念。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it kafka-kafka-<span class="number">1</span> /bin/bash</span><br><span class="line">/opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server=localhost:<span class="number">9092</span> --topic=kinaction_helloworld --partitions <span class="number">1</span> --replication-factor <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WARNING: Due to limitations in metric names, <span class="function">topics with a <span class="title">period</span> <span class="params">(<span class="string">&#x27;.&#x27;</span>)</span> or <span class="title">underscore</span> <span class="params">(<span class="string">&#x27;_&#x27;</span>)</span> could collide. To avoid issues it is best to use either, but not both.</span></span><br><span class="line"><span class="function">Created topic kinaction_helloworld.</span></span><br></pre></td></tr></table></figure>
+
+<p>这条命令是用于在Kafka集群中创建一个名为kinaction_helloworld的主题。让我们详细解析一下这个命令的各个部分：<br>● /opt/bitnami/kafka/bin/kafka-topics.sh：这是Kafka提供的一个脚本，用于管理Kafka的主题，包括创建、列出、删除等操作。<br>● –create：标志告诉脚本你想要创建一个新的主题。<br>● –bootstrap-server=localhost:9092：指定了Kafka集群的地址和端口，这里是假设Kafka运行在本地，并且使用默认的端口9092。如果你的Kafka集群不在本地或者使用了不同的端口，你需要将这部分替换为实际的地址和端口。<br>● –topic=kinaction_helloworld：定义了你想要创建的主题名称，在这个例子中是kinaction_helloworld。<br>● –partitions 1：指定了主题中的分区数量。分区是Kafka并行处理消息的基础，每个分区可以被看作是一个有序的消息队列。在这个例子中，我们只创建了一个分区。<br>● –replication-factor 1：我为你补全了这一部分，它指定了每个分区的副本因子。副本因子表示每个分区会有多少个副本以确保数据的持久性和故障恢复能力。在这个例子中设置为1意味着没有额外的副本，这在生产环境中可能不够健壮，因为如果该分区所在的Broker失败，那么这部分数据将不可用。在生产环境中，通常会设置一个更高的副本因子（如3）来保证高可用性。<br>综上所述，该命令完整地执行后，会在本地Kafka集群上创建一个名为kinaction_helloworld的主题，该主题包含1个分区和1个副本。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:<span class="number">9092</span></span><br><span class="line">kinaction_helloworld</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看主题详细内容"><a href="#查看主题详细内容" class="headerlink" title="查看主题详细内容"></a>查看主题详细内容</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:<span class="number">9092</span> --describe --topic kinaction_helloworld</span><br><span class="line">Topic: kinaction_helloworld	TopicId: 7El5X-HBQre8t9R2H9ec8w	PartitionCount: <span class="number">1</span>	ReplicationFactor: <span class="number">1</span>	Configs: </span><br><span class="line">Topic: kinaction_helloworld	Partition: <span class="number">0</span>	Leader: <span class="number">1001</span>	Replicas: <span class="number">1001</span>	Isr: <span class="number">1001</span></span><br></pre></td></tr></table></figure>
+
+<p>该命令行语句是用于查询Kafka中特定主题（topic）的详细信息。下面是该命令的分解和其输出内容的详细解释：</p>
+<h3 id="输出内容解释"><a href="#输出内容解释" class="headerlink" title="输出内容解释:"></a>输出内容解释:</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Topic: kinaction_helloworld	TopicId: 7El5X-HBQre8t9R2H9ec8w	PartitionCount: <span class="number">1</span>	ReplicationFactor: <span class="number">1</span>	Configs: </span><br></pre></td></tr></table></figure>
+
+<p>● Topic: 表示主题的名称，这里是kinaction_helloworld。<br>● TopicId: 是主题的唯一标识符，用于在Kafka内部识别不同的主题，例如7El5X-HBQre8t9R2H9ec8w。<br>● PartitionCount: 指出该主题包含的分区数量，这里是1个分区。分区是Kafka并行处理和扩展消息存储的基础。<br>● ReplicationFactor: 表示每个分区的副本数，这里也是1，意味着没有数据冗余。在生产环境中，通常会设置更高的副本数以确保高可用性。<br>● Configs: 后面没有列出具体的配置项，表明该主题使用的是默认配置。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Topic: kinaction_helloworld	Partition: <span class="number">0</span>	Leader: <span class="number">1001</span>	Replicas: <span class="number">1001</span>	Isr: <span class="number">1001</span></span><br></pre></td></tr></table></figure>
+
+<p>● Partition: 指定具体分区的信息，这里是分区0。<br>● Leader: 每个分区都有一个领导者副本，负责处理对该分区的所有读写请求。这里分区0的领导者是Broker id为1001的节点。<br>● Replicas: 列出了该分区的所有副本节点，这里只有一个副本，也是1001。<br>● Isr: 表示“in-sync replicas”（同步副本集），这些副本与领导者保持同步并且被认为是可以立即接替成为领导者的副本。在这个例子中，ISR中也只有1001这一个副本。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/opt/bitnami/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:<span class="number">9092</span> --topic kinaction_helloworld</span><br><span class="line">&gt;<span class="number">773616</span></span><br><span class="line">&gt;<span class="number">187271</span></span><br><span class="line">&gt;<span class="number">8381</span></span><br><span class="line">&gt;<span class="number">3810018</span></span><br></pre></td></tr></table></figure>
+
+<p>整个命令的作用是启动Kafka的控制台生产者，连接到本地（localhost）的Kafka服务器，然后开始向名为 kinaction_helloworld 的主题发送消息。用户可以在启动的命令行界面中输入消息内容，每按一次回车，输入的内容就会作为一条消息发送到指定的主题中。这对于测试和演示Kafka消息生产与消费流程非常有用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:<span class="number">9092</span> --topic kinaction_helloworld --from-beginning</span><br><span class="line"><span class="number">773616</span></span><br><span class="line"><span class="number">187271</span></span><br><span class="line"><span class="number">8381</span></span><br><span class="line"><span class="number">3810018</span></span><br></pre></td></tr></table></figure>
+
+<p>该命令的作用是使用Kafka提供的命令行工具，从本地Kafka服务器上的kinaction_helloworld主题中消费消息，并且是从该主题最开始的消息消费起。这对于测试、调试或初学者了解Kafka消息队列的工作原理非常有用。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%BB%E9%A2%98Topic"><span class="toc-number">1.</span> <span class="toc-text">创建主题Topic</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%B8%BB%E9%A2%98%E8%AF%A6%E7%BB%86%E5%86%85%E5%AE%B9"><span class="toc-number">2.</span> <span class="toc-text">查看主题详细内容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E5%86%85%E5%AE%B9%E8%A7%A3%E9%87%8A"><span class="toc-number">2.1.</span> <span class="toc-text">输出内容解释:</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&text=Docker部署Kafka 3.9"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&is_video=false&description=Docker部署Kafka 3.9"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker部署Kafka 3.9&body=Check out this article: https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&title=Docker部署Kafka 3.9"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/10/30/kafka/Docker%E9%83%A8%E7%BD%B2Kafka%203.9/&name=Docker部署Kafka 3.9&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

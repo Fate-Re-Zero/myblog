@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="批次的基本概念● 是一组待发送的消息集合，这些消息通常会被一起发送到 Kafka 服务器，以减少网络开销。● 批次在生产者内部创建和管理，用于将多个单独的消息打包，形成一个更大的消息单元，以便一次性发送。● 生产者会为批次分配一定的内存空间，当批次被发送出去后，其占用的内存将被释放，以便为后续批次使用。 批次的创建和管理触发条件：● batch.size：  ○ 这是一个配置参数，指定了一个批次">
+<meta property="og:type" content="article">
+<meta property="og:title" content="生产者批次设计">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="批次的基本概念● 是一组待发送的消息集合，这些消息通常会被一起发送到 Kafka 服务器，以减少网络开销。● 批次在生产者内部创建和管理，用于将多个单独的消息打包，形成一个更大的消息单元，以便一次性发送。● 生产者会为批次分配一定的内存空间，当批次被发送出去后，其占用的内存将被释放，以便为后续批次使用。 批次的创建和管理触发条件：● batch.size：  ○ 这是一个配置参数，指定了一个批次">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221110-1.png">
+<meta property="article:published_time" content="2022-11-10T01:01:31.000Z">
+<meta property="article:modified_time" content="2025-04-14T14:29:48.204Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221110-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>生产者批次设计</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/09/kafka/Kafka%E7%9A%84%E6%B6%88%E6%81%AF%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&text=生产者批次设计"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&is_video=false&description=生产者批次设计"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=生产者批次设计&body=Check out this article: https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&name=生产者批次设计&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">批次的基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E7%AE%A1%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">批次的创建和管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">触发条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%92%8C%E6%89%B9%E6%AC%A1%E7%9A%84%E5%85%B3%E7%B3%BB%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">分区和批次的关系：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%89%B9%E6%AC%A1%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">3. 批次的内部结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">消息结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%EF%BC%88B"><span class="toc-number">3.2.</span> <span class="toc-text">批次（B</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%BD%95%EF%BC%88Record%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">记录（Record）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%EF%BC%88Header%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">记录头（Header）</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        生产者批次设计
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-10T01:01:31.000Z" itemprop="datePublished">2022-11-10</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/" class="leancloud-visitors" data-flag-title="生产者批次设计" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><img src="/images/kafka/20221110-1.png" alt="image-20221102-1"></p>
+<h3 id="批次的基本概念"><a href="#批次的基本概念" class="headerlink" title="批次的基本概念"></a>批次的基本概念</h3><p>● 是一组待发送的消息集合，这些消息通常会被一起发送到 Kafka 服务器，以减少网络开销。<br>● 批次在生产者内部创建和管理，用于将多个单独的消息打包，形成一个更大的消息单元，以便一次性发送。<br>● 生产者会为批次分配一定的内存空间，当批次被发送出去后，其占用的内存将被释放，以便为后续批次使用。</p>
+<h3 id="批次的创建和管理"><a href="#批次的创建和管理" class="headerlink" title="批次的创建和管理"></a>批次的创建和管理</h3><h4 id="触发条件："><a href="#触发条件：" class="headerlink" title="触发条件："></a>触发条件：</h4><p>● batch.size：<br>  ○ 这是一个配置参数，指定了一个批次所能容纳的最大字节数。当一个批次中的消息字节数累计达到 batch.size 时，该批次将被发送。<br>  ○ 例如，若 batch.size 被设置为 16384 字节，当一批次中消息的字节数达到或超过这个值时，生产者将把该批次发送到 Kafka 服务器。<br>● linger.ms：<br>  ○ 另一个配置参数，指定了一个批次的最长等待时间（以毫秒为单位）。<br>  ○ 即使批次未满，如果从第一个消息加入该批次开始，经过 linger.ms 的时间后，该批次也会被发送。<br>  ○ 例如，设置 linger.ms 为 100 毫秒，意味着一个批次会等待 100 毫秒，若在此期间未达到 batch.size，但时间到了，该批次也会被发送。</p>
+<h4 id="分区和批次的关系："><a href="#分区和批次的关系：" class="headerlink" title="分区和批次的关系："></a>分区和批次的关系：</h4><p>● 对于每个主题的每个分区，生产者会创建和管理相应的批次。<br>● 当消息被发送时，首先根据消息的 Key（若有）使用分区器确定其所属分区，然后将消息添加到该分区对应的批次中。<br>● 不同分区的批次是独立的，它们会根据各自的 batch.size 和 linger.ms 条件来触发发送操作。</p>
+<h3 id="3-批次的内部结构"><a href="#3-批次的内部结构" class="headerlink" title="3. 批次的内部结构"></a>3. 批次的内部结构</h3><p>● 消息存储：<br>  ○ 一个批次内部会存储多个消息记录，这些记录包含消息的 Key、Value、时间戳等信息。<br>  ○ 存储时，消息通常以一种紧凑的形式排列，以减少空间占用。<br>  ○ 消息在批次中的存储可能会使用缓冲区，以提高存储和发送的效率。</p>
+<h4 id="消息结构"><a href="#消息结构" class="headerlink" title="消息结构"></a>消息结构</h4><h4 id="批次（B"><a href="#批次（B" class="headerlink" title="批次（B"></a>批次（B</h4><p>批次是 Kafka 中最小的可压缩单元，包含多条记录。每个批次有如下字段：<br>● baseOffset: 批次中第一条消息的偏移量。<br>● batchLength: 批次的长度（字节数）。<br>● partitionLeaderEpoch: 分区领导者纪元，用于保证消费者的消费进度与领导者变更同步。<br>● magic: 版本号，标识使用的批次格式版本。当前版本为 2。<br>● crc: 循环冗余校验码，用于验证批次的完整性。<br>● attributes: 包含压缩类型、时间戳类型等标志位的属性字段。<br>● lastOffsetDelta: 批次中最后一条消息相对于 baseOffset 的增量值。<br>● baseTimestamp: 批次中第一条消息的时间戳。<br>● maxTimestamp: 批次中的最大时间戳。<br>● producerId: 生产者 ID，用于幂等性和事务支持。<br>● producerEpoch: 生产者纪元，与生产者 ID 一起使用来确保生产者的唯一性。<br>● baseSequence: 生产者序列号，用于幂等性。<br>● records: []记录列表，包含实际的消息数据。</p>
+<h4 id="记录（Record）"><a href="#记录（Record）" class="headerlink" title="记录（Record）"></a>记录（Record）</h4><p>每条记录由以下部分组成：<br>● length: 记录的长度（变长整数）。<br>● attributes: 属性字段，目前未使用。<br>● timestampDelta: 时间戳增量（变长整数），相对于批次的 baseTimestamp。<br>● offsetDelta: 偏移量增量（变长整数），相对于批次的 baseOffset。<br>● keyLength: 键的长度（变长整数）。<br>● key: 消息键（字节数组）。<br>● valueLen: 消息体长度（变长整数）。<br>● value: 消息体（字节数组）。<br>● Headers: 消息头列表，可以携带额外的元数据。</p>
+<h4 id="记录头（Header）"><a href="#记录头（Header）" class="headerlink" title="记录头（Header）"></a>记录头（Header）</h4><p>每个消息头包括：<br>● headerKeyLength: 头键的长度（变长整数）。<br>● headerKey: 头键（字符串）。<br>● headerValueLength: 头值的长度（变长整数）。<br>● Value: 头值（字节数组）。<br>变长整数（varint）和变长长整数（varlong）是特殊的编码方式，旨在节省空间，只有当数值较大时才会占用更多字节。这使得 Kafka 能够有效地存储和传输消息，即使它们非常小。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">批次的基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E7%AE%A1%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">批次的创建和管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">触发条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%92%8C%E6%89%B9%E6%AC%A1%E7%9A%84%E5%85%B3%E7%B3%BB%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">分区和批次的关系：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%89%B9%E6%AC%A1%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">3. 批次的内部结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E7%BB%93%E6%9E%84"><span class="toc-number">3.1.</span> <span class="toc-text">消息结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E6%AC%A1%EF%BC%88B"><span class="toc-number">3.2.</span> <span class="toc-text">批次（B</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%BD%95%EF%BC%88Record%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">记录（Record）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%EF%BC%88Header%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">记录头（Header）</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&text=生产者批次设计"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&is_video=false&description=生产者批次设计"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=生产者批次设计&body=Check out this article: https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&title=生产者批次设计"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/&name=生产者批次设计&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

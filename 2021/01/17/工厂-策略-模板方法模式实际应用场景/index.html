@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="问题场景：项目中需要实现PC端和APP端推广二维码的功能，其实采用一种简单的实现方式就是使用if-else判断是使用PC端还APP端的逻辑，这种做法虽然可以实现，但是如果再加上Mac端，H5端等等就需要在原代码上添加很多的if,代码看起来很不优雅而且修改了原代码，基于对修改关闭对扩展开放的原则，我使用了工厂模式 + 策略模式 + 模板方法模式来实现这一场景。 设备工厂类12345678910111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工厂 + 策略 + 模板方法模式实际应用场景">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="问题场景：项目中需要实现PC端和APP端推广二维码的功能，其实采用一种简单的实现方式就是使用if-else判断是使用PC端还APP端的逻辑，这种做法虽然可以实现，但是如果再加上Mac端，H5端等等就需要在原代码上添加很多的if,代码看起来很不优雅而且修改了原代码，基于对修改关闭对扩展开放的原则，我使用了工厂模式 + 策略模式 + 模板方法模式来实现这一场景。 设备工厂类12345678910111">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-17T02:51:20.000Z">
+<meta property="article:modified_time" content="2021-04-02T09:26:59.863Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>工厂 + 策略 + 模板方法模式实际应用场景</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/01/20/%E5%85%A8%E5%B1%80sql%E9%87%8D%E5%86%99%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/12/26/%E5%88%86%E5%B8%83%E5%BC%8Fsession%E5%AE%9E%E7%8E%B0%E5%9C%BA%E6%99%AF/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&text=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&is_video=false&description=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=工厂 + 策略 + 模板方法模式实际应用场景&body=Check out this article: https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&name=工厂 + 策略 + 模板方法模式实际应用场景&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E5%A4%87%E5%B7%A5%E5%8E%82%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">设备工厂类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">抽象设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#APP%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">APP设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PC%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">4.</span> <span class="toc-text">PC设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E7%94%A8COntroller%E7%B1%BB"><span class="toc-number">5.</span> <span class="toc-text">调用COntroller类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        工厂 + 策略 + 模板方法模式实际应用场景
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-01-17T02:51:20.000Z" itemprop="datePublished">2021-01-17</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" class="leancloud-visitors" data-flag-title="工厂 + 策略 + 模板方法模式实际应用场景" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>问题场景：项目中需要实现PC端和APP端推广二维码的功能，其实采用一种简单的实现方式就是使用if-else判断是使用PC端还APP端的逻辑，这种做法虽然可以实现，但是如果再加上Mac端，H5端等等就需要在原代码上添加很多的if,代码看起来很不优雅而且修改了原代码，基于对修改关闭对扩展开放的原则，我使用了工厂模式 + 策略模式 + 模板方法模式来实现这一场景。</p>
+<h3 id="设备工厂类"><a href="#设备工厂类" class="headerlink" title="设备工厂类"></a>设备工厂类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DeviceFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, AbstractDevice&gt; strategyMap = Maps.newHashMap();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> AbstractDevice <span class="title">getInvokeStrategy</span><span class="params">(String deviceName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> strategyMap.get(deviceName);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(String deviceName, AbstractDevice abstractDevice)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (StringUtils.isEmpty(deviceName) || <span class="keyword">null</span> == abstractDevice) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        strategyMap.put(deviceName, abstractDevice);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="抽象设备类"><a href="#抽象设备类" class="headerlink" title="抽象设备类"></a>抽象设备类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractDevice</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Logger logger = LoggerFactory.getLogger(AppHandler.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String URL = <span class="string">&quot;https://openerp.banksteel.com/m/register.html&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String MOBILE = <span class="string">&quot;mobile&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String INVITE_CONTENT_UP = <span class="string">&quot;邀请码: &quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String INVITE_CONTENT_DOWN = <span class="string">&quot;邀请人: &quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> UserInfoService userInfoService;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> SysConfigService sysConfigService;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> InviteResultVO <span class="title">getQRCode</span><span class="params">(InviteUserVO inviteUserVO, String device)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@author</span> lixiang</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@Description</span> 根据手机号获取用户信息</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@Date</span> 2021/3/2 18:46</span></span><br><span class="line"><span class="comment">    **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;UserInfo&gt; <span class="title">getUserInfoByMobile</span><span class="params">(String mobile)</span> </span>&#123;</span><br><span class="line">        SaasParameter.setMemberId(<span class="string">&quot;-1&quot;</span>);</span><br><span class="line">        Map&lt;String, Object&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        map.put(MOBILE, mobile);</span><br><span class="line">        <span class="keyword">return</span> userInfoService.queryByMap(map);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@author</span> lixiang</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@Description</span> 获取二维码和邀请链接并封装信息</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@Date</span> 2021/3/2 18:46</span></span><br><span class="line"><span class="comment">    **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> InviteResultVO <span class="title">getURLAndAssembleInfo</span><span class="params">(Long userId, String userName, String device)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] logoFileByte;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ClassPathResource classPathResource = <span class="keyword">new</span> ClassPathResource(<span class="string">&quot;image/SaaS-logo.png&quot;</span>);</span><br><span class="line">            logoFileByte = FileCopyUtils.copyToByteArray(classPathResource.getInputStream());</span><br><span class="line">            <span class="keyword">int</span> length = logoFileByte.length;</span><br><span class="line">            logger.info(<span class="string">&quot;=================getInviteQR-errorlength:&#123;&#125;&quot;</span> + length);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            logger.error(<span class="string">&quot;================getInviteQR-error:&#123;&#125;&quot;</span>, e);</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ParamsValidException(e);</span><br><span class="line">        &#125;</span><br><span class="line">        String url = URL + <span class="string">&quot;?inviteId=&quot;</span> + userId + <span class="string">&quot;?device=&quot;</span> + device;</span><br><span class="line">        SysConfig envType = sysConfigService.findSysConfigByKey(<span class="string">&quot;environmentType&quot;</span>);</span><br><span class="line">        String value ;</span><br><span class="line">        <span class="keyword">if</span> (envType == <span class="keyword">null</span> ) &#123;</span><br><span class="line">            value = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span>  &#123;</span><br><span class="line">            <span class="keyword">if</span> (!org.apache.commons.lang3.StringUtils.isBlank(envType.getValue()) &amp;&amp; envType.getValue().length() &gt; <span class="number">2</span>) &#123;</span><br><span class="line">                value = envType.getValue().substring(<span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                value = <span class="string">&quot;&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        String qRBase64 = QrCodeUtils.generateQrCodeAsBase64(url, logoFileByte, <span class="string">&quot;     &quot;</span> + INVITE_CONTENT_UP + userId + value, <span class="string">&quot;               &quot;</span>+INVITE_CONTENT_DOWN + userName);</span><br><span class="line">        logger.error(<span class="string">&quot;================getInviteQR-qRBase64:&#123;&#125;&quot;</span>, qRBase64);</span><br><span class="line">        InviteResultVO resultVO = <span class="keyword">new</span> InviteResultVO();</span><br><span class="line">        resultVO.setInviteCode(qRBase64);</span><br><span class="line">        resultVO.setInviteUrl(url);</span><br><span class="line">        <span class="keyword">return</span> resultVO;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="APP设备类"><a href="#APP设备类" class="headerlink" title="APP设备类"></a>APP设备类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppHandler</span> <span class="keyword">extends</span> <span class="title">AbstractDevice</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> InviteResultVO <span class="title">getQRCode</span><span class="params">(InviteUserVO inviteUserVO, String device)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 根据手机号获取用户信息</span></span><br><span class="line">        List&lt;UserInfo&gt; userInfos = <span class="keyword">super</span>.getUserInfoByMobile(inviteUserVO.getMobile());</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(userInfos)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ParamsValidException(<span class="string">&quot;获取用户信息异常！&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 获取二维码和邀请链接并封装信息</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.getURLAndAssembleInfo(userInfos.get(<span class="number">0</span>).getId(), userInfos.get(<span class="number">0</span>).getName(), device);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        DeviceFactory.register(<span class="string">&quot;app&quot;</span>, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="PC设备类"><a href="#PC设备类" class="headerlink" title="PC设备类"></a>PC设备类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PcHandler</span> <span class="keyword">extends</span> <span class="title">AbstractDevice</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> UserRegisterAO userRegisterAO;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> InviteResultVO <span class="title">getQRCode</span><span class="params">(InviteUserVO inviteUserVO, String device)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 根据手机号获取用户信息</span></span><br><span class="line">        List&lt;UserInfo&gt; userInfos = <span class="keyword">super</span>.getUserInfoByMobile(inviteUserVO.getMobile());</span><br><span class="line">        Long userId;</span><br><span class="line">        String userName;</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(userInfos)) &#123;</span><br><span class="line">            <span class="comment">// 用户不存在，注册用户</span></span><br><span class="line">            userId = userRegisterAO.quickRegister(inviteUserVO);</span><br><span class="line">            userName = inviteUserVO.getUserName();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 用户存在，直接校验</span></span><br><span class="line">            userRegisterAO.checkVerifyCode(inviteUserVO.getImgCheckCode(), inviteUserVO.getImgVerifyCode());</span><br><span class="line">            userRegisterAO.checkMobilCheckCode(inviteUserVO.getMobile(), inviteUserVO.getMobilCheckCode(), SmsConstants.QUICK_MOBILE_CHECKCODE_REGISTER);</span><br><span class="line">            userId = userInfos.get(<span class="number">0</span>).getId();</span><br><span class="line">            userName = userInfos.get(<span class="number">0</span>).getName();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 获取二维码和邀请链接并封装信息</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.getURLAndAssembleInfo(userId, userName, device);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        DeviceFactory.register(<span class="string">&quot;pc&quot;</span>, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="调用COntroller类"><a href="#调用COntroller类" class="headerlink" title="调用COntroller类"></a>调用COntroller类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/user/register&quot;)</span></span><br><span class="line"><span class="meta">@Api(tags = &#123;&quot;用户相关&quot;&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserRegisterController</span> <span class="keyword">extends</span> <span class="title">BaseController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@ResponseBody</span></span><br><span class="line">  	<span class="meta">@RequestMapping(value = &quot;/get/device/inviteQR&quot;, method = RequestMethod.POST)</span></span><br><span class="line">  	<span class="meta">@WriteBuzLog(buzModel = &quot;用户管理&quot;, buzName = &quot;获取二维码&quot;)</span></span><br><span class="line">  	<span class="meta">@ApiOperation(value = &quot;获取PC端和APP端邀请二维码&quot;, httpMethod = &quot;POST&quot;, consumes = &quot;application/json;charset=UTF-8&quot;,notes = &quot;commond命令：get_device_invite_QR&quot;)</span></span><br><span class="line">  	<span class="meta">@PermissionSource(command = &quot;get_device_invite_QR&quot;, level=PermissionLevel.ALL)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> ResponseEntity&lt;InviteResultVO&gt; <span class="title">getDeviceInviteQR</span><span class="params">(<span class="meta">@RequestBody</span> <span class="meta">@Valid</span> InviteUserVO inviteUserVO, <span class="meta">@ApiParam(name = &quot;device&quot;, value = &quot;PC端或者APP端&quot;,required = true)</span> <span class="meta">@RequestParam</span> String device)</span> </span>&#123;</span><br><span class="line">  		AbstractDevice strategy = DeviceFactory.getInvokeStrategy(device);</span><br><span class="line">  		<span class="keyword">return</span> returnSuccess(<span class="number">200</span>, <span class="string">&quot;生成二维码成功&quot;</span>, strategy.getQRCode(inviteUserVO, device));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h3><p>以上实现方式优点是：如果需要添加一个Mac端只需要添加一个类去继承AbstractDevice就可以做到，无需改动原来的任何代码，符合开闭原则，也去除所有的if-else。<br>上述代码都是一些简单代码，我只是希望通过上面的例子告诉自己在写代码时不要只是单纯的只是想完成功能，而要更多的思考如何去设计代码，使代码更具可扩展性，写出更优雅的代码。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E5%A4%87%E5%B7%A5%E5%8E%82%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">设备工厂类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">抽象设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#APP%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">APP设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PC%E8%AE%BE%E5%A4%87%E7%B1%BB"><span class="toc-number">4.</span> <span class="toc-text">PC设备类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E7%94%A8COntroller%E7%B1%BB"><span class="toc-number">5.</span> <span class="toc-text">调用COntroller类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">6.</span> <span class="toc-text">总结：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&text=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&is_video=false&description=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=工厂 + 策略 + 模板方法模式实际应用场景&body=Check out this article: https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&title=工厂 + 策略 + 模板方法模式实际应用场景"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/01/17/%E5%B7%A5%E5%8E%82-%E7%AD%96%E7%95%A5-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/&name=工厂 + 策略 + 模板方法模式实际应用场景&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

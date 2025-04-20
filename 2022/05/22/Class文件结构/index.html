@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一.Java语言：跨平台的语言    (1).正真实现Java跨平台的其实是字节码，Java源代码及其他可以编译成字节码码的语言编译后直接可以运行在各个平台的虚拟机上，实现了一次编译，到处运行； 二.Java虚拟机：跨语言的平台    (1).Java虚拟机不和包括Java在内的任何语言绑定,它只与”Class”文件这种特定的二进制文件格式所关联 三.类文件结构有几个部分： 四.关于String一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Class文件结构">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一.Java语言：跨平台的语言    (1).正真实现Java跨平台的其实是字节码，Java源代码及其他可以编译成字节码码的语言编译后直接可以运行在各个平台的虚拟机上，实现了一次编译，到处运行； 二.Java虚拟机：跨语言的平台    (1).Java虚拟机不和包括Java在内的任何语言绑定,它只与”Class”文件这种特定的二进制文件格式所关联 三.类文件结构有几个部分： 四.关于String一">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-05-22T12:00:38.000Z">
+<meta property="article:modified_time" content="2022-05-28T10:44:33.081Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Class文件结构</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/05/27/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/05/20/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&text=Class文件结构"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&is_video=false&description=Class文件结构"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Class文件结构&body=Check out this article: https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&name=Class文件结构&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Class文件结构
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-05-22T12:00:38.000Z" itemprop="datePublished">2022-05-22</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/" class="leancloud-visitors" data-flag-title="Class文件结构" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>一.Java语言：跨平台的语言<br>    (1).正真实现Java跨平台的其实是字节码，Java源代码及其他可以编译成字节码码的语言编译后直接可以运行在各个平台的虚拟机上，实现了一次编译，到处运行；</p>
+<p>二.Java虚拟机：跨语言的平台<br>    (1).Java虚拟机不和包括Java在内的任何语言绑定,它只与”Class”文件这种特定的二进制文件格式所关联</p>
+<p>三.类文件结构有几个部分：</p>
+<p>四.关于String一个题目：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过下述字节码文件可知</span></span><br><span class="line"><span class="comment">// 首先在堆中创建了StringBuilder对象，然后在堆中创建hello的String对象，然后调用了StringBuilder的Append</span></span><br><span class="line">方法拼接hello,然后又在堆中创建了world的String对象，然后再次调用了append方法拼接了world,最后调用了StringBuilder的toString方法，toString方法底层其实就是<span class="keyword">new</span>了一个String对象，相当于再次在堆中创建了helloworld的String对象。</span><br><span class="line">String str = <span class="keyword">new</span> String(<span class="string">&quot;hello&quot;</span>) + <span class="keyword">new</span> String(<span class="string">&quot;world&quot;</span>);</span><br><span class="line"><span class="comment">// 下面这行注释若打开，第一个str == str1将为true,str调用intern方法，首先会查找字符串常量池中是</span></span><br><span class="line">否存在该字面值相同的字符串常量，若存在，则直接将该字符串常量引用返回指向str变量，若不存在，则在字符串常量池中创建该字符串常量，并返回引用指向str变量</span><br><span class="line"><span class="comment">// str.intern(); </span></span><br><span class="line"><span class="comment">// 在字符串常量池创建helloworld对象</span></span><br><span class="line">   String str1 = <span class="string">&quot;helloworld&quot;</span>;</span><br><span class="line">   System.out.println(str == str1);  <span class="comment">// false</span></span><br><span class="line">   <span class="comment">// 再次在堆中创建新的helloworld对象，注意堆中可以存在字面值相同的但是引用不同的两个String对象,但是字符串常量池中一个字面值只能有一个对象</span></span><br><span class="line">   String str2 = <span class="keyword">new</span> String(<span class="string">&quot;helloworld&quot;</span>);</span><br><span class="line">   System.out.println(str == str2);  <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<pre><code>上述文件对应的字节指令
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">0 new #2 &lt;java/lang/StringBuilder&gt;</span><br><span class="line"><span class="number">3</span> dup</span><br><span class="line">4 invokespecial #3 &lt;java/lang/StringBuilder.&lt;init&gt;&gt;</span><br><span class="line">7 new #4 &lt;java/lang/String&gt;</span><br><span class="line"><span class="number">10</span> dup</span><br><span class="line">11 ldc #5 &lt;hello&gt;</span><br><span class="line">13 invokespecial #6 &lt;java/lang/String.&lt;init&gt;&gt;</span><br><span class="line">16 invokevirtual #7 &lt;java/lang/StringBuilder.append&gt;</span><br><span class="line">19 new #4 &lt;java/lang/String&gt;</span><br><span class="line"><span class="number">22</span> dup</span><br><span class="line">23 ldc #8 &lt;world&gt;</span><br><span class="line">25 invokespecial #6 &lt;java/lang/String.&lt;init&gt;&gt;</span><br><span class="line">28 invokevirtual #7 &lt;java/lang/StringBuilder.append&gt;</span><br><span class="line">31 invokevirtual #9 &lt;java/lang/StringBuilder.toString&gt;</span><br><span class="line"><span class="number">34</span> astore_1</span><br><span class="line">35 ldc #10 &lt;helloworld&gt;</span><br><span class="line"><span class="number">37</span> astore_2</span><br><span class="line">38 getstatic #11 &lt;java/lang/System.out&gt;</span><br><span class="line"><span class="number">41</span> aload_1</span><br><span class="line"><span class="number">42</span> aload_2</span><br><span class="line"><span class="number">43</span> if_acmpne <span class="number">50</span> (+<span class="number">7</span>)</span><br><span class="line"><span class="number">46</span> iconst_1</span><br><span class="line"><span class="number">47</span> goto <span class="number">51</span> (+<span class="number">4</span>)</span><br><span class="line"><span class="number">50</span> iconst_0</span><br><span class="line">51 invokevirtual #12 &lt;java/io/PrintStream.println&gt;</span><br><span class="line">54 new #4 &lt;java/lang/String&gt;</span><br><span class="line"><span class="number">57</span> dup</span><br><span class="line">58 ldc #10 &lt;helloworld&gt;</span><br><span class="line">60 invokespecial #6 &lt;java/lang/String.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">63</span> astore_3</span><br><span class="line">64 getstatic #11 &lt;java/lang/System.out&gt;</span><br><span class="line"><span class="number">67</span> aload_1</span><br><span class="line"><span class="number">68</span> aload_3</span><br><span class="line"><span class="number">69</span> if_acmpne <span class="number">76</span> (+<span class="number">7</span>)</span><br><span class="line"><span class="number">72</span> iconst_1</span><br><span class="line"><span class="number">73</span> goto <span class="number">77</span> (+<span class="number">4</span>)</span><br><span class="line"><span class="number">76</span> iconst_0</span><br><span class="line">77 invokevirtual #12 &lt;java/io/PrintStream.println&gt;</span><br><span class="line"><span class="number">80</span> <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+
+<p>五.一个关于多态的题目：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">成员变量（非静态的）的赋值过程： ① 默认初始化 - ② 显式初始化 /代码块中初始化 - ③ 构造器中初始化 - ④ 有了对象之后，可以“对象.属性”或&quot;对象.方法&quot;</span></span><br><span class="line"><span class="comment"> 的方式对成员变量进行赋值。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> x = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Father</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">// 3.此时x只进行了默认初始化，x =0</span></span><br><span class="line">        <span class="keyword">this</span>.print();</span><br><span class="line">        <span class="comment">// 5.将x赋值为20</span></span><br><span class="line">        x = <span class="number">20</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">// 4.打印x = 0</span></span><br><span class="line">        System.out.println(<span class="string">&quot;Father.x = &quot;</span> + x);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 1.默认赋值后，执行属性赋值x=30</span></span><br><span class="line">    <span class="keyword">int</span> x = <span class="number">30</span>;</span><br><span class="line"><span class="comment">//    float x = 30.1F;</span></span><br><span class="line">	<span class="comment">// 2.执行字类构造方法前首先执行父类构造方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Son</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">// 6.打印x = 30</span></span><br><span class="line">        <span class="keyword">this</span>.print();</span><br><span class="line">        <span class="comment">// 7.将x赋值为40</span></span><br><span class="line">        x = <span class="number">40</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Son.x = &quot;</span> + x);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SonTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Father f = <span class="keyword">new</span> Son();</span><br><span class="line">        <span class="comment">// 注意成员变量属性无多态特性</span></span><br><span class="line">        System.out.println(f.x);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>六.Class类的本质：<br>    Class文件是一组以8位字节为基础单位的二进制流</p>
+<p>七.Class文件结构：<br>    (1).魔数：识别当前文件是一个Class文件;都是以ca fe ba be开始的（4个字节）<br>    (2).Class文件版本；（5，6两个字节代表副版本；7,8两个字节代表主版本）<br>    (3).常量池；<br>    – 常量池计数器 = 常量池表的实际长度 + 1<br>    –(如方法的符号引用，参数字面量，参数类型，方法返回值字面量，返回值类型，字段的符号引用，字段类型等)<br>    –（前两个字节，常量池计数器，后n个字节常量池表）<br>    –（常量池表项中，用于存放编译时期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放）<br>    (4).访问标识；（标记是类、接口、枚举；标记访问权限；标记是否是抽象类；标记是否有final修饰）<br>    (5).类索引、父类索引、接口索引：（类索引；父类索引；接口计数器；实现接口集合）<br>    (6).字段（Filed属性）表集合：（类级变量以及实例实例变量，不包含局部变量；字段表计数器；字段访问标识<br>    字段名索引；字段描述符索引;字段属性计数器;属性表集合）<br>    (7).方法表集合:(方法计数器;方法表；方法访问标识;方法名索引;方法描述符索引;方法的属性计数器;<br>    属性计数器；属性名索引;属性长度；操作数栈的最大深度；局部变量表的长度；字节码指令的长度；具体的字节码指令；异常表的长度；Code中的属性计数器；LineNumberTable_attribute；LocalVariableTable_attribute)<br>    (8).属性表集合:(不是我们平时所说的类的属性,指的是class文件的辅助信息；附加属性计数器，属性名索引；<br>    属性的长度；源码文件索引；源码文件名称)</p>
+<p>八.javac -g 操作说明:相对于javac会多编译出一些局部变量表信息，IDEA使用同样是javac -g</p>
+<p>九.javap命令的参数说明：<br>  -version                         版本信息<br>  -public                          仅显示公共类和成员<br>  -protected                       显示受保护的/公共类和成员<br>  -package                         显示程序包/受保护的/公共类和成员 (默认)<br>  -sysinfo                         显示正在处理的类的系统信息 (路径, 大小, 日期, MD5 散列)</p>
+<p>  -p  -private                     显示所有类和成员<br>  -v  -verbose                     输出附加信息<br>  -c                               对代码进行反汇编<br>  -s                               输出内部类型签名<br>  -l                               输出行号和本地变量表</p>
+<p>  -constants                       显示最终常量<br>  –module &lt;模块&gt;, -m &lt;模块&gt;       指定包含要反汇编的类的模块<br>  –module-path &lt;路径&gt;             指定查找应用程序模块的位置<br>  –system <jdk>                   指定查找系统模块的位置<br>  –class-path &lt;路径&gt;              指定查找用户类文件的位置<br>  -classpath &lt;路径&gt;                指定查找用户类文件的位置<br>  -cp &lt;路径&gt;                       指定查找用户类文件的位置<br>  -bootclasspath &lt;路径&gt;            覆盖引导类文件的位置<br>注意：想要看到最全的文件结构使用javap -v -p</jdk></p>
+<p>十.各基本数据类型所占的字节数及槽位数及对应的指令标识（short,byte,char,Boolean都表示为带符号的int）：<br>    byte:二进制位数为8，占1个字节，（-2^7 –&gt; 2^7-1）,占1个slot<br>    short:二进制位数为16，占2个字节，（-2^15 –&gt; 2^15-1）,占1个slot<br>    char:二进制位数为16，占2个字节，（0 –&gt; 2^16-1）,占1个slot<br>    Boolean:二进制位数为1，占1个字节，（true,false）,占1个slot<br>    int:二进制位数为32，占4个字节，（-2^31 –&gt; 2^31-1）,占1个slot<br>    float:二进制位数为32，占4个字节，（3.402823e+38 ~ 1.401298e-45）,占1个slot<br>    long:二进制位数为64，占8个字节，（-2^63 –&gt; 2^63-1）,占2个slot<br>    double:二进制位数为64，占8个字节，（1.797693e+308~ 4.9000000e-324）,占2个slot</p>
+<p>十一.类型转换:<br>    宽化类型转换：int –&gt; long –&gt; float –&gt; double（i2l,l2f,f2d）<br>    宽化类型转换依然会出现精度损失问题（long(8个字节)–&gt;float(4个字节)）：如下实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">upCast2</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">123123123</span>;</span><br><span class="line">        <span class="keyword">float</span> f = i;</span><br><span class="line">        System.out.println(f);<span class="comment">//123123120</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">long</span> l = <span class="number">123123123123L</span>;</span><br><span class="line">        l = <span class="number">123123123123123123L</span>;</span><br><span class="line">        <span class="keyword">double</span> d = l;</span><br><span class="line">        System.out.println(d);<span class="comment">//123123123123123120</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<pre><code>窄化类型转换：int --&gt; byte, int --&gt;short, int --&gt; char(i2b,i2s,i2c)
+long --&gt; int(l2i), float --&gt; int(f2i), float --&gt; long(f2l),double --&gt; int(d2i),
+double --&gt; long(d2l),double --&gt; float(d2f)
+精度损失：JVM底层不会抛运行时异常
+代码样例：
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">downCast3</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">short</span> s = <span class="number">10</span>;</span><br><span class="line">   	<span class="keyword">byte</span> b = (<span class="keyword">byte</span>)s;<span class="comment">// i2b		</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//窄化类型转换的精度损失</span></span><br><span class="line">   <span class="meta">@Test</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">downCast4</span><span class="params">()</span></span>&#123;</span><br><span class="line">       <span class="keyword">int</span> i = <span class="number">128</span>;</span><br><span class="line">       <span class="keyword">byte</span> b = (<span class="keyword">byte</span>)i;</span><br><span class="line">       System.out.println(b);<span class="comment">//-128</span></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>十二.NaN和无穷大</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//测试NaN,无穷大的情况</span></span><br><span class="line">   <span class="meta">@Test</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">downCast5</span><span class="params">()</span></span>&#123;</span><br><span class="line">       <span class="keyword">double</span> d1 = Double.NaN; <span class="comment">//0.0 / 0.0</span></span><br><span class="line">       <span class="keyword">int</span> i = (<span class="keyword">int</span>)d1;</span><br><span class="line">       System.out.println(d1);</span><br><span class="line">       System.out.println(i);</span><br><span class="line"></span><br><span class="line">       <span class="keyword">double</span> d2 = Double.POSITIVE_INFINITY;</span><br><span class="line">       <span class="keyword">long</span> l = (<span class="keyword">long</span>)d2;</span><br><span class="line">       <span class="keyword">int</span> j = (<span class="keyword">int</span>)d2;</span><br><span class="line">       System.out.println(l); <span class="comment">// Long.MAX_VALUE</span></span><br><span class="line">       System.out.println(Long.MAX_VALUE);</span><br><span class="line">       System.out.println(j); <span class="comment">// Integer.MAX_VALUE</span></span><br><span class="line">       System.out.println(Integer.MAX_VALUE);</span><br><span class="line"></span><br><span class="line">       <span class="keyword">float</span> f = (<span class="keyword">float</span>)d2;</span><br><span class="line">       System.out.println(f); <span class="comment">// Infinity</span></span><br><span class="line"></span><br><span class="line">       <span class="keyword">float</span> f1 = (<span class="keyword">float</span>)d1;</span><br><span class="line">       System.out.println(f1);<span class="comment">// NaN</span></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>十三.题目：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">nextIndex</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="comment">// index的值为1了，但是返回的是0</span></span><br><span class="line">       <span class="keyword">return</span> index++;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">long</span> index = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  	<span class="comment">//字节指令如下：</span></span><br><span class="line">  	 <span class="number">0</span> aload_0</span><br><span class="line"> <span class="number">1</span> dup</span><br><span class="line"> 2 getfield #2 &lt;com/atguigu/java/StackOperateTest.index&gt;</span><br><span class="line"> <span class="number">5</span> dup2_x1</span><br><span class="line"> <span class="number">6</span> lconst_1</span><br><span class="line"> <span class="number">7</span> ladd</span><br><span class="line"> 8 putfield #2 &lt;com/atguigu/java/StackOperateTest.index&gt;</span><br><span class="line"><span class="number">11</span> lreturn</span><br><span class="line"></span><br><span class="line"><span class="comment">// 分析如上字节指令</span></span><br><span class="line"><span class="number">0</span> 将<span class="keyword">this</span>对象引用地址加载到操作数栈（非静态方法局部变量表第<span class="number">0</span>位是<span class="keyword">this</span>的引用地址）</span><br><span class="line"><span class="number">1</span> 复制<span class="keyword">this</span>引用地址</span><br><span class="line"><span class="number">2</span> 调用<span class="keyword">this</span>的getfield(这个field不是显式的写在类中的方法)，意思是获取index字段值（此时顶部的<span class="keyword">this</span>引用</span><br><span class="line">出栈,index字段入栈值为<span class="number">0</span>，<span class="keyword">long</span>类型占<span class="number">2</span>个slot）</span><br><span class="line"><span class="number">5</span> 复制两个slot的index下移<span class="number">3</span>位(值为<span class="number">0</span>)，也就是移到<span class="keyword">this</span>引用地址的下面</span><br><span class="line"><span class="number">6</span> 加载<span class="number">1</span>进入操作数栈</span><br><span class="line"><span class="number">7</span> 栈顶的index(值为<span class="number">0</span>)与<span class="number">1</span>相加</span><br><span class="line"><span class="number">8</span> 栈顶做完加法的index（值为<span class="number">1</span>）出栈</span><br><span class="line"><span class="number">11</span> 最后返回栈中index(值为<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>十四.swithch case的特殊情况：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//jdk7新特性：引入String类型</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">swtich3</span><span class="params">(String season)</span></span>&#123;</span><br><span class="line">       <span class="keyword">switch</span>(season)&#123;</span><br><span class="line">           <span class="keyword">case</span> <span class="string">&quot;SPRING&quot;</span>:<span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> <span class="string">&quot;SUMMER&quot;</span>:<span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> <span class="string">&quot;AUTUMN&quot;</span>:<span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> <span class="string">&quot;WINTER&quot;</span>:<span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 字节指令如下：</span></span><br><span class="line">     <span class="number">0</span> aload_1</span><br><span class="line">  <span class="number">1</span> astore_2</span><br><span class="line">  <span class="number">2</span> iconst_m1</span><br><span class="line">  <span class="number">3</span> istore_3</span><br><span class="line">  <span class="number">4</span> aload_2</span><br><span class="line">  5 invokevirtual #11 &lt;java/lang/String.hashCode&gt;</span><br><span class="line">  <span class="number">8</span> lookupswitch <span class="number">4</span></span><br><span class="line">	-<span class="number">1842350579</span>:  <span class="number">52</span> (+<span class="number">44</span>)</span><br><span class="line">	-<span class="number">1837878353</span>:  <span class="number">66</span> (+<span class="number">58</span>)</span><br><span class="line">	-<span class="number">1734407483</span>:  <span class="number">94</span> (+<span class="number">86</span>)</span><br><span class="line">	<span class="number">1941980694</span>:  <span class="number">80</span> (+<span class="number">72</span>)</span><br><span class="line">	<span class="keyword">default</span>:  <span class="number">105</span> (+<span class="number">97</span>)</span><br><span class="line"> <span class="number">52</span> aload_2</span><br><span class="line"> 53 ldc #12 &lt;SPRING&gt;</span><br><span class="line"> 55 invokevirtual #13 &lt;java/lang/String.equals&gt;</span><br><span class="line"> <span class="number">58</span> ifeq <span class="number">105</span> (+<span class="number">47</span>)</span><br><span class="line"> <span class="number">61</span> iconst_0</span><br><span class="line"> <span class="number">62</span> istore_3</span><br><span class="line"> <span class="number">63</span> goto <span class="number">105</span> (+<span class="number">42</span>)</span><br><span class="line"> <span class="number">66</span> aload_2</span><br><span class="line"> 67 ldc #14 &lt;SUMMER&gt;</span><br><span class="line"> 69 invokevirtual #13 &lt;java/lang/String.equals&gt;</span><br><span class="line"> <span class="number">72</span> ifeq <span class="number">105</span> (+<span class="number">33</span>)</span><br><span class="line"> <span class="number">75</span> iconst_1</span><br><span class="line"> <span class="number">76</span> istore_3</span><br><span class="line"> <span class="number">77</span> goto <span class="number">105</span> (+<span class="number">28</span>)</span><br><span class="line"> <span class="number">80</span> aload_2</span><br><span class="line"> 81 ldc #15 &lt;AUTUMN&gt;</span><br><span class="line"> 83 invokevirtual #13 &lt;java/lang/String.equals&gt;</span><br><span class="line"> <span class="number">86</span> ifeq <span class="number">105</span> (+<span class="number">19</span>)</span><br><span class="line"> <span class="number">89</span> iconst_2</span><br><span class="line"> <span class="number">90</span> istore_3</span><br><span class="line"> <span class="number">91</span> goto <span class="number">105</span> (+<span class="number">14</span>)</span><br><span class="line"> <span class="number">94</span> aload_2</span><br><span class="line"> 95 ldc #16 &lt;WINTER&gt;</span><br><span class="line"> 97 invokevirtual #13 &lt;java/lang/String.equals&gt;</span><br><span class="line"><span class="number">100</span> ifeq <span class="number">105</span> (+<span class="number">5</span>)</span><br><span class="line"><span class="number">103</span> iconst_3</span><br><span class="line"><span class="number">104</span> istore_3</span><br><span class="line"><span class="number">105</span> iload_3</span><br><span class="line"><span class="number">106</span> tableswitch <span class="number">0</span> to <span class="number">3</span>	<span class="number">0</span>:  <span class="number">136</span> (+<span class="number">30</span>)</span><br><span class="line">	<span class="number">1</span>:  <span class="number">139</span> (+<span class="number">33</span>)</span><br><span class="line">	<span class="number">2</span>:  <span class="number">142</span> (+<span class="number">36</span>)</span><br><span class="line">	<span class="number">3</span>:  <span class="number">145</span> (+<span class="number">39</span>)</span><br><span class="line">	<span class="keyword">default</span>:  <span class="number">145</span> (+<span class="number">39</span>)</span><br><span class="line"><span class="number">136</span> goto <span class="number">145</span> (+<span class="number">9</span>)</span><br><span class="line"><span class="number">139</span> goto <span class="number">145</span> (+<span class="number">6</span>)</span><br><span class="line"><span class="number">142</span> goto <span class="number">145</span> (+<span class="number">3</span>)</span><br><span class="line"><span class="number">145</span> <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//分析如上字节指令：</span></span><br><span class="line">通过以上的字节码可以发现：对比String是否相同先调用了hashCode方法对比hashcode值是否相同，然后在调用equals方法进行对比</span><br></pre></td></tr></table></figure>
+
+<p>十五.同步控制指令（synchronized）：<br>    概述：java虚拟机支持两种同步结构:方法级的同步和方法内部一段指令序列的同步，这两种同步都是使用monitor来支持的。<br>    (1).方法级的同步:是隐式的,即无须通过字节码指令来控制,它实现在方法调用和返回操作之中。虚拟机可以从方法常量池的方法表结构中的ACC_SYNCHRONIZED访问标志得知一个方法是否声明为同步方法;<br>       1.当调用方法时,调用指令将会检查方法的AC_SYNCHRONIZED访问标志是否设置。<br>       2.如果设置了,执行线程将先持有同步锁,然后执行方法。最后在方法完成(无论是正常完成还是非正常完成)时释放同步锁。<br>       3.在方法执行期间,执行线程持有了同步锁,其他任何线程都无法再获得同一个锁。<br>       4.如果一个同步方法执行期间抛出了异常,并且在方法内部无法处理此异常,那这个同步方法所持有的锁将在异常抛到同步方法之外时自动释放。<br>    (2).方法内指定指令序列的同步:<br>    同步一段指令集序列:通常是由java中的synchronized语句块来表示的。jvm的指令集有 monitorenter和monitorexit两条指令来<br>    支持synchronized关键字的语义。<br>    当一个线程进入同步代码块时，它使用monitorenter指令请求进入。如果当前对象的监视器计数器为0，则它会被准许进入，若为1，则判断持有当前监视器的线程是否为自己，如果是，则进入，否则进行等待，直到对象的监视器计数器为0，才会被允许进入同步块。</p>
+<pre><code>当线程退出同步块时，需要使用monitorexit声明退出。在Java虚拟机中，任何对象都有一个监视器与之相关联，用来判断对象是否被锁定，当监视器被持有后，对象处于锁定状态。
+
+指令monitorenter和monitorexit在执行时，都需要在操作数栈顶压入对象，之后monitorenter和monitorexit的锁定和释放都是针对这个对象的监视器进行的。
+
+下图展示了监视器如何保护临界区代码不同时被多个线程访问，只有当线程4离开临界区后，线程1、2、3才有可能进入。
+![](/images/jvm/多线程访问同步代码块示例图.jpg)
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">()</span></span>&#123;</span><br><span class="line">       i++;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">//字节码指令如下：</span></span><br><span class="line">    <span class="number">0</span> aload_0</span><br><span class="line"> <span class="number">1</span> dup</span><br><span class="line"> 2 getfield #2 &lt;com/atguigu/java1/SynchronizedTest.i&gt;</span><br><span class="line"> <span class="number">5</span> iconst_1</span><br><span class="line"> <span class="number">6</span> iadd</span><br><span class="line"> 7 putfield #2 &lt;com/atguigu/java1/SynchronizedTest.i&gt;</span><br><span class="line"><span class="number">10</span> <span class="keyword">return</span> </span><br><span class="line"><span class="comment">// 方法签名相关信息：</span></span><br><span class="line">Name: cp_info#21 &lt;add&gt;</span><br><span class="line">Descriptor: cp_info#11 &lt;()V&gt;</span><br><span class="line">Access Flags: <span class="number">0x0021</span>[<span class="keyword">public</span> <span class="keyword">synchronized</span>]</span><br><span class="line"><span class="comment">//字节码解析如下：</span></span><br><span class="line">通过字节码指令可以看到，当<span class="keyword">synchronized</span>标记方法时，字节码指令没有发生任何变化，但是方法前面签名信息会带上<span class="keyword">synchronized</span>关键字</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">private</span> Object obj = <span class="keyword">new</span> Object();</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subtract</span><span class="params">()</span></span>&#123;</span><br><span class="line">       <span class="keyword">synchronized</span> (obj)&#123;</span><br><span class="line">           i--;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//字节码指令如下：</span></span><br><span class="line">    <span class="number">0</span> aload_0</span><br><span class="line"> 1 getfield #4 &lt;com/atguigu/java1/SynchronizedTest.obj&gt;</span><br><span class="line"> <span class="number">4</span> dup</span><br><span class="line"> <span class="number">5</span> astore_1</span><br><span class="line"> <span class="number">6</span> monitorenter</span><br><span class="line"> <span class="number">7</span> aload_0</span><br><span class="line"> <span class="number">8</span> dup</span><br><span class="line"> 9 getfield #2 &lt;com/atguigu/java1/SynchronizedTest.i&gt;</span><br><span class="line"><span class="number">12</span> iconst_1</span><br><span class="line"><span class="number">13</span> isub</span><br><span class="line">14 putfield #2 &lt;com/atguigu/java1/SynchronizedTest.i&gt;</span><br><span class="line"><span class="number">17</span> aload_1</span><br><span class="line"><span class="number">18</span> monitorexit</span><br><span class="line"><span class="number">19</span> goto <span class="number">27</span> (+<span class="number">8</span>)</span><br><span class="line"><span class="number">22</span> astore_2</span><br><span class="line"><span class="number">23</span> aload_1</span><br><span class="line"><span class="number">24</span> monitorexit</span><br><span class="line"><span class="number">25</span> aload_2</span><br><span class="line"><span class="number">26</span> athrow</span><br><span class="line"><span class="number">27</span> <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//字节码解析如下：</span></span><br><span class="line">通过字节码指令</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&text=Class文件结构"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&is_video=false&description=Class文件结构"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Class文件结构&body=Check out this article: https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&title=Class文件结构"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/05/22/Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/&name=Class文件结构&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

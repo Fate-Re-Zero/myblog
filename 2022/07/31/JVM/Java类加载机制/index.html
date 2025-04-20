@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="JVM相关的理论 JVM跨语言的平台，不管任何语言，只要能编译程class文件，都可以在JVM上执行; JVM是一种规范  JVM,JRE,JDK JVM：java虚拟机 JRE：java运行时环境 &#x3D; JVM + Java核心类库 JDK：JRE + 编译器等开发工具  类加载过程 加载（Loading）：将class文件加载进内存； 链接(Linking)[验证(Verification) –">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java类加载机制">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="JVM相关的理论 JVM跨语言的平台，不管任何语言，只要能编译程class文件，都可以在JVM上执行; JVM是一种规范  JVM,JRE,JDK JVM：java虚拟机 JRE：java运行时环境 &#x3D; JVM + Java核心类库 JDK：JRE + 编译器等开发工具  类加载过程 加载（Loading）：将class文件加载进内存； 链接(Linking)[验证(Verification) –">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-07-31T08:00:38.000Z">
+<meta property="article:modified_time" content="2022-08-14T08:31:10.278Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java类加载机制</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/08/02/JVM/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&text=Java类加载机制"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&is_video=false&description=Java类加载机制"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java类加载机制&body=Check out this article: https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&name=Java类加载机制&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM%E7%9B%B8%E5%85%B3%E7%9A%84%E7%90%86%E8%AE%BA"><span class="toc-number">1.</span> <span class="toc-text">JVM相关的理论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM-JRE-JDK"><span class="toc-number">2.</span> <span class="toc-text">JVM,JRE,JDK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">类加载过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B5%8B%E5%88%9D%E5%A7%8B%E5%80%BC%E5%92%8Cnew%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%B5%8B%E5%88%9D%E5%A7%8B%E5%80%BC"><span class="toc-number">4.</span> <span class="toc-text">类加载过程中赋初始值和new对象的赋初始值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">单例模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM%E7%9A%84%E6%87%92%E5%8A%A0%E8%BD%BD"><span class="toc-number">6.</span> <span class="toc-text">JVM的懒加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E7%9A%84%E5%88%86%E7%B1%BB%EF%BC%9A"><span class="toc-number">7.</span> <span class="toc-text">类加载器的分类：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">8.</span> <span class="toc-text">双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">9.</span> <span class="toc-text">为什么要使用双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E7%A0%B4%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">10.</span> <span class="toc-text">打破双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Launcher"><span class="toc-number">11.</span> <span class="toc-text">Launcher</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E6%98%AF%E8%A7%A3%E9%87%8A%E6%89%A7%E8%A1%8C%E7%9A%84%E8%AF%AD%E8%A8%80%E8%BF%98%E6%98%AF%E7%BC%96%E8%AF%91%E6%89%A7%E8%A1%8C%E7%9A%84%E8%AF%AD%E8%A8%80"><span class="toc-number">12.</span> <span class="toc-text">Java是解释执行的语言还是编译执行的语言</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java类加载机制
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-31T08:00:38.000Z" itemprop="datePublished">2022-07-31</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" class="leancloud-visitors" data-flag-title="Java类加载机制" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/JVM/" rel="tag">JVM</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="JVM相关的理论"><a href="#JVM相关的理论" class="headerlink" title="JVM相关的理论"></a>JVM相关的理论</h3><ol>
+<li>JVM跨语言的平台，不管任何语言，只要能编译程class文件，都可以在JVM上执行;</li>
+<li>JVM是一种规范</li>
+</ol>
+<h3 id="JVM-JRE-JDK"><a href="#JVM-JRE-JDK" class="headerlink" title="JVM,JRE,JDK"></a>JVM,JRE,JDK</h3><ol>
+<li>JVM：java虚拟机</li>
+<li>JRE：java运行时环境 = JVM + Java核心类库</li>
+<li>JDK：JRE + 编译器等开发工具</li>
+</ol>
+<h3 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h3><ol>
+<li>加载（Loading）：将class文件加载进内存；</li>
+<li>链接(Linking)[验证(Verification) –&gt; 准备(Preparation) –&gt; 解析(Resolution)]<br> 1.验证(Verification)：校验加载进来的class文件是否符合class文件的标准；(校验文件是否符合JVM规定)<br> 2.准备(Preparation)：为class文件的静态成员变量赋默认值；<br> 3.解析(Resolution)：将class文件的符号引用转换成直接引用；将类，方法，属性等符号引用解析为直接引用，常量池中的各种符号引用解析为指针、偏移量等内存地址的直接引用；</li>
+<li>初始化（Initialization）：给静态成员变量赋初始值，这一步才执行静态代码块；调用类初始化代码<clinit>,给静态成员变量<br> 赋初始值</clinit></li>
+</ol>
+<h3 id="类加载过程中赋初始值和new对象的赋初始值"><a href="#类加载过程中赋初始值和new对象的赋初始值" class="headerlink" title="类加载过程中赋初始值和new对象的赋初始值"></a>类加载过程中赋初始值和new对象的赋初始值</h3><ol>
+<li>load - 默认值 - 初始值</li>
+<li>new - 申请内存 - 默认值 - 初始值</li>
+</ol>
+<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><ul>
+<li>双重检查锁，在前一个线程获取到锁进行对象初始化的时候，对象初始化的正确顺序（1：分配对象的内存空间；2：初始化对象；3：设置instance指向刚分配的内存地址）, 此时发生了指令重排序，先将对象引用指向了内存地址，还没有初始化象但是此时对象还没有赋值，对象引用已经指向了对象的内存地址，这时候其他线程检查对象是否为null的时候，发现对象不为null,此时其他线程使用的是这个半初始化状态的对象从而引发一些问题；解决方案：单例对象加上volatile<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(T.count);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//private int m = 8;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">        <span class="comment">//System.out.println(&quot;--&quot; + count);</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="JVM的懒加载"><a href="#JVM的懒加载" class="headerlink" title="JVM的懒加载"></a>JVM的懒加载</h3><ul>
+<li>理解：Jvm采用的是懒加载的方式进行类加载的，也就是按需加载，只有这个类被用到时候才会去加载；</li>
+</ul>
+<h3 id="类加载器的分类："><a href="#类加载器的分类：" class="headerlink" title="类加载器的分类："></a>类加载器的分类：</h3><ol>
+<li>启动类加载器(引导类加载器，Bootstrap ClassLoader)：加载一些java核心类的jar包及扩展类加载器和系统类加载器</li>
+<li>扩展类加载器(Extension ClassLoader)：主要用于加载(D:\jdk1.8\jre\lib\ext，C:\WINDOWS\Sun\Java\lib\ext)下的jar包</li>
+<li>系统类加载器(应用程序类加载器，Application ClassLoader)：父类加载器为扩展类加载器，它负责加载环境变量classpath或系统属性java.class.path指定路径下的类库，可以通过ClassLoader.getSystemClassLoader()来获取该类的加载器</li>
+<li>用户自定义加载器(User ClassLoader)：java开发者可以自定义类加载器来实现类库的动态加载，加载源可以是本地的jar包，也可以是网络上的远程资源<br> 注意：Application ClassLoader和Extension ClassLoader类加载器的加载器是Bootstrap ClassLoader;</li>
+</ol>
+<h3 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h3><p>1.双亲委派机制里的父加载器：这里父加载器并不是指父类加载器，Application ClassLoader和Extension ClassLoader都继承自URLClassLoader,之所以称之为父加载器，是因为双亲委派机制的逻辑类似于字类将任务委托给父类查找是否加载了某个类，所以称之为父加载器;</p>
+<h3 id="为什么要使用双亲委派机制"><a href="#为什么要使用双亲委派机制" class="headerlink" title="为什么要使用双亲委派机制"></a>为什么要使用双亲委派机制</h3><ol>
+<li>保护程序安全，防止核心API被随意篡改(例如在src下创建java.lang包，编写自己的String类)；</li>
+<li>避免了类的重复加载，确保一个类是全局唯一性的，通过这种层级关系避免了类的重复加载；<br> 补充：在一个类加载器的命名空间中，同一个类型的类只会有一个；<br> 注意：同一个类型由不同的类加载器加载，执行类型转换时会发生异常；<br> 双亲委派机制的弊端：底层ClassLoader可以通过parent属性来获取父类的所加载的类，但是顶层ClassLoader无法访问底层ClassLoader所加载的类</li>
+</ol>
+<h3 id="打破双亲委派机制"><a href="#打破双亲委派机制" class="headerlink" title="打破双亲委派机制"></a>打破双亲委派机制</h3><ol>
+<li>JDK1.2之前，自定义ClassLoader是需要重写LoadClass方法的；</li>
+<li>可以设置线程上下文类加载器，Thread.currentThread().setContextClassLoader(this.loader);</li>
+<li>热部署：自定义classLoader重写loadClass方法，当触发热部署条件时，直接重写构建一个新的classLoader进行类加载，这样就可以保证加载的内容都是最新的;同一个tomcat的web容器中两个应用可以加载不同版本jar包：每个模块都有自己的classLoader;</li>
+</ol>
+<h3 id="Launcher"><a href="#Launcher" class="headerlink" title="Launcher"></a>Launcher</h3><ul>
+<li>理解：Launcher为类加载器的启动类，常见的类加载器为其内部类，内部定义了类加载器的加载范围；</li>
+</ul>
+<ol>
+<li>Bootstrap ClassLoader： String bootClassPath = System.getProperty(“sun.boot.class.path”);</li>
+<li>ExtClassLoader：String var0 = System.getProperty(“java.ext.dirs”);</li>
+<li>AppClassLoader：String var1 = System.getProperty(“java.class.path”);</li>
+</ol>
+<h3 id="Java是解释执行的语言还是编译执行的语言"><a href="#Java是解释执行的语言还是编译执行的语言" class="headerlink" title="Java是解释执行的语言还是编译执行的语言"></a>Java是解释执行的语言还是编译执行的语言</h3><ol>
+<li>解释器：bytecode intepreter</li>
+<li>JIT：Just In-Time compiler</li>
+<li>混合模式：<br> 1.混合使用解释器 + 热点代码编译<br> 2.起始阶段采用解释执行<br> 3.热点代码检测 ： -XX:CompileThreshold = 10000<br> -多次被调用的方法（方法计数器：监测方法执行频率）<br> -多次被调用的循环（循环计数器：检测循环执行频率）<br> -进行编译<br> -Xmixed 默认为混合模式<br> 开始解释执行，启动速度较快，对热点代码实行检测和编译<br> -Xint 使用解释模式，启动很快，执行稍慢<br> -Xcomp 使用纯编译模式，执行很快，启动很慢</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM%E7%9B%B8%E5%85%B3%E7%9A%84%E7%90%86%E8%AE%BA"><span class="toc-number">1.</span> <span class="toc-text">JVM相关的理论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM-JRE-JDK"><span class="toc-number">2.</span> <span class="toc-text">JVM,JRE,JDK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">类加载过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B5%8B%E5%88%9D%E5%A7%8B%E5%80%BC%E5%92%8Cnew%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%B5%8B%E5%88%9D%E5%A7%8B%E5%80%BC"><span class="toc-number">4.</span> <span class="toc-text">类加载过程中赋初始值和new对象的赋初始值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">单例模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM%E7%9A%84%E6%87%92%E5%8A%A0%E8%BD%BD"><span class="toc-number">6.</span> <span class="toc-text">JVM的懒加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E7%9A%84%E5%88%86%E7%B1%BB%EF%BC%9A"><span class="toc-number">7.</span> <span class="toc-text">类加载器的分类：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">8.</span> <span class="toc-text">双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">9.</span> <span class="toc-text">为什么要使用双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E7%A0%B4%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">10.</span> <span class="toc-text">打破双亲委派机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Launcher"><span class="toc-number">11.</span> <span class="toc-text">Launcher</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E6%98%AF%E8%A7%A3%E9%87%8A%E6%89%A7%E8%A1%8C%E7%9A%84%E8%AF%AD%E8%A8%80%E8%BF%98%E6%98%AF%E7%BC%96%E8%AF%91%E6%89%A7%E8%A1%8C%E7%9A%84%E8%AF%AD%E8%A8%80"><span class="toc-number">12.</span> <span class="toc-text">Java是解释执行的语言还是编译执行的语言</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&text=Java类加载机制"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&is_video=false&description=Java类加载机制"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java类加载机制&body=Check out this article: https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&title=Java类加载机制"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/31/JVM/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/&name=Java类加载机制&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

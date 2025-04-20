@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="实现原理:异常结果拦截逻辑contorller层统一异常处理组件是通过spring的ControllerAdvice和ExceptionHandler来 拦截系统controller方法执行抛异常的请求，然后对异常结果做统一的封装，底层还是spring的aop实现。 异常处理逻辑：配置文件指定异常处理策略：在系统启动时，加载exceptionCode.properties配置文件来 指定对特定异常">
+<meta property="og:type" content="article">
+<meta property="og:title" content="contorller层统一异常处理组件">
+<meta property="og:url" content="https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="实现原理:异常结果拦截逻辑contorller层统一异常处理组件是通过spring的ControllerAdvice和ExceptionHandler来 拦截系统controller方法执行抛异常的请求，然后对异常结果做统一的封装，底层还是spring的aop实现。 异常处理逻辑：配置文件指定异常处理策略：在系统启动时，加载exceptionCode.properties配置文件来 指定对特定异常">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-06-25T11:39:22.000Z">
+<meta property="article:modified_time" content="2021-04-18T09:28:41.349Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>contorller层统一异常处理组件</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/10/12/%E5%85%A8%E5%B1%80%E4%B8%9A%E5%8A%A1%E6%97%A5%E5%BF%97%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/06/08/Spring-AOP%E5%8E%9F%E7%90%86%E5%8F%8A%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&text=contorller层统一异常处理组件"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&is_video=false&description=contorller层统一异常处理组件"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=contorller层统一异常处理组件&body=Check out this article: https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&name=contorller层统一异常处理组件&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">实现原理:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">异常处理逻辑：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%B1%BB%E8%A7%A3%E6%9E%90%EF%BC%9A-%E4%B8%9A%E5%8A%A1%E5%BC%82%E5%B8%B8%E7%B1%BBBuzzErrorException"><span class="toc-number">3.</span> <span class="toc-text">异常处理类解析： 业务异常类BuzzErrorException</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#controller%E7%BB%9F%E4%B8%80%E4%B8%9A%E5%8A%A1%E5%BC%82%E5%B8%B8%E5%A4%84%E7%B1%BB-GlobalExceptionHandler"><span class="toc-number">4.</span> <span class="toc-text">controller统一业务异常处类:GlobalExceptionHandler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%94%9F%E6%88%90%E5%BC%82%E5%B8%B8%E7%BB%93%E6%9E%9C%E5%AF%B9%E8%B1%A1ErrorMessage"><span class="toc-number">5.</span> <span class="toc-text">根据异常对象生成异常结果对象ErrorMessage:</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        contorller层统一异常处理组件
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-06-25T11:39:22.000Z" itemprop="datePublished">2020-06-25</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/" class="leancloud-visitors" data-flag-title="contorller层统一异常处理组件" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理:"></a>实现原理:</h3><p>异常结果拦截逻辑<br>contorller层统一异常处理组件是通过spring的ControllerAdvice和ExceptionHandler来 拦截系统controller方法执行抛异常的请求，然后对异常结果做统一的封装，底层还是spring的aop实现。</p>
+<h3 id="异常处理逻辑："><a href="#异常处理逻辑：" class="headerlink" title="异常处理逻辑："></a>异常处理逻辑：</h3><p>配置文件指定异常处理策略：在系统启动时，加载exceptionCode.properties配置文件来 指定对特定异常进行统一错误响应码、统一错误消息的封装策略(通过 exceptionCode.properties指定的方式后续需要去掉)。 继承BuzzErrorException指定异常处理策 </p>
+<h3 id="异常处理类解析：-业务异常类BuzzErrorException"><a href="#异常处理类解析：-业务异常类BuzzErrorException" class="headerlink" title="异常处理类解析： 业务异常类BuzzErrorException"></a>异常处理类解析： 业务异常类BuzzErrorException</h3><p>在我们进行业务处理时，绝大多数时不会对业务执行过程中抛出的异常进行捕获后进行特殊 的业务处理，而是直接抛出，所以BuzzErrorException通过基础RuntimeException，这样 业务系统抛出的业务异常不要每次都去捕获后又原封不动抛出，或在方法签名上加上一个很长的异常列表。 在实现自己的业务异常类时需要继承BuzzErrorException，并且可以通过errorCode来指定返回给前端的错误码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 〈一句话功能简述〉&lt;br&gt;</span></span><br><span class="line"><span class="comment"> * Description: 统一业务异常处理类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BuzzErrorException</span> <span class="keyword">extends</span> <span class="title">RuntimeException</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> errorCode = <span class="number">500</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(<span class="string">&quot;未知异常&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(String message, Throwable cause)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message, cause);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(Throwable cause)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(cause);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(<span class="keyword">int</span> errorCode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(errorCode,<span class="string">&quot;未知异常&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(String message, Throwable cause, <span class="keyword">boolean</span> enableSuppression, <span class="keyword">boolean</span> writableStackTrace)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message, cause, enableSuppression, writableStackTrace);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(<span class="keyword">int</span> errorCode, String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message);</span><br><span class="line">        <span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(<span class="keyword">int</span> errorCode,String message, Throwable cause)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message, cause);</span><br><span class="line">        <span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BuzzErrorException</span><span class="params">(<span class="keyword">int</span> errorCode,Throwable cause)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(cause);</span><br><span class="line">        <span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getErrorCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> errorCode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setErrorCode</span><span class="params">(<span class="keyword">int</span> errorCode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="controller统一业务异常处类-GlobalExceptionHandler"><a href="#controller统一业务异常处类-GlobalExceptionHandler" class="headerlink" title="controller统一业务异常处类:GlobalExceptionHandler"></a>controller统一业务异常处类:GlobalExceptionHandler</h3><p>统一异常处理入口方法： 在拦截到controller方法执行异常时，会通过执行所抛出的异常生成异常信息和响应错误码 包装到GlobalExceptionHandler.ErrorMessage 类中，然后包装成响应结果对象返回给前端：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ExceptionHandler(value = Exception.class)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ModelAndView <span class="title">defaultErrorHandler</span><span class="params">(HttpServletRequest request,HttpServletResponse response, Exception ex)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	logger.error(ex.getMessage(), ex);</span><br><span class="line">	ErrorMessage mess = getMessage(ex);</span><br><span class="line">	ResponseEntity result = returnException(mess);</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		response.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">		response.getWriter().write(JSONObject.toJSONString(result));</span><br><span class="line">	&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">		logger.error(<span class="string">&quot;返回异常&quot;</span>,e.getMessage());</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> ModelAndView();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="根据异常对象生成异常结果对象ErrorMessage"><a href="#根据异常对象生成异常结果对象ErrorMessage" class="headerlink" title="根据异常对象生成异常结果对象ErrorMessage:"></a>根据异常对象生成异常结果对象ErrorMessage:</h3><p>生成异常结果对象的步骤如下：<br>1.通过配置文件指定的异常处理策略来生成异常结果对象;<br>2.如果是BuzzErrorException的子类，则通过BuzzErrorException的errorCode和 message来生成异常结果对象;<br>3.如果不为BuzzErrorException的子类但为包装异常类，则通过包装的异常类生成异常结果对象;<br>4.如果为其他情况，就按照Exception类生成默认的系统异常结果对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ErrorMessage <span class="title">getMessage</span><span class="params">(Throwable th)</span> </span>&#123;</span><br><span class="line">	ErrorMessage mess = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">if</span> (th <span class="keyword">instanceof</span> BuzzErrorException)&#123;</span><br><span class="line">		BuzzErrorException buzzErrorException = (BuzzErrorException)th;</span><br><span class="line">		mess = <span class="keyword">new</span> ErrorMessage(buzzErrorException.getErrorCode(),buzzErrorException.getMessage());</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (th <span class="keyword">instanceof</span> BncErrorException) &#123;</span><br><span class="line">		BncErrorException bncErrorException = (BncErrorException)th;</span><br><span class="line">		mess = <span class="keyword">new</span> ErrorMessage(<span class="number">4002</span>,bncErrorException.getMessage());</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (th.getCause() != <span class="keyword">null</span>)&#123;</span><br><span class="line">		mess = getMessage(th.getCause());</span><br><span class="line">	&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">		ErrorMsgDetail errorMsgDetail = getErrorMsgDetail(th);</span><br><span class="line">		String exceptionMsg = errorMsgDetail.getExceptionMsg();</span><br><span class="line">		<span class="keyword">boolean</span> hasMsg = StringUtils.isBlank(exceptionMsg) || exceptionMsg.equals(<span class="string">&quot;null&quot;</span>);</span><br><span class="line">		mess = <span class="keyword">new</span> ErrorMessage(<span class="number">500</span>, hasMsg ? <span class="string">&quot;系统异常,请联系管理员!&quot;</span> : exceptionMsg, errorMsgDetail);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> mess;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">实现原理:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">异常处理逻辑：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%B1%BB%E8%A7%A3%E6%9E%90%EF%BC%9A-%E4%B8%9A%E5%8A%A1%E5%BC%82%E5%B8%B8%E7%B1%BBBuzzErrorException"><span class="toc-number">3.</span> <span class="toc-text">异常处理类解析： 业务异常类BuzzErrorException</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#controller%E7%BB%9F%E4%B8%80%E4%B8%9A%E5%8A%A1%E5%BC%82%E5%B8%B8%E5%A4%84%E7%B1%BB-GlobalExceptionHandler"><span class="toc-number">4.</span> <span class="toc-text">controller统一业务异常处类:GlobalExceptionHandler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E5%BC%82%E5%B8%B8%E5%AF%B9%E8%B1%A1%E7%94%9F%E6%88%90%E5%BC%82%E5%B8%B8%E7%BB%93%E6%9E%9C%E5%AF%B9%E8%B1%A1ErrorMessage"><span class="toc-number">5.</span> <span class="toc-text">根据异常对象生成异常结果对象ErrorMessage:</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&text=contorller层统一异常处理组件"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&is_video=false&description=contorller层统一异常处理组件"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=contorller层统一异常处理组件&body=Check out this article: https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&title=contorller层统一异常处理组件"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2020/06/25/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/contorller%E5%B1%82%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%BB%84%E4%BB%B6/&name=contorller层统一异常处理组件&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

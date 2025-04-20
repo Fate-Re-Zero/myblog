@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全局异常处理">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-09-02T08:42:02.000Z">
+<meta property="article:modified_time" content="2021-09-02T08:43:12.771Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>全局异常处理</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/09/02/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AC%E5%8F%91Servlet/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/09/02/%E6%9D%83%E9%99%90%E6%A0%A1%E9%AA%8C/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&text=全局异常处理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&is_video=false&description=全局异常处理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=全局异常处理&body=Check out this article: https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&name=全局异常处理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        全局异常处理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-09-02T08:42:02.000Z" itemprop="datePublished">2021-09-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" class="leancloud-visitors" data-flag-title="全局异常处理" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONObject;</span><br><span class="line"><span class="keyword">import</span> com.banksteel.openerp.commons.exception.BuzzErrorException;</span><br><span class="line"><span class="keyword">import</span> com.banksteel.openerp.commons.framework.entiy.ResponseEntity;</span><br><span class="line"><span class="keyword">import</span> com.banksteel.openerp.commons.framework.exception.BncErrorException;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang3.StringUtils;</span><br><span class="line"><span class="keyword">import</span> org.springframework.amqp.core.AmqpTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.ControllerAdvice;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.ExceptionHandler;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.ModelAndView;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.Calendar;</span><br><span class="line"><span class="keyword">import</span> java.util.Locale;</span><br><span class="line"><span class="keyword">import</span> java.util.UUID;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@ControllerAdvice</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalExceptionHandler</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> AmqpTemplate amqpTemplate;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//private static Properties exceptionCodes = null;</span></span><br><span class="line">	<span class="comment">//private static String exceptionCodePath = &quot;exceptionCode.properties&quot;;</span></span><br><span class="line">	<span class="comment">//private static Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*static &#123;</span></span><br><span class="line"><span class="comment">		loadProperties();</span></span><br><span class="line"><span class="comment">	&#125;*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*	private static void loadProperties()&#123;</span></span><br><span class="line"><span class="comment">		try &#123;</span></span><br><span class="line"><span class="comment">			exceptionCodes = new Properties();</span></span><br><span class="line"><span class="comment">			InputStream inputStream = GlobalExceptionHandler.class.getClassLoader().getResourceAsStream(exceptionCodePath);</span></span><br><span class="line"><span class="comment">			if (inputStream != null)&#123;</span></span><br><span class="line"><span class="comment">				InputStreamReader isr = new InputStreamReader(inputStream, &quot;UTF-8&quot;);</span></span><br><span class="line"><span class="comment">				exceptionCodes.load(isr);</span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">		&#125; catch (Exception e) &#123;</span></span><br><span class="line"><span class="comment">			logger.error(&quot;HandleException 初始化异常&quot;, e);</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">	&#125;*/</span></span><br><span class="line"></span><br><span class="line">	<span class="meta">@ExceptionHandler(value = Exception.class)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> ModelAndView <span class="title">defaultErrorHandler</span><span class="params">(HttpServletRequest request,HttpServletResponse response, Exception ex)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String trackId = UUID.randomUUID().toString().replace(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">		log.error(<span class="string">&quot;defaultErrorHandler-&gt;全局拦截异常信息,trackId=&#123;&#125;,AmqpTemplate=&#123;&#125;,&#123;&#125;&quot;</span>,trackId , amqpTemplate ,request, ex);</span><br><span class="line">		<span class="comment">//推异常日志队列</span></span><br><span class="line">		<span class="comment">//TODO</span></span><br><span class="line">		log.error(<span class="string">&quot;defaultErrorHandler-&gt;全局拦截异常信息,trackId=&#123;&#125;&quot;</span>,trackId , ex);</span><br><span class="line">		ErrorMessage mess = getMessage(ex);</span><br><span class="line">		ResponseEntity result = returnException(mess);</span><br><span class="line">		result.setResult(<span class="string">&quot;trackId=&quot;</span>+trackId);</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			response.setContentType(<span class="string">&quot;text/plain; charset=UTF-8&quot;</span>);</span><br><span class="line">			response.getWriter().write(JSONObject.toJSONString(result));</span><br><span class="line">		&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">			log.error(<span class="string">&quot;返回异常&quot;</span>,e.getMessage());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> ModelAndView();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@description</span>:组装异常后的返回信息</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> mess</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@author</span>:商家进销存项目组 xuxp</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@createTime</span>:2017年1月11日 下午3:44:16</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> ResponseEntity <span class="title">returnException</span><span class="params">(ErrorMessage mess)</span> </span>&#123;</span><br><span class="line">		ResponseEntity responseEntity = <span class="keyword">new</span> ResponseEntity();</span><br><span class="line">		String errorDetail = <span class="string">&quot;&quot;</span>;</span><br><span class="line">		<span class="keyword">if</span>(mess!=<span class="keyword">null</span>) &#123;</span><br><span class="line">			responseEntity.setCode(mess.errorCode);</span><br><span class="line">			responseEntity.setMess(mess.message);</span><br><span class="line">			errorDetail = mess.getErrorMsgDetail() == <span class="keyword">null</span> ? <span class="string">&quot;&quot;</span> : mess.getErrorMsgDetail().toString();</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			responseEntity.setCode(<span class="number">500</span>);</span><br><span class="line">			responseEntity.setMess(<span class="string">&quot;系统返回异常&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		Calendar calendar = Calendar.getInstance(Locale.CHINA);</span><br><span class="line">		responseEntity.setTimeStamp(calendar.getTimeInMillis());</span><br><span class="line">		responseEntity.setResult(<span class="string">&quot;exception&quot;</span>);</span><br><span class="line"></span><br><span class="line">		responseEntity.setData(errorDetail);</span><br><span class="line">		<span class="keyword">return</span> responseEntity;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> ErrorMessage <span class="title">getMessage</span><span class="params">(Throwable th)</span> </span>&#123;</span><br><span class="line">		ErrorMessage mess = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">if</span> (th <span class="keyword">instanceof</span> BuzzErrorException)&#123;</span><br><span class="line">			BuzzErrorException buzzErrorException = (BuzzErrorException)th;</span><br><span class="line">			mess = <span class="keyword">new</span> ErrorMessage(buzzErrorException.getErrorCode(),buzzErrorException.getMessage());</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (th <span class="keyword">instanceof</span> BncErrorException) &#123;</span><br><span class="line">			BncErrorException bncErrorException = (BncErrorException)th;</span><br><span class="line">			mess = <span class="keyword">new</span> ErrorMessage(<span class="number">4002</span>,bncErrorException.getMessage());</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (th.getCause() != <span class="keyword">null</span>)&#123;</span><br><span class="line">			mess = getMessage(th.getCause());</span><br><span class="line">		&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">			ErrorMsgDetail errorMsgDetail = getErrorMsgDetail(th);</span><br><span class="line">			String exceptionMsg = errorMsgDetail.getExceptionMsg();</span><br><span class="line">			<span class="keyword">boolean</span> hasMsg = StringUtils.isBlank(exceptionMsg) || exceptionMsg.equals(<span class="string">&quot;null&quot;</span>) || exceptionMsg.length() &gt; <span class="number">100</span>;</span><br><span class="line">			mess = <span class="keyword">new</span> ErrorMessage(<span class="number">500</span>, hasMsg ? <span class="string">&quot;系统异常,请联系管理员!&quot;</span> : exceptionMsg);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> mess;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> ErrorMsgDetail <span class="title">getErrorMsgDetail</span><span class="params">(Throwable th)</span> </span>&#123;</span><br><span class="line">		Class&lt;? extends Throwable&gt; clazzException = th.getClass();</span><br><span class="line">		String clazzExStr = <span class="keyword">null</span> == clazzException ? <span class="string">&quot;&quot;</span> : clazzException.toString();</span><br><span class="line">		String message = th.getMessage();</span><br><span class="line">		String stackExStr = <span class="string">&quot;&quot;</span>;</span><br><span class="line">		StackTraceElement[] stackTrace = th.getStackTrace();</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">null</span> != stackTrace &amp;&amp; stackTrace.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			stackExStr = stackTrace[<span class="number">0</span>].toString();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> ErrorMsgDetail(clazzExStr, message, stackExStr);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*	private ErrorMessage getMessage(Class thClazz, String errMsg) &#123;</span></span><br><span class="line"><span class="comment">		ErrorMessage mess = null;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">		String code = exceptionCodes.getProperty(thClazz.getName());</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">		if (StringUtils.contains(code,&quot;,&quot;))&#123;</span></span><br><span class="line"><span class="comment">			String[] values = code.split(&quot;,&quot;);</span></span><br><span class="line"><span class="comment">			int errorCode = 500;</span></span><br><span class="line"><span class="comment">			try&#123;</span></span><br><span class="line"><span class="comment">				errorCode = Integer.parseInt(values[0]);</span></span><br><span class="line"><span class="comment">			&#125;catch (NumberFormatException e)&#123;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">			&#125;</span></span><br><span class="line"><span class="comment">			String errorMsg = StringUtils.isNotEmpty(errMsg) &amp;&amp; errorCode != 500 ? errMsg : values[1];</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">			mess = new ErrorMessage(errorCode,errorMsg);</span></span><br><span class="line"><span class="comment">		&#125;</span></span><br><span class="line"><span class="comment">		return mess;</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">ErrorMessage</span> </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">int</span> errorCode;</span><br><span class="line">		<span class="keyword">private</span> String message;</span><br><span class="line">		<span class="keyword">private</span> ErrorMsgDetail errorMsgDetail;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="title">ErrorMessage</span><span class="params">(<span class="keyword">int</span> errorCode, String message)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">			<span class="keyword">this</span>.message = message;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="title">ErrorMessage</span><span class="params">(<span class="keyword">int</span> errorCode, String message, ErrorMsgDetail errorMsgDetail)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.errorCode = errorCode;</span><br><span class="line">			<span class="keyword">this</span>.message = message;</span><br><span class="line">			<span class="keyword">this</span>.errorMsgDetail = errorMsgDetail;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">public</span> ErrorMsgDetail <span class="title">getErrorMsgDetail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> errorMsgDetail;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;ErrorMessage [errorCode=&quot;</span> + errorCode + <span class="string">&quot;, message=&quot;</span> + message + <span class="string">&quot;, errorMsgDetail=&quot;</span></span><br><span class="line">				+ errorMsgDetail + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">ErrorMsgDetail</span> </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> String exceptionClass;</span><br><span class="line">		<span class="keyword">private</span> String exceptionMsg;</span><br><span class="line">		<span class="keyword">private</span> String exceptionStackTrace;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">public</span> String <span class="title">getExceptionMsg</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> exceptionMsg;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="title">ErrorMsgDetail</span><span class="params">(String exceptionClass, String exceptionMsg, String exceptionStackTrace)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">this</span>.exceptionClass = exceptionClass;</span><br><span class="line">			<span class="keyword">this</span>.exceptionMsg = exceptionMsg;</span><br><span class="line">			<span class="keyword">this</span>.exceptionStackTrace = exceptionStackTrace;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="string">&quot;ErrorMsgDetail [exceptionClass=&quot;</span> + exceptionClass + <span class="string">&quot;, exceptionMsg=&quot;</span> + exceptionMsg</span><br><span class="line">				+ <span class="string">&quot;, exceptionStackTrace=&quot;</span> + exceptionStackTrace + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&text=全局异常处理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&is_video=false&description=全局异常处理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=全局异常处理&body=Check out this article: https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=全局异常处理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/09/02/%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&name=全局异常处理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

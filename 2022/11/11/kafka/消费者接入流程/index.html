@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="消费者接入代码实例123456789101112131415161718192021222324252627282930313233343536import lombok.extern.slf4j.Slf4j;import org.apache.kafka.clients.consumer.ConsumerConfig;import org.apache.kafka.clients.consume">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka消费者接入细节">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="消费者接入代码实例123456789101112131415161718192021222324252627282930313233343536import lombok.extern.slf4j.Slf4j;import org.apache.kafka.clients.consumer.ConsumerConfig;import org.apache.kafka.clients.consume">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221111-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221111-2.png">
+<meta property="article:published_time" content="2022-11-11T00:26:35.000Z">
+<meta property="article:modified_time" content="2025-04-19T13:16:43.483Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221111-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Kafka消费者接入细节</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/10/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%89%B9%E6%AC%A1%E8%AE%BE%E8%AE%A1/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&text=Kafka消费者接入细节"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&is_video=false&description=Kafka消费者接入细节"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka消费者接入细节&body=Check out this article: https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&name=Kafka消费者接入细节&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.</span> <span class="toc-text">消费者接入代码实例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85poll%E6%8B%89%E5%8F%96%E6%96%B9%E6%B3%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%BB%86%E8%8A%82"><span class="toc-number">2.</span> <span class="toc-text">消费者poll拉取方法的设计细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%EF%BC%88Consumer%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">消费者（Consumer）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="toc-number">4.</span> <span class="toc-text">流程说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%8F%E7%A7%BB%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">偏移量初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4%E4%B8%8E%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">6.</span> <span class="toc-text">消费者自动提交与手动提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">7.</span> <span class="toc-text">自动提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">8.</span> <span class="toc-text">手动提交</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Kafka消费者接入细节
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-11T00:26:35.000Z" itemprop="datePublished">2022-11-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/" class="leancloud-visitors" data-flag-title="Kafka消费者接入细节" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="消费者接入代码实例"><a href="#消费者接入代码实例" class="headerlink" title="消费者接入代码实例"></a>消费者接入代码实例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;order-group&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, Order&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;orders&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, Order&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, Order&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="消费者poll拉取方法的设计细节"><a href="#消费者poll拉取方法的设计细节" class="headerlink" title="消费者poll拉取方法的设计细节"></a>消费者poll拉取方法的设计细节</h3><p><img src="/images/kafka/20221111-1.png" alt="image-20221111-1"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//max.poll.records</span></span><br><span class="line">kaProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, <span class="number">500</span>);</span><br><span class="line">...</span><br><span class="line">ConsumerRecords&lt;String, Order&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br></pre></td></tr></table></figure>
+
+<h3 id="消费者（Consumer）"><a href="#消费者（Consumer）" class="headerlink" title="消费者（Consumer）"></a>消费者（Consumer）</h3><p>● ConsumerNetworkClient：消费者网络客户端，负责与Kafka集群中的代理节点进行通信。它有几个重要的参数：<br>  ○ fetch.min.bytes：每批次最小抓取大小，默认1字节，即每次从代理节点抓取数据时，至少要抓取这么多字节的数据才会返回。<br>  ○ fetch.max.wait.ms：一批数据最小值未达到的超时时间，默认500ms，如果在这个时间内没有达到Fetch.min.bytes的要求，也会返回已抓取到的数据。<br>  ○ fetch.max.bytes：每批次最大抓取大小，默认50m，即每次抓取数据的最大字节数。<br>● completedFetches（queue）：一个完成抓取的队列，用于存储从代理节点成功抓取到的数据（completed Fetch）。</p>
+<h3 id="流程说明"><a href="#流程说明" class="headerlink" title="流程说明"></a>流程说明</h3><ol>
+<li>消费者通过ConsumerNetworkClient发送消费请求（sendFetches）到Kafka集群中的相应代理节点（根据要消费的主题和分区确定）。</li>
+<li>代理节点处理请求后，将数据返回给消费者网络客户端。</li>
+<li>消费者网络客户端将获取到的数据放入completedFetches队列中。</li>
+<li>消费者从completedFetches队列中抓取数据（FetchedRecords），并进行反序列化（ parseRecord）等后续处理。</li>
+</ol>
+<h3 id="偏移量初始化"><a href="#偏移量初始化" class="headerlink" title="偏移量初始化"></a>偏移量初始化</h3><p>AUTO_OFFSET_RESET_CONFIG 是 Kafka 消费者配置中的一个重要选项，它决定了当消费者启动时，如果没有找到存储的偏移量（例如消费者首次启动或者之前存储的偏移量已过期），该如何确定初始的消费位置。通常有以下几个可能的设置值：<br>● “earliest”：从最早的可用（未提交）消息开始消费。<br>● “latest”：从最新的消息开始消费，也就是从分区中当前的末尾位置开始消费，只消费消费者启动后新产生的消息。<br>● “none”：当设置为 “none” 时，情况有所不同。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;order-group&quot;</span>);</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">            分区0：1|2|3|4|5</span></span><br><span class="line"><span class="comment">            分区1: 1|2|3</span></span><br><span class="line"><span class="comment">            auto.offset.reset</span></span><br><span class="line"><span class="comment">            如果 Kafka 中没有初始偏移量，或者服务器上当前偏移量不再存在时该怎么办：</span></span><br><span class="line"><span class="comment">            earliest：自动将偏移量重置为最早的未提交偏移量。</span></span><br><span class="line"><span class="comment">            latest：自动将偏移量重置为最新的偏移量。</span></span><br><span class="line"><span class="comment">            none：如果没有找到消费者组的先前偏移量，则向消费者抛出异常。</span></span><br><span class="line"><span class="comment">        * */</span></span><br><span class="line"><span class="comment">//        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, &quot;earliest&quot;);</span></span><br><span class="line"><span class="comment">//        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, &quot;latest&quot;);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//Kafka 将分区消费进度保存在一个特殊的内部主题中，即 __consumer_offsets 主题。</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, <span class="string">&quot;earliest&quot;</span>);</span><br><span class="line">        <span class="comment">//自动提交消费进度</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="comment">// 自动提交的时间间隔</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, <span class="string">&quot;1000&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, Order&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;orders&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, Order&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, Order&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="消费者自动提交与手动提交"><a href="#消费者自动提交与手动提交" class="headerlink" title="消费者自动提交与手动提交"></a>消费者自动提交与手动提交</h3><p>在Kafka中，消费者（Consumers）从主题（Topics）中读取消息。消费者提交（Commit）指的是消费者告知Kafka它已经成功处理了某个偏移量（Offset）之前的所有消息。<br>consumer_offsets是Kafka内部使用的一个特殊主题，它用于存储所有消费者组的提交偏移量信息。每当消费者提交了新的偏移量（无论是自动还是手动），这个信息就会被记录在 consumer_offsets主题中。Kafka使用该主题来跟踪每个消费者组内各个分区的消费进度，以便在消费者重启或重新平衡时能够从上次提交的位置继续消费消息。</p>
+<p><img src="/images/kafka/20221111-2.png" alt="image-20221111-2"></p>
+<h3 id="自动提交"><a href="#自动提交" class="headerlink" title="自动提交"></a>自动提交</h3><p>自动提交是指Kafka消费者配置为定期自动将已消费的消息偏移量提交给Kafka集群。这种模式简化了编程模型，因为开发者不需要显式地管理偏移量的提交。然而，这也意味着如果消费者在自动提交之后但在处理消息之前崩溃，那么在消费者重启后，它可能会丢失那些尚未处理但已被标记为已处理的消息。<br>● 优点：易于使用，不需要额外代码来处理偏移量。<br>● 缺点：可能导致消息丢失，并且难以精确控制何时提交偏移量。<br>配置参数：<br>● enable.auto.commit 设置为 true 时启用自动提交。<br>● auto.commit.interval.ms 定义了两次自动提交之间的间隔时间。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;order-group&quot;</span>);</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">            分区0：1|2|3|4|5</span></span><br><span class="line"><span class="comment">            分区1: 1|2|3</span></span><br><span class="line"><span class="comment">            auto.offset.reset</span></span><br><span class="line"><span class="comment">            如果 Kafka 中没有初始偏移量，或者服务器上当前偏移量不再存在时该怎么办：</span></span><br><span class="line"><span class="comment">            earliest：自动将偏移量重置为最早的未提交偏移量。</span></span><br><span class="line"><span class="comment">            latest：自动将偏移量重置为最新的偏移量。</span></span><br><span class="line"><span class="comment">            none：如果没有找到消费者组的先前偏移量，则向消费者抛出异常。</span></span><br><span class="line"><span class="comment">        * */</span></span><br><span class="line"><span class="comment">//        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, &quot;earliest&quot;);</span></span><br><span class="line"><span class="comment">//        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, &quot;latest&quot;);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//Kafka 将分区消费进度保存在一个特殊的内部主题中，即 __consumer_offsets 主题。</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, <span class="string">&quot;latest&quot;</span>);</span><br><span class="line">        <span class="comment">//自动提交消费进度</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="comment">// 自动提交的时间间隔</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, <span class="string">&quot;1000&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, Order&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;orders112&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, Order&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, Order&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="手动提交"><a href="#手动提交" class="headerlink" title="手动提交"></a>手动提交</h3><p>手动提交则要求消费者程序显式地调用提交方法（如 commitSync() 或 commitAsync()），以通知Kafka哪些消息已经被成功处理。这种方式提供了更精细的控制，可以确保只有在消息被成功处理后才提交偏移量，从而避免消息丢失。<br>● 优点：更好的控制，防止消息丢失。<br>● 缺点：增加了复杂性，需要开发者正确处理异常情况。<br>两种主要的手动提交方式：<br>● commitSync()：同步提交，会阻塞直到提交完成或发生错误。如果提交失败，它可以抛出异常，允许应用程序逻辑进行适当的恢复操作。<br>● commitAsync()：异步提交，不会等待提交完成。这对于性能优化很有用，但是如果没有相应的回调机制来处理可能的提交失败，则可能会导致问题。<br>选择自动提交还是手动提交取决于你的应用需求以及对消息处理保证级别的要求。如果你的应用不能容忍消息丢失并且需要精确一次的处理语义，那么通常应该选择手动提交并谨慎处理偏移量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.TopicPartition;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderManualConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;order-group&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, <span class="string">&quot;latest&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, <span class="string">&quot;false&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, Order&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;orders&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, Order&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">if</span>(records.count() &gt; <span class="number">0</span>)&#123;</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, Order&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>,</span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 手动同步方式提交偏移量</span></span><br><span class="line">                <span class="comment">// consumer.commitSync();</span></span><br><span class="line"></span><br><span class="line">                <span class="comment">// 手动异步方式提交偏移量</span></span><br><span class="line">                consumer.commitAsync(<span class="keyword">new</span> OffsetCommitCallback() &#123;</span><br><span class="line">                    <span class="comment">/*</span></span><br><span class="line"><span class="comment">                    用于提供对提交请求完成的异步处理。当发送到服务器的提交请求被确认时，将调用此方法。</span></span><br><span class="line"><span class="comment">                    参数：</span></span><br><span class="line"><span class="comment">                    offsets – 这个回调适用的偏移量及其关联的元数据的映射</span></span><br><span class="line"><span class="comment">                    exception – 在处理请求期间抛出的异常，如果提交成功则为 null</span></span><br><span class="line"><span class="comment">                     */</span></span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onComplete</span><span class="params">(Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets, Exception exception)</span> </span>&#123;</span><br><span class="line">                        log.info(<span class="string">&quot;Committed offsets: &#123;&#125;&quot;</span>, offsets);</span><br><span class="line">                        <span class="keyword">if</span> (exception != <span class="keyword">null</span>) &#123;</span><br><span class="line">                            log.error(<span class="string">&quot;Failed to commit offsets&quot;</span>, exception);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.</span> <span class="toc-text">消费者接入代码实例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85poll%E6%8B%89%E5%8F%96%E6%96%B9%E6%B3%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%BB%86%E8%8A%82"><span class="toc-number">2.</span> <span class="toc-text">消费者poll拉取方法的设计细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%EF%BC%88Consumer%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">消费者（Consumer）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B%E8%AF%B4%E6%98%8E"><span class="toc-number">4.</span> <span class="toc-text">流程说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%8F%E7%A7%BB%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">偏移量初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4%E4%B8%8E%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">6.</span> <span class="toc-text">消费者自动提交与手动提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">7.</span> <span class="toc-text">自动提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="toc-number">8.</span> <span class="toc-text">手动提交</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&text=Kafka消费者接入细节"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&is_video=false&description=Kafka消费者接入细节"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka消费者接入细节&body=Check out this article: https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&title=Kafka消费者接入细节"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/&name=Kafka消费者接入细节&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

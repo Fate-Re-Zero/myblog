@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="什么是事务事务是指将一系列数据操作整体进行统一管理,这些数据操作要么同时成功,要么同时失败;MySQL只有InnoDB存储引擎支持事务; 事务特性（ACID）1.原子性（atomicity）:事务必须被视为一个不可分割的最小单元，整个事务中的所有操作要么全部提交成功，要么全部失败2.一致性（consistency）:一致性是指事务将数据库从一种一致性转换到另外一种一致性状态，在事务开始之前和事务结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL事务">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="什么是事务事务是指将一系列数据操作整体进行统一管理,这些数据操作要么同时成功,要么同时失败;MySQL只有InnoDB存储引擎支持事务; 事务特性（ACID）1.原子性（atomicity）:事务必须被视为一个不可分割的最小单元，整个事务中的所有操作要么全部提交成功，要么全部失败2.一致性（consistency）:一致性是指事务将数据库从一种一致性转换到另外一种一致性状态，在事务开始之前和事务结">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-27T06:30:38.000Z">
+<meta property="article:modified_time" content="2022-10-07T02:35:41.873Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>MySQL事务</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/10/07/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/%E5%85%A8%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%8D%E4%B9%A0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/09/27/MySql/MySQL%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&text=MySQL事务"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&is_video=false&description=MySQL事务"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL事务&body=Check out this article: https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&name=MySQL事务&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.</span> <span class="toc-text">什么是事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7%EF%BC%88ACID%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">事务特性（ACID）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E5%B9%B6%E5%8F%91%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">事务并发引发的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%AD%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">4.</span> <span class="toc-text">MySQL中的隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%BF%9D%E5%AD%98%E7%82%B9"><span class="toc-number">5.</span> <span class="toc-text">MySQL保存点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E9%9A%90%E5%BC%8F%E6%8F%90%E4%BA%A4"><span class="toc-number">6.</span> <span class="toc-text">MySQL隐式提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MVCC-Multi-Version-Concurrency-Control-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="toc-number">7.</span> <span class="toc-text">MVCC(Multi-Version Concurrency Control - 多版本并发控制)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReadView-%E8%AF%BB%E8%A7%86%E5%9B%BE"><span class="toc-number">8.</span> <span class="toc-text">ReadView(读视图)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8BMySQL%E6%98%AF%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E8%84%8F%E8%AF%BB-%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB%E7%9A%84"><span class="toc-number">9.</span> <span class="toc-text">不同事务隔离级别下MySQL是如何解决脏读,不可重复读的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redo-log"><span class="toc-number">10.</span> <span class="toc-text">redo log</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#undo-log"><span class="toc-number">11.</span> <span class="toc-text">undo log</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#binlog"><span class="toc-number">12.</span> <span class="toc-text">binlog</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E5%B4%A9%E6%BA%83%E5%90%8E%E7%9A%84%E6%81%A2%E5%A4%8D"><span class="toc-number">13.</span> <span class="toc-text">MySQL崩溃后的恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B4%A9%E6%BA%83%E5%90%8E%E7%9A%84%E6%81%A2%E5%A4%8D%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8binlog"><span class="toc-number">14.</span> <span class="toc-text">崩溃后的恢复为什么不用binlog</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86"><span class="toc-number">15.</span> <span class="toc-text">MySQL主从复制原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="toc-number">16.</span> <span class="toc-text">主从复制延迟问题的产生</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98"><span class="toc-number">17.</span> <span class="toc-text">解决主从复制延迟问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8GTID%E6%9D%A5%E8%A7%A3%E5%86%B3%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%97%AE%E9%A2%98"><span class="toc-number">18.</span> <span class="toc-text">使用GTID来解决主从复制问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%AD%E7%9A%84%E9%94%81"><span class="toc-number">19.</span> <span class="toc-text">MySQL中的锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%8C%E9%94%81%E5%92%8C%E8%A1%A8%E9%94%81"><span class="toc-number">20.</span> <span class="toc-text">行锁和表锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">21.</span> <span class="toc-text">间隙锁</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        MySQL事务
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-27T06:30:38.000Z" itemprop="datePublished">2022-09-27</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/" class="leancloud-visitors" data-flag-title="MySQL事务" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="什么是事务"><a href="#什么是事务" class="headerlink" title="什么是事务"></a>什么是事务</h3><p>事务是指将一系列数据操作整体进行统一管理,这些数据操作要么同时成功,要么同时失败;<br>MySQL只有InnoDB存储引擎支持事务;</p>
+<h3 id="事务特性（ACID）"><a href="#事务特性（ACID）" class="headerlink" title="事务特性（ACID）"></a>事务特性（ACID）</h3><p>1.原子性（atomicity）:事务必须被视为一个不可分割的最小单元，整个事务中的所有操作要么全部提交成功，要么全部失败<br>2.一致性（consistency）:一致性是指事务将数据库从一种一致性转换到另外一种一致性状态，在事务开始之前和事务结束之后数据库中数据的完整性没有被破坏;<br>3.隔离性（isolation）: 一个事务的执行不能被其他事务干扰,并发执行的各个事务之间互相隔离;<br>4.持久性（durability）:一旦事务提交，则其所做的修改就会永久保存到数据库中。此时即使系统崩溃，已经提交的修改数据也不会丢失;</p>
+<h3 id="事务并发引发的问题"><a href="#事务并发引发的问题" class="headerlink" title="事务并发引发的问题"></a>事务并发引发的问题</h3><p>1.脏读:同一个事务读取到了另外一个事务修改但未提交的数据,被称为脏读;<br>2.不可重复读:同一个事务内相同的记录被检索两次，且两次得到的结果不一致;<br>3.幻读:在事务执行过程,另一个事务将新记录添加到正在读取的事务中时,导致同一个事务中第二次读取到了之前读取没有获取到的记录</p>
+<h3 id="MySQL中的隔离级别"><a href="#MySQL中的隔离级别" class="headerlink" title="MySQL中的隔离级别"></a>MySQL中的隔离级别</h3><p>READ UNCOMMITTED：未提交读  — 有脏读,不可重复读,幻读<br>READ COMMITTED：已提交读    — 有不可重复读,幻读<br>REPEATABLE READ：可重复读   — 有幻读(MySQL并没有完全解决)<br>SERIALIZABLE：可串行化</p>
+<h3 id="MySQL保存点"><a href="#MySQL保存点" class="headerlink" title="MySQL保存点"></a>MySQL保存点</h3><p>关闭掉MySQL自动提交,可以在MySQL执行语句的过程中设置保存点,然后回滚到保存点;</p>
+<h3 id="MySQL隐式提交"><a href="#MySQL隐式提交" class="headerlink" title="MySQL隐式提交"></a>MySQL隐式提交</h3><p>即使MySQL关掉了自动提交,在事务执行过程中如果执行了DDL语句(如：创建表,添加字段,删除表),或者再次执行开启事务的语句(begain, start transaction会提交上一个事务)都会发生隐式提交;</p>
+<h3 id="MVCC-Multi-Version-Concurrency-Control-多版本并发控制"><a href="#MVCC-Multi-Version-Concurrency-Control-多版本并发控制" class="headerlink" title="MVCC(Multi-Version Concurrency Control - 多版本并发控制)"></a>MVCC(Multi-Version Concurrency Control - 多版本并发控制)</h3><p>利用记录的版本链来控制并发事务访问相同记录的行为，这种机制就被称之为多版本并发控制(Mulit-Version Concurrency Control MVCC)。<br>版本链：<br>    首先需要明确几个概念：<br>    rowId:(没有主键或者唯一键时MySQL会创建的隐藏主键);<br>    trxid:事务ID;<br>    roll_pointer:版本链中指向旧版本undo_log记录的指针;<br>    每次对某行数据进行改动，都会记录一条undo日志，随着更新次数的增多，所有的版本都会被roll_pointer属性连接成一个链表，我们把这个链表称之为版本链，版本链的头节点就是当前记录最新的值。每个版本中还包含生成该版本时对应的事务id。</p>
+<h3 id="ReadView-读视图"><a href="#ReadView-读视图" class="headerlink" title="ReadView(读视图)"></a>ReadView(读视图)</h3><p>主要包含4个重要的概念：<br>    m_ids：在生成ReadView时对应当前数据活跃的事务id列表(活跃的事务id列表中记录的未提交的事务id);<br>    min_trx_id:在生成ReadView时对应当前数据活跃的事务中最小的事务id,也就是m_ids中的最小值<br>    max_trx_id:生成ReadView时应该分配给下一个事务的id值;<br>    creator_trx_id：表示生成该ReadView的事务的事务id,执行INSERT、DELETE、UPDATE这些语句时才会为事务分配事务id,否则在一个只读事务中的事务id值都默认为0;</p>
+<h3 id="不同事务隔离级别下MySQL是如何解决脏读-不可重复读的"><a href="#不同事务隔离级别下MySQL是如何解决脏读-不可重复读的" class="headerlink" title="不同事务隔离级别下MySQL是如何解决脏读,不可重复读的"></a>不同事务隔离级别下MySQL是如何解决脏读,不可重复读的</h3><p>不同事务隔离级别下Select语句获取到的ReadView的版本不同;</p>
+<ol>
+<li>READ UNCOMMITTED:由于可以读到未提交事务修改过的记录，所以直接读取记录的最新版本就好了(所以就会出现脏读、不可重复读、幻读);</li>
+<li>SERIALIZABLE:InnoDB使用加锁的方式来访问记录（也就是所有的事务都是串行的，当然不会出现脏读、不可重复读、幻读）</li>
+<li>READ COMMITTED:每次查询开始时都会生成一个独立的ReadView,生成该ReadView的版本位当前最小活跃事务id的前一个版本,也就历史正真提交了的版本;(当前活跃的事务id对应的版本都是未提交的)</li>
+<li>REPEATABLE READ:同一个事务中,只会在第一次执行查询语句时生成一个ReadView,之后的查询就不会重复生成;(保证了前后两次查询数据一致,解决了不可重复读);</li>
+</ol>
+<p>REPEATABLE READ在大部分情况下是解决了幻读问题的,只有在一些特殊情况下才会出现幻读问题,例如:A事务查询id=1的数据,此时为空(此时连版本链都没有,ReadView是空的),但是此时事务B添加了一条id=1的数据并提交,事务A修改id=1等于的这条数据,然后事务A在读取id=1的数据,因为这时已经存在版本链,所以ReadView不为空,会产生幻读;</p>
+<h3 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h3><p>确保事务的持久性<br>在事务执行之前将操作写入redo log，这样当发生掉电之类的情况时系统可以保证事务的持久性;</p>
+<h3 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h3><p>确保事务的原子性<br>undo log称为撤销日志，当事务变更执行到一半无法完成时，可以根据撤销日志恢复到变更之间的状态来保证事务的原子性</p>
+<h3 id="binlog"><a href="#binlog" class="headerlink" title="binlog"></a>binlog</h3><p>binlog以事件形式记录了所有的DDL和除了查询语句select外的DML语句的日志,还包含语句执行所消耗的时间;</p>
+<h3 id="MySQL崩溃后的恢复"><a href="#MySQL崩溃后的恢复" class="headerlink" title="MySQL崩溃后的恢复"></a>MySQL崩溃后的恢复</h3><p>在服务器不挂的情况下，redo日志简直就是个大累赘，不仅没用，反而让性能变得更差。但是万一数据库挂了，就可以在重启时根据redo日志中的记录就可以将页面恢复到系统崩溃前的状态。</p>
+<h3 id="崩溃后的恢复为什么不用binlog"><a href="#崩溃后的恢复为什么不用binlog" class="headerlink" title="崩溃后的恢复为什么不用binlog"></a>崩溃后的恢复为什么不用binlog</h3><ol>
+<li>binlog会记录表所有更改操作，更改表结构等操作,但redo_log还记录MySQl崩溃前没有提交的事务操作;</li>
+<li>redo log是InnoDB引擎特有的，binlog是MySQL的Server层实现的,所有引擎都可以使用;</li>
+<li>redo log是物理日志,记录的是”发生在具体数据页上的修改”,直接锁定了数据位置,恢复的速度更快;binlog是逻辑日志,记录的是这个语句的原始逻辑,比如”给ID=2这的c字段加1”,恢复工程需要转化所以速度要慢一些;</li>
+<li>redo log是”循环写”的日志文件,redo log只会记录未刷盘的日志,已经刷入磁盘的数据都会从redo log 这个有限大小的日志文件里删除.binlog是追加日志,保存的是全量的日志.如果想要未刷盘的部分数据到内存时,binlog 是无法恢复的,虽然binlog拥有全量的日志,但没有一个标志让innoD 判断哪些数据已经写入磁盘,哪些数据还没有;</li>
+</ol>
+<h3 id="MySQL主从复制原理"><a href="#MySQL主从复制原理" class="headerlink" title="MySQL主从复制原理"></a>MySQL主从复制原理</h3><p>首先需要明确一下要点:</p>
+<ol>
+<li>我们在搭建MySQL主从复制架构时,首先要保证的就slave节点的IO Thread和SQL Thread必须同时正常启动,不然主从复制的搭建就是有问题的,这两个线程在主从复制过程中起着重要的作用;</li>
+<li>MySQL会以事件形式记录了所有的DDL和除了select查询语句外的DML语句的binlog日志;<br>然后就是主从复制的具体实现原理:</li>
+<li>slave节点会在一定时间间隔内对master节点的binlog进行探测其是否发生改变,如果发生改变,IO Thread会请求master节点binlog中新添加的二进制事件;</li>
+<li>同时master节点为每个IO Thread启动一个dump线程,向从节点发送二进制事件,并保存至从节点的中继日志中(Relay log)</li>
+<li>从节点使用SQL Thread从中继日志中读取二进制事件,在本地进行重放,从而使得从节点与主节点的数据保持一致,<br>执行完毕后,IO Thread和SQL Thread进入睡眠状态,等待下一次被唤醒;</li>
+</ol>
+<h3 id="主从复制延迟问题的产生"><a href="#主从复制延迟问题的产生" class="headerlink" title="主从复制延迟问题的产生"></a>主从复制延迟问题的产生</h3><p>MySQL主库写binlog采用的是追加日志的方式,这里产生的是顺序IO,但是SQL Thread将relay_log中的数据读取出来同步到从机的数据文件中去,这里发生的是随机IO,需要先查找具体操作数据的内存地址,然后再进行修改,这个过程可能比较耗时;且整个过程是单线程执行的;<br>也就是主要问题点在于：1. 随机IO; 2. 单线程执行;<br>当然也会有其他一些架构上和外部原因：1. 从库所在的机器性能要比主库所在的机器性能差; 2. 从库读压力过大,查询消耗了大量CPU资源从而影响了同步数据的速度; 3. 网路带宽不是很好,导致同步数据延时;</p>
+<p>如果担心binlog落盘的效率,可以将硬盘换成固态;</p>
+<p>主库的写操作是顺序写binlog，从库单线程去主库顺序读binlog，从库取到binlog之后在本地执行。mysql的主从复制都是单线程的操作，但是由于主库是顺序写，所以效率很高，而从库也是顺序读取主库的日志，此时的效率受网络因素的影响，但是当数据拉取回来之后变成了随机的操作，而不是顺序的，所以此时成本会提高。</p>
+<h3 id="解决主从复制延迟问题"><a href="#解决主从复制延迟问题" class="headerlink" title="解决主从复制延迟问题"></a>解决主从复制延迟问题</h3><ol>
+<li>业务的持久化层的实现采用分库架构，让不同的业务请求分散到不同的数据库服务上，分散单台机器的压力;</li>
+<li>在读多写少的情况下，对于热点数据，可以在业务层和mysql之间加入缓存层，来减少MySQL读的压力;</li>
+<li>使用更好的硬件设备，比如使用更好的CPU或者将硬盘换成固态;</li>
+</ol>
+<h3 id="使用GTID来解决主从复制问题"><a href="#使用GTID来解决主从复制问题" class="headerlink" title="使用GTID来解决主从复制问题"></a>使用GTID来解决主从复制问题</h3><p>想要从根本上解决MySQL主从复制问题,就需要MySQL主从复制设计上存在的问题出发;<br>主要存在两个问题：SQL Thread从中继日志中读取二进制事件，然后在本地进行重放；这里主要存在两个问题：1. 随机IO; 2. 单线程执行;<br>在MySQL5.6版本之后,可以给MySQL加上GTID的配置：<br>gtid_mode=on<br>enforce-gtid-consistency=true<br>当开启gtid配置后，每一个操作语句执行前会添加一个gtid事件,记录当前全局事务id,MySQL会采用多线程分组提交的方式来提高SQL Thread重放的速度,组提交信息被保存在gtid事件中;</p>
+<h3 id="MySQL中的锁"><a href="#MySQL中的锁" class="headerlink" title="MySQL中的锁"></a>MySQL中的锁</h3><p>MySQL中的锁主要用于解决并发事务问题;</p>
+<p>独占锁：排斥其他独占锁和共享锁;<br>共享锁：排斥其他独占锁,兼容其他共享锁;<br>意向锁：分为意向独占锁，意向共享锁,只能加在表级别,它的作用是用于标记表中某行是否加了独占锁或者共享锁,而不需要一行一行去做检查;<br>    当事务准备在某条记录上加共享锁时，需要先在表级别加一个意向共享锁<br>    当事务准备在某条记录上加独占锁时，需要先在表级别加一个意向独占锁</p>
+<p>MySQL中只有InnoDB存储引擎支持行锁,其他存储引擎都是表锁;</p>
+<h3 id="行锁和表锁"><a href="#行锁和表锁" class="headerlink" title="行锁和表锁"></a>行锁和表锁</h3><p>行锁：也称为记录锁,顾名思义就是在记录上加的锁。但是要注意，这个记录指的是通过给索引上的索引项加锁。<br>表锁：对整张表记录进行加锁;</p>
+<h3 id="间隙锁"><a href="#间隙锁" class="headerlink" title="间隙锁"></a>间隙锁</h3><p>间隙锁（Gap Lock）：<br>1）间隙锁锁定的是索引BTree+叶子节点的前后next指针,这就导致了加锁范围为当前叶子节点的所有索引项;<br>2）间隙锁可以在一定程度上解决可重复读事务隔离级别中的幻读问题。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.</span> <span class="toc-text">什么是事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7%EF%BC%88ACID%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">事务特性（ACID）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E5%B9%B6%E5%8F%91%E5%BC%95%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">事务并发引发的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%AD%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">4.</span> <span class="toc-text">MySQL中的隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%BF%9D%E5%AD%98%E7%82%B9"><span class="toc-number">5.</span> <span class="toc-text">MySQL保存点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E9%9A%90%E5%BC%8F%E6%8F%90%E4%BA%A4"><span class="toc-number">6.</span> <span class="toc-text">MySQL隐式提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MVCC-Multi-Version-Concurrency-Control-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="toc-number">7.</span> <span class="toc-text">MVCC(Multi-Version Concurrency Control - 多版本并发控制)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReadView-%E8%AF%BB%E8%A7%86%E5%9B%BE"><span class="toc-number">8.</span> <span class="toc-text">ReadView(读视图)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8BMySQL%E6%98%AF%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E8%84%8F%E8%AF%BB-%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB%E7%9A%84"><span class="toc-number">9.</span> <span class="toc-text">不同事务隔离级别下MySQL是如何解决脏读,不可重复读的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redo-log"><span class="toc-number">10.</span> <span class="toc-text">redo log</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#undo-log"><span class="toc-number">11.</span> <span class="toc-text">undo log</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#binlog"><span class="toc-number">12.</span> <span class="toc-text">binlog</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E5%B4%A9%E6%BA%83%E5%90%8E%E7%9A%84%E6%81%A2%E5%A4%8D"><span class="toc-number">13.</span> <span class="toc-text">MySQL崩溃后的恢复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B4%A9%E6%BA%83%E5%90%8E%E7%9A%84%E6%81%A2%E5%A4%8D%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8binlog"><span class="toc-number">14.</span> <span class="toc-text">崩溃后的恢复为什么不用binlog</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86"><span class="toc-number">15.</span> <span class="toc-text">MySQL主从复制原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="toc-number">16.</span> <span class="toc-text">主从复制延迟问题的产生</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%BB%B6%E8%BF%9F%E9%97%AE%E9%A2%98"><span class="toc-number">17.</span> <span class="toc-text">解决主从复制延迟问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8GTID%E6%9D%A5%E8%A7%A3%E5%86%B3%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%97%AE%E9%A2%98"><span class="toc-number">18.</span> <span class="toc-text">使用GTID来解决主从复制问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E4%B8%AD%E7%9A%84%E9%94%81"><span class="toc-number">19.</span> <span class="toc-text">MySQL中的锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%8C%E9%94%81%E5%92%8C%E8%A1%A8%E9%94%81"><span class="toc-number">20.</span> <span class="toc-text">行锁和表锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81"><span class="toc-number">21.</span> <span class="toc-text">间隙锁</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&text=MySQL事务"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&is_video=false&description=MySQL事务"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL事务&body=Check out this article: https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&title=MySQL事务"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/27/MySql/MySQL%E4%BA%8B%E5%8A%A1/&name=MySQL事务&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

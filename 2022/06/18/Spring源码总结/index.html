@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="我们会在 web.xml 中配置 ContextLoaderListener 监听器，当 Tomcat 启动时，会触发 ContextLoaderListener 的 contextInitialized 方法，但是在执行该方法前，会去先执行父类的静态代码块 123456789101112131415static &amp;#123;		&#x2F;&#x2F; Load default strategy implement">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码总结">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="我们会在 web.xml 中配置 ContextLoaderListener 监听器，当 Tomcat 启动时，会触发 ContextLoaderListener 的 contextInitialized 方法，但是在执行该方法前，会去先执行父类的静态代码块 123456789101112131415static &amp;#123;		&#x2F;&#x2F; Load default strategy implement">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-06-18T12:30:38.000Z">
+<meta property="article:modified_time" content="2022-06-19T15:21:55.535Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring源码总结</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/06/24/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/06/12/Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&text=Spring源码总结"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&is_video=false&description=Spring源码总结"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码总结&body=Check out this article: https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&name=Spring源码总结&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring源码总结
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-06-18T12:30:38.000Z" itemprop="datePublished">2022-06-18</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/" class="leancloud-visitors" data-flag-title="Spring源码总结" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>我们会在 web.xml 中配置 ContextLoaderListener 监听器，当 Tomcat 启动时，会触发 ContextLoaderListener 的 contextInitialized 方法，但是在执行该方法前，会去先执行父类的静态代码块</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">		<span class="comment">// Load default strategy implementations from properties file.</span></span><br><span class="line">		<span class="comment">// This is currently strictly internal and not meant to be customized</span></span><br><span class="line">		<span class="comment">// by application developers.</span></span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">// 1.根据 DEFAULT_STRATEGIES_PATH（ContextLoader.properties） 和 ContextLoader.class 构建 ClassPathResource，</span></span><br><span class="line">			<span class="comment">// path在这边为相对路径，全路径为：org.springframework.web.context.ContextLoader.properties</span></span><br><span class="line">			ClassPathResource resource = <span class="keyword">new</span> ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);</span><br><span class="line">			<span class="comment">// 2.加载resource的属性，在这边我们拿到了默认的WebApplicationContext，即：XmlWebApplicationContext</span></span><br><span class="line">			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (IOException ex) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Could not load &#x27;ContextLoader.properties&#x27;: &quot;</span> + ex.getMessage());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码主要作用是，根据spring-web工程下的ContextLoader.properties文件构建ClassPathResource，然后根据文件内容初始化ContextLoader的defaultStrategies属性；</p>
+<p>接下来就回去执行ContextLoaderListener的contextInitialized方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Initialize the root web application context.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextInitialized</span><span class="params">(ServletContextEvent event)</span> </span>&#123;</span><br><span class="line">	initWebApplicationContext(event.getServletContext());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> WebApplicationContext <span class="title">initWebApplicationContext</span><span class="params">(ServletContext servletContext)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1.校验WebApplicationContext 是否已经初始化过，如果已经初始化，则抛出异常</span></span><br><span class="line">		<span class="keyword">if</span> (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">					<span class="string">&quot;Cannot initialize context because there is already a root application context present - &quot;</span> +</span><br><span class="line">					<span class="string">&quot;check whether you have multiple ContextLoader* definitions in your web.xml!&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		servletContext.log(<span class="string">&quot;Initializing Spring root WebApplicationContext&quot;</span>);</span><br><span class="line">		Log logger = LogFactory.getLog(ContextLoader.class);</span><br><span class="line">		<span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">			logger.info(<span class="string">&quot;Root WebApplicationContext: initialization started&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">long</span> startTime = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">// Store context in local instance variable, to guarantee that</span></span><br><span class="line">			<span class="comment">// it is available on ServletContext shutdown.</span></span><br><span class="line">			<span class="keyword">if</span> (<span class="keyword">this</span>.context == <span class="keyword">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 2.创建一个WebApplicationContext并保存到context属性</span></span><br><span class="line">				<span class="keyword">this</span>.context = createWebApplicationContext(servletContext);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> (<span class="keyword">this</span>.context <span class="keyword">instanceof</span> ConfigurableWebApplicationContext) &#123;</span><br><span class="line">				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) <span class="keyword">this</span>.context;</span><br><span class="line">				<span class="keyword">if</span> (!cwac.isActive()) &#123;</span><br><span class="line">					<span class="comment">// The context has not yet been refreshed -&gt; provide services such as</span></span><br><span class="line">					<span class="comment">// setting the parent context, setting the application context id, etc</span></span><br><span class="line">					<span class="keyword">if</span> (cwac.getParent() == <span class="keyword">null</span>) &#123;</span><br><span class="line">						<span class="comment">// The context instance was injected without an explicit parent -&gt;</span></span><br><span class="line">						<span class="comment">// determine parent for root web application context, if any.</span></span><br><span class="line">						ApplicationContext parent = loadParentContext(servletContext);</span><br><span class="line">						cwac.setParent(parent);</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// 3.配置和刷新web应用上下文</span></span><br><span class="line">					configureAndRefreshWebApplicationContext(cwac, servletContext);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, <span class="keyword">this</span>.context);</span><br><span class="line"></span><br><span class="line">			ClassLoader ccl = Thread.currentThread().getContextClassLoader();</span><br><span class="line">			<span class="keyword">if</span> (ccl == ContextLoader.class.getClassLoader()) &#123;</span><br><span class="line">				currentContext = <span class="keyword">this</span>.context;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> <span class="keyword">if</span> (ccl != <span class="keyword">null</span>) &#123;</span><br><span class="line">				currentContextPerThread.put(ccl, <span class="keyword">this</span>.context);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">				<span class="keyword">long</span> elapsedTime = System.currentTimeMillis() - startTime;</span><br><span class="line">				logger.info(<span class="string">&quot;Root WebApplicationContext initialized in &quot;</span> + elapsedTime + <span class="string">&quot; ms&quot;</span>);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>.context;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (RuntimeException | Error ex) &#123;</span><br><span class="line">			logger.error(<span class="string">&quot;Context initialization failed&quot;</span>, ex);</span><br><span class="line">			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);</span><br><span class="line">			<span class="keyword">throw</span> ex;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法的核心内容在第3步：配置和刷新web应用上下文(见下面代码块)，<br>其中第2步：创建一个WebApplicationContext并保存到context属性会用到defaultStrategies属性</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configureAndRefreshWebApplicationContext</span><span class="params">(ConfigurableWebApplicationContext wac, ServletContext sc)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1.如果应用上下文id是原始默认值，则根据相关信息生成一个更有用的</span></span><br><span class="line">		<span class="keyword">if</span> (ObjectUtils.identityToString(wac).equals(wac.getId())) &#123;</span><br><span class="line">			<span class="comment">// The application context id is still set to its original default value</span></span><br><span class="line">			<span class="comment">// -&gt; assign a more useful id based on available information</span></span><br><span class="line">			<span class="comment">// 1.1 从servletContext中解析初始化参数contextId(可以在web.xml中配置)</span></span><br><span class="line">			String idParam = sc.getInitParameter(CONTEXT_ID_PARAM);</span><br><span class="line">			<span class="keyword">if</span> (idParam != <span class="keyword">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 1.1.1 如果idParam不为空, 则设置为wac的Id属性</span></span><br><span class="line">				wac.setId(idParam);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="comment">// Generate default id...</span></span><br><span class="line">				<span class="comment">// 1.1.2 如果idParam为空, 则生成默认的id, 例如: org.springframework.web.context.WebApplicationContext:</span></span><br><span class="line">				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +</span><br><span class="line">						ObjectUtils.getDisplayString(sc.getContextPath()));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 2.为应用上下文设置servletContext</span></span><br><span class="line">		wac.setServletContext(sc);</span><br><span class="line">		<span class="comment">// 3.从servletContext中解析初始化参数contextConfigLocation(可以在web.xml中配置, 这个参数一般我们都会设置)</span></span><br><span class="line">		String configLocationParam = sc.getInitParameter(CONFIG_LOCATION_PARAM);</span><br><span class="line">		<span class="keyword">if</span> (configLocationParam != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="comment">// 4.设置wac的configLocations属性值为configLocationParam,还会初始化环境属性</span></span><br><span class="line">			wac.setConfigLocation(configLocationParam);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// The wac environment&#x27;s #initPropertySources will be called in any case when the context</span></span><br><span class="line">		<span class="comment">// is refreshed; do it eagerly here to ensure servlet property sources are in place for</span></span><br><span class="line">		<span class="comment">// use in any post-processing or initialization that occurs below prior to #refresh</span></span><br><span class="line">		ConfigurableEnvironment env = wac.getEnvironment();</span><br><span class="line">		<span class="keyword">if</span> (env <span class="keyword">instanceof</span> ConfigurableWebEnvironment) &#123;</span><br><span class="line">			<span class="comment">// 5.初始化属性源(主要是将servletContextInitParams的占位类替换成sc)</span></span><br><span class="line">			((ConfigurableWebEnvironment) env).initPropertySources(sc, <span class="keyword">null</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 6.自定义上下文</span></span><br><span class="line">		customizeContext(sc, wac);</span><br><span class="line">		<span class="comment">// 7.应用上下文的刷新</span></span><br><span class="line">		wac.refresh();</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>4.设置 wac 的 configLocations 属性值为 configLocationParam，</p>
+<p>5.初始化属性源，见代码块11详解。</p>
+<p>6.自定义上下文，见代码块12详解。</p>
+<p>7.应用上下文的刷新，IoC 核心内容</p>
+<p>总结：初始化IOC容器之前的一些操作：<br>    1.根据spring-web工程下的ContextLoader.properties文件构建ClassPathResource，然后根据文件内容初始化ContextLoader的defaultStrategies属性；<br>    2.根据defaultStrategies属性创建WebApplicationContext，这里创建的是XmlWebApplicationContext并强转为ConfigurableWebApplicationContext;<br>    3.将web.xml配置文件中的属性都初始化到ConfigurableWebApplicationContext中，创建并初始化环境属性；<br>    4.将ServletContext替换掉ConfigurableWebEnvironment环境中的占位符；<br>    5.自定义上下文，开发者可以自己创建ApplicationContextInitializer的实现类，重写initialize，向ConfigurableApplicationContext上下文中添加自己的逻辑实现；并在web.xml中定义 contextInitializerClasses 或 globalInitializerClasses 参数，参数值为自定义实现类的全路径；此处是Spring提供的自定义应用上下文 ConfigurableApplicationContext 的扩展点；<br>    6.执行应用上下文的刷新，也就是核心方法refresh()方法；</p>
+<p>obtainFreshBeanFactory方法：<br>总结：<br>    1.创建DefaultListableBeanFactory；<br>    2.为指定BeanFactory创建XmlBeanDefinitionReader；<br>    3.获取配置文件路径集合，遍历文件路径；（就是为了将配置文件封装成Resource对象和获取到inputStream）<br>        3.1.根据路径拿到该路径下所有符合的配置文件，并封装成Resource集合;<br>        3.2.遍历Resource集合，构建EncodedResource，并获取到Resource的inputStream<br>        3.3.将inputStream封装成org.xml.sax.InputSource<br>    4.解析配置文件，注册Bean；<br>        4.1.根据inputSource和resource加载XML文件，并封装成Document<br>            4.1.1.获取XML配置文件的验证模式。XML文件的验证模式是用来保证XML文件的正确性，常见的验证模式有两种：DTD和XSD<br>        4.2.根据返回的Document注册Bean信息(对配置文件的解析，核心逻辑)<br>            4.2.1.根据resource创建一个XmlReaderContext,用于存放解析时会用到的一些上下文信息,并且会去构建NamespaceHandlerResolver,DefaultNamespaceHandlerResolver的handlerMappingsLocation属性会使用默认的值”META-INF/spring.handlers”，<br>            并且这边有个重要的属性 handlerMappings，handlerMappings 用于存放命名空间和该命名空间handler类的映射<br>            4.2.2.根据Document的节点信息和XmlReaderContext构建BeanDefinitionParserDelegate，并赋值给DefaultBeanDefinitionDocumentReader的delegate属性；<br>            4.2.3.解析处理profile属性,profile属性主要用于多环境开发,可以在配置文件中同时写上多套配置来适用于开发环境、测试环境、生产环境，这样可以方便的进行切换开发、部署环境，最常用的就是更换不同的数据库。具体使用哪个环境在 web.xml 中通过参数 spring.profiles.active 来配置；<br>            4.2.4.解析前处理, 留给子类实现；<br>            4.2.5.解析并注册bean定义;<br>                4.2.5.1.遍历root的子节点列表;<br>                4.2.5.1.如果节点的命名空间是 Spring 默认的命名空间，则走 parseDefaultElement(ele, delegate) 方法进行解析，例如最常见的：<bean>;<br>                4.2.5.2.如果节点的命名空间不是 Spring 默认的命名空间，也就是自定义命名空间，则走 delegate.parseCustomElement(ele) 方法进行解析，例如常见的：<a href="context:component-scan/">context:component-scan/</a>、<a href="aop:aspectj-autoproxy/">aop:aspectj-autoproxy/</a>;<br>            4.2.6.解析后处理, 留给子类实现；</bean></p>
+<p>parseDefaultElement(ele, delegate)总结：<br>    先将 xml 中的 bean 配置信息进行了解析，并构建了 AbstractBeanDefinition（GenericBeanDefinition） 对象来存放所有解析出来的属性。<br>    然后，我们将 AbstractBeanDefinition 、beanName、aliasesArray 构建成 BeanDefinitionHolder 对象并返回。<br>    最后，我们通过 BeanDefinitionHolder 将 BeanDefinition 和 beanName 注册到 BeanFactory 中，也就是存放到缓存中。<br>    执行完 parseDefaultElement 方法，我们得到了两个重要的缓存：<br>        beanDefinitionNames 缓存；<br>        beanDefinitionMap 缓存；<br>        aliasMap缓存；<br>    beanDefinitionMap：DefaultListableBeanFactory的属性,用于存放bean name与BeanDefinition的映射关系</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Map of bean definition objects, keyed by bean name. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, BeanDefinition&gt; beanDefinitionMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">256</span>);</span><br></pre></td></tr></table></figure>
+<pre><code>beanDefinitionNames:DefaultListableBeanFactory的属性,用于存放bean name集合
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** List of bean definition names, in registration order. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> List&lt;String&gt; beanDefinitionNames = <span class="keyword">new</span> ArrayList&lt;&gt;(<span class="number">256</span>);</span><br></pre></td></tr></table></figure>
+<pre><code>aliasMap:SimpleAliasRegistry的属性，用于别名和beanName的映射
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Map from alias to canonical name. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, String&gt; aliasMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">16</span>);</span><br></pre></td></tr></table></figure>
+
+<p>BeanDefinition是什么：<br>    BeanDefinition主要是用来描述Bean，存储Bean的相关信息，主要包括：Bean的属性、是否单例、延迟加载、Bean的名称、构造方法等；<br>        1.BeanDefinition继承了AttributeAccessor，具备处理属性的能力；<br>        2.BeanDefinition继承了BeanMetadataElement，可以持有Bean元数据元素，作用是可以持有XML文件的一个bean标签对应的Object；</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&text=Spring源码总结"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&is_video=false&description=Spring源码总结"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码总结&body=Check out this article: https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&title=Spring源码总结"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/06/18/Spring%E6%BA%90%E7%A0%81%E6%80%BB%E7%BB%93/&name=Spring源码总结&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

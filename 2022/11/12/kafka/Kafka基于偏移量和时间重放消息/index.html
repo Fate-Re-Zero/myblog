@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="基于偏移量重放消息 数据重新处理错误修复：处理消息时出错致数据不准确或丢失，可重放消息修复存储错误或逻辑错误。 功能测试和验证新功能测试：使用历史消息测试新功能的准确性和性能。性能测试：将偏移量设至高负载时段，评估系统优化或升级后的性能。 业务逻辑调整和审计业务更新：业务逻辑变更，重放消息以符合新规则。审计检查：设置偏移量，对特定时段消息重新处理，确保合规性。  12345678910111213">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka基于偏移量和时间重放消息">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="基于偏移量重放消息 数据重新处理错误修复：处理消息时出错致数据不准确或丢失，可重放消息修复存储错误或逻辑错误。 功能测试和验证新功能测试：使用历史消息测试新功能的准确性和性能。性能测试：将偏移量设至高负载时段，评估系统优化或升级后的性能。 业务逻辑调整和审计业务更新：业务逻辑变更，重放消息以符合新规则。审计检查：设置偏移量，对特定时段消息重新处理，确保合规性。  12345678910111213">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-11-12T00:16:28.000Z">
+<meta property="article:modified_time" content="2025-04-19T13:41:34.233Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Kafka基于偏移量和时间重放消息</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/13/kafka/Kafka%E6%96%B0%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84KRaft/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&text=Kafka基于偏移量和时间重放消息"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&is_video=false&description=Kafka基于偏移量和时间重放消息"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka基于偏移量和时间重放消息&body=Check out this article: https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&name=Kafka基于偏移量和时间重放消息&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">基于偏移量重放消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF"><span class="toc-number">2.</span> <span class="toc-text">基于时间重放消息</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Kafka基于偏移量和时间重放消息
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-12T00:16:28.000Z" itemprop="datePublished">2022-11-12</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/" class="leancloud-visitors" data-flag-title="Kafka基于偏移量和时间重放消息" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="基于偏移量重放消息"><a href="#基于偏移量重放消息" class="headerlink" title="基于偏移量重放消息"></a>基于偏移量重放消息</h3><ol>
+<li>数据重新处理<br>错误修复：处理消息时出错致数据不准确或丢失，可重放消息修复存储错误或逻辑错误。</li>
+<li>功能测试和验证<br>新功能测试：使用历史消息测试新功能的准确性和性能。<br>性能测试：将偏移量设至高负载时段，评估系统优化或升级后的性能。</li>
+<li>业务逻辑调整和审计<br>业务更新：业务逻辑变更，重放消息以符合新规则。<br>审计检查：设置偏移量，对特定时段消息重新处理，确保合规性。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.TopicPartition;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OffsetSeekConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IoTEventDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;iot-events-group&quot;</span>);</span><br><span class="line">        <span class="comment">//自动提交消费进度</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="comment">// 自动提交的时间间隔</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, <span class="string">&quot;1000&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, IoTEvent&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line"></span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;iot-events&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 获取当前消费者分配的主题分区集合。</span></span><br><span class="line">            Set&lt;TopicPartition&gt; assignment = consumer.assignment();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 等待直到消费者被分配到主题分区。</span></span><br><span class="line">            <span class="comment">// 由于初始分配可能需要一些时间，因此使用一个 while 循环不断轮询，</span></span><br><span class="line">            <span class="comment">// 每次轮询间隔 100 毫秒，直到获取到分配的分区。</span></span><br><span class="line">            <span class="keyword">while</span> (assignment.isEmpty()) &#123;</span><br><span class="line">                <span class="comment">// 调用 poll 方法以确保消费者与 Kafka 集群保持连接，并等待分配。</span></span><br><span class="line">                consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="comment">// 更新分配的分区集合。</span></span><br><span class="line">                assignment = consumer.assignment();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 遍历所有分配的分区，并将每个分区的消费位置设置为偏移量 10。</span></span><br><span class="line">            <span class="keyword">for</span> (TopicPartition topicPartition : assignment) &#123;</span><br><span class="line">                <span class="comment">// 将指定分区的消费位置设置为偏移量 10。</span></span><br><span class="line">                <span class="comment">// 这意味着消费者将从每个分区的第 10 条消息开始读取。</span></span><br><span class="line">                consumer.seek(topicPartition, <span class="number">10</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                ConsumerRecords&lt;String, IoTEvent&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, IoTEvent&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (KafkaMetricsCollector.java:<span class="number">270</span>) - initializing Kafka metrics collector</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AppInfoParser.java:<span class="number">125</span>) - Kafka version: <span class="number">3.9</span><span class="number">.0</span></span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AppInfoParser.java:<span class="number">126</span>) - Kafka commitId: 84caaa6e9da06435</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AppInfoParser.java:<span class="number">127</span>) - Kafka startTimeMs: <span class="number">1736998857485</span></span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (ClassicKafkaConsumer.java:<span class="number">481</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] <span class="function">Subscribed to <span class="title">topic</span><span class="params">(s)</span>: iot-events</span></span><br><span class="line"><span class="function">2025-01-16 11:40:57 [INFO] <span class="params">(Metadata.java:<span class="number">365</span>)</span> - [Consumer clientId</span>=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Cluster ID: B4mRavu_Tm-rLq1koR7IgQ</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AbstractCoordinator.java:<span class="number">937</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Discovered group coordinator kafka:<span class="number">9092</span> (id: <span class="number">2147482646</span> rack: <span class="keyword">null</span>)</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AbstractCoordinator.java:<span class="number">605</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] (Re-)joining group</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AbstractCoordinator.java:<span class="number">1103</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Request joining group due to: need to re-join with the given member-id: consumer-iot-events-group-<span class="number">1</span>-2cf66a8d-cadf-<span class="number">462d</span>-b62a-05c54ba70f26</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">40</span>:<span class="number">57</span> [INFO] (AbstractCoordinator.java:<span class="number">605</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] (Re-)joining group</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (AbstractCoordinator.java:<span class="number">666</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Successfully joined group with generation Generation&#123;generationId=<span class="number">10</span>, memberId=<span class="string">&#x27;consumer-iot-events-group-1-2cf66a8d-cadf-462d-b62a-05c54ba70f26&#x27;</span>, protocol=<span class="string">&#x27;range&#x27;</span>&#125;</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (ConsumerCoordinator.java:<span class="number">664</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Finished assignment <span class="keyword">for</span> group at generation <span class="number">10</span>: &#123;consumer-iot-events-group-<span class="number">1</span>-2cf66a8d-cadf-<span class="number">462d</span>-b62a-05c54ba70f26=Assignment(partitions=[iot-events-<span class="number">0</span>])&#125;</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (AbstractCoordinator.java:<span class="number">843</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Successfully synced group in generation Generation&#123;generationId=<span class="number">10</span>, memberId=<span class="string">&#x27;consumer-iot-events-group-1-2cf66a8d-cadf-462d-b62a-05c54ba70f26&#x27;</span>, protocol=<span class="string">&#x27;range&#x27;</span>&#125;</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (ConsumerCoordinator.java:<span class="number">324</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] <span class="function">Notifying assignor about the new <span class="title">Assignment</span><span class="params">(partitions=[iot-events-<span class="number">0</span>])</span></span></span><br><span class="line"><span class="function">2025-01-16 11:41:40 [INFO] <span class="params">(ConsumerRebalanceListenerInvoker.java:<span class="number">58</span>)</span> - [Consumer clientId</span>=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Adding newly assigned partitions: iot-events-<span class="number">0</span></span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (ConsumerUtils.java:<span class="number">209</span>) - Setting offset <span class="keyword">for</span> partition iot-events-<span class="number">0</span> to the committed offset FetchPosition&#123;offset=<span class="number">791</span>, offsetEpoch=Optional[<span class="number">0</span>], currentLeader=LeaderAndEpoch&#123;leader=Optional[kafka:<span class="number">9092</span> (id: <span class="number">1001</span> rack: <span class="keyword">null</span>)], epoch=<span class="number">0</span>&#125;&#125;</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">40</span> [INFO] (ClassicKafkaConsumer.java:<span class="number">764</span>) - [Consumer clientId=consumer-iot-events-group-<span class="number">1</span>, groupId=iot-events-group] Seeking to offset <span class="number">10</span> <span class="keyword">for</span> partition iot-events-<span class="number">0</span></span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">41</span> [INFO] (OffsetConsumer.java:<span class="number">54</span>) - topic=iot-events, partition=<span class="number">0</span>, offset=<span class="number">10</span>, key=<span class="number">3</span>, value=IoTEvent(deviceId=<span class="number">3</span>, eventTimestamp=<span class="number">1736997681860</span>, deviceType=BOT, eventValue=<span class="number">88</span>)</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">41</span> [INFO] (OffsetConsumer.java:<span class="number">54</span>) - topic=iot-events, partition=<span class="number">0</span>, offset=<span class="number">11</span>, key=<span class="number">3</span>, value=IoTEvent(deviceId=<span class="number">3</span>, eventTimestamp=<span class="number">1736997682880</span>, deviceType=BOT, eventValue=<span class="number">62</span>)</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">41</span> [INFO] (OffsetConsumer.java:<span class="number">54</span>) - topic=iot-events, partition=<span class="number">0</span>, offset=<span class="number">12</span>, key=<span class="number">1</span>, value=IoTEvent(deviceId=<span class="number">1</span>, eventTimestamp=<span class="number">1736997683885</span>, deviceType=BOT, eventValue=<span class="number">29</span>)</span><br><span class="line"><span class="number">2025</span>-<span class="number">01</span>-<span class="number">16</span> <span class="number">11</span>:<span class="number">41</span>:<span class="number">41</span> [INFO] (OffsetConsumer.java:<span class="number">54</span>) - topic=iot-events, partition=<span class="number">0</span>, offset=<span class="number">13</span>, key=<span class="number">5</span>, value=IoTEvent(deviceId=<span class="number">5</span>, eventTimestamp=<span class="number">1736997684894</span>, deviceType=BOT, eventValue=<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="基于时间重放消息"><a href="#基于时间重放消息" class="headerlink" title="基于时间重放消息"></a>基于时间重放消息</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.TopicPartition;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TimeSeekConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IoTEventDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;iot-events-group&quot;</span>);</span><br><span class="line">        <span class="comment">//自动提交消费进度</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="comment">// 自动提交的时间间隔</span></span><br><span class="line">        kaProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, <span class="string">&quot;1000&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, IoTEvent&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line"></span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;iot-events&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 获取当前消费者分配的主题分区集合。</span></span><br><span class="line">            Set&lt;TopicPartition&gt; assignment = consumer.assignment();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 等待直到消费者被分配到主题分区。</span></span><br><span class="line">            <span class="comment">// 由于初始分配可能需要一些时间，因此使用一个 while 循环不断轮询，</span></span><br><span class="line">            <span class="comment">// 每次轮询间隔 100 毫秒，直到获取到分配的分区。</span></span><br><span class="line">            <span class="keyword">while</span> (assignment.isEmpty()) &#123;</span><br><span class="line">                <span class="comment">// 调用 poll 方法以确保消费者与 Kafka 集群保持连接，并等待分配。</span></span><br><span class="line">                consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="comment">// 更新分配的分区集合。</span></span><br><span class="line">                assignment = consumer.assignment();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 指定时间戳（例如，当前时间减去1小时）</span></span><br><span class="line">            <span class="keyword">long</span> timestamp = <span class="number">1736997681860l</span>;</span><br><span class="line">            <span class="comment">// 创建一个Map来存储每个分区的时间戳</span></span><br><span class="line">            Map&lt;TopicPartition, Long&gt; timestampsToSearch = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">            <span class="keyword">for</span> (TopicPartition topicPartition : assignment) &#123;</span><br><span class="line">                timestampsToSearch.put(topicPartition, timestamp);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 获取指定时间的偏移量</span></span><br><span class="line">            Map&lt;TopicPartition, OffsetAndTimestamp&gt; offsets = consumer.offsetsForTimes(timestampsToSearch);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 遍历所有分配的分区，并将每个分区的消费位置设置为指定时间的偏移量。</span></span><br><span class="line">            <span class="keyword">for</span> (TopicPartition topicPartition : assignment) &#123;</span><br><span class="line">                OffsetAndTimestamp offsetAndTimestamp = offsets.get(topicPartition);</span><br><span class="line">                <span class="keyword">if</span> (offsetAndTimestamp != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// 将指定分区的消费位置设置为指定时间的偏移量。</span></span><br><span class="line">                    consumer.seek(topicPartition, offsetAndTimestamp.offset());</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// 如果没有找到指定时间的偏移量，则从头开始消费</span></span><br><span class="line">                    consumer.seekToBeginning(Collections.singletonList(topicPartition));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                ConsumerRecords&lt;String, IoTEvent&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, IoTEvent&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">基于偏移量重放消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF"><span class="toc-number">2.</span> <span class="toc-text">基于时间重放消息</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&text=Kafka基于偏移量和时间重放消息"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&is_video=false&description=Kafka基于偏移量和时间重放消息"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka基于偏移量和时间重放消息&body=Check out this article: https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&title=Kafka基于偏移量和时间重放消息"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/&name=Kafka基于偏移量和时间重放消息&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

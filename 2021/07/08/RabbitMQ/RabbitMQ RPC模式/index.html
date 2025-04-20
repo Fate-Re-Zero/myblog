@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="RabbitMQ 的 RPC 模式介绍RPC（Remote Procedure Call，远程过程调用）是一种常见的通信模式，允许客户端通过网络调用远程服务器上的方法或服务，就像调用本地函数一样。RabbitMQ提供了对 RPC 模式的原生支持，使得开发者可以通过消息队列实现高效的分布式系统。在RabbitMQ的RPC模式中，客户端发送一个请求消息到服务器，服务器处理请求后返回响应消息给客户端。这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ RPC模式">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="RabbitMQ 的 RPC 模式介绍RPC（Remote Procedure Call，远程过程调用）是一种常见的通信模式，允许客户端通过网络调用远程服务器上的方法或服务，就像调用本地函数一样。RabbitMQ提供了对 RPC 模式的原生支持，使得开发者可以通过消息队列实现高效的分布式系统。在RabbitMQ的RPC模式中，客户端发送一个请求消息到服务器，服务器处理请求后返回响应消息给客户端。这">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210708-2.png">
+<meta property="article:published_time" content="2021-07-08T05:26:21.000Z">
+<meta property="article:modified_time" content="2025-04-19T06:34:33.785Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210708-2.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RabbitMQ RPC模式</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/09/RabbitMQ/RabbitMQ%E6%B6%88%E8%B4%B9%E8%80%85%E4%BC%98%E5%85%88%E7%BA%A7%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E9%98%9F%E5%88%97/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/08/RabbitMQ/RabbitMQ%E5%A4%87%E7%94%A8%E4%BA%A4%E6%8D%A2%E6%9C%BA(Alternate%20Exchange)/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&text=RabbitMQ RPC模式"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&is_video=false&description=RabbitMQ RPC模式"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ RPC模式&body=Check out this article: https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&name=RabbitMQ RPC模式&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ-%E7%9A%84-RPC-%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 的 RPC 模式介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RPC%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">RPC模式的工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="toc-number">3.</span> <span class="toc-text">关键概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RPC%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">4.</span> <span class="toc-text">RPC模式的应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RabbitMQ RPC模式
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-08T05:26:21.000Z" itemprop="datePublished">2021-07-08</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/" class="leancloud-visitors" data-flag-title="RabbitMQ RPC模式" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="RabbitMQ-的-RPC-模式介绍"><a href="#RabbitMQ-的-RPC-模式介绍" class="headerlink" title="RabbitMQ 的 RPC 模式介绍"></a>RabbitMQ 的 RPC 模式介绍</h3><p>RPC（Remote Procedure Call，远程过程调用）是一种常见的通信模式，允许客户端通过网络调用远程服务器上的方法或服务，就像调用本地函数一样。RabbitMQ提供了对 RPC 模式的原生支持，使得开发者可以通过消息队列实现高效的分布式系统。<br>在RabbitMQ的RPC模式中，客户端发送一个请求消息到服务器，服务器处理请求后返回响应消息给客户端。这种模式的核心思想是通过消息队列实现异步的远程调用，并确保请求和响应能够正确匹配。</p>
+<p><img src="/images/RabbitMQ/20210708-2.png" alt="image-20210708-2"></p>
+<h3 id="RPC模式的工作流程"><a href="#RPC模式的工作流程" class="headerlink" title="RPC模式的工作流程"></a>RPC模式的工作流程</h3><ol>
+<li>客户端发送请求：<br>○ 客户端创建一个临时的专属队列（通常称为“回调队列”），用于接收服务器的响应。<br>○ 客户端将请求消息发送到一个指定的队列（通常是服务器监听的队列），并在消息中附带回调队列的名称以及一个唯一标识符（如 correlation_id），以便后续匹配响应。</li>
+<li>服务器处理请求：<br>○ 服务器从请求队列中消费消息，执行相应的业务逻辑。<br>○ 处理完成后，服务器将结果封装为响应消息，并将其发送到客户端指定的回调队列中。响应消息中会包含与请求相同的 correlation_id，以确保客户端能够正确匹配请求和响应。</li>
+<li>客户端接收响应：<br>○ 客户端从回调队列中消费响应消息，并根据 correlation_id 找到对应的请求。<br>○ 客户端处理响应数据，完成整个 RPC 调用。</li>
+</ol>
+<h3 id="关键概念"><a href="#关键概念" class="headerlink" title="关键概念"></a>关键概念</h3><p>● 回调队列（Callback Queue）：<br>客户端创建的临时队列，用于接收服务器的响应消息。每个客户端通常都有自己的回调队列，以避免消息混淆。<br>● Correlation ID：<br>每个请求消息都附带一个唯一的标识符（correlation_id），用于在客户端匹配请求和响应。<br>● 消息确认机制：<br>RabbitMQ 提供了消息确认机制（ACK/NACK），确保消息不会丢失。例如，服务器可以确认已成功处理请求，客户端可以确认已成功接收到响应。</p>
+<h3 id="RPC模式的应用场景"><a href="#RPC模式的应用场景" class="headerlink" title="RPC模式的应用场景"></a>RPC模式的应用场景</h3><ol>
+<li>微服务架构：<br>在微服务架构中，不同服务之间需要通过网络进行通信。RPC模式可以帮助服务之间高效地传递请求和响应，而无需直接暴露服务的内部细节。</li>
+<li>分布式计算：<br>当需要将计算任务分发到多个节点时，RPC模式可以用来协调任务分发和结果收集。</li>
+<li>API 网关：<br>API 网关可以通过 RPC模式与后端服务通信，从而实现负载均衡、请求路由和响应聚合。</li>
+<li>实时数据处理：<br>在需要实时处理用户请求的场景中（如在线游戏、聊天应用等），RPC模式可以快速响应用户的操作请求。</li>
+<li>异步任务调度：<br>当某些任务需要异步执行时，RPC模式可以用来提交任务并获取最终结果。例如，文件上传后的处理、图片压缩等。</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>RabbitMQ的RPC模式是一种强大的通信机制，特别适用于分布式系统中的远程调用。它通过消息队列实现了请求和响应的解耦，提供了高可靠性和灵活性。然而，在使用RPC模式时需要注意以下几点：<br>● 性能开销： 由于涉及消息的序列化、网络传输和反序列化，RPC模式可能会引入一定的延迟。<br>● 错误处理： 需要设计完善的错误处理机制，以应对网络故障、超时等问题。<br>● 安全性： 在生产环境中，建议使用 TLS 加密通信，确保消息的安全性。<br>通过合理设计和优化，RabbitMQ 的 RPC 模式可以成为构建高效分布式系统的有力工具。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq.client;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.util.UUID;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ArrayBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * RPCClient 类用于实现基于 RabbitMQ 的远程过程调用（RPC）客户端。</span></span><br><span class="line"><span class="comment"> * 该类实现了 AutoCloseable 接口，确保资源可以正确关闭。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RPCClient</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 请求队列的名称</span></span><br><span class="line">    <span class="keyword">private</span> String requestQueueName = <span class="string">&quot;rpc_queue&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 向 RPC 服务端发送请求并等待响应。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> message 要发送的请求消息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 服务端返回的响应消息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException          如果在与 RabbitMQ 通信时发生 I/O 错误</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> InterruptedException 如果在等待响应时线程被中断</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"></span><br><span class="line">     <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">(String message)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (</span><br><span class="line">            <span class="comment">// 从工具类获取 RabbitMQ 连接</span></span><br><span class="line">                Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                <span class="comment">// 创建一个新的通道</span></span><br><span class="line">                Channel channel = connection.createChannel();) &#123;</span><br><span class="line">            <span class="comment">// 声明请求队列，如果队列不存在则创建</span></span><br><span class="line">            channel.queueDeclare(requestQueueName, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">            <span class="comment">// 生成一个唯一的关联 ID，用于匹配请求和响应</span></span><br><span class="line">            <span class="keyword">final</span> String corrId = UUID.randomUUID().toString();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 声明一个临时的回复队列，并获取其名称</span></span><br><span class="line">            String replyQueueName = channel.queueDeclare().getQueue();</span><br><span class="line">            log.info(<span class="string">&quot;replyQueueName:&#123;&#125;,correlationId:&#123;&#125;&quot;</span>, replyQueueName,corrId);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 构建 AMQP 消息属性，设置关联 ID 和回复队列</span></span><br><span class="line">            AMQP.BasicProperties props = <span class="keyword">new</span> AMQP.BasicProperties.Builder()</span><br><span class="line">                    .correlationId(corrId)</span><br><span class="line">                    <span class="comment">// 设置回复队列，服务端将响应发送到该队列</span></span><br><span class="line">                    .replyTo(replyQueueName)</span><br><span class="line">                    .build();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 发布请求消息到请求队列</span></span><br><span class="line">            channel.basicPublish(<span class="string">&quot;&quot;</span>, requestQueueName, props, message.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 创建一个阻塞队列，用于存储响应消息</span></span><br><span class="line">            <span class="keyword">final</span> BlockingQueue&lt;String&gt; response = <span class="keyword">new</span> ArrayBlockingQueue&lt;&gt;(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 开始消费回复队列中的消息，此方法会返回一个消费者标签。</span></span><br><span class="line"><span class="comment">             * </span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> replyQueueName 要消费的回复队列的名称</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> true           表示自动确认消息，即消费者接收到消息后，RabbitMQ 会自动将消息标记为已消费</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> (consumerTag, delivery) -&gt; &#123;...&#125;  消息消费的回调函数，当接收到消息时会执行此函数</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> consumerTag -&gt; &#123;...&#125;  消费者取消时的回调函数，这里为空实现</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@return</span> 消费者标签，用于后续取消消费等操作</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            String ctag = channel.basicConsume(replyQueueName, <span class="keyword">true</span>, (consumerTag, delivery) -&gt; &#123;</span><br><span class="line">                <span class="comment">// 检查响应消息的关联 ID 是否与请求的关联 ID 匹配</span></span><br><span class="line">                <span class="keyword">if</span> (delivery.getProperties().getCorrelationId().equals(corrId)) &#123;</span><br><span class="line">                    <span class="comment">// 将响应消息添加到阻塞队列中，方便后续取出处理</span></span><br><span class="line">                    response.offer(<span class="keyword">new</span> String(delivery.getBody(), StandardCharsets.UTF_8));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;, consumerTag -&gt; &#123;</span><br><span class="line">                <span class="comment">// 消费者取消时的回调，这里为空实现</span></span><br><span class="line">            &#125;);</span><br><span class="line">            log.info(<span class="string">&quot;ctag:&#123;&#125;&quot;</span>, ctag);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 从阻塞队列中获取响应消息，如果队列为空则阻塞等待</span></span><br><span class="line">            String result = response.take();</span><br><span class="line">            <span class="comment">// 取消对回复队列的消费，不再对回复队列进行监听</span></span><br><span class="line">            channel.basicCancel(ctag);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 程序入口，用于测试 RPCClient 类。</span></span><br><span class="line"><span class="comment">     * 发送一系列斐波那契数列请求并打印响应。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> argv 命令行参数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (RPCClient fibonacciRpc = <span class="keyword">new</span> RPCClient()) &#123;</span><br><span class="line">            <span class="comment">// 循环发送 32 个请求</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">32</span>; i++) &#123;</span><br><span class="line">                <span class="comment">// 将整数转换为字符串</span></span><br><span class="line">                String i_str = Integer.toString(i);</span><br><span class="line">                <span class="comment">// 打印请求信息</span></span><br><span class="line">                System.out.println(<span class="string">&quot; [x] Requesting fib(&quot;</span> + i_str + <span class="string">&quot;)&quot;</span>);</span><br><span class="line">                <span class="comment">// 调用 call 方法发送请求并获取响应</span></span><br><span class="line">                String response = fibonacciRpc.call(i_str);</span><br><span class="line">                <span class="comment">// 打印响应信息</span></span><br><span class="line">                System.out.println(<span class="string">&quot; [.] Got &#x27;&quot;</span> + response + <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 关闭资源的方法，当前未实现。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception 如果关闭资源时发生错误</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        log.info(<span class="string">&quot;close()&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq.server;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RPCServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String RPC_QUEUE_NAME = <span class="string">&quot;rpc_queue&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                Channel channel = connection.createChannel()) &#123;</span><br><span class="line">            channel.queueDeclare(RPC_QUEUE_NAME, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">            channel.basicQos(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot; [x] Awaiting RPC requests&quot;</span>);</span><br><span class="line"></span><br><span class="line">            Object monitor = <span class="keyword">new</span> Object();</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 定义一个 DeliverCallback 回调函数，用于处理从队列中接收到的消息。</span></span><br><span class="line"><span class="comment">             * 当 RabbitMQ 服务器将消息传递给消费者时，会调用这个回调函数。</span></span><br><span class="line"><span class="comment">             * </span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> consumerTag 消费者的标签，用于标识这个消费者。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> delivery 包含接收到的消息的详细信息，如消息体、属性等。</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            DeliverCallback deliverCallback = (consumerTag, delivery) -&gt; &#123;</span><br><span class="line">                <span class="comment">// 构建一个 AMQP 消息属性对象，用于在回复消息时携带必要的信息</span></span><br><span class="line">                <span class="comment">// 使用 AMQP.BasicProperties.Builder 来创建属性对象</span></span><br><span class="line">                AMQP.BasicProperties replyProps = <span class="keyword">new</span> AMQP.BasicProperties.Builder()</span><br><span class="line">                        <span class="comment">// 设置关联 ID，该 ID 与接收到的消息的关联 ID 相同</span></span><br><span class="line">                        <span class="comment">// 关联 ID 用于将请求消息和响应消息进行关联，确保客户端能正确匹配响应</span></span><br><span class="line">                        .correlationId(delivery.getProperties().getCorrelationId())</span><br><span class="line">                        <span class="comment">// 构建最终的 AMQP 消息属性对象</span></span><br><span class="line">                        .build();</span><br><span class="line"></span><br><span class="line">                String response = <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    String message = <span class="keyword">new</span> String(delivery.getBody(), StandardCharsets.UTF_8);</span><br><span class="line">                    <span class="keyword">int</span> n = Integer.parseInt(message);</span><br><span class="line"></span><br><span class="line">                    System.out.println(<span class="string">&quot; [.] fib(&quot;</span> + message + <span class="string">&quot;)&quot;</span>);</span><br><span class="line">                    response += fib(n);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot; [.] &quot;</span> + e.toString());</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="comment">/**</span></span><br><span class="line"><span class="comment">                     * 向客户端发送响应消息。</span></span><br><span class="line"><span class="comment">                     * exchange 参数为空字符串，表示使用默认的交换器。</span></span><br><span class="line"><span class="comment">                     * delivery.getProperties().getReplyTo() 为客户端指定的回复队列名称，响应消息将被发送到该队列。</span></span><br><span class="line"><span class="comment">                     * replyProps 是之前构建好的包含关联 ID 的消息属性，用于客户端匹配请求和响应。</span></span><br><span class="line"><span class="comment">                     * response.getBytes(StandardCharsets.UTF_8) 将响应字符串转换为 UTF-8 编码的字节数组进行发送。</span></span><br><span class="line"><span class="comment">                     */</span></span><br><span class="line">                    channel.basicPublish(<span class="string">&quot;&quot;</span>, delivery.getProperties().getReplyTo(), replyProps,</span><br><span class="line">                            response.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">                    <span class="comment">/**</span></span><br><span class="line"><span class="comment">                     * 向 RabbitMQ 服务器确认已成功处理消息。</span></span><br><span class="line"><span class="comment">                     * delivery.getEnvelope().getDeliveryTag() 是消息的唯一标识，用于指定要确认的消息。</span></span><br><span class="line"><span class="comment">                     * 第二个参数为 false 表示只确认当前消息，而不是批量确认。</span></span><br><span class="line"><span class="comment">                     * 确认消息后，RabbitMQ 服务器会将该消息从队列中移除。</span></span><br><span class="line"><span class="comment">                     */</span></span><br><span class="line">                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">                    <span class="comment">// RabbitMq consumer worker thread notifies the RPC server owner thread</span></span><br><span class="line">                    <span class="keyword">synchronized</span> (monitor) &#123;</span><br><span class="line">                        monitor.notify();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            channel.basicConsume(RPC_QUEUE_NAME, <span class="keyword">false</span>, deliverCallback, (consumerTag -&gt; &#123;</span><br><span class="line">            &#125;));</span><br><span class="line">            <span class="comment">// Wait and be prepared to consume the message from RPC client.</span></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (monitor) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        monitor.wait();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">fib</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">return</span> fib(n - <span class="number">1</span>) + fib(n - <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ-%E7%9A%84-RPC-%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 的 RPC 模式介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RPC%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">RPC模式的工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="toc-number">3.</span> <span class="toc-text">关键概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RPC%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">4.</span> <span class="toc-text">RPC模式的应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&text=RabbitMQ RPC模式"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&is_video=false&description=RabbitMQ RPC模式"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ RPC模式&body=Check out this article: https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&title=RabbitMQ RPC模式"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/08/RabbitMQ/RabbitMQ%20RPC%E6%A8%A1%E5%BC%8F/&name=RabbitMQ RPC模式&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

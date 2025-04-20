@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="At Most Once 语义（最多一次）● 原理：○ 生产者发送消息后，不会等待任何来自 Kafka 服务器的确认。一旦消息发送出去，生产者就认为任务完成，不会关心消息是否成功到达 Kafka 集群或被存储。如果在消息发送过程中出现网络故障、服务器故障等问题，该消息可能会丢失，并且生产者不会尝试重新发送。○ 这种语义下，生产者的性能通常是最高的，因为它减少了等待确认的时间，但牺牲了消息的可靠">
+<meta property="og:type" content="article">
+<meta property="og:title" content="生产者数据传递语义">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="At Most Once 语义（最多一次）● 原理：○ 生产者发送消息后，不会等待任何来自 Kafka 服务器的确认。一旦消息发送出去，生产者就认为任务完成，不会关心消息是否成功到达 Kafka 集群或被存储。如果在消息发送过程中出现网络故障、服务器故障等问题，该消息可能会丢失，并且生产者不会尝试重新发送。○ 这种语义下，生产者的性能通常是最高的，因为它减少了等待确认的时间，但牺牲了消息的可靠">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221102-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221102-2.jpg">
+<meta property="article:published_time" content="2022-11-02T01:51:12.000Z">
+<meta property="article:modified_time" content="2025-03-23T04:13:21.329Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221102-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>生产者数据传递语义</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/08/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E6%81%AF%E5%88%86%E5%8C%BA/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/01/kafka/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%85%B3%E9%94%AE%E9%85%8D%E7%BD%AE/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&text=生产者数据传递语义"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&is_video=false&description=生产者数据传递语义"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=生产者数据传递语义&body=Check out this article: https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&name=生产者数据传递语义&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#At-Most-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.</span> <span class="toc-text">At Most Once 语义配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#At-Least-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">At Least Once 语义配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Exactly-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">Exactly Once 语义配置示例</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        生产者数据传递语义
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-02T01:51:12.000Z" itemprop="datePublished">2022-11-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/" class="leancloud-visitors" data-flag-title="生产者数据传递语义" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><img src="/images/kafka/20221102-1.png" alt="image-20221102-1"></p>
+<ol>
+<li>At Most Once 语义（最多一次）<br>● 原理：<br>○ 生产者发送消息后，不会等待任何来自 Kafka 服务器的确认。一旦消息发送出去，生产者就认为任务完成，不会关心消息是否成功到达 Kafka 集群或被存储。如果在消息发送过程中出现网络故障、服务器故障等问题，该消息可能会丢失，并且生产者不会尝试重新发送。<br>○ 这种语义下，生产者的性能通常是最高的，因为它减少了等待确认的时间，但牺牲了消息的可靠性。<br>● 适用场景：<br>○ 适用于对消息丢失不太敏感，但对性能和低延迟要求较高的场景。例如，一些监控数据的实时传输，即使部分数据丢失，也不会对整体监控结果产生重大影响，因为后续的数据可以弥补之前的信息缺失。</li>
+<li>At Least Once 语义（至少一次）<br>● 原理：<br>○ 生产者发送消息后，会等待 Kafka 服务器的确认（通常是 ack 确认）。如果没有收到确认，生产者会认为消息发送失败，会尝试重新发送该消息，直到收到确认。这种情况下，可能会导致消息被重复发送，因为生产者无法确定消息是在第一次发送时未到达还是在确认过程中丢失。<br>○ 为了保证消息不丢失，生产者会不断重试发送消息，可能会导致接收方收到重复的消息，因此在消费者端需要处理可能出现的重复消息，如通过消息去重机制。<br>● 适用场景：<br>○ 适用于大多数业务场景，特别是对消息丢失非常敏感，但可以容忍一定程度的消息重复的情况。例如，在金融交易系统中，宁可重复处理一笔交易，也不能让交易消息丢失，后续可以通过业务逻辑或幂等性操作来解决重复消息的问题。</li>
+<li>Exactly Once 语义（精确一次）</li>
+</ol>
+<p><img src="/images/kafka/20221102-2.jpg" alt="image-20221102-1"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;PID,Partition,SeqNumber&gt;</span><br></pre></td></tr></table></figure>
+
+<p>● 原理：<br>  ○ 生产者确保消息在发送过程中，从发送到存储在 Kafka 集群的整个过程中，只会被存储一次，既不会丢失也不会重复。这是最严格的数据传递语义，需要生产者、Kafka 集群和消费者端协同工作。<br>  ○ 在生产者端，通过使用事务（transactions）和幂等性（idempotency）机制。事务允许生产者将多个消息发送操作组合成一个原子操作，幂等性确保生产者在重试发送时不会重复发送消息。Kafka 集群内部也需要支持事务，消费者端也需要配合使用事务来保证从正确的偏移量开始消费，以避免重复消费。<br>● 生产者端的消息标识：<br>  ○ Kafka 生产者启用幂等性（enable.idempotency=true）后，会为每条消息分配一个唯一的序列号（Sequence Number）。这个序列号是针对每个生产者实例和主题分区的组合生成的。<br>  ○ 对于同一个生产者发送到同一分区的消息，序列号是递增的。当 Kafka 服务器接收到消息时，会检查该消息的序列号。如果接收到的消息序列号与该分区下此生产者上一个成功存储的消息序列号连续（即比上一个序列号大 1），则认为该消息是合法的；如果序列号小于或等于上一个存储的序列号，Kafka 服务器会将其视为重复消息并拒绝存储。<br>● 适用场景：<br>  ○ 适用于对消息的准确性和一致性要求极高，既不能丢失也不能重复的场景。例如，在涉及重要的订单处理、库存管理等业务场景中，确保消息的精确传递非常重要，避免出现多扣库存或重复订单等问题。<br>以下是 Kafka 生产者实现不同数据传递语义的关键配置：</p>
+<h3 id="At-Most-Once-语义配置示例"><a href="#At-Most-Once-语义配置示例" class="headerlink" title="At Most Once 语义配置示例"></a>At Most Once 语义配置示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kaProperties.put(ProducerConfig.ACKS_CONFIG, <span class="string">&quot;0&quot;</span>); </span><br><span class="line">kaProperties.put(ProducerConfig.RETRIES_CONFIG, <span class="string">&quot;0&quot;</span>); </span><br></pre></td></tr></table></figure>
+<p>● acks=0 表示生产者不需要等待任何确认，retries=0 表示不进行重试。</p>
+<h3 id="At-Least-Once-语义配置示例"><a href="#At-Least-Once-语义配置示例" class="headerlink" title="At Least Once 语义配置示例"></a>At Least Once 语义配置示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kaProperties.put(ProducerConfig.ACKS_CONFIG, <span class="string">&quot;all&quot;</span>); </span><br><span class="line">kaProperties.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE); </span><br></pre></td></tr></table></figure>
+<p>● acks=all 表示生产者需要等待所有副本确认，retries=Integer.MAX_VALUE 表示无限次重试，以确保消息至少被存储一次。</p>
+<h3 id="Exactly-Once-语义配置示例"><a href="#Exactly-Once-语义配置示例" class="headerlink" title="Exactly Once 语义配置示例"></a>Exactly Once 语义配置示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kaProperties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, <span class="keyword">true</span>);</span><br><span class="line">kaProperties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, <span class="string">&quot;your_transaction_id&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>enable.idempotency=true 启用生产者的幂等性，transactional.id 为事务提供唯一标识，启用事务机制。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#At-Most-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.</span> <span class="toc-text">At Most Once 语义配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#At-Least-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">At Least Once 语义配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Exactly-Once-%E8%AF%AD%E4%B9%89%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">Exactly Once 语义配置示例</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&text=生产者数据传递语义"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&is_video=false&description=生产者数据传递语义"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=生产者数据传递语义&body=Check out this article: https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&title=生产者数据传递语义"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/02/kafka/%E7%94%9F%E4%BA%A7%E8%80%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89/&name=生产者数据传递语义&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

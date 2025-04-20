@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="队列 TTL（Time To Live）通过 RabbitMQ，用户能够为消息及队列配置TTL（Time To Live，生存时间）参数或策略。TTL定义了消息或队列在系统中的最大存活期限。对于消息而言，其TTL决定了该消息在被消费之前可以在队列中保留的最大时长。一旦消息停留的时间超过了设定的TTL值，则该消息将被视为过期，并从队列中移除。“移除”意味着这条消息既不会被分发给任何订阅者，也无法通过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ队列与消息TTL">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="队列 TTL（Time To Live）通过 RabbitMQ，用户能够为消息及队列配置TTL（Time To Live，生存时间）参数或策略。TTL定义了消息或队列在系统中的最大存活期限。对于消息而言，其TTL决定了该消息在被消费之前可以在队列中保留的最大时长。一旦消息停留的时间超过了设定的TTL值，则该消息将被视为过期，并从队列中移除。“移除”意味着这条消息既不会被分发给任何订阅者，也无法通过">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-11T05:25:57.000Z">
+<meta property="article:modified_time" content="2025-04-19T08:09:23.615Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RabbitMQ队列与消息TTL</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/11/RabbitMQ/RabbitMQ%20Quorum%E9%98%9F%E5%88%97/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&text=RabbitMQ队列与消息TTL"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&is_video=false&description=RabbitMQ队列与消息TTL"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ队列与消息TTL&body=Check out this article: https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&name=RabbitMQ队列与消息TTL&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97-TTL%EF%BC%88Time-To-Live%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">队列 TTL（Time To Live）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97%E7%BA%A7%E5%88%AB%E7%9A%84%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">2.</span> <span class="toc-text">队列级别的消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5%E4%B8%BA%E9%98%9F%E5%88%97%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">3.</span> <span class="toc-text">使用策略为队列定义消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E8%80%85%E8%AE%BE%E7%BD%AE%E7%9A%84%E9%80%90%E6%9D%A1%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">4.</span> <span class="toc-text">发布者设置的逐条消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%90%E6%9D%A1%E6%B6%88%E6%81%AF-TTL-%E4%B8%8E%E6%AD%BB%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="toc-number">5.</span> <span class="toc-text">逐条消息 TTL 与死信机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97-TTL"><span class="toc-number">6.</span> <span class="toc-text">队列 TTL</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RabbitMQ队列与消息TTL
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-11T05:25:57.000Z" itemprop="datePublished">2021-07-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/" class="leancloud-visitors" data-flag-title="RabbitMQ队列与消息TTL" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="队列-TTL（Time-To-Live）"><a href="#队列-TTL（Time-To-Live）" class="headerlink" title="队列 TTL（Time To Live）"></a>队列 TTL（Time To Live）</h3><p>通过 RabbitMQ，用户能够为消息及队列配置TTL（Time To Live，生存时间）参数或策略。TTL定义了消息或队列在系统中的最大存活期限。<br>对于消息而言，其TTL决定了该消息在被消费之前可以在队列中保留的最大时长。一旦消息停留的时间超过了设定的TTL值，则该消息将被视为过期，并从队列中移除。“移除”意味着这条消息既不会被分发给任何订阅者，也无法通过调用basic.get方法直接从队列中获取。值得注意的是，消息TTL可以针对单个消息、特定队列或是整个队列组进行设置。<br>此外，TTL不仅限于应用于消息层面，还可以对整个队列生效。这一特性与自动删除属性相结合使用时尤为有用。特别是对于非持久化的经典队列来说，设置队列级别的TTL通常更加有意义；然而，需指出的是流式队列并不支持这种过期机制。当一个队列处于未被活跃使用的状态时（即没有消费者在线连接到该队列），它会在达到指定的TTL后自动删除。<br>TTL的行为可以通过可选的队列参数来调控，而最推荐的做法是通过策略来进行这些配置。同时，管理员也可以通过制定策略来强制执行某些TTL相关的规则。</p>
+<h3 id="队列级别的消息-TTL"><a href="#队列级别的消息-TTL" class="headerlink" title="队列级别的消息 TTL"></a>队列级别的消息 TTL</h3><p>可通过策略设置 message-ttl 参数，或在声明队列时指定相同参数来为特定队列设置消息 TTL。<br>在队列中停留时间超过配置 TTL 的消息将被视为过期。注意，路由到多个队列的消息可能在每个队列中以不同时间过期（或完全不过期）。某队列中消息的过期不会影响其他队列中的同一消息。<br>服务器保证过期消息不会通过 basic.deliver 投递（给消费者），也不会在响应轮询消费者时发送（在 basic.get-ok 响应中）。<br>此外，服务器会尝试在消息基于 TTL 的过期时间到达时或之后尽快移除它们。<br>TTL 参数或策略的值必须是非负整数（≥0），以毫秒为单位描述 TTL 时长。例如，值 1000 表示消息在队列中存活 1 秒或直到被投递给消费者。该参数可以是 AMQP 0-9-1 类型的 short-short-int、short-int、long-int 或 long-long-int。</p>
+<h3 id="使用策略为队列定义消息-TTL"><a href="#使用策略为队列定义消息-TTL" class="headerlink" title="使用策略为队列定义消息 TTL"></a>使用策略为队列定义消息 TTL</h3><p>以下 Java 示例创建一个消息最多保留 60 秒的队列：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Object&gt; args = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">args.put(<span class="string">&quot;x-message-ttl&quot;</span>, <span class="number">60000</span>);</span><br><span class="line">channel.queueDeclare(<span class="string">&quot;myqueue&quot;</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, args);</span><br></pre></td></tr></table></figure>
+
+<p>可以对已包含消息的队列应用消息 TTL 策略，但需注意以下情况：<br>● 当消息被重新入队时（例如使用带 requeue 参数的 AMQP 方法，或因通道关闭），其原始过期时间会被保留。<br>● 将 TTL 设置为 0 会使消息在到达队列时立即过期，除非能立即投递给消费者。这提供了替代 RabbitMQ 服务器不支持的 immediate 发布标志的方案。与该标志不同，不会生成 basic.returns，如果设置了死信交换，消息会被死信化。</p>
+<h3 id="发布者设置的逐条消息-TTL"><a href="#发布者设置的逐条消息-TTL" class="headerlink" title="发布者设置的逐条消息 TTL"></a>发布者设置的逐条消息 TTL</h3><p>在发布消息时，可以通过设置 expiration 属性来实现每条消息的生存时间（TTL）。expiration 字段应以毫秒为单位指定 TTL 的持续时间，这一要求与 x-message-ttl 参数的规定一致。需要注意的是，expiration 字段必须采用字符串形式提供，即代理仅接受该字段值作为数字的字符串表示。<br>如果同时设置了队列级别的 TTL 以及单个消息级别的 TTL，则实际生效的将是两者中较小的那个值。<br>以下 Java 示例使用 RabbitMQ 客户端发布一条最多保留 60 秒的消息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span>[] messageBodyBytes = <span class="string">&quot;Hello, world!&quot;</span>.getBytes();</span><br><span class="line">AMQP.BasicProperties properties = <span class="keyword">new</span> AMQP.BasicProperties.Builder()</span><br><span class="line">.expiration(<span class="string">&quot;60000&quot;</span>)</span><br><span class="line">.build();</span><br><span class="line">channel.basicPublish(<span class="string">&quot;my-exchange&quot;</span>, <span class="string">&quot;routing-key&quot;</span>, properties, messageBodyBytes);</span><br></pre></td></tr></table></figure>
+
+<h3 id="逐条消息-TTL-与死信机制"><a href="#逐条消息-TTL-与死信机制" class="headerlink" title="逐条消息 TTL 与死信机制"></a>逐条消息 TTL 与死信机制</h3><p>仅当过期消息位于队列头部时，才会被实际删除（即标记为已删除）。消费者不会接收到这些过期的消息。需要注意的是，在消息过期与消费者接收之间可能存在一种自然的竞争状态，例如，一条消息可能在发送到套接字之后但在到达消费者之前就已经过期。<br>对于设置了逐条消息时间生存期（TTL）的情况，过期的消息可能会累积在尚未过期的消息之后，直到后者被消费或同样过期为止。因此，这些过期但未被清理的消息将继续占用系统资源，并且会被计入队列的统计信息中，比如队列中的总消息数量。<br>当对现有队列追溯性地应用逐条消息TTL策略时，建议保持消费者在线以加速过期消息的清除过程。<br>鉴于上述针对单个消息设置TTL的行为特点，在需要通过删除消息来释放存储空间等资源的情况下，推荐采用整个队列级别的TTL设置方法，或者考虑使用队列清空、队列删除等功能作为替代方案。</p>
+<h3 id="队列-TTL"><a href="#队列-TTL" class="headerlink" title="队列 TTL"></a>队列 TTL</h3><p>时间至存活（TTL）特性不仅适用于队列中的消息，也适用于队列本身。这一机制能够与自动删除队列属性协同工作，从而实现更灵活的资源管理。<br>对于队列级别的 TTL（即过期设置），主要针对的是瞬态（非持久化）的经典队列类型；而流式队列则不支持此类过期功能。当一个队列处于未使用状态时，它将在预设的时间后被标记为可删除状态——这里“未使用”的定义是指该队列当前没有任何活跃消费者、最近没有被重新声明（重新声明操作会重置其生存期限），并且在过去的一个完整过期周期内没有执行过 basic.get 操作。这种配置特别适合于如远程过程调用(RPC)响应队列这样的场景，其中大量创建的队列可能最终并不需要实际处理任何消息。<br>系统确保在至少达到一次完整的设定过期时间之后，如果队列仍然保持未使用状态，则会被安全地移除。但是，请注意，虽然可以保证超过过期时限后队列将被安排删除，但并不能保证其会在恰好到达那个时刻立即被清除。<br>无论是通过 queue.declare 方法中指定 x-expires 参数还是通过设置 expires 策略来定义队列的过期行为，所给定的值都必须是以毫秒为单位的正整数（不同于消息级别 TTL 允许设置为 0 的情况）。例如，设定值为 1000 意味着如果该队列连续 1 秒钟未被访问，则满足了自动删除条件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Object&gt; args = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">args.put(<span class="string">&quot;x-expires&quot;</span>, <span class="number">1800000</span>);</span><br><span class="line">channel.queueDeclare(<span class="string">&quot;myqueue&quot;</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, args);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitConstant</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_SMS_TTL = <span class="string">&quot;sms.ttl&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.google.gson.Gson;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.entity.SMS;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderSystem</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, TimeoutException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                Channel channel = connection.createChannel();) &#123;</span><br><span class="line">            Map&lt;String, Object&gt; quArgs = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">            quArgs.put(<span class="string">&quot;x-message-ttl&quot;</span>, <span class="number">10000</span>);</span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_SMS_TTL, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, quArgs);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">100</span>; i &lt; <span class="number">200</span>; i++) &#123;</span><br><span class="line">                SMS sms = <span class="keyword">new</span> SMS(<span class="string">&quot;乘客&quot;</span> + i, <span class="string">&quot;13900000&quot;</span> + i, <span class="string">&quot;您的车票已预订成功&quot;</span>);</span><br><span class="line">                String jsonSMS = <span class="keyword">new</span> Gson().toJson(sms);</span><br><span class="line">                channel.basicPublish(<span class="string">&quot;&quot;</span>, RabbitConstant.QUEUE_SMS_TTL, <span class="keyword">null</span>, jsonSMS.getBytes());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">&quot;订单信息已投递至Broker&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SmsSender</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();       </span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        Map&lt;String, Object&gt; quArgs = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">            quArgs.put(<span class="string">&quot;x-message-ttl&quot;</span>, <span class="number">10000</span>);</span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_SMS_TTL, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, quArgs);</span><br><span class="line">            </span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_SMS_TTL, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                String jsonSMS = <span class="keyword">new</span> String(body);</span><br><span class="line">                log.info(<span class="string">&quot;SMSSender-短信发送成功:&#123;&#125;&quot;</span>, jsonSMS);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97-TTL%EF%BC%88Time-To-Live%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">队列 TTL（Time To Live）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97%E7%BA%A7%E5%88%AB%E7%9A%84%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">2.</span> <span class="toc-text">队列级别的消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5%E4%B8%BA%E9%98%9F%E5%88%97%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">3.</span> <span class="toc-text">使用策略为队列定义消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E8%80%85%E8%AE%BE%E7%BD%AE%E7%9A%84%E9%80%90%E6%9D%A1%E6%B6%88%E6%81%AF-TTL"><span class="toc-number">4.</span> <span class="toc-text">发布者设置的逐条消息 TTL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%90%E6%9D%A1%E6%B6%88%E6%81%AF-TTL-%E4%B8%8E%E6%AD%BB%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="toc-number">5.</span> <span class="toc-text">逐条消息 TTL 与死信机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%9F%E5%88%97-TTL"><span class="toc-number">6.</span> <span class="toc-text">队列 TTL</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&text=RabbitMQ队列与消息TTL"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&is_video=false&description=RabbitMQ队列与消息TTL"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ队列与消息TTL&body=Check out this article: https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&title=RabbitMQ队列与消息TTL"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/&name=RabbitMQ队列与消息TTL&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

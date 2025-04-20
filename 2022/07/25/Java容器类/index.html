@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="###HashTable ###SynchronizedMap ###HashMap ###ConcurrentHashMap ###Vector ###ConcurrentLinkedQueue ###CopyOnWriteList ###ConcurrentSkipListMap ###LinkedBlockingQueue    理解：无界队列，它的put(obj)方法如果容器满了会阻塞住，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java容器类">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="###HashTable ###SynchronizedMap ###HashMap ###ConcurrentHashMap ###Vector ###ConcurrentLinkedQueue ###CopyOnWriteList ###ConcurrentSkipListMap ###LinkedBlockingQueue    理解：无界队列，它的put(obj)方法如果容器满了会阻塞住，">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-07-25T13:00:38.000Z">
+<meta property="article:modified_time" content="2022-07-27T15:08:45.600Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java容器类</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/07/23/%E5%B8%B8%E7%94%A8%E7%9A%84%E5%B9%B6%E5%8F%91%E5%B7%A5%E5%85%B7%E7%B1%BB/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&text=Java容器类"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&is_video=false&description=Java容器类"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java容器类&body=Check out this article: https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&name=Java容器类&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java容器类
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-25T13:00:38.000Z" itemprop="datePublished">2022-07-25</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/" class="leancloud-visitors" data-flag-title="Java容器类" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>###HashTable</p>
+<p>###SynchronizedMap</p>
+<p>###HashMap</p>
+<p>###ConcurrentHashMap</p>
+<p>###Vector</p>
+<p>###ConcurrentLinkedQueue</p>
+<p>###CopyOnWriteList</p>
+<p>###ConcurrentSkipListMap</p>
+<p>###LinkedBlockingQueue<br>    理解：无界队列，它的put(obj)方法如果容器满了会阻塞住，take()方法如果队列空了会阻塞住，使用这两个方法可以实现生产者，<br>    消费者模型；add()方法如果添加失败会报异常，offer()添加失败会返回false,天生的就是对线程友好的生产者消费者模型；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyLinkedBlockingQueue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> BlockingQueue&lt;String&gt; strs = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> Random r = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					strs.put(<span class="string">&quot;a&quot;</span> + i); <span class="comment">// 如果容器满了，会阻塞住(这里的阻塞是通过ReentrantLock的Condition实现的)</span></span><br><span class="line">					TimeUnit.MILLISECONDS.sleep(r.nextInt(<span class="number">1000</span>));</span><br><span class="line">				&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">					e.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;, <span class="string">&quot;p1&quot;</span>).start();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">			<span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">				<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">					<span class="keyword">try</span> &#123;</span><br><span class="line">						System.out.println(Thread.currentThread().getName() + <span class="string">&quot; take -&quot;</span> + strs.take()); <span class="comment">// 如果队列空了会阻塞住</span></span><br><span class="line">					&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">						e.printStackTrace();</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;, <span class="string">&quot;c&quot;</span> + i).start();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###ArrayBlockingQueue<br>    理解：有界队列，它的put(obj)方法如果容器满了会阻塞住，add()方法队列满了会报异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T06_ArrayBlockingQueue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> BlockingQueue&lt;String&gt; strs = <span class="keyword">new</span> ArrayBlockingQueue&lt;&gt;(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> Random r = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">			strs.put(<span class="string">&quot;a&quot;</span> + i);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//strs.put(&quot;aaa&quot;); // 如果容器满了会阻塞住</span></span><br><span class="line">		<span class="comment">//strs.add(&quot;aaa&quot;);</span></span><br><span class="line">		<span class="comment">//strs.offer(&quot;aaa&quot;);</span></span><br><span class="line">		strs.offer(<span class="string">&quot;aaa&quot;</span>, <span class="number">1</span>, TimeUnit.SECONDS); <span class="comment">// 阻塞一秒尝试添加</span></span><br><span class="line">		<span class="comment">// List和Queue主要的区别在于添加put(),take(),offer()这些对线程友好的，或者阻塞，或者时间等待的方法</span></span><br><span class="line">		</span><br><span class="line">		System.out.println(strs);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###DelayQueue<br>    理解：可以用于按照时间排序的任务调度，自定义Task实现Delayed接口,重写compareTo方法来实现任务排序；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyDelayQueue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> BlockingQueue&lt;MyTask&gt; tasks = <span class="keyword">new</span> DelayQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> Random r = <span class="keyword">new</span> Random();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyTask</span> <span class="keyword">implements</span> <span class="title">Delayed</span> </span>&#123;</span><br><span class="line">		String name;</span><br><span class="line">		<span class="keyword">long</span> runningTime;</span><br><span class="line">		</span><br><span class="line">		MyTask(String name, <span class="keyword">long</span> rt) &#123;</span><br><span class="line">			<span class="keyword">this</span>.name = name;</span><br><span class="line">			<span class="keyword">this</span>.runningTime = rt;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Delayed o)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">if</span>(<span class="keyword">this</span>.getDelay(TimeUnit.MILLISECONDS) &lt; o.getDelay(TimeUnit.MILLISECONDS))</span><br><span class="line">				<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">			<span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDelay(TimeUnit.MILLISECONDS) &gt; o.getDelay(TimeUnit.MILLISECONDS)) </span><br><span class="line">				<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">			<span class="keyword">else</span> </span><br><span class="line">				<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getDelay</span><span class="params">(TimeUnit unit)</span> </span>&#123;</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">return</span> unit.convert(runningTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> name + <span class="string">&quot; &quot;</span> + runningTime;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">		<span class="keyword">long</span> now = System.currentTimeMillis();</span><br><span class="line">		MyTask t1 = <span class="keyword">new</span> MyTask(<span class="string">&quot;t1&quot;</span>, now + <span class="number">1000</span>);</span><br><span class="line">		MyTask t2 = <span class="keyword">new</span> MyTask(<span class="string">&quot;t2&quot;</span>, now + <span class="number">2000</span>);</span><br><span class="line">		MyTask t3 = <span class="keyword">new</span> MyTask(<span class="string">&quot;t3&quot;</span>, now + <span class="number">1500</span>);</span><br><span class="line">		MyTask t4 = <span class="keyword">new</span> MyTask(<span class="string">&quot;t4&quot;</span>, now + <span class="number">2500</span>);</span><br><span class="line">		MyTask t5 = <span class="keyword">new</span> MyTask(<span class="string">&quot;t5&quot;</span>, now + <span class="number">500</span>);</span><br><span class="line">		</span><br><span class="line">		tasks.put(t1);</span><br><span class="line">		tasks.put(t2);</span><br><span class="line">		tasks.put(t3);</span><br><span class="line">		tasks.put(t4);</span><br><span class="line">		tasks.put(t5);</span><br><span class="line">		</span><br><span class="line">		System.out.println(tasks);</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">5</span>; i++) &#123;</span><br><span class="line">			System.out.println(tasks.take());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###SynchronousQueue<br>    理解：容量为0，主要用于实现数据传递，a线程向SynchronousQueue中put数据，b线程从Queue中取数据,如果没有线程取数据，<br>    a线程会一直阻塞住；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MySynchronusQueue</span> </span>&#123; <span class="comment">// 容量为0</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">		BlockingQueue&lt;String&gt; strs = <span class="keyword">new</span> SynchronousQueue&lt;&gt;();</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				System.out.println(strs.take());</span><br><span class="line">			&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;).start();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				strs.put(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">			&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;).start();</span><br><span class="line"></span><br><span class="line"><span class="comment">//		strs.put(&quot;aaa&quot;); //阻塞等待其他线程取数据</span></span><br><span class="line"><span class="comment">//		strs.put(&quot;bbb&quot;);</span></span><br><span class="line"><span class="comment">//		strs.add(&quot;aaa&quot;);</span></span><br><span class="line">		System.out.println(strs.size());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###LinkedTransferQueue<br>    理解：生产者会一直阻塞直到所添加到队列的元素被某一个消费者所消费（不仅仅是添加到队列里就完事）,当我们不想生产者过度生产消息时，TransferQueue可能非常有用,生产完消息就阻塞住，等消费者消费完再生产</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T09_TransferQueue</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">		LinkedTransferQueue&lt;String&gt; strs = <span class="keyword">new</span> LinkedTransferQueue&lt;&gt;();</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				System.out.println(strs.take());</span><br><span class="line">			&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;).start();</span><br><span class="line">		</span><br><span class="line">		strs.transfer(<span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&text=Java容器类"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&is_video=false&description=Java容器类"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java容器类&body=Check out this article: https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&title=Java容器类"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/07/25/Java%E5%AE%B9%E5%99%A8%E7%B1%BB/&name=Java容器类&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

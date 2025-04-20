@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、容器技术前世今生1.1 1979年 — chroot 容器技术的概念可以追溯到1979年的UNIX chroot。 它是一套“UNIX操作系统”系统，旨在将其root目录及其它子目录变更至文件系统内的新位置，且只接受特定进程的访问。 这项功能的设计目的在于为每个进程提供一套隔离化磁盘空间。 1982年其被添加至BSD当中。  1.2 2000年 — FreeBSD Jails FreeBSD">
+<meta property="og:type" content="article">
+<meta property="og:title" content="容器技术所涉及Linux内核关键技术">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、容器技术前世今生1.1 1979年 — chroot 容器技术的概念可以追溯到1979年的UNIX chroot。 它是一套“UNIX操作系统”系统，旨在将其root目录及其它子目录变更至文件系统内的新位置，且只接受特定进程的访问。 这项功能的设计目的在于为每个进程提供一套隔离化磁盘空间。 1982年其被添加至BSD当中。  1.2 2000年 — FreeBSD Jails FreeBSD">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF.assets/image-20220111132707215.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF.assets/image-20220112182824405.png">
+<meta property="article:published_time" content="2023-07-28T02:48:22.000Z">
+<meta property="article:modified_time" content="2025-03-16T14:45:06.422Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF.assets/image-20220111132707215.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>容器技术所涉及Linux内核关键技术</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/02/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E7%94%9F%E6%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E9%83%A8%E7%BD%B2/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/07/26/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2%E7%9A%84%E6%BC%94%E5%8F%98%E4%B9%8B%E8%B7%AF/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&text=容器技术所涉及Linux内核关键技术"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&is_video=false&description=容器技术所涉及Linux内核关键技术"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=容器技术所涉及Linux内核关键技术&body=Check out this article: https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&name=容器技术所涉及Linux内核关键技术&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F"><span class="toc-number">1.</span> <span class="toc-text">一、容器技术前世今生</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-1979%E5%B9%B4-%E2%80%94-chroot"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 1979年 — chroot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-2000%E5%B9%B4-%E2%80%94-FreeBSD-Jails"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 2000年 — FreeBSD Jails</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-2001%E5%B9%B4-%E2%80%94-Linux-VServer"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 2001年 — Linux VServer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-2004%E5%B9%B4-%E2%80%94-Solaris%E5%AE%B9%E5%99%A8"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 2004年 — Solaris容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-2005%E5%B9%B4-%E2%80%94-OpenVZ"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 2005年 — OpenVZ</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-2006%E5%B9%B4-%E2%80%94-Process%E5%AE%B9%E5%99%A8"><span class="toc-number">1.6.</span> <span class="toc-text">1.6 2006年 — Process容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-7-2007%E5%B9%B4-%E2%80%94-Control-Groups"><span class="toc-number">1.7.</span> <span class="toc-text">1.7 2007年 — Control Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-8-2008%E5%B9%B4-%E2%80%94-LXC"><span class="toc-number">1.8.</span> <span class="toc-text">1.8 2008年 — LXC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-9-2011%E5%B9%B4-%E2%80%94-Warden"><span class="toc-number">1.9.</span> <span class="toc-text">1.9 2011年 — Warden</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-10-2013%E5%B9%B4-%E2%80%94-LMCTFY"><span class="toc-number">1.10.</span> <span class="toc-text">1.10 2013年 — LMCTFY</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-11-2013%E5%B9%B4-Docker"><span class="toc-number">1.11.</span> <span class="toc-text">1.11 2013年-Docker</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81NameSpace"><span class="toc-number">2.</span> <span class="toc-text">二、NameSpace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-NameSpace%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 NameSpace介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Linux%E7%B3%BB%E7%BB%9F%E4%B8%ADNameSpace%E5%88%86%E7%B1%BB"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Linux系统中NameSpace分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-NameSpace%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 NameSpace应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%88%9B%E5%BB%BAnet%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 创建net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E5%88%A0%E9%99%A4net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.3.2 删除net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%9C%A8net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.3.</span> <span class="toc-text">2.3.3 在net命名空间中执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-4-%E5%9C%A8net%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5-%E7%BD%91%E5%8D%A1-%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.4.</span> <span class="toc-text">2.3.4 在net命令空间中执行查看网络连接(网卡)命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-5-%E9%80%80%E5%87%BA%E5%BD%93%E5%89%8D%E7%9A%84net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.5.</span> <span class="toc-text">2.3.5 退出当前的net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-6-%E5%9C%A8net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E5%A4%9A%E6%9D%A1%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.6.</span> <span class="toc-text">2.3.6 在net命名空间中执行多条命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-7-%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1"><span class="toc-number">2.3.7.</span> <span class="toc-text">2.3.7 创建虚拟网卡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-8-%E8%BF%81%E7%A7%BB%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1%E5%88%B0%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD"><span class="toc-number">2.3.8.</span> <span class="toc-text">2.3.8 迁移虚拟网卡到命名空间中</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-9-%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E8%BF%81%E5%87%BA%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1"><span class="toc-number">2.3.9.</span> <span class="toc-text">2.3.9 命名空间中迁出虚拟网卡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-10-%E9%85%8D%E7%BD%AE%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1IP%E5%9C%B0%E5%9D%80"><span class="toc-number">2.3.10.</span> <span class="toc-text">2.3.10 配置虚拟网卡IP地址</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81CGroups"><span class="toc-number">3.</span> <span class="toc-text">三、CGroups</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-CGroups%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 CGroups介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-CGroups%E5%8A%9F%E8%83%BD"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 CGroups功能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-CGroups%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 CGroups应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-%E5%AE%89%E8%A3%85%E5%8F%8A%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.3.1.</span> <span class="toc-text">3.3.1 安装及开启服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-%E9%99%90%E5%88%B6%E8%BF%9B%E7%A8%8B%E4%BD%BF%E7%94%A8CPU"><span class="toc-number">3.3.2.</span> <span class="toc-text">3.3.2 限制进程使用CPU</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-1-%E6%9F%A5%E7%9C%8Bcpu-shares"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">3.3.2.1 查看cpu shares</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-2-%E4%BD%BF%E7%94%A8CPU%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA2%E4%B8%AAgroup%E5%88%86%E7%BB%84"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">3.3.2.2 使用CPU子系统创建2个group分组</span></a></li></ol></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        容器技术所涉及Linux内核关键技术
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-07-28T02:48:22.000Z" itemprop="datePublished">2023-07-28</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/" class="leancloud-visitors" data-flag-title="容器技术所涉及Linux内核关键技术" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Docker/" rel="tag">Docker</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、容器技术前世今生"><a href="#一、容器技术前世今生" class="headerlink" title="一、容器技术前世今生"></a>一、容器技术前世今生</h1><h2 id="1-1-1979年-—-chroot"><a href="#1-1-1979年-—-chroot" class="headerlink" title="1.1 1979年 — chroot"></a>1.1 1979年 — chroot</h2><ul>
+<li>容器技术的概念可以追溯到1979年的UNIX chroot。</li>
+<li>它是一套“UNIX操作系统”系统，旨在将其root目录及其它子目录变更至文件系统内的新位置，且只接受特定进程的访问。</li>
+<li>这项功能的设计目的在于为每个进程提供一套隔离化磁盘空间。</li>
+<li>1982年其被添加至BSD当中。</li>
+</ul>
+<h2 id="1-2-2000年-—-FreeBSD-Jails"><a href="#1-2-2000年-—-FreeBSD-Jails" class="headerlink" title="1.2 2000年 — FreeBSD Jails"></a>1.2 2000年 — FreeBSD Jails</h2><ul>
+<li>FreeBSD Jails是由Derrick T. Woolworth于2000年在FreeBSD研发协会中构建而成的早期容器技术之一。</li>
+<li>这是一套“操作系统”系统，与chroot的定位类似，不过其中包含有其它进程沙箱机制以对文件系统、用户及网络等资源进行隔离。</li>
+<li>通过这种方式，它能够为每个Jail、定制化软件安装包乃至配置方案等提供一个对应的IP地址。</li>
+</ul>
+<h2 id="1-3-2001年-—-Linux-VServer"><a href="#1-3-2001年-—-Linux-VServer" class="headerlink" title="1.3 2001年 — Linux VServer"></a>1.3 2001年 — Linux VServer</h2><ul>
+<li>Linux VServer属于另一种jail机制，其能够被用于保护计算机系统之上各分区资源的安全(包括文件系统、CPU时间、网络地址以及内存等)。</li>
+<li>每个分区被称为一套安全背景(security context)，而其中的虚拟化系统则被称为一套虚拟私有服务器。</li>
+</ul>
+<h2 id="1-4-2004年-—-Solaris容器"><a href="#1-4-2004年-—-Solaris容器" class="headerlink" title="1.4 2004年 — Solaris容器"></a>1.4 2004年 — Solaris容器</h2><ul>
+<li>Solaris容器诞生之时面向x86与SPARC系统架构，其最初亮相于2004年2月的Solaris 10 Build 51 beta当中，随后于2005年正式登陆Solaris 10的完整版本。</li>
+<li>Solaris容器相当于将系统资源控制与由分区提供的边界加以结合。各分区立足于单一操作系统实例之内以完全隔离的虚拟服务器形式运行。</li>
+</ul>
+<h2 id="1-5-2005年-—-OpenVZ"><a href="#1-5-2005年-—-OpenVZ" class="headerlink" title="1.5 2005年 — OpenVZ"></a>1.5 2005年 — OpenVZ</h2><ul>
+<li>OpenVZ与Solaris容器非常相似，且使用安装有补丁的Linux内核以实现虚拟化、隔离能力、资源管理以及检查点交付。</li>
+<li>每套OpenVZ容器拥有一套隔离化文件系统、用户与用户群组、一套进程树、网络、设备以及IPC对象。</li>
+</ul>
+<h2 id="1-6-2006年-—-Process容器"><a href="#1-6-2006年-—-Process容器" class="headerlink" title="1.6 2006年 — Process容器"></a>1.6 2006年 — Process容器</h2><ul>
+<li>Process容器于2006年由谷歌公司推出，旨在对一整套进程集合中的资源使用量(包括CPU、内存、磁盘I/O以及网络等等)加以限制、分配与隔离。</li>
+<li>此后其被更名为Control Groups(即控制组)，从而避免其中的“容器”字眼与Linux内核2.6.24中的另一术语出现冲突。这表明了谷歌公司率先重视容器技术的敏锐眼光以及为其做出的突出贡献。</li>
+</ul>
+<h2 id="1-7-2007年-—-Control-Groups"><a href="#1-7-2007年-—-Control-Groups" class="headerlink" title="1.7 2007年 — Control Groups"></a>1.7 2007年 — Control Groups</h2><p>Control Groups也就是谷歌实现的cgroups，其于2007年被添加至Linux内核当中。</p>
+<h2 id="1-8-2008年-—-LXC"><a href="#1-8-2008年-—-LXC" class="headerlink" title="1.8 2008年 — LXC"></a>1.8 2008年 — LXC</h2><ul>
+<li>LXC指代的是Linux Containers</li>
+<li>是第一套完整的Linux容器管理实现方案。</li>
+<li>其功能通过cgroups以及Linux namespaces实现。</li>
+<li>LXC通过liblxc库进行交付，并提供可与Python3、Python2、Lua、Go、Ruby以及Haskell等语言相对接的API。</li>
+<li>相较于其它容器技术，LXC能够在无需任何额外补丁的前提下运行在原版Linux内核之上。</li>
+</ul>
+<h2 id="1-9-2011年-—-Warden"><a href="#1-9-2011年-—-Warden" class="headerlink" title="1.9 2011年 — Warden"></a>1.9 2011年 — Warden</h2><ul>
+<li>Warden由CloudFoundry公司于2011年所建立，其利用LXC作为初始阶段，随后又将其替换为自家实现方案。</li>
+<li>与LXC不同，Warden并不会与Linux紧密耦合。相反，其能够运行在任意能够提供多种隔离环境方式的操作系统之上。Warden以后台进程方式运行并提供API以实现容器管理。</li>
+</ul>
+<h2 id="1-10-2013年-—-LMCTFY"><a href="#1-10-2013年-—-LMCTFY" class="headerlink" title="1.10 2013年 — LMCTFY"></a>1.10 2013年 — LMCTFY</h2><ul>
+<li>Lmctfy代表的是“Let Me Contain That For You(帮你实现容器化)”。它其实属于谷歌容器技术堆栈的开源版本，负责提供Linux应用程序容器。谷歌公司在该项目的起步阶段宣称其能够提供值得信赖的性能表现、高资源利用率、共享资源机制、充裕的发展空间以及趋近于零的额外资源消耗。</li>
+<li>2013年10月lmctfy的首个版本正式推出，谷歌公司在2015年决定将lmctfy的核心概念与抽象机制转化为libcontainer。在失去了主干之后，如今lmctfy已经失去一切积极的发展势头。</li>
+</ul>
+<p>　　Libcontainer项目最初由Docker公司建立，如今已经被归入开放容器基金会的管辖范畴。</p>
+<h2 id="1-11-2013年-Docker"><a href="#1-11-2013年-Docker" class="headerlink" title="1.11 2013年-Docker"></a>1.11 2013年-Docker</h2><ul>
+<li>在2013年Docker刚发布的时候，它是一款基于LXC的开源容器管理引擎。</li>
+<li>把LXC复杂的容器创建与使用方式简化为Docker自己的一套命令体系。</li>
+<li>随着Docker的不断发展，它开始有了更为远大的目标，那就是反向定义容器的实现标准，将底层实现都抽象化到Libcontainer的接口。这就意味着，底层容器的实现方式变成了一种可变的方案，无论是使用namespace、cgroups技术抑或是使用systemd等其他方案，只要实现了Libcontainer定义的一组接口，Docker都可以运行。这也为Docker实现全面的跨平台带来了可能。</li>
+</ul>
+<h1 id="二、NameSpace"><a href="#二、NameSpace" class="headerlink" title="二、NameSpace"></a>二、NameSpace</h1><h2 id="2-1-NameSpace介绍"><a href="#2-1-NameSpace介绍" class="headerlink" title="2.1 NameSpace介绍"></a>2.1 NameSpace介绍</h2><ul>
+<li>很多编程语言都包含了命名空间的概念，我们可以认为命名空间是一种封装，封装本身实际上实现了代码的隔离</li>
+</ul>
+<ul>
+<li>在操作系统中命名空间命名空间提供的是系统资源的隔离，其中系统资源包括了：进程、网络、文件系统……</li>
+</ul>
+<ul>
+<li>实际上linux系统实现命名空间主要目的之一就是为了实现轻量级虚拟化服务，也就是我们说的容器，在同一个命名空间下的进程可以感知彼此的变化，而对其他命名空间的进程一无所知，这样就可以让容器中的进程产生一个错觉，仿佛它自己置身于一个独立的系统环境当中，以此达到独立和隔离的目的。</li>
+</ul>
+<h2 id="2-2-Linux系统中NameSpace分类"><a href="#2-2-Linux系统中NameSpace分类" class="headerlink" title="2.2 Linux系统中NameSpace分类"></a>2.2 Linux系统中NameSpace分类</h2><table>
+<thead>
+<tr>
+<th align="center">命名空间</th>
+<th align="center">描述</th>
+<th align="center">作用</th>
+<th align="center">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">进程命名空间</td>
+<td align="center">隔离进程ID</td>
+<td align="center">Linux通过命名空间管理进程号，同一个进程，在不同的命名空间进程号不同</td>
+<td align="center">进程命名空间是一个父子结构，子空间对于父空间可见</td>
+</tr>
+<tr>
+<td align="center">网络命名空间</td>
+<td align="center">隔离网络设备、协议栈、端口等</td>
+<td align="center">通过网络命名空间，实现网络隔离</td>
+<td align="center">docker采用虚拟网络设备，将不同命名空间的网络设备连接到一起</td>
+</tr>
+<tr>
+<td align="center">IPC命名空间</td>
+<td align="center">隔离进程间通信</td>
+<td align="center">进程间交互方法</td>
+<td align="center">PID命名空间和IPC命名空间可以组合起来用，同一个IPC名字空间内的进程可以彼此看见，允许进行交互，不同空间进程无法交互</td>
+</tr>
+<tr>
+<td align="center">挂载命名空间</td>
+<td align="center">隔离挂载点</td>
+<td align="center">隔离文件目录</td>
+<td align="center">进程运行时可以将挂载点与系统分离，使用这个功能时，我们可以达到 chroot 的功能，而在安全性方面比 chroot 更高</td>
+</tr>
+<tr>
+<td align="center">UTS命名空间</td>
+<td align="center">隔离Hostname和NIS域名</td>
+<td align="center">让容器拥有独立的主机名和域名，从而让容器看起来像个独立的主机</td>
+<td align="center">目的是独立出主机名和网络信息服务（NIS）</td>
+</tr>
+<tr>
+<td align="center">用户命名空间</td>
+<td align="center">隔离用户和group ID</td>
+<td align="center">每个容器内上的用户跟宿主主机上不在一个命名空间</td>
+<td align="center">同进程 ID 一样，用户 ID 和组 ID 在命名空间内外是不一样的，并且在不同命名空间内可以存在相同的 ID</td>
+</tr>
+</tbody></table>
+<h2 id="2-3-NameSpace应用案例"><a href="#2-3-NameSpace应用案例" class="headerlink" title="2.3 NameSpace应用案例"></a>2.3 NameSpace应用案例</h2><blockquote>
+<p>以net namespace为例</p>
+</blockquote>
+<ul>
+<li>在 Linux 中，网络命名空间可以被认为是隔离的拥有单独网络栈（网卡、路由转发表、iptables）的环境。网络命名空间经常用来隔离网络设备和服务，只有拥有同样网络命名空间的设备，才能看到彼此。</li>
+<li>从逻辑上说，网络命名空间是网络栈的副本，拥有自己的网络设备、路由选择表、邻接表、Netfilter表、网络套接字、网络procfs条目、网络sysfs条目和其他网络资源。</li>
+<li>从系统的角度来看，当通过clone()系统调用创建新进程时，传递标志CLONE_NEWNET将在新进程中创建一个全新的网络命名空间。</li>
+<li>从用户的角度来看，我们只需使用工具ip（package is iproute2）来创建一个新的持久网络命名空间。</li>
+</ul>
+<p><img src="/images/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF.assets/image-20220111132707215.png" alt="image-20220111132707215"></p>
+<h3 id="2-3-1-创建net命名空间"><a href="#2-3-1-创建net命名空间" class="headerlink" title="2.3.1 创建net命名空间"></a>2.3.1 创建net命名空间</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">创建名称为lixiang的网络命名空间</span><br><span class="line"><span class="comment"># ip netns add lixiang</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">查看已创建的网络命名空间</span><br><span class="line"><span class="comment"># ip netns ls</span></span><br><span class="line">lixiang</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-3-2-删除net命名空间"><a href="#2-3-2-删除net命名空间" class="headerlink" title="2.3.2 删除net命名空间"></a>2.3.2 删除net命名空间</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">删除已创建的网络命名空间</span><br><span class="line"><span class="comment"># ip netns delete lixiang</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-3-在net命名空间中执行命令"><a href="#2-3-3-在net命名空间中执行命令" class="headerlink" title="2.3.3 在net命名空间中执行命令"></a>2.3.3 在net命名空间中执行命令</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在网络命名空间中执行bash命令，如果想退出，需要使用<span class="keyword">exit</span></span><br><span class="line"><span class="comment"># ip netns exec lixiang bash</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-4-在net命令空间中执行查看网络连接-网卡-命令"><a href="#2-3-4-在net命令空间中执行查看网络连接-网卡-命令" class="headerlink" title="2.3.4 在net命令空间中执行查看网络连接(网卡)命令"></a>2.3.4 在net命令空间中执行查看网络连接(网卡)命令</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在网络命名空间中查看网络命名空间中的网卡信息</span><br><span class="line"><span class="comment"># ip link</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK&gt; mtu <span class="number">65536</span> qdisc noop state DOWN mode DEFAULT <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在Linux主机系统中查看</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link list</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK&gt; mtu <span class="number">65536</span> qdisc noop state DOWN mode DEFAULT <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-3-5-退出当前的net命名空间"><a href="#2-3-5-退出当前的net命名空间" class="headerlink" title="2.3.5 退出当前的net命名空间"></a>2.3.5 退出当前的net命名空间</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">退出已进入的网络命名空间</span><br><span class="line"><span class="comment"># exit</span></span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-6-在net命名空间中执行多条命令"><a href="#2-3-6-在net命名空间中执行多条命令" class="headerlink" title="2.3.6 在net命名空间中执行多条命令"></a>2.3.6 在net命名空间中执行多条命令</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在网络命名空间中查看路由表</span><br><span class="line"><span class="comment"># route -n</span></span><br><span class="line">Kernel IP routing table</span><br><span class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">在网络命名空间中查看防火墙规则</span><br><span class="line"><span class="comment"># iptables -t nat -nL</span></span><br><span class="line">Chain PREROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line"></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line"></span><br><span class="line">Chain POSTROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-7-创建虚拟网卡"><a href="#2-3-7-创建虚拟网卡" class="headerlink" title="2.3.7 创建虚拟网卡"></a>2.3.7 创建虚拟网卡</h3><blockquote>
+<p>同时创建一对虚拟网卡</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">创建虚拟网卡对</span><br><span class="line"><span class="comment"># ip link add veth0 type veth peer name veth1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">在物理机上查看</span><br><span class="line"><span class="comment"># ip a s</span></span><br><span class="line">......</span><br><span class="line"><span class="number">10</span>: veth1@veth0: &lt;BROADCAST,MULTICAST,M<span class="literal">-DOWN</span>&gt; mtu <span class="number">1500</span> qdisc noop state DOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/ether de:<span class="number">44</span>:f8:b7:<span class="number">12</span>:<span class="number">65</span> brd ff:ff:ff:ff:ff:ff</span><br><span class="line"><span class="number">11</span>: veth0@veth1: &lt;BROADCAST,MULTICAST,M<span class="literal">-DOWN</span>&gt; mtu <span class="number">1500</span> qdisc noop state DOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/ether <span class="number">46</span>:<span class="number">5</span>e:<span class="number">89</span>:<span class="number">8</span>c:cb:b3 brd ff:ff:ff:ff:ff:ff</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-8-迁移虚拟网卡到命名空间中"><a href="#2-3-8-迁移虚拟网卡到命名空间中" class="headerlink" title="2.3.8 迁移虚拟网卡到命名空间中"></a>2.3.8 迁移虚拟网卡到命名空间中</h3><blockquote>
+<p>这两个网卡还都属于“default”或“global”命名空间，和物理网卡一样。把其中一个网卡转移到命名空间lixiang中。</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">把创建的veth1网卡添加到lixiang网络命名空间中</span><br><span class="line"><span class="comment"># ip link set veth1 netns lixiang</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在Linux系统命令行查看网络命名空间中的网络</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK&gt; mtu <span class="number">65536</span> qdisc noop state DOWN mode DEFAULT <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line"><span class="number">10</span>: veth1@if11: &lt;BROADCAST,MULTICAST&gt; mtu <span class="number">1500</span> qdisc noop state DOWN mode DEFAULT <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/ether de:<span class="number">44</span>:f8:b7:<span class="number">12</span>:<span class="number">65</span> brd ff:ff:ff:ff:ff:ff link<span class="literal">-netnsid</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-9-命名空间中迁出虚拟网卡"><a href="#2-3-9-命名空间中迁出虚拟网卡" class="headerlink" title="2.3.9 命名空间中迁出虚拟网卡"></a>2.3.9 命名空间中迁出虚拟网卡</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在Linux系统命令行把虚拟网卡veth1从网络命名空间删除</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link delete veth1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在Linux系统命令行查看结果</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK&gt; mtu <span class="number">65536</span> qdisc noop state DOWN mode DEFAULT <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-10-配置虚拟网卡IP地址"><a href="#2-3-10-配置虚拟网卡IP地址" class="headerlink" title="2.3.10 配置虚拟网卡IP地址"></a>2.3.10 配置虚拟网卡IP地址</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">再次创建虚拟网卡，添加到lixiang网络命名空间，并设置IP地址</span><br><span class="line"><span class="comment"># ip link add veth0 type veth peer name veth1</span></span><br><span class="line"><span class="comment"># ip link set veth1 netns lixiang</span></span><br><span class="line"><span class="comment"># ip netns exec lixiang ip addr add 192.168.50.2/24 dev veth1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">在Linux系统命令行查看网络状态</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip addr</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK&gt; mtu <span class="number">65536</span> qdisc noop state DOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line"><span class="number">12</span>: veth1@if13: &lt;BROADCAST,MULTICAST&gt; mtu <span class="number">1500</span> qdisc noop state DOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/ether fe:<span class="number">20</span>:<span class="built_in">ac</span>:a8:<span class="number">13</span>:<span class="number">4</span>c brd ff:ff:ff:ff:ff:ff link<span class="literal">-netnsid</span> <span class="number">0</span></span><br><span class="line">    inet <span class="number">192.168</span>.<span class="number">50.2</span>/<span class="number">24</span> scope global veth1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">启动虚拟网卡,veth1与lo全部要启动</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link set veth1 up</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ip netns exec lixiang ip link set lo up</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">为物理机veth0添加IP地址</span><br><span class="line"></span><br><span class="line"><span class="comment"># ip a s</span></span><br><span class="line">......</span><br><span class="line"><span class="number">15</span>: veth0@if14: &lt;BROADCAST,MULTICAST&gt; mtu <span class="number">1500</span> qdisc noop state DOWN <span class="built_in">group</span> defau</span><br><span class="line">lt qlen <span class="number">1000</span></span><br><span class="line">    link/ether <span class="number">2</span>e:b4:<span class="number">40</span>:c8:<span class="number">73</span>:dc brd ff:ff:ff:ff:ff:ff link<span class="literal">-netnsid</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip addr add 192.168.50.3/24 dev veth0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ip a s veth0</span></span><br><span class="line"><span class="number">15</span>: veth0@if14: &lt;BROADCAST,MULTICAST&gt; mtu <span class="number">1500</span> qdisc noop state DOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/ether <span class="number">2</span>e:b4:<span class="number">40</span>:c8:<span class="number">73</span>:dc brd ff:ff:ff:ff:ff:ff link<span class="literal">-netnsid</span> <span class="number">0</span></span><br><span class="line">    inet <span class="number">192.168</span>.<span class="number">50.3</span>/<span class="number">24</span> scope global veth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip link set veth0 up</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在宿主机上ping lixiang中的veth1</span><br><span class="line"><span class="comment"># ping 192.168.50.2</span></span><br><span class="line">PING <span class="number">192.168</span>.<span class="number">50.2</span> (<span class="number">192.168</span>.<span class="number">50.2</span>) <span class="number">56</span>(<span class="number">84</span>) bytes of <span class="keyword">data</span>.</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.2</span>: icmp_seq=<span class="number">1</span> ttl=<span class="number">64</span> time=<span class="number">0.102</span> ms</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.2</span>: icmp_seq=<span class="number">2</span> ttl=<span class="number">64</span> time=<span class="number">0.068</span> ms</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.2</span>: icmp_seq=<span class="number">3</span> ttl=<span class="number">64</span> time=<span class="number">0.068</span> ms</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在lixiang中的veth1 ping 宿主机上veth0</span><br><span class="line"><span class="comment"># ip netns exec lixiang ping 192.168.50.3</span></span><br><span class="line">PING <span class="number">192.168</span>.<span class="number">50.3</span> (<span class="number">192.168</span>.<span class="number">50.3</span>) <span class="number">56</span>(<span class="number">84</span>) bytes of <span class="keyword">data</span>.</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.3</span>: icmp_seq=<span class="number">1</span> ttl=<span class="number">64</span> time=<span class="number">0.053</span> ms</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.3</span>: icmp_seq=<span class="number">2</span> ttl=<span class="number">64</span> time=<span class="number">0.031</span> ms</span><br><span class="line"><span class="number">64</span> bytes from <span class="number">192.168</span>.<span class="number">50.3</span>: icmp_seq=<span class="number">3</span> ttl=<span class="number">64</span> time=<span class="number">0.029</span> ms</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">如果需要访问本机的其它网段，可手动添加如下默认路由条目。</span><br><span class="line"><span class="comment"># ip netns exec lixiang ip route add default via 192.168.50.3</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<blockquote>
+<p>关于如何ping通外网主机，可设置路由转发完成。</p>
+</blockquote>
+<h1 id="三、CGroups"><a href="#三、CGroups" class="headerlink" title="三、CGroups"></a>三、CGroups</h1><h2 id="3-1-CGroups介绍"><a href="#3-1-CGroups介绍" class="headerlink" title="3.1 CGroups介绍"></a>3.1 CGroups介绍</h2><ul>
+<li>Control groups(cgroups) 控制组</li>
+</ul>
+<ul>
+<li>linux内核提供的可以限制、记录、隔离进程组所使用的物理资源的机制。为容器而生，没有cgroups就没有今天的容器技术。</li>
+</ul>
+<p><img src="/images/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF.assets/image-20220112182824405.png" alt="image-20220112182824405"></p>
+<h2 id="3-2-CGroups功能"><a href="#3-2-CGroups功能" class="headerlink" title="3.2 CGroups功能"></a>3.2 CGroups功能</h2><ul>
+<li>资源限制（Resource Limitation）：cgroups 可以对进程组使用的资源总额进行限制。如设定应用运行时使用内存的上限，一旦超过这个配额就发出 OOM（Out of Memory）。</li>
+<li>优先级分配（Prioritization）：通过分配的 CPU 时间片数量及硬盘 IO 带宽大小，实际上就相当于控制了进程运行的优先级。</li>
+<li>资源统计（Accounting）： cgroups 可以统计系统的资源使用量，如 CPU 使用时长、内存用量等等，这个功能非常适用于计费。</li>
+<li>进程控制（Control）：cgroups 可以对进程组执行挂起、恢复等操作。</li>
+</ul>
+<h2 id="3-3-CGroups应用案例"><a href="#3-3-CGroups应用案例" class="headerlink" title="3.3 CGroups应用案例"></a>3.3 CGroups应用案例</h2><h3 id="3-3-1-安装及开启服务"><a href="#3-3-1-安装及开启服务" class="headerlink" title="3.3.1 安装及开启服务"></a>3.3.1 安装及开启服务</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# yum -y install libcgroup</span><br><span class="line">[root@localhost ~]# systemctl start cgconfig.service 	</span><br><span class="line">[root@localhost ~]# systemctl enable cgconfig.service</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-3-2-限制进程使用CPU"><a href="#3-3-2-限制进程使用CPU" class="headerlink" title="3.3.2 限制进程使用CPU"></a>3.3.2 限制进程使用CPU</h3><h4 id="3-3-2-1-查看cpu-shares"><a href="#3-3-2-1-查看cpu-shares" class="headerlink" title="3.3.2.1 查看cpu shares"></a>3.3.2.1 查看cpu shares</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">查看资源限制子系统</span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># lssubsys</span></span><br><span class="line">cpuset</span><br><span class="line">cpu,cpuacct</span><br><span class="line">memory</span><br><span class="line">devices</span><br><span class="line">freezer</span><br><span class="line">net_cls,net_prio</span><br><span class="line">blkio</span><br><span class="line">perf_event</span><br><span class="line">hugetlb</span><br><span class="line">pids</span><br><span class="line"></span><br><span class="line">查看子系统配置文件所在位置</span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># ls /sys/fs/cgroup/</span></span><br><span class="line">blkio  cpuacct      cpuset   freezer  memory   net_cls,net_prio  perf_event  systemd</span><br><span class="line">cpu    cpu,cpuacct  devices  hugetlb  net_cls  net_prio          pids</span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># ls /sys/fs/cgroup/cpu</span></span><br><span class="line">cgroup.clone_children  cpuacct.stat          cpu.cfs_quota_us   cpu.stat</span><br><span class="line">cgroup.event_control   cpuacct.usage         cpu.rt_period_us   notify_on_release</span><br><span class="line">cgroup.procs           cpuacct.usage_percpu  cpu.rt_runtime_us  release_agent</span><br><span class="line">cgroup.sane_behavior   cpu.cfs_period_us     cpu.shares         tasks</span><br><span class="line"></span><br><span class="line">查看CPU时间分片，用于保证分组所得到的CPU分片总量。</span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># cat /sys/fs/cgroup/cpu/cpu.shares</span></span><br><span class="line"><span class="number">1024</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="3-3-2-2-使用CPU子系统创建2个group分组"><a href="#3-3-2-2-使用CPU子系统创建2个group分组" class="headerlink" title="3.3.2.2 使用CPU子系统创建2个group分组"></a>3.3.2.2 使用CPU子系统创建2个group分组</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/cgconfig.conf</span><br><span class="line">group lesscpu &#123;</span><br><span class="line">	cpu&#123;</span><br><span class="line">		cpu.shares=200;</span><br><span class="line">	&#125;	</span><br><span class="line">&#125;</span><br><span class="line">group morecpu &#123;</span><br><span class="line">	cpu&#123;</span><br><span class="line">		cpu.shares=800;</span><br><span class="line">	&#125;	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# systemctl restart cgconfig</span><br></pre></td></tr></table></figure>
+
+<p>准备一个脚本</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">a=<span class="number">1</span></span><br><span class="line"><span class="keyword">while</span> true</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line"></span><br><span class="line">        a=<span class="variable">$</span>[<span class="variable">$a</span>+<span class="number">1</span>]</span><br><span class="line">done</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>将将要运行的应用程序分配到指定分组(<strong>请使用单CPU机器,三个终端验证</strong>)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">终端1# cgexec -g cpu:lesscpu sh /tmp/1.sh</span><br><span class="line"></span><br><span class="line">终端2# cgexec -g cpu:morecpu sh /tmp/1.sh</span><br><span class="line"></span><br><span class="line">终端3# top</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>PS: 如果主机有多CPU，为了验证效果，可以进行如下操作</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> lscpu</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">echo</span> 0 &gt; /sys/devices/system/cpu/cpu0/online</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">echo</span> 1 &gt; /sys/devices/system/cpu/cpu1/online</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F"><span class="toc-number">1.</span> <span class="toc-text">一、容器技术前世今生</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-1979%E5%B9%B4-%E2%80%94-chroot"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 1979年 — chroot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-2000%E5%B9%B4-%E2%80%94-FreeBSD-Jails"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 2000年 — FreeBSD Jails</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-2001%E5%B9%B4-%E2%80%94-Linux-VServer"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 2001年 — Linux VServer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-2004%E5%B9%B4-%E2%80%94-Solaris%E5%AE%B9%E5%99%A8"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 2004年 — Solaris容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-2005%E5%B9%B4-%E2%80%94-OpenVZ"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 2005年 — OpenVZ</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-2006%E5%B9%B4-%E2%80%94-Process%E5%AE%B9%E5%99%A8"><span class="toc-number">1.6.</span> <span class="toc-text">1.6 2006年 — Process容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-7-2007%E5%B9%B4-%E2%80%94-Control-Groups"><span class="toc-number">1.7.</span> <span class="toc-text">1.7 2007年 — Control Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-8-2008%E5%B9%B4-%E2%80%94-LXC"><span class="toc-number">1.8.</span> <span class="toc-text">1.8 2008年 — LXC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-9-2011%E5%B9%B4-%E2%80%94-Warden"><span class="toc-number">1.9.</span> <span class="toc-text">1.9 2011年 — Warden</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-10-2013%E5%B9%B4-%E2%80%94-LMCTFY"><span class="toc-number">1.10.</span> <span class="toc-text">1.10 2013年 — LMCTFY</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-11-2013%E5%B9%B4-Docker"><span class="toc-number">1.11.</span> <span class="toc-text">1.11 2013年-Docker</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81NameSpace"><span class="toc-number">2.</span> <span class="toc-text">二、NameSpace</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-NameSpace%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 NameSpace介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Linux%E7%B3%BB%E7%BB%9F%E4%B8%ADNameSpace%E5%88%86%E7%B1%BB"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Linux系统中NameSpace分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-NameSpace%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 NameSpace应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%88%9B%E5%BB%BAnet%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 创建net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E5%88%A0%E9%99%A4net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.3.2 删除net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%9C%A8net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.3.</span> <span class="toc-text">2.3.3 在net命名空间中执行命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-4-%E5%9C%A8net%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5-%E7%BD%91%E5%8D%A1-%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.4.</span> <span class="toc-text">2.3.4 在net命令空间中执行查看网络连接(网卡)命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-5-%E9%80%80%E5%87%BA%E5%BD%93%E5%89%8D%E7%9A%84net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="toc-number">2.3.5.</span> <span class="toc-text">2.3.5 退出当前的net命名空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-6-%E5%9C%A8net%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E6%89%A7%E8%A1%8C%E5%A4%9A%E6%9D%A1%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.6.</span> <span class="toc-text">2.3.6 在net命名空间中执行多条命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-7-%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1"><span class="toc-number">2.3.7.</span> <span class="toc-text">2.3.7 创建虚拟网卡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-8-%E8%BF%81%E7%A7%BB%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1%E5%88%B0%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD"><span class="toc-number">2.3.8.</span> <span class="toc-text">2.3.8 迁移虚拟网卡到命名空间中</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-9-%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E4%B8%AD%E8%BF%81%E5%87%BA%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1"><span class="toc-number">2.3.9.</span> <span class="toc-text">2.3.9 命名空间中迁出虚拟网卡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-10-%E9%85%8D%E7%BD%AE%E8%99%9A%E6%8B%9F%E7%BD%91%E5%8D%A1IP%E5%9C%B0%E5%9D%80"><span class="toc-number">2.3.10.</span> <span class="toc-text">2.3.10 配置虚拟网卡IP地址</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81CGroups"><span class="toc-number">3.</span> <span class="toc-text">三、CGroups</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-CGroups%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 CGroups介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-CGroups%E5%8A%9F%E8%83%BD"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 CGroups功能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-CGroups%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 CGroups应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-%E5%AE%89%E8%A3%85%E5%8F%8A%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.3.1.</span> <span class="toc-text">3.3.1 安装及开启服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-%E9%99%90%E5%88%B6%E8%BF%9B%E7%A8%8B%E4%BD%BF%E7%94%A8CPU"><span class="toc-number">3.3.2.</span> <span class="toc-text">3.3.2 限制进程使用CPU</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-1-%E6%9F%A5%E7%9C%8Bcpu-shares"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">3.3.2.1 查看cpu shares</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-2-%E4%BD%BF%E7%94%A8CPU%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA2%E4%B8%AAgroup%E5%88%86%E7%BB%84"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">3.3.2.2 使用CPU子系统创建2个group分组</span></a></li></ol></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&text=容器技术所涉及Linux内核关键技术"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&is_video=false&description=容器技术所涉及Linux内核关键技术"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=容器技术所涉及Linux内核关键技术&body=Check out this article: https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&title=容器技术所涉及Linux内核关键技术"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/07/28/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E6%89%80%E6%B6%89%E5%8F%8ALinux%E5%86%85%E6%A0%B8%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/&name=容器技术所涉及Linux内核关键技术&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

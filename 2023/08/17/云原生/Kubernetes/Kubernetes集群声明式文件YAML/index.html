@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、YAML介绍  YAML 的意思是：仍是一种标记语言，但为了强调这种语言以数据做为中心，而不是以标记语言为重点。是一个可读性高，用来表达数据序列的格式。 二、基本语法1231.低版本缩进时不允许使用Tab键，只允许使用空格2.缩进的空格数目不重要，只要相同层级的元素左侧对齐即可3.# 标识注释，从这个字符一直到行尾，都会被解释器忽略    三、YAML  支持的数据结构 对象：键值对的集合，又">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes集群声明式文件YAML">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、YAML介绍  YAML 的意思是：仍是一种标记语言，但为了强调这种语言以数据做为中心，而不是以标记语言为重点。是一个可读性高，用来表达数据序列的格式。 二、基本语法1231.低版本缩进时不允许使用Tab键，只允许使用空格2.缩进的空格数目不重要，只要相同层级的元素左侧对齐即可3.# 标识注释，从这个字符一直到行尾，都会被解释器忽略    三、YAML  支持的数据结构 对象：键值对的集合，又">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-08-17T01:20:09.000Z">
+<meta property="article:modified_time" content="2025-03-16T15:03:41.651Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Kubernetes集群声明式文件YAML</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/20/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%EF%BC%88Namespace%EF%BC%89/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/08/16/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4Node%E7%AE%A1%E7%90%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&text=Kubernetes集群声明式文件YAML"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&is_video=false&description=Kubernetes集群声明式文件YAML"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kubernetes集群声明式文件YAML&body=Check out this article: https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&name=Kubernetes集群声明式文件YAML&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81YAML%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">一、YAML介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">二、基本语法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81YAML-%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">三、YAML  支持的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B%EF%BC%9A%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%80%E7%BB%84%E9%94%AE%E5%80%BC%E5%AF%B9%EF%BC%8C%E4%BD%BF%E7%94%A8%E5%86%92%E5%8F%B7%E7%BB%93%E6%9E%84%E8%A1%A8%E7%A4%BA"><span class="toc-number">3.0.0.0.1.</span> <span class="toc-text">对象类型：对象的一组键值对，使用冒号结构表示</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B%EF%BC%9A%E4%B8%80%E7%BB%84%E8%BF%9E%E8%AF%8D%E7%BA%BF%E5%BC%80%E5%A4%B4%E7%9A%84%E8%A1%8C%EF%BC%8C%E6%9E%84%E6%88%90%E4%B8%80%E4%B8%AA%E6%95%B0%E7%BB%84"><span class="toc-number">3.0.0.0.2.</span> <span class="toc-text">数组类型：一组连词线开头的行，构成一个数组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%8D%E5%90%88%E7%BB%93%E6%9E%84%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%92%8C%E6%95%B0%E7%BB%84%E5%8F%AF%E4%BB%A5%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8%EF%BC%8C%E5%BD%A2%E6%88%90%E5%A4%8D%E5%90%88%E7%BB%93%E6%9E%84"><span class="toc-number">3.0.0.0.3.</span> <span class="toc-text">复合结构：对象和数组可以结合使用，形成复合结构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BA%AF%E9%87%8F%EF%BC%9A%E7%BA%AF%E9%87%8F%E6%98%AF%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%80%81%E4%B8%8D%E5%8F%AF%E5%86%8D%E5%88%86%E7%9A%84%E5%80%BC%E3%80%82%E4%BB%A5%E4%B8%8B%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E9%83%BD%E5%B1%9E%E4%BA%8E%E7%BA%AF%E9%87%8F"><span class="toc-number">3.0.0.0.4.</span> <span class="toc-text">纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.0.0.0.5.</span> <span class="toc-text">字符串</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Kubernetes%E9%9B%86%E7%BE%A4%E4%B8%AD%E8%B5%84%E6%BA%90%E5%AF%B9%E8%B1%A1%E6%8F%8F%E8%BF%B0%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">四、Kubernetes集群中资源对象描述方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%B8%B8%E7%94%A8%E5%AD%97%E6%AE%B5"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 常用字段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 举例说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E4%BD%BF%E7%94%A8%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML%E5%88%9B%E5%BB%BAnamespace"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 使用声明式文件YAML创建namespace</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E4%BD%BF%E7%94%A8%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML%E5%88%9B%E5%BB%BApod"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 使用声明式文件YAML创建pod</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Kubernetes集群声明式文件YAML
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-08-17T01:20:09.000Z" itemprop="datePublished">2023-08-17</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/" class="leancloud-visitors" data-flag-title="Kubernetes集群声明式文件YAML" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kubernetes/" rel="tag">Kubernetes</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、YAML介绍"><a href="#一、YAML介绍" class="headerlink" title="一、YAML介绍"></a>一、YAML介绍</h1><p>  YAML 的意思是：仍是一种标记语言，但为了强调这种语言以数据做为中心，而不是以标记语言为重点。是一个可读性高，用来表达数据序列的格式。</p>
+<h1 id="二、基本语法"><a href="#二、基本语法" class="headerlink" title="二、基本语法"></a>二、基本语法</h1><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>.低版本缩进时不允许使用Tab键，只允许使用空格</span><br><span class="line"><span class="number">2</span>.缩进的空格数目不重要，只要相同层级的元素左侧对齐即可</span><br><span class="line"><span class="number">3</span>.<span class="comment"># 标识注释，从这个字符一直到行尾，都会被解释器忽略</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="三、YAML-支持的数据结构"><a href="#三、YAML-支持的数据结构" class="headerlink" title="三、YAML  支持的数据结构"></a>三、YAML  支持的数据结构</h1><ul>
+<li>对象：键值对的集合，又称为映射（mapping）/ 哈希（hashes） / 字典（dictionary）</li>
+<li>数组：一组按次序排列的值，又称为序列（sequence） / 列表 （list）</li>
+<li>纯量（scalars）：单个的、不可再分的值  </li>
+</ul>
+<h5 id="对象类型：对象的一组键值对，使用冒号结构表示"><a href="#对象类型：对象的一组键值对，使用冒号结构表示" class="headerlink" title="对象类型：对象的一组键值对，使用冒号结构表示"></a>对象类型：对象的一组键值对，使用冒号结构表示</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">name: Steve</span><br><span class="line">age: <span class="number">18</span></span><br></pre></td></tr></table></figure>
+
+<p>Yaml 也允许另一种写法，将所有键值对写成一个行内对象</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hash: &#123; name: Steve, age: <span class="number">18</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="数组类型：一组连词线开头的行，构成一个数组"><a href="#数组类型：一组连词线开头的行，构成一个数组" class="headerlink" title="数组类型：一组连词线开头的行，构成一个数组"></a>数组类型：一组连词线开头的行，构成一个数组</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">animal</span><br><span class="line">- <span class="built_in">Cat</span></span><br><span class="line">- Dog</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>数组也可以采用行内表示法  </p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">animal: [<span class="type">Cat</span>, <span class="type">Dog</span>]</span><br></pre></td></tr></table></figure>
+
+<h5 id="复合结构：对象和数组可以结合使用，形成复合结构"><a href="#复合结构：对象和数组可以结合使用，形成复合结构" class="headerlink" title="复合结构：对象和数组可以结合使用，形成复合结构"></a>复合结构：对象和数组可以结合使用，形成复合结构</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> languages:</span><br><span class="line"><span class="number">2</span> - Ruby </span><br><span class="line"><span class="number">3</span> - Perl </span><br><span class="line"><span class="number">4</span> - Python</span><br><span class="line"><span class="number">5</span> websites:</span><br><span class="line"><span class="number">6</span> YAML: yaml.org </span><br><span class="line"><span class="number">7</span> Ruby: ruby<span class="literal">-lang</span>.org </span><br><span class="line"><span class="number">8</span> Python: python.org </span><br><span class="line"><span class="number">9</span> Perl: use.perl.org  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量"><a href="#纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量" class="headerlink" title="纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量"></a><strong>纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量</strong></h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> 字符串  布尔值  整数 浮点数 Null </span><br><span class="line"><span class="number">2</span> 时间  日期</span><br><span class="line"></span><br><span class="line">数值直接以字面量的形式表示</span><br><span class="line">number: <span class="number">12.30</span></span><br><span class="line"></span><br><span class="line">布尔值用true和false表示</span><br><span class="line">isSet: true</span><br><span class="line"></span><br><span class="line">null用 ~ 表示</span><br><span class="line">parent: ~</span><br><span class="line"></span><br><span class="line">时间采用 ISO8601 格式</span><br><span class="line">iso8601: <span class="number">2001</span><span class="literal">-12</span><span class="literal">-14t21</span>:<span class="number">59</span>:<span class="number">43.10</span><span class="literal">-05</span>:<span class="number">00</span></span><br><span class="line"></span><br><span class="line">日期采用复合 iso8601 格式的年、月、日表示</span><br><span class="line">date: <span class="number">1976</span><span class="literal">-07</span><span class="literal">-31</span></span><br><span class="line"></span><br><span class="line">YAML 允许使用两个感叹号，强制转换数据类型</span><br><span class="line">e: !!str <span class="number">123</span></span><br><span class="line">f: !!str true</span><br></pre></td></tr></table></figure>
+
+<h5 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h5><p>字符串默认不使用引号表示</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str: 这是一行字符串</span><br></pre></td></tr></table></figure>
+
+<p>如果字符串之中包含空格或特殊字符，需要放在引号之中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str: &#39;内容：  字符串&#39;</span><br></pre></td></tr></table></figure>
+
+<p>单引号和双引号都可以使用，双引号不会对特殊字符转义</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s1: <span class="string">&#x27;内容\n字符串&#x27;</span></span><br><span class="line">s2: <span class="string">&quot;内容\n字符串&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>单引号之中如果还有单引号，必须连续使用两个单引号转义</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str: <span class="string">&#x27;labor&#x27;</span><span class="string">&#x27;s day&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>字符串可以写成多行，从第二行开始，必须有一个单空格缩进。换行符会被转为 空格</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">str: 这是一段</span><br><span class="line">  多行</span><br><span class="line">  字符串</span><br></pre></td></tr></table></figure>
+
+<p>多行字符串可以使用|保留换行符，也可以使用&gt;折叠换行</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">this: |</span><br><span class="line">Foo</span><br><span class="line">Bar</span><br><span class="line">that</span><br><span class="line">Foo</span><br><span class="line">Bar</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="四、Kubernetes集群中资源对象描述方法"><a href="#四、Kubernetes集群中资源对象描述方法" class="headerlink" title="四、Kubernetes集群中资源对象描述方法"></a>四、Kubernetes集群中资源对象描述方法</h1><p>在kubernetes中，一般使用ymal格式的文件来创建符合我们预期期望的pod,这样的yaml文件称为资源清单文件。</p>
+<h2 id="4-1-常用字段"><a href="#4-1-常用字段" class="headerlink" title="4.1 常用字段"></a>4.1 常用字段</h2><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>字段类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>version</td>
+<td>String</td>
+<td>这里是指的是K8S API的版本，目前基本上是v1，可以用 kubectl api-versions命令查询</td>
+</tr>
+<tr>
+<td>kind</td>
+<td>String</td>
+<td>这里指的是yam文件定义的资源类型和角色，比如:Pod</td>
+</tr>
+<tr>
+<td>metadata</td>
+<td>Object</td>
+<td>元数据对象，固定值就写 metadata</td>
+</tr>
+<tr>
+<td>metadata.name</td>
+<td>String</td>
+<td>元数据对象的名字，这里由我们编写，比如命名Pod的名字</td>
+</tr>
+<tr>
+<td>metadata.namespace</td>
+<td>String</td>
+<td>元数据对象的命名空间，由我们自身定义</td>
+</tr>
+<tr>
+<td>Spec</td>
+<td>Object</td>
+<td>详细定义对象，固定值就写Spec</td>
+</tr>
+<tr>
+<td>spec. containers[]</td>
+<td>list</td>
+<td>这里是Spec对象的容器列表定义，是个列表</td>
+</tr>
+<tr>
+<td>spec containers [].name</td>
+<td>String</td>
+<td>这里定义容器的名字</td>
+</tr>
+<tr>
+<td>spec.containers [].image</td>
+<td>String</td>
+<td>这里定义要用到的镜像名称</td>
+</tr>
+<tr>
+<td>spec.containers [].imagePullPolicy</td>
+<td>String</td>
+<td>定义镜像拉取策路，有 Always、 Never、Ifnotpresent三个值可选：(1) Always:意思是每次都尝试重新拉取镜像；(2) Never:表示仅使用本地镜像；(3) IfNotPresent:如果本地有镜像就使用本地镜像，没有就拉取在线镜像。上面三个值都没设置的话，默认是 Always。</td>
+</tr>
+<tr>
+<td>spec containers [].command[]</td>
+<td>List</td>
+<td>指定容器启动命令，因为是数组可以指定多个。不指定则使用镜像打包时使用的启动命令。</td>
+</tr>
+<tr>
+<td>spec.containers [].args</td>
+<td>List</td>
+<td>指定容器启动命令参数，因为是数组可以指定多个.</td>
+</tr>
+<tr>
+<td>spec.containers [].workDir</td>
+<td>String</td>
+<td>指定容器的工作目录</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[]</td>
+<td>List</td>
+<td>指定容器内部的存储卷配置</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].name</td>
+<td>String</td>
+<td>指定可以被容器挂载的存储卷的名称</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].mountPath</td>
+<td>String</td>
+<td>指定可以被容器挂载的存储卷的路径</td>
+</tr>
+<tr>
+<td>spec.containers[]. volumeMounts[].readOnly</td>
+<td>String</td>
+<td>设置存储卷路径的读写模式，ture或者 false，默认为读写模式</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[]</td>
+<td>String</td>
+<td>指容器需要用到的端口列表</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].name</td>
+<td>String</td>
+<td>指定端口名称</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].containerPort</td>
+<td>String</td>
+<td>指定容器需要监听的端口号</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].hostPort</td>
+<td>String</td>
+<td>指定容器所在主机需要监听的端口号，默认跟上面 containerPort相同，注意设置了 hostPort同一台主机无法启动该容器的相同副本(因为主机的端口号不能相同，这样会冲突)</td>
+</tr>
+<tr>
+<td>spec.containers [].ports[].protocol</td>
+<td>String</td>
+<td>指定端口协议，支持TCP和UDP，默认值为TCP</td>
+</tr>
+<tr>
+<td>spec.containers [].env[]</td>
+<td>List</td>
+<td>指定容器运行前需设的环境变量列表</td>
+</tr>
+<tr>
+<td>spec.containers [].env[].name</td>
+<td>String</td>
+<td>指定环境变量名称</td>
+</tr>
+<tr>
+<td>spec.containers [].env[].value</td>
+<td>String</td>
+<td>指定环境变量值</td>
+</tr>
+<tr>
+<td>spec.containers[].resources</td>
+<td>Object</td>
+<td>指定资源 限制和资源请求的值（这里开始就是设置容器的资源上限）</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits</td>
+<td>Object</td>
+<td>指定设置容器运行时资源的运行上限</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits.cpu</td>
+<td>String</td>
+<td>指定CPU限制，单位为core数，将用于docker run – cpu-shares参数</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.limits.memory</td>
+<td>String</td>
+<td>指定MEM内存的限制，单位为MiB、GiB</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests</td>
+<td>Object</td>
+<td>指定容器启动和调度时的限制设置</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests.cpu</td>
+<td>String</td>
+<td>CPU请求，单位为core数，容器启动时初始化可用数量</td>
+</tr>
+<tr>
+<td>spec.containers[].resources.requests.memory</td>
+<td>String</td>
+<td>内存请求，单位为MiB、GiB，容器启动时初始化可用数量</td>
+</tr>
+<tr>
+<td>sepc.restartPolicy</td>
+<td>String</td>
+<td>定义Pod的重启策略，可选值为Always、OnFailure,默认值为Always。1.Always:Pod一旦终止运行，则无论容器时如何终止的，kubelet服务都将重启它。2.OnFailure:只有Pod以非零退出码终止时，kubelet才会重启该容器。如果容器正常结束（退出码为0），则kubelet将不会重启它。3.Never:Pod终止后，kubelet将退出码报告给Master,不会重启该Pod。</td>
+</tr>
+<tr>
+<td>spec.nodeSelector</td>
+<td>Object</td>
+<td>定义Node的Label过滤标签，以key:value格式指定。</td>
+</tr>
+<tr>
+<td>spec.imagePullSecrets</td>
+<td>Object</td>
+<td>定义pull镜像时使用secret名称，以name:secretkey格式指定。</td>
+</tr>
+<tr>
+<td>spec.hostNetwork</td>
+<td>Boolean</td>
+<td>定义是否使用主机网络模式，默认值为false。设置true表示使用宿主机网络，不使用docker网桥，同时设置了true将无法在同一台宿主机上启动第二个副本。</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-举例说明"><a href="#4-2-举例说明" class="headerlink" title="4.2 举例说明"></a>4.2 举例说明</h2><h3 id="4-2-1-使用声明式文件YAML创建namespace"><a href="#4-2-1-使用声明式文件YAML创建namespace" class="headerlink" title="4.2.1 使用声明式文件YAML创建namespace"></a>4.2.1 使用声明式文件YAML创建namespace</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  name: test</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-2-2-使用声明式文件YAML创建pod"><a href="#4-2-2-使用声明式文件YAML创建pod" class="headerlink" title="4.2.2 使用声明式文件YAML创建pod"></a>4.2.2 使用声明式文件YAML创建pod</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod1</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: k8sonline1</span><br><span class="line">    image: nginx:latest</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81YAML%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">一、YAML介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">二、基本语法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81YAML-%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">三、YAML  支持的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B%EF%BC%9A%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%80%E7%BB%84%E9%94%AE%E5%80%BC%E5%AF%B9%EF%BC%8C%E4%BD%BF%E7%94%A8%E5%86%92%E5%8F%B7%E7%BB%93%E6%9E%84%E8%A1%A8%E7%A4%BA"><span class="toc-number">3.0.0.0.1.</span> <span class="toc-text">对象类型：对象的一组键值对，使用冒号结构表示</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B%EF%BC%9A%E4%B8%80%E7%BB%84%E8%BF%9E%E8%AF%8D%E7%BA%BF%E5%BC%80%E5%A4%B4%E7%9A%84%E8%A1%8C%EF%BC%8C%E6%9E%84%E6%88%90%E4%B8%80%E4%B8%AA%E6%95%B0%E7%BB%84"><span class="toc-number">3.0.0.0.2.</span> <span class="toc-text">数组类型：一组连词线开头的行，构成一个数组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%8D%E5%90%88%E7%BB%93%E6%9E%84%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%92%8C%E6%95%B0%E7%BB%84%E5%8F%AF%E4%BB%A5%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8%EF%BC%8C%E5%BD%A2%E6%88%90%E5%A4%8D%E5%90%88%E7%BB%93%E6%9E%84"><span class="toc-number">3.0.0.0.3.</span> <span class="toc-text">复合结构：对象和数组可以结合使用，形成复合结构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BA%AF%E9%87%8F%EF%BC%9A%E7%BA%AF%E9%87%8F%E6%98%AF%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%80%81%E4%B8%8D%E5%8F%AF%E5%86%8D%E5%88%86%E7%9A%84%E5%80%BC%E3%80%82%E4%BB%A5%E4%B8%8B%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E9%83%BD%E5%B1%9E%E4%BA%8E%E7%BA%AF%E9%87%8F"><span class="toc-number">3.0.0.0.4.</span> <span class="toc-text">纯量：纯量是最基本的、不可再分的值。以下数据类型都属于纯量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.0.0.0.5.</span> <span class="toc-text">字符串</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Kubernetes%E9%9B%86%E7%BE%A4%E4%B8%AD%E8%B5%84%E6%BA%90%E5%AF%B9%E8%B1%A1%E6%8F%8F%E8%BF%B0%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">四、Kubernetes集群中资源对象描述方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%B8%B8%E7%94%A8%E5%AD%97%E6%AE%B5"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 常用字段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 举例说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E4%BD%BF%E7%94%A8%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML%E5%88%9B%E5%BB%BAnamespace"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 使用声明式文件YAML创建namespace</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E4%BD%BF%E7%94%A8%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML%E5%88%9B%E5%BB%BApod"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 使用声明式文件YAML创建pod</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&text=Kubernetes集群声明式文件YAML"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&is_video=false&description=Kubernetes集群声明式文件YAML"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kubernetes集群声明式文件YAML&body=Check out this article: https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&title=Kubernetes集群声明式文件YAML"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%96%87%E4%BB%B6YAML/&name=Kubernetes集群声明式文件YAML&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
