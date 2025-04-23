@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、使用Docker Compose必要性及定义用容器运行一个服务,需要使用docker run命令。但如果我要运行多个服务呢? 假设我要运行一个web服务,还要运行一个db服务,那么是用一个容器运行,还是用多个容器运行呢? 一个容器运行多个服务会造成镜像的复杂度提高,docker倾向于一个容器运行一个应用。 那么复杂的架构就会需要很多的容器,并且需要它们之间有关联(容器之间的依赖和连接)就更复杂">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker容器服务编排利器Docker Compose">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、使用Docker Compose必要性及定义用容器运行一个服务,需要使用docker run命令。但如果我要运行多个服务呢? 假设我要运行一个web服务,还要运行一个db服务,那么是用一个容器运行,还是用多个容器运行呢? 一个容器运行多个服务会造成镜像的复杂度提高,docker倾向于一个容器运行一个应用。 那么复杂的架构就会需要很多的容器,并且需要它们之间有关联(容器之间的依赖和连接)就更复杂">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215214445753.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215146472.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215216047.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215239151.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215359944.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215221648195.png">
+<meta property="article:published_time" content="2023-08-13T00:48:22.000Z">
+<meta property="article:modified_time" content="2025-04-23T15:54:06.912Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215214445753.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Docker容器服务编排利器Docker Compose</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E4%B8%BB%E6%9C%BA%E9%9B%86%E7%BE%A4%E5%8C%96Docker%20Swarm/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/08/09/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&text=Docker容器服务编排利器Docker Compose"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&is_video=false&description=Docker容器服务编排利器Docker Compose"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker容器服务编排利器Docker Compose&body=Check out this article: https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&name=Docker容器服务编排利器Docker Compose&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BD%BF%E7%94%A8Docker-Compose%E5%BF%85%E8%A6%81%E6%80%A7%E5%8F%8A%E5%AE%9A%E4%B9%89"><span class="toc-number">1.</span> <span class="toc-text">一、使用Docker Compose必要性及定义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">2.</span> <span class="toc-text">二、Docker Compose应用参考资料</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.</span> <span class="toc-text">三、Docker Compose应用最佳实践步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 步骤</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Docker-Compose%E5%AE%89%E8%A3%85"><span class="toc-number">4.</span> <span class="toc-text">四、Docker Compose安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">五、Docker Compose应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E7%BD%91%E7%AB%99%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 网站文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-Dockerfile%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 Dockerfile文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-Compose%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 Compose文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-%E4%BD%BF%E7%94%A8docker-compose-up%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8"><span class="toc-number">5.4.</span> <span class="toc-text">5.4 使用docker-compose up启动容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-5-%E8%AE%BF%E9%97%AE"><span class="toc-number">5.5.</span> <span class="toc-text">5.5 访问</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Docker容器服务编排利器Docker Compose
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-08-13T00:48:22.000Z" itemprop="datePublished">2023-08-13</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/" class="leancloud-visitors" data-flag-title="Docker容器服务编排利器Docker Compose" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Docker/" rel="tag">Docker</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、使用Docker-Compose必要性及定义"><a href="#一、使用Docker-Compose必要性及定义" class="headerlink" title="一、使用Docker Compose必要性及定义"></a>一、使用Docker Compose必要性及定义</h1><p>用容器运行一个服务,需要使用<code>docker run</code>命令。但如果我要运行多个服务呢?</p>
+<p>假设我要运行一个web服务,还要运行一个db服务,那么是用一个容器运行,还是用多个容器运行呢?</p>
+<p>一个容器运行多个服务会造成镜像的复杂度提高,<strong>docker倾向于一个容器运行一个应用</strong>。</p>
+<p>那么复杂的架构就会需要很多的容器,并且需要它们之间有关联(容器之间的依赖和连接)就更复杂了。</p>
+<p>这个复杂的问题需要解决,这就涉及到了**==容器编排==**的问题了。</p>
+<ul>
+<li>Compose<ul>
+<li>编排<ul>
+<li>是对多个容器进行启动和管理的方法</li>
+<li>例如：LNMT，先启动MySQL,再启动Tomcat，最后启动Nginx</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>服务架构的演进<ul>
+<li>单体服务架构</li>
+<li>分布式服务架构</li>
+<li>微服务架构</li>
+<li>超微服务架构</li>
+</ul>
+</li>
+<li>容器编排工具<ul>
+<li>docker machine<ul>
+<li>在虚拟机中部署docker容器引擎的工具</li>
+</ul>
+</li>
+<li>docker compose<ul>
+<li>是一个用于定义和运行多容器Docker的应用程序工具</li>
+</ul>
+</li>
+<li>docker swarm<ul>
+<li>是Docker Host主机批量管理及资源调度管理工具</li>
+</ul>
+</li>
+<li>mesos+marathon<ul>
+<li>mesos 对计算机计算资源进行管理和调度</li>
+<li>marathon 服务发现及负载均衡的功能</li>
+</ul>
+</li>
+<li>kubernetes<ul>
+<li>google开源的容器编排工具</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="二、Docker-Compose应用参考资料"><a href="#二、Docker-Compose应用参考资料" class="headerlink" title="二、Docker Compose应用参考资料"></a>二、Docker Compose应用参考资料</h1><ul>
+<li>网址<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.docker.com/compose/">https://docs.docker.com/compose/</a></li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215214445753.png" alt="image-20220215214445753"></p>
+<ul>
+<li>yaml格式<ul>
+<li><a target="_blank" rel="noopener" href="https://yaml.org/">https://yaml.org/</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="三、Docker-Compose应用最佳实践步骤"><a href="#三、Docker-Compose应用最佳实践步骤" class="headerlink" title="三、Docker Compose应用最佳实践步骤"></a>三、Docker Compose应用最佳实践步骤</h1><h2 id="3-1-概念"><a href="#3-1-概念" class="headerlink" title="3.1 概念"></a>3.1 概念</h2><ul>
+<li>工程（project）</li>
+<li>服务 (Service)</li>
+<li>容器 (Container)</li>
+</ul>
+<h2 id="3-2-步骤"><a href="#3-2-步骤" class="headerlink" title="3.2 步骤"></a>3.2 步骤</h2><p>1.定义应用的Dockerfile文件，为了anywhere进行构建。</p>
+<p>2.使用docker-compose.yaml定义一套服务，这套服务可以一起在一个隔离环境中运行。</p>
+<p>3.使用docker-compose up就可以启动整套服务。</p>
+<h1 id="四、Docker-Compose安装"><a href="#四、Docker-Compose安装" class="headerlink" title="四、Docker Compose安装"></a>四、Docker Compose安装</h1><p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215146472.png" alt="image-20220215215146472"></p>
+<p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215216047.png" alt="image-20220215215216047"></p>
+<p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215239151.png" alt="image-20220215215239151"></p>
+<p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215215359944.png" alt="image-20220215215359944"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv docker-compose-linux-x86_64 /usr/bin/docker-compose</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># chmod +x /usr/bin/docker-compose</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose version</span></span><br><span class="line">Docker Compose version v2.<span class="number">2.3</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="五、Docker-Compose应用案例"><a href="#五、Docker-Compose应用案例" class="headerlink" title="五、Docker Compose应用案例"></a>五、Docker Compose应用案例</h1><blockquote>
+<p>运行Python语言开发的网站</p>
+</blockquote>
+<h2 id="5-1-网站文件准备"><a href="#5-1-网站文件准备" class="headerlink" title="5.1 网站文件准备"></a>5.1 网站文件准备</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir flaskproject</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># cd flaskproject/</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># vim app.py</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># cat app.py</span></span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">import redis</span><br><span class="line">from flask import Flask</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">cache = redis.Redis(host=<span class="string">&#x27;redis&#x27;</span>, port=<span class="number">6379</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def get_hit_count():</span><br><span class="line">    retries = <span class="number">5</span></span><br><span class="line">    <span class="keyword">while</span> True:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> cache.incr(<span class="string">&#x27;hits&#x27;</span>)</span><br><span class="line">        except redis.exceptions.ConnectionError as exc:</span><br><span class="line">            <span class="keyword">if</span> retries == <span class="number">0</span>:</span><br><span class="line">                raise exc</span><br><span class="line">            retries -= <span class="number">1</span></span><br><span class="line">            time.sleep(<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.route(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">def hello():</span><br><span class="line">    count = get_hit_count()</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;Hello World! I have been seen &#123;&#125; times.\n&#x27;</span>.format(count)</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># vim requirements.txt</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># cat requirements.txt</span></span><br><span class="line">flask</span><br><span class="line">redis</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-2-Dockerfile文件准备"><a href="#5-2-Dockerfile文件准备" class="headerlink" title="5.2 Dockerfile文件准备"></a>5.2 Dockerfile文件准备</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># vim Dockerfile</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># cat Dockerfile</span></span><br><span class="line">FROM python:<span class="number">3.7</span><span class="literal">-alpine</span></span><br><span class="line">WORKDIR /code</span><br><span class="line">ENV FLASK_APP app.py</span><br><span class="line">ENV FLASK_RUN_HOST <span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line">RUN apk add -<span class="literal">-no</span><span class="literal">-cache</span> gcc musl<span class="literal">-dev</span> linux<span class="literal">-headers</span></span><br><span class="line"><span class="built_in">COPY</span> requirements.txt requirements.txt</span><br><span class="line">RUN pip install <span class="literal">-r</span> requirements.txt</span><br><span class="line"><span class="built_in">COPY</span> . .</span><br><span class="line">CMD [<span class="string">&quot;flask&quot;</span>, <span class="string">&quot;run&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-3-Compose文件准备"><a href="#5-3-Compose文件准备" class="headerlink" title="5.3 Compose文件准备"></a>5.3 Compose文件准备</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># vim docker-compose.yaml</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># cat docker-compose.yaml</span></span><br><span class="line">version: <span class="string">&#x27;3&#x27;</span></span><br><span class="line">services:</span><br><span class="line">  web:</span><br><span class="line">    build: .</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">&quot;5000:5000&quot;</span></span><br><span class="line">  redis:</span><br><span class="line">    image: <span class="string">&quot;redis:alpine&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-4-使用docker-compose-up启动容器"><a href="#5-4-使用docker-compose-up启动容器" class="headerlink" title="5.4 使用docker-compose up启动容器"></a>5.4 使用docker-compose up启动容器</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># ls</span></span><br><span class="line">app.py  docker<span class="literal">-compose</span>.yaml  Dockerfile  requirements.txt</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">flaskproject</span>]<span class="comment"># docker-compose up</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line">输出：</span><br><span class="line">[+] Running <span class="number">7</span>/<span class="number">7</span></span><br><span class="line"> ⠿ redis Pulled                                                                         <span class="number">15.8</span>s</span><br><span class="line">   ⠿ <span class="number">59</span>bf1c3509f3 Pull complete                                                          <span class="number">2.9</span>s</span><br><span class="line">   ⠿ <span class="number">719</span>adce26c52 Pull complete                                                          <span class="number">3.0</span>s</span><br><span class="line">   ⠿ b8f35e378c31 Pull complete                                                          <span class="number">5.8</span>s</span><br><span class="line">   ⠿ d034517f789c Pull complete                                                          <span class="number">6.5</span>s</span><br><span class="line">   ⠿ <span class="number">3772</span>d4d76753 Pull complete                                                          <span class="number">6.6</span>s</span><br><span class="line">   ⠿ <span class="number">211</span>a7f52febb Pull complete                                                          <span class="number">6.8</span>s</span><br><span class="line">Sending build context to Docker daemon     <span class="number">714</span>B</span><br><span class="line">Step <span class="number">1</span>/<span class="number">9</span> : FROM python:<span class="number">3.7</span><span class="literal">-alpine</span></span><br><span class="line"><span class="number">3.7</span><span class="literal">-alpine</span>: Pulling from library/python</span><br><span class="line"><span class="number">59</span>bf1c3509f3: Already exists</span><br><span class="line"><span class="number">07</span>a400e93df3: Already exists</span><br><span class="line">bdabb07397e1: Already exists</span><br><span class="line">cd0af01c7b70: Already exists</span><br><span class="line">d0f18e022200: Already exists</span><br><span class="line">Digest: sha256:<span class="number">5</span>a776e3b5336827faf7a1c3a191b73b5b2eef4cdcfe8b94f59b79cb749a2b5d8</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> python:<span class="number">3.7</span><span class="literal">-alpine</span></span><br><span class="line"> ---&gt; e72b511ad78e</span><br><span class="line">Step <span class="number">2</span>/<span class="number">9</span> : WORKDIR /code</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">2</span>b9d07bef719</span><br><span class="line">Removing intermediate container <span class="number">2</span>b9d07bef719</span><br><span class="line"> ---&gt; <span class="number">7</span>d39e96fadf1</span><br><span class="line">Step <span class="number">3</span>/<span class="number">9</span> : ENV FLASK_APP app.py</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">9</span>bcb28bd632a</span><br><span class="line">Removing intermediate container <span class="number">9</span>bcb28bd632a</span><br><span class="line"> ---&gt; <span class="number">79</span>f656a616d5</span><br><span class="line">Step <span class="number">4</span>/<span class="number">9</span> : ENV FLASK_RUN_HOST <span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">8470</span>c2dbd6c2</span><br><span class="line">Removing intermediate container <span class="number">8470</span>c2dbd6c2</span><br><span class="line"> ---&gt; e212ba688fcd</span><br><span class="line">Step <span class="number">5</span>/<span class="number">9</span> : RUN apk add -<span class="literal">-no</span><span class="literal">-cache</span> gcc musl<span class="literal">-dev</span> linux<span class="literal">-headers</span></span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">6</span>e9ca0766bc8</span><br><span class="line">fetch https://dl<span class="literal">-cdn</span>.alpinelinux.org/alpine/v3.<span class="number">15</span>/main/x86_64/APKINDEX.tar.gz</span><br><span class="line">fetch https://dl<span class="literal">-cdn</span>.alpinelinux.org/alpine/v3.<span class="number">15</span>/community/x86_64/APKINDEX.tar.gz</span><br><span class="line">(<span class="number">1</span>/<span class="number">13</span>) Installing libgcc (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">2</span>/<span class="number">13</span>) Installing libstdc++ (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">3</span>/<span class="number">13</span>) Installing binutils (<span class="number">2.37</span><span class="literal">-r3</span>)</span><br><span class="line">(<span class="number">4</span>/<span class="number">13</span>) Installing libgomp (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">5</span>/<span class="number">13</span>) Installing libatomic (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">6</span>/<span class="number">13</span>) Installing libgphobos (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">7</span>/<span class="number">13</span>) Installing gmp (<span class="number">6.2</span>.<span class="number">1</span><span class="literal">-r1</span>)</span><br><span class="line">(<span class="number">8</span>/<span class="number">13</span>) Installing isl22 (<span class="number">0.22</span><span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">9</span>/<span class="number">13</span>) Installing mpfr4 (<span class="number">4.1</span>.<span class="number">0</span><span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">10</span>/<span class="number">13</span>) Installing mpc1 (<span class="number">1.2</span>.<span class="number">1</span><span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">11</span>/<span class="number">13</span>) Installing gcc (<span class="number">10.3</span>.<span class="number">1</span>_git20211027<span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">12</span>/<span class="number">13</span>) Installing linux<span class="literal">-headers</span> (<span class="number">5.10</span>.<span class="number">41</span><span class="literal">-r0</span>)</span><br><span class="line">(<span class="number">13</span>/<span class="number">13</span>) Installing musl<span class="literal">-dev</span> (<span class="number">1.2</span>.<span class="number">2</span><span class="literal">-r7</span>)</span><br><span class="line">Executing busybox<span class="literal">-1</span>.<span class="number">34.1</span><span class="literal">-r3</span>.trigger</span><br><span class="line">OK: <span class="number">143</span> MiB <span class="keyword">in</span> <span class="number">49</span> packages</span><br><span class="line">Removing intermediate container <span class="number">6</span>e9ca0766bc8</span><br><span class="line"> ---&gt; <span class="number">273</span>d4f04dfbc</span><br><span class="line">Step <span class="number">6</span>/<span class="number">9</span> : <span class="built_in">COPY</span> requirements.txt requirements.txt</span><br><span class="line"> ---&gt; daf51c54e8ba</span><br><span class="line">Step <span class="number">7</span>/<span class="number">9</span> : RUN pip install <span class="literal">-r</span> requirements.txt</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">2</span>aa2d30c5311</span><br><span class="line">Collecting flask</span><br><span class="line">  Downloading Flask<span class="literal">-2</span>.<span class="number">0.3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">95</span> kB)</span><br><span class="line">Collecting redis</span><br><span class="line">  Downloading redis<span class="literal">-4</span>.<span class="number">1.3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">173</span> kB)</span><br><span class="line">Collecting Jinja2&gt;=<span class="number">3.0</span></span><br><span class="line">  Downloading Jinja2<span class="literal">-3</span>.<span class="number">0.3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">133</span> kB)</span><br><span class="line">Collecting itsdangerous&gt;=<span class="number">2.0</span></span><br><span class="line">  Downloading itsdangerous<span class="literal">-2</span>.<span class="number">0.1</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">18</span> kB)</span><br><span class="line">Collecting click&gt;=<span class="number">7.1</span>.<span class="number">2</span></span><br><span class="line">  Downloading click<span class="literal">-8</span>.<span class="number">0.3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">97</span> kB)</span><br><span class="line">Collecting Werkzeug&gt;=<span class="number">2.0</span></span><br><span class="line">  Downloading Werkzeug<span class="literal">-2</span>.<span class="number">0.3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">289</span> kB)</span><br><span class="line">Collecting deprecated&gt;=<span class="number">1.2</span>.<span class="number">3</span></span><br><span class="line">  Downloading Deprecated<span class="literal">-1</span>.<span class="number">2.13</span><span class="literal">-py2</span>.py3<span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">9.6</span> kB)</span><br><span class="line">Collecting packaging&gt;=<span class="number">20.4</span></span><br><span class="line">  Downloading packaging<span class="literal">-21</span>.<span class="number">3</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">40</span> kB)</span><br><span class="line">Collecting importlib<span class="literal">-metadata</span>&gt;=<span class="number">1.0</span></span><br><span class="line">  Downloading importlib_metadata<span class="literal">-4</span>.<span class="number">11.1</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">17</span> kB)</span><br><span class="line">Collecting wrapt&lt;<span class="number">2</span>,&gt;=<span class="number">1.10</span></span><br><span class="line">  Downloading wrapt<span class="literal">-1</span>.<span class="number">13.3</span><span class="literal">-cp37</span><span class="literal">-cp37m</span><span class="literal">-musllinux_1_1_x86_64</span>.whl (<span class="number">78</span> kB)</span><br><span class="line">Collecting ty<span class="built_in">ping-extensions</span>&gt;=<span class="number">3.6</span>.<span class="number">4</span></span><br><span class="line">  Downloading typing_extensions<span class="literal">-4</span>.<span class="number">1.1</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">26</span> kB)</span><br><span class="line">Collecting zipp&gt;=<span class="number">0.5</span></span><br><span class="line">  Downloading zipp<span class="literal">-3</span>.<span class="number">7.0</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">5.3</span> kB)</span><br><span class="line">Collecting MarkupSafe&gt;=<span class="number">2.0</span></span><br><span class="line">  Downloading MarkupSafe<span class="literal">-2</span>.<span class="number">0.1</span><span class="literal">-cp37</span><span class="literal">-cp37m</span><span class="literal">-musllinux_1_1_x86_64</span>.whl (<span class="number">30</span> kB)</span><br><span class="line">Collecting pyparsing!=<span class="number">3.0</span>.<span class="number">5</span>,&gt;=<span class="number">2.0</span>.<span class="number">2</span></span><br><span class="line">  Downloading pyparsing<span class="literal">-3</span>.<span class="number">0.7</span><span class="literal">-py3</span><span class="literal">-none</span><span class="literal">-any</span>.whl (<span class="number">98</span> kB)</span><br><span class="line">Installing collected packages: zipp, ty<span class="built_in">ping-extensions</span>, wrapt, pyparsing, MarkupSafe, importlib<span class="literal">-metadata</span>, Werkzeug, packaging, Jinja2, itsdangerous, deprecated, click, redis, flask</span><br><span class="line">Successfully installed Jinja2<span class="literal">-3</span>.<span class="number">0.3</span> MarkupSafe<span class="literal">-2</span>.<span class="number">0.1</span> Werkzeug<span class="literal">-2</span>.<span class="number">0.3</span> click<span class="literal">-8</span>.<span class="number">0.3</span> deprecated<span class="literal">-1</span>.<span class="number">2.13</span> flask<span class="literal">-2</span>.<span class="number">0.3</span> importlib<span class="literal">-metadata</span><span class="literal">-4</span>.<span class="number">11.1</span> itsdangerous<span class="literal">-2</span>.<span class="number">0.1</span> packaging<span class="literal">-21</span>.<span class="number">3</span> pyparsing<span class="literal">-3</span>.<span class="number">0.7</span> redis<span class="literal">-4</span>.<span class="number">1.3</span> ty<span class="built_in">ping-extensions</span><span class="literal">-4</span>.<span class="number">1.1</span> wrapt<span class="literal">-1</span>.<span class="number">13.3</span> zipp<span class="literal">-3</span>.<span class="number">7.0</span></span><br><span class="line">WARNING: Running pip as the <span class="string">&#x27;root&#x27;</span> user can result <span class="keyword">in</span> broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv</span><br><span class="line">WARNING: You are <span class="keyword">using</span> pip version 21.2.4; however, version 22.0.3 is available.</span><br><span class="line">You should consider upgrading via the <span class="string">&#x27;/usr/local/bin/python -m pip install --upgrade pip&#x27;</span> command.</span><br><span class="line">Removing intermediate container <span class="number">2</span>aa2d30c5311</span><br><span class="line"> ---&gt; dd8f52b132f8</span><br><span class="line">Step <span class="number">8</span>/<span class="number">9</span> : <span class="built_in">COPY</span> . .</span><br><span class="line"> ---&gt; b36938a26cf5</span><br><span class="line">Step <span class="number">9</span>/<span class="number">9</span> : CMD [<span class="string">&quot;flask&quot;</span>, <span class="string">&quot;run&quot;</span>]</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">260</span>cbfa02959</span><br><span class="line">Removing intermediate container <span class="number">260</span>cbfa02959</span><br><span class="line"> ---&gt; fa04dfec6ff2</span><br><span class="line">Successfully built fa04dfec6ff2</span><br><span class="line">Successfully tagged flaskproject_web:latest</span><br><span class="line"></span><br><span class="line">Use <span class="string">&#x27;docker scan&#x27;</span> to run Snyk tests against images to find vulnerabilities and learn how to fix them</span><br><span class="line">[+] Running <span class="number">3</span>/<span class="number">3</span></span><br><span class="line"> ⠿ Network flaskproject_default    Created                                               <span class="number">0.1</span>s</span><br><span class="line"> ⠿ Container flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  Created                                               <span class="number">0.1</span>s</span><br><span class="line"> ⠿ Container flaskproject<span class="literal">-web</span><span class="literal">-1</span>    Created                                               <span class="number">0.1</span>s</span><br><span class="line">Attaching to flaskproject<span class="literal">-redis</span><span class="literal">-1</span>, flaskproject<span class="literal">-web</span><span class="literal">-1</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:C <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.696</span> <span class="comment"># oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:C <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.696</span> <span class="comment"># Redis version=6.2.6, bits=64, commit=00000000, modified=0, pid=1, just started</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:C <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.696</span> <span class="comment"># Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.697</span> * monotonic clock: POSIX clock_gettime</span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.698</span> * Running mode=standalone, port=<span class="number">6379</span>.</span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.698</span> <span class="comment"># WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.698</span> <span class="comment"># Server initialized</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.698</span> <span class="comment"># WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add &#x27;vm.overcommit_memory = 1&#x27; to /etc/sysctl.conf and then reboot or run the command &#x27;sysctl vm.overcommit_memory=1&#x27; for this to take effect.</span></span><br><span class="line">flaskproject<span class="literal">-redis</span><span class="literal">-1</span>  | <span class="number">1</span>:M <span class="number">15</span> Feb <span class="number">2022</span> <span class="number">14</span>:<span class="number">14</span>:<span class="number">21.698</span> * Ready to accept connections</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |  * Serving Flask app <span class="string">&#x27;app.py&#x27;</span> (lazy loading)</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |  * Environment: production</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |    WARNING: This is a development server. <span class="keyword">Do</span> not use it <span class="keyword">in</span> a production deployment.</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |    Use a production WSGI server instead.</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |  * Debug mode: off</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |  * Running on all addresses.</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |    WARNING: This is a development server. <span class="keyword">Do</span> not use it <span class="keyword">in</span> a production deployment.</span><br><span class="line">flaskproject<span class="literal">-web</span><span class="literal">-1</span>    |  * Running on http://<span class="number">172.18</span>.<span class="number">0.2</span>:<span class="number">5000</span>/ (Press CTRL+C to quit)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="5-5-访问"><a href="#5-5-访问" class="headerlink" title="5.5 访问"></a>5.5 访问</h2><p><img src="/images/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8DockerCompose%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98.assets/image-20220215221648195.png" alt="image-20220215221648195"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BD%BF%E7%94%A8Docker-Compose%E5%BF%85%E8%A6%81%E6%80%A7%E5%8F%8A%E5%AE%9A%E4%B9%89"><span class="toc-number">1.</span> <span class="toc-text">一、使用Docker Compose必要性及定义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">2.</span> <span class="toc-text">二、Docker Compose应用参考资料</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.</span> <span class="toc-text">三、Docker Compose应用最佳实践步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 步骤</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Docker-Compose%E5%AE%89%E8%A3%85"><span class="toc-number">4.</span> <span class="toc-text">四、Docker Compose安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81Docker-Compose%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">五、Docker Compose应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E7%BD%91%E7%AB%99%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 网站文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-Dockerfile%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 Dockerfile文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-Compose%E6%96%87%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 Compose文件准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-%E4%BD%BF%E7%94%A8docker-compose-up%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8"><span class="toc-number">5.4.</span> <span class="toc-text">5.4 使用docker-compose up启动容器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-5-%E8%AE%BF%E9%97%AE"><span class="toc-number">5.5.</span> <span class="toc-text">5.5 访问</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&text=Docker容器服务编排利器Docker Compose"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&is_video=false&description=Docker容器服务编排利器Docker Compose"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker容器服务编排利器Docker Compose&body=Check out this article: https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&title=Docker容器服务编排利器Docker Compose"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/&name=Docker容器服务编排利器Docker Compose&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

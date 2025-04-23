@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Broker存储目录结构● Commitlog：这是一个目录，其中包含具体的commitlog文件。文件名长度为20个字符，文件名由该文件保存消息的最大物理offset值在高位补0组成。每个文件大小一般是1GB，可以通过mapedFileSizeCommitLog进行配置。● consumequeue：这是一个目录，包含该 Broker 上所有的 Topic 对应的消费队列文件信息。消费队列文件的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ消息存储与检索原理">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Broker存储目录结构● Commitlog：这是一个目录，其中包含具体的commitlog文件。文件名长度为20个字符，文件名由该文件保存消息的最大物理offset值在高位补0组成。每个文件大小一般是1GB，可以通过mapedFileSizeCommitLog进行配置。● consumequeue：这是一个目录，包含该 Broker 上所有的 Topic 对应的消费队列文件信息。消费队列文件的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-5.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-6.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-7.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-8.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-9.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-10.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-11.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-12.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-13.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-14.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-15.png">
+<meta property="article:published_time" content="2022-01-30T05:27:49.000Z">
+<meta property="article:modified_time" content="2025-04-22T15:20:09.049Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RocketMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220130-5.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RocketMQ消息存储与检索原理</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/02/05/RocketMQ/RocketMQ%20Broker%E8%BF%87%E6%9C%9F%E6%96%87%E4%BB%B6%E5%88%A0%E9%99%A4%E6%9C%BA%E5%88%B6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&text=RocketMQ消息存储与检索原理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&is_video=false&description=RocketMQ消息存储与检索原理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ消息存储与检索原理&body=Check out this article: https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&name=RocketMQ消息存储与检索原理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Broker%E5%AD%98%E5%82%A8%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">Broker存储目录结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ-%E6%B6%88%E6%81%AF%E7%9A%84%E6%9E%84%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">RocketMQ 消息的构成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CommitLog%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">CommitLog的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E6%B6%88%E6%81%AF%E7%9A%84%E7%B4%A2%E5%BC%95%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">RocketMQ消息的索引机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8EIndexFile%E5%AE%9E%E7%8E%B0Key%E6%9F%A5%E8%AF%A2"><span class="toc-number">5.</span> <span class="toc-text">基于IndexFile实现Key查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ESlot-%E9%93%BE%E8%A1%A8%E7%9A%84%E6%9F%A5%E8%AF%A2%E8%BF%87%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">基于Slot+链表的查询过程</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RocketMQ消息存储与检索原理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-01-30T05:27:49.000Z" itemprop="datePublished">2022-01-30</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/" class="leancloud-visitors" data-flag-title="RocketMQ消息存储与检索原理" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="Broker存储目录结构"><a href="#Broker存储目录结构" class="headerlink" title="Broker存储目录结构"></a>Broker存储目录结构</h3><p>● Commitlog：这是一个目录，其中包含具体的commitlog文件。文件名长度为20个字符，文件名由该文件保存消息的最大物理offset值在高位补0组成。每个文件大小一般是1GB，可以通过mapedFileSizeCommitLog进行配置。<br>● consumequeue：这是一个目录，包含该 Broker 上所有的 Topic 对应的消费队列文件信息。消费队列文件的格式为“./consumequeue/Topic名字/queue id/具体消费队列文件”。每个消费队列其实是commitlog的一个索引，提供给消费者做拉取消息、更新位点使用。<br>● Index：这是一个目录，全部的文件都是按照消息key创建的Hash索引。文件名是用创建时的时间戳命名的。<br>● Config：这是一个目录，保存了当前Broker中全部的Topic、订阅关系和消费进度。这些数据Broker会定时从内存持久化到磁盘，以便宕机后恢复。<br>● abort：Broker 是否异常关闭的标志。正常关闭时该文件会被删除，异常关闭时则不会。当Broker重新启动时，根据是否异常宕机决定是否需要重新构建Index索引等操作。<br>● checkpoint：Broker最近一次正常运行时的状态，比如最后一次正常刷盘的时间、最后一次正确索引的时间等。</p>
+<p><img src="/images/RocketMQ/20220130-5.png" alt="image-20220130-5"></p>
+<p>Tips:如果没有在配置文件中显式指定存储位置，这些文件默认存放在Linux的”/root/store”目录下</p>
+<p><img src="/images/RocketMQ/20220130-6.png" alt="image-20220130-6"></p>
+<h3 id="RocketMQ-消息的构成"><a href="#RocketMQ-消息的构成" class="headerlink" title="RocketMQ 消息的构成"></a>RocketMQ 消息的构成</h3><p><img src="/images/RocketMQ/20220130-7.png" alt="image-20220130-7"></p>
+<h3 id="CommitLog的作用"><a href="#CommitLog的作用" class="headerlink" title="CommitLog的作用"></a>CommitLog的作用</h3><p><img src="/images/RocketMQ/20220130-8.png" alt="image-20220130-8"></p>
+<p>CommitLog目录下有多个CommitLog文件。其实CommitLog只有一个文件，为了方便保存和读写被切分为多个子文件，所有的子文件通过其保存的第一个和最后一个消息的物理位点进行连接。</p>
+<p><img src="/images/RocketMQ/20220130-9.png" alt="image-20220130-9"></p>
+<p>Broker按照时间和物理的offset顺序写CommitLog文件，每次写的时候需要加锁，每个 CommitLog 子文件的大小默认是1GB（1024×1024×1024B），可以通过mapedFileSizeCommitLog进行配置。当一个CommitLog写满后，创建一个新的CommitLog，继续上一个ComiitLog的Offset写操作，直到写满换成下一个文件。所有CommitLog子文件之间的Offset是连续的，所以最后一个CommitLog总是被写入的。</p>
+<h3 id="RocketMQ消息的索引机制"><a href="#RocketMQ消息的索引机制" class="headerlink" title="RocketMQ消息的索引机制"></a>RocketMQ消息的索引机制</h3><p>● 利用MessageID提取消息<br>因为MessageID就是用broker+offset生成的（这里MsgId指的是服务端的），所以很容易就找到对应的commitLog文件来读取消息。</p>
+<p>● 基于ConsumeQueue实现Tag查询<br>    - ConsumeQueue存储结构<br>        - zxp_test_topic：主题名<br>            - 0|1|2|3：队列编号<br>                - ConsumeQueue文件，每个文件默认600W字节=5.72MB</p>
+<p><img src="/images/RocketMQ/20220130-10.png" alt="image-20220130-10"></p>
+<p>● 处理过程<br>第一步，消费者要获取tag=20220101的消息，首先通过执行”20220101”.hashcode=99得到Hash值；<br>第二步，在ConsumeQueue文件中查找hash(tag)=99的offset数据；<br>第三步，根据物理位置Offset到对应的CommitLog文件中提取消息，因为可能会出现Hash碰撞，所以再次对这些命中数据以字符串匹配方式筛选”20220101”的消息；<br>第四步，将“20220101”消息提取，封装为Message对象返回。</p>
+<p><img src="/images/RocketMQ/20220130-11.png" alt="image-20220130-11"></p>
+<h3 id="基于IndexFile实现Key查询"><a href="#基于IndexFile实现Key查询" class="headerlink" title="基于IndexFile实现Key查询"></a>基于IndexFile实现Key查询</h3><p><img src="/images/RocketMQ/20220130-12.png" alt="image-20220130-12"></p>
+<p>每个Index File文件包含文件头、Hash槽位、索引数据。每个文件的Hash槽位个数、索引数据个数都是固定的。Hash 槽位可以通过 Broker启动参数 maxHashSlotNum进行配置，默认值为500万；索引数据可以通过Broker启动参数maxIndexNum进行配置，默认值为500万×4=2000万，一个Index File约为400MB。</p>
+<p><img src="/images/RocketMQ/20220130-13.png" alt="image-20220130-13"></p>
+<p>每个Index File文件包含文件头、Hash槽位、索引数据。每个文件的Hash槽位个数、索引数据个数都是固定的。</p>
+<h3 id="基于Slot-链表的查询过程"><a href="#基于Slot-链表的查询过程" class="headerlink" title="基于Slot+链表的查询过程"></a>基于Slot+链表的查询过程</h3><p><img src="/images/RocketMQ/20220130-14.png" alt="image-20220130-14"></p>
+<p>Index File的索引设计在一定程度上参考了Java中的HashMap设计，只是当Index File遇到Hash碰撞时只会用链表，而Java 8中在一定情况下链表会转化为红黑树。<br>这里具体实现相对ComsumeQueue比较复杂，有兴趣的童鞋可以阅读下面详细学习：<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xjwhaha/p/15772846.html">https://www.cnblogs.com/xjwhaha/p/15772846.html</a></p>
+<p><img src="/images/RocketMQ/20220130-15.png" alt="image-20220130-15"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Broker%E5%AD%98%E5%82%A8%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">Broker存储目录结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ-%E6%B6%88%E6%81%AF%E7%9A%84%E6%9E%84%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">RocketMQ 消息的构成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CommitLog%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">CommitLog的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E6%B6%88%E6%81%AF%E7%9A%84%E7%B4%A2%E5%BC%95%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">RocketMQ消息的索引机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8EIndexFile%E5%AE%9E%E7%8E%B0Key%E6%9F%A5%E8%AF%A2"><span class="toc-number">5.</span> <span class="toc-text">基于IndexFile实现Key查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ESlot-%E9%93%BE%E8%A1%A8%E7%9A%84%E6%9F%A5%E8%AF%A2%E8%BF%87%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">基于Slot+链表的查询过程</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&text=RocketMQ消息存储与检索原理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&is_video=false&description=RocketMQ消息存储与检索原理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ消息存储与检索原理&body=Check out this article: https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&title=RocketMQ消息存储与检索原理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/30/RocketMQ/RocketMQ%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86/&name=RocketMQ消息存储与检索原理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

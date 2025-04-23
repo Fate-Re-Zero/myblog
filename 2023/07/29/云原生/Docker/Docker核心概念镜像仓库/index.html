@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="docker容器镜像加速器及本地容器镜像仓库一、容器镜像加速器 由于国内访问国外的容器镜像仓库速度比较慢，因此国内企业创建了容器镜像加速器，以方便国内用户使用容器镜像。  1.1 获取阿里云容器镜像加速地址  1.2 配置docker daemon使用加速器123456添加daemon.json配置文件# vim &#x2F;etc&#x2F;docker&#x2F;daemon.json# cat &#x2F;etc&#x2F;docker&#x2F;d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker核心概念镜像仓库">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="docker容器镜像加速器及本地容器镜像仓库一、容器镜像加速器 由于国内访问国外的容器镜像仓库速度比较慢，因此国内企业创建了容器镜像加速器，以方便国内用户使用容器镜像。  1.1 获取阿里云容器镜像加速地址  1.2 配置docker daemon使用加速器123456添加daemon.json配置文件# vim &#x2F;etc&#x2F;docker&#x2F;daemon.json# cat &#x2F;etc&#x2F;docker&#x2F;d">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125221631548.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125221748100.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125224745376.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125224838850.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225243088.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225448956.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225753719.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225914283.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230046456.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230216488.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230307699.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125231912826.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125232445910.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125232519365.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233602760.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233652604.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233739356.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000804490.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000825616.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000840905.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001253192.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001447862.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001510880.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126002747864.png">
+<meta property="article:published_time" content="2023-07-29T05:48:22.000Z">
+<meta property="article:modified_time" content="2025-04-23T15:37:22.172Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125221631548.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Docker核心概念镜像仓库</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/01/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E9%83%A8%E7%BD%B2%E5%BA%94%E7%94%A8%E9%9B%86%E7%BE%A4/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&text=Docker核心概念镜像仓库"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&is_video=false&description=Docker核心概念镜像仓库"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker核心概念镜像仓库&body=Check out this article: https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&name=Docker核心概念镜像仓库&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">docker容器镜像加速器及本地容器镜像仓库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">一、容器镜像加速器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E8%8E%B7%E5%8F%96%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%9C%B0%E5%9D%80"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 获取阿里云容器镜像加速地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E9%85%8D%E7%BD%AEdocker-daemon%E4%BD%BF%E7%94%A8%E5%8A%A0%E9%80%9F%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 配置docker daemon使用加速器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">3.</span> <span class="toc-text">二、容器镜像仓库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-docker-hub"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 docker hub</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.1.</span> <span class="toc-text">2.1.1 注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E7%99%BB%E5%BD%95"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.1.2 登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E5%88%9B%E5%BB%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">3.1.3.</span> <span class="toc-text">2.1.3 创建容器镜像仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-4-%E5%9C%A8%E6%9C%AC%E5%9C%B0%E7%99%BB%E5%BD%95Docker-Hub"><span class="toc-number">3.1.4.</span> <span class="toc-text">2.1.4 在本地登录Docker Hub</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-5-%E4%B8%8A%E4%BC%A0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">3.1.5.</span> <span class="toc-text">2.1.5 上传容器镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-6-%E4%B8%8B%E8%BD%BD%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">3.1.6.</span> <span class="toc-text">2.1.6 下载容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-harbor"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 harbor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E8%8E%B7%E5%8F%96-docker-compose%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.1.</span> <span class="toc-text">2.2.1 获取 docker compose二进制文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E8%8E%B7%E5%8F%96harbor%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.2.2 获取harbor安装文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E8%8E%B7%E5%8F%96TLS%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.3.</span> <span class="toc-text">2.2.3 获取TLS文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-4-%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.4.</span> <span class="toc-text">2.2.4 修改配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-5-%E6%89%A7%E8%A1%8C%E9%A2%84%E5%A4%87%E8%84%9A%E6%9C%AC"><span class="toc-number">3.2.5.</span> <span class="toc-text">2.2.5 执行预备脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-6-%E6%89%A7%E8%A1%8C%E5%AE%89%E8%A3%85%E8%84%9A%E6%9C%AC"><span class="toc-number">3.2.6.</span> <span class="toc-text">2.2.6 执行安装脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-7-%E9%AA%8C%E8%AF%81%E8%BF%90%E8%A1%8C%E6%83%85%E5%86%B5"><span class="toc-number">3.2.7.</span> <span class="toc-text">2.2.7 验证运行情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-8-%E8%AE%BF%E9%97%AEharbor-UI%E7%95%8C%E9%9D%A2"><span class="toc-number">3.2.8.</span> <span class="toc-text">2.2.8 访问harbor UI界面</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-8-1-%E5%9C%A8%E7%89%A9%E7%90%86%E6%9C%BA%E9%80%9A%E8%BF%87%E6%B5%8F%E8%A7%88%E5%99%A8%E8%AE%BF%E9%97%AE"><span class="toc-number">3.2.8.1.</span> <span class="toc-text">2.2.8.1 在物理机通过浏览器访问</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-8-2-%E5%9C%A8Docker-Host%E4%B8%BB%E6%9C%BA%E9%80%9A%E8%BF%87%E5%9F%9F%E5%90%8D%E8%AE%BF%E9%97%AE"><span class="toc-number">3.2.8.2.</span> <span class="toc-text">2.2.8.2 在Docker Host主机通过域名访问</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81docker%E9%95%9C%E5%83%8F%E4%B8%8A%E4%BC%A0%E8%87%B3Harbor%E5%8F%8A%E4%BB%8Eharbor%E4%B8%8B%E8%BD%BD"><span class="toc-number">4.</span> <span class="toc-text">三、docker镜像上传至Harbor及从harbor下载</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BF%AE%E6%94%B9docker-daemon%E4%BD%BF%E7%94%A8harbor"><span class="toc-number">4.1.</span> <span class="toc-text">3.1  修改docker daemon使用harbor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-docker-tag"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 docker tag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-docker-push"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 docker push</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-docker-pull"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 docker pull</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Docker核心概念镜像仓库
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-07-29T05:48:22.000Z" itemprop="datePublished">2023-07-29</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/" class="leancloud-visitors" data-flag-title="Docker核心概念镜像仓库" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Docker/" rel="tag">Docker</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="docker容器镜像加速器及本地容器镜像仓库"><a href="#docker容器镜像加速器及本地容器镜像仓库" class="headerlink" title="docker容器镜像加速器及本地容器镜像仓库"></a>docker容器镜像加速器及本地容器镜像仓库</h1><h1 id="一、容器镜像加速器"><a href="#一、容器镜像加速器" class="headerlink" title="一、容器镜像加速器"></a>一、容器镜像加速器</h1><blockquote>
+<p>由于国内访问国外的容器镜像仓库速度比较慢，因此国内企业创建了容器镜像加速器，以方便国内用户使用容器镜像。</p>
+</blockquote>
+<h2 id="1-1-获取阿里云容器镜像加速地址"><a href="#1-1-获取阿里云容器镜像加速地址" class="headerlink" title="1.1 获取阿里云容器镜像加速地址"></a>1.1 获取阿里云容器镜像加速地址</h2><p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125221631548.png" alt="image-20220125221631548"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125221748100.png" alt="image-20220125221748100"></p>
+<h2 id="1-2-配置docker-daemon使用加速器"><a href="#1-2-配置docker-daemon使用加速器" class="headerlink" title="1.2 配置docker daemon使用加速器"></a>1.2 配置docker daemon使用加速器</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">添加daemon.json配置文件</span><br><span class="line"><span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line"><span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://s27w6kze.mirror.aliyuncs.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">重启docker</span><br><span class="line"><span class="comment"># systemctl daemon-reload</span></span><br><span class="line"><span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">尝试下载容器镜像</span><br><span class="line"><span class="comment"># docker pull centos</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h1 id="二、容器镜像仓库"><a href="#二、容器镜像仓库" class="headerlink" title="二、容器镜像仓库"></a>二、容器镜像仓库</h1><h2 id="2-1-docker-hub"><a href="#2-1-docker-hub" class="headerlink" title="2.1 docker hub"></a>2.1 docker hub</h2><h3 id="2-1-1-注册"><a href="#2-1-1-注册" class="headerlink" title="2.1.1 注册"></a>2.1.1 注册</h3><blockquote>
+<p>准备邮箱及用户ID</p>
+</blockquote>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125224745376.png" alt="image-20220125224745376"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125224838850.png" alt="image-20220125224838850"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225243088.png" alt="image-20220125225243088"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225448956.png" alt="image-20220125225448956"></p>
+<h3 id="2-1-2-登录"><a href="#2-1-2-登录" class="headerlink" title="2.1.2 登录"></a>2.1.2 登录</h3><p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225753719.png" alt="image-20220125225753719"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125225914283.png" alt="image-20220125225914283"></p>
+<h3 id="2-1-3-创建容器镜像仓库"><a href="#2-1-3-创建容器镜像仓库" class="headerlink" title="2.1.3 创建容器镜像仓库"></a>2.1.3 创建容器镜像仓库</h3><p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230046456.png" alt="image-20220125230046456"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230216488.png" alt="image-20220125230216488"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125230307699.png" alt="image-20220125230307699"></p>
+<h3 id="2-1-4-在本地登录Docker-Hub"><a href="#2-1-4-在本地登录Docker-Hub" class="headerlink" title="2.1.4 在本地登录Docker Hub"></a>2.1.4 在本地登录Docker Hub</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">默认可以不添加docker hub容器镜像仓库地址</span><br><span class="line"><span class="comment"># docker login </span></span><br><span class="line">Login with your Docker ID to push and pull images from Docker Hub. <span class="keyword">If</span> you don<span class="string">&#x27;t have a Docker ID, head over to https://hub.docker.com to create one.</span></span><br><span class="line"><span class="string">Username: dockersmartmsb</span></span><br><span class="line"><span class="string">Password:</span></span><br><span class="line"><span class="string">WARNING! Your password will be stored unencrypted in /root/.docker/config.json.</span></span><br><span class="line"><span class="string">Configure a credential helper to remove this warning. See</span></span><br><span class="line"><span class="string">https://docs.docker.com/engine/reference/commandline/login/#credentials-store</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Login Succeeded 成功</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">登出</span><br><span class="line"><span class="comment"># docker logout</span></span><br><span class="line">Removing login credentials <span class="keyword">for</span> https://index.docker.io/v1/</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="2-1-5-上传容器镜像"><a href="#2-1-5-上传容器镜像" class="headerlink" title="2.1.5 上传容器镜像"></a>2.1.5 上传容器镜像</h3><blockquote>
+<p>在登录Docker Hub主机上传容器镜像,向全球用户共享容器镜像。</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">为容器镜像重新打标记</span><br><span class="line"></span><br><span class="line">原始容器镜像</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY   TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos       latest    <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br><span class="line"></span><br><span class="line">重新为容器镜像打标记</span><br><span class="line"><span class="comment"># docker tag centos:latest dockersmartmsb/centos:v1</span></span><br><span class="line"></span><br><span class="line">重新打标记后容器镜像</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY              TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">dockersmartmsb/centos   v1        <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br><span class="line">centos                  latest    <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">上传容器镜像至docker hub</span><br><span class="line"><span class="comment"># docker push dockersmartmsb/centos:v1</span></span><br><span class="line">The push refers to repository [<span class="type">docker.io</span>/<span class="type">dockersmartmsb</span>/<span class="type">centos</span>]</span><br><span class="line"><span class="number">74</span>ddd0ec08fa: Mounted from library/centos</span><br><span class="line">v1: digest: sha256:a1801b843b1bfaf77c501e7a6d3f709401a1e0c83863037fa3aab063a7fdb9dc size: <span class="number">529</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125231912826.png" alt="image-20220125231912826"></p>
+<h3 id="2-1-6-下载容器镜像"><a href="#2-1-6-下载容器镜像" class="headerlink" title="2.1.6 下载容器镜像"></a>2.1.6 下载容器镜像</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">在其它主机上下载</span><br><span class="line"></span><br><span class="line">下载</span><br><span class="line"><span class="comment"># docker pull dockersmartmsb/centos:v1</span></span><br><span class="line">v1: Pulling from dockersmartmsb/centos</span><br><span class="line">a1d0c7532777: Pull complete</span><br><span class="line">Digest: sha256:a1801b843b1bfaf77c501e7a6d3f709401a1e0c83863037fa3aab063a7fdb9dc</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> dockersmartmsb/centos:v1</span><br><span class="line">docker.io/dockersmartmsb/centos:v1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">查看下载后容器镜像</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY              TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">dockersmartmsb/centos   v1        <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="2-2-harbor"><a href="#2-2-harbor" class="headerlink" title="2.2 harbor"></a>2.2 harbor</h2><h3 id="2-2-1-获取-docker-compose二进制文件"><a href="#2-2-1-获取-docker-compose二进制文件" class="headerlink" title="2.2.1 获取 docker compose二进制文件"></a>2.2.1 获取 docker compose二进制文件</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">下载docker<span class="literal">-compose</span>二进制文件</span><br><span class="line"><span class="comment"># wget https://github.com/docker/compose/releases/download/1.25.0/docker-compose-Linux-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">查看已下载二进制文件</span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">docker<span class="literal">-compose</span><span class="literal">-Linux</span><span class="literal">-x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">移动二进制文件到/usr/bin目录，并更名为docker<span class="literal">-compose</span></span><br><span class="line"><span class="comment"># mv docker-compose-Linux-x86_64 /usr/bin/docker-compose</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">为二进制文件添加可执行权限</span><br><span class="line"><span class="comment"># chmod +x /usr/bin/docker-compose</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">安装完成后，查看docker<span class="literal">-compse</span>版本</span><br><span class="line"><span class="comment"># docker-compose version</span></span><br><span class="line">docker<span class="literal">-compose</span> version <span class="number">1.25</span>.<span class="number">0</span>, build <span class="number">0</span>a186604</span><br><span class="line">docker<span class="literal">-py</span> version: <span class="number">4.1</span>.<span class="number">0</span></span><br><span class="line">CPython version: <span class="number">3.7</span>.<span class="number">4</span></span><br><span class="line">OpenSSL version: OpenSSL <span class="number">1.1</span>.<span class="number">0</span>l  <span class="number">10</span> Sep <span class="number">2019</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-2-获取harbor安装文件"><a href="#2-2-2-获取harbor安装文件" class="headerlink" title="2.2.2 获取harbor安装文件"></a>2.2.2 获取harbor安装文件</h3><p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125232445910.png" alt="image-20220125232445910"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125232519365.png" alt="image-20220125232519365"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233602760.png" alt="image-20220125233602760"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233652604.png" alt="image-20220125233652604"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220125233739356.png" alt="image-20220125233739356"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">下载harbor离线安装包</span><br><span class="line"><span class="comment"># wget https://github.com/goharbor/harbor/releases/download/v2.4.1/harbor-offline-installer-v2.4.1.tgz</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">查看已下载的离线安装包</span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">harbor<span class="literal">-offline</span><span class="literal">-installer</span><span class="literal">-v2</span>.<span class="number">4.1</span>.tgz</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-3-获取TLS文件"><a href="#2-2-3-获取TLS文件" class="headerlink" title="2.2.3 获取TLS文件"></a>2.2.3 获取TLS文件</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">查看准备好的证书</span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">kubemsb.com_nginx.zip</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">解压证书压缩包文件</span><br><span class="line"><span class="comment"># unzip kubemsb.com_nginx.zip</span></span><br><span class="line">Archive:  kubemsb.com_nginx.zip</span><br><span class="line">Aliyun Certificate Download</span><br><span class="line">  inflating: <span class="number">6864844</span>_kubemsb.com.pem</span><br><span class="line">  inflating: <span class="number">6864844</span>_kubemsb.com.key</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">查看解压出的文件</span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line"><span class="number">6864844</span>_kubemsb.com.key</span><br><span class="line"><span class="number">6864844</span>_kubemsb.com.pem</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-4-修改配置文件"><a href="#2-2-4-修改配置文件" class="headerlink" title="2.2.4 修改配置文件"></a>2.2.4 修改配置文件</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">解压harbor离线安装包</span><br><span class="line"><span class="comment"># tar xf harbor-offline-installer-v2.4.1.tgz</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">查看解压出来的目录</span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">harbor </span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">移动证书到harbor目录</span><br><span class="line"><span class="comment"># # mv 6864844_kubemsb.com.* harbor</span></span><br><span class="line"></span><br><span class="line">查看harbor目录</span><br><span class="line"><span class="comment"># ls harbor</span></span><br><span class="line"><span class="number">6864844</span>_kubemsb.com.key  <span class="number">6864844</span>_kubemsb.com.pem  common.sh  harbor.v2.<span class="number">4.1</span>.tar.gz  harbor.yml.tmpl  install.sh  LICENSE  prepare</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">创建配置文件</span><br><span class="line"><span class="comment"># cd harbor/</span></span><br><span class="line"><span class="comment"># mv harbor.yml.tmpl harbor.yml</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">修改配置文件内容</span><br><span class="line"></span><br><span class="line"><span class="comment"># vim harbor.yml</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Configuration file of Harbor</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The IP address or hostname to access admin UI and registry service.</span></span><br><span class="line"><span class="comment"># DO NOT use localhost or 127.0.0.1, because Harbor needs to be accessed by external clients.</span></span><br><span class="line">hostname: www.kubemsb.com 修改为域名，而且一定是证书签发的域名</span><br><span class="line"></span><br><span class="line"><span class="comment"># http related config</span></span><br><span class="line">http:</span><br><span class="line">  <span class="comment"># port for http, default is 80. If https enabled, this port will redirect to https port</span></span><br><span class="line">  port: <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># https related config</span></span><br><span class="line">https:</span><br><span class="line">  <span class="comment"># https port for harbor, default is 443</span></span><br><span class="line">  port: <span class="number">443</span></span><br><span class="line">  <span class="comment"># The path of cert and key files for nginx</span></span><br><span class="line">  certificate: /root/harbor/<span class="number">6864844</span>_kubemsb.com.pem 证书</span><br><span class="line">  private_key: /root/harbor/<span class="number">6864844</span>_kubemsb.com.key 密钥</span><br><span class="line"></span><br><span class="line"><span class="comment"># # Uncomment following will enable tls communication between all harbor components</span></span><br><span class="line"><span class="comment"># internal_tls:</span></span><br><span class="line"><span class="comment">#   # set enabled to true means internal tls is enabled</span></span><br><span class="line"><span class="comment">#   enabled: true</span></span><br><span class="line"><span class="comment">#   # put your cert and key files on dir</span></span><br><span class="line"><span class="comment">#   dir: /etc/harbor/tls/internal</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Uncomment external_url if you want to enable external proxy</span></span><br><span class="line"><span class="comment"># And when it enabled the hostname will no longer used</span></span><br><span class="line"><span class="comment"># external_url: https://reg.mydomain.com:8433</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The initial password of Harbor admin</span></span><br><span class="line"><span class="comment"># It only works in first time to install harbor</span></span><br><span class="line"><span class="comment"># Remember Change the admin password from UI after launching Harbor.</span></span><br><span class="line">harbor_admin_password: <span class="number">12345</span> 访问密码</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-5-执行预备脚本"><a href="#2-2-5-执行预备脚本" class="headerlink" title="2.2.5 执行预备脚本"></a>2.2.5 执行预备脚本</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ./prepare</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">输出</span><br><span class="line">prepare base <span class="built_in">dir</span> is <span class="built_in">set</span> to /root/harbor</span><br><span class="line">Clearing the configuration file: /config/portal/nginx.conf</span><br><span class="line">Clearing the configuration file: /config/log/logrotate.conf</span><br><span class="line">Clearing the configuration file: /config/log/rsyslog_docker.conf</span><br><span class="line">Generated configuration file: /config/portal/nginx.conf</span><br><span class="line">Generated configuration file: /config/log/logrotate.conf</span><br><span class="line">Generated configuration file: /config/log/rsyslog_docker.conf</span><br><span class="line">Generated configuration file: /config/nginx/nginx.conf</span><br><span class="line">Generated configuration file: /config/core/env</span><br><span class="line">Generated configuration file: /config/core/app.conf</span><br><span class="line">Generated configuration file: /config/registry/config.yml</span><br><span class="line">Generated configuration file: /config/registryctl/env</span><br><span class="line">Generated configuration file: /config/registryctl/config.yml</span><br><span class="line">Generated configuration file: /config/db/env</span><br><span class="line">Generated configuration file: /config/jobservice/env</span><br><span class="line">Generated configuration file: /config/jobservice/config.yml</span><br><span class="line">Generated and saved secret to file: /<span class="keyword">data</span>/secret/keys/secretkey</span><br><span class="line">Successfully called func: create_root_cert</span><br><span class="line">Generated configuration file: /compose_location/docker<span class="literal">-compose</span>.yml</span><br><span class="line">Clean up the input <span class="built_in">dir</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-6-执行安装脚本"><a href="#2-2-6-执行安装脚本" class="headerlink" title="2.2.6 执行安装脚本"></a>2.2.6 执行安装脚本</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ./install.sh</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">输出</span><br><span class="line">[<span class="type">Step</span> <span class="number">0</span>]: checking <span class="keyword">if</span> docker is installed ...</span><br><span class="line"></span><br><span class="line">Note: docker version: <span class="number">20.10</span>.<span class="number">12</span></span><br><span class="line"></span><br><span class="line">[<span class="type">Step</span> <span class="number">1</span>]: checking docker<span class="literal">-compose</span> is installed ...</span><br><span class="line"></span><br><span class="line">Note: docker<span class="literal">-compose</span> version: <span class="number">1.25</span>.<span class="number">0</span></span><br><span class="line"></span><br><span class="line">[<span class="type">Step</span> <span class="number">2</span>]: loading Harbor images ...</span><br><span class="line"></span><br><span class="line">[<span class="type">Step</span> <span class="number">3</span>]: preparing environment ...</span><br><span class="line"></span><br><span class="line">[<span class="type">Step</span> <span class="number">4</span>]: preparing harbor configs ...</span><br><span class="line">prepare base <span class="built_in">dir</span> is <span class="built_in">set</span> to /root/harbor</span><br><span class="line"></span><br><span class="line">[<span class="type">Step</span> <span class="number">5</span>]: starting Harbor ...</span><br><span class="line">Creating network <span class="string">&quot;harbor_harbor&quot;</span> with the default driver</span><br><span class="line">Creating harbor<span class="literal">-log</span> ... done</span><br><span class="line">Creating harbor<span class="literal">-db</span>     ... done</span><br><span class="line">Creating registry      ... done</span><br><span class="line">Creating registryctl   ... done</span><br><span class="line">Creating redis         ... done</span><br><span class="line">Creating harbor<span class="literal">-portal</span> ... done</span><br><span class="line">Creating harbor<span class="literal">-core</span>   ... done</span><br><span class="line">Creating harbor<span class="literal">-jobservice</span> ... done</span><br><span class="line">Creating nginx             ... done</span><br><span class="line">✔ ---<span class="literal">-Harbor</span> has been installed and started successfully.----</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-7-验证运行情况"><a href="#2-2-7-验证运行情况" class="headerlink" title="2.2.7 验证运行情况"></a>2.2.7 验证运行情况</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker ps</span></span><br><span class="line">CONTAINER ID   IMAGE                                COMMAND                  CREATED              STATUS                        PORTS                                                                            NAMES</span><br><span class="line"><span class="number">71</span>c0db683e4a   goharbor/nginx<span class="literal">-photon</span>:v2.<span class="number">4.1</span>         <span class="string">&quot;nginx -g &#x27;daemon of…&quot;</span>   About a minute ago   Up About a minute (healthy)   <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">80</span>-&gt;<span class="number">8080</span>/tcp, :::<span class="number">80</span>-&gt;<span class="number">8080</span>/tcp, <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">443</span>-&gt;<span class="number">8443</span>/tcp, :::<span class="number">443</span>-&gt;<span class="number">8443</span>/tcp   nginx</span><br><span class="line"><span class="number">4</span>e3b53a86f01   goharbor/harbor<span class="literal">-jobservice</span>:v2.<span class="number">4.1</span>    <span class="string">&quot;/harbor/entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    harbor<span class="literal">-jobservice</span></span><br><span class="line">df76e1eabbf7   goharbor/harbor<span class="literal">-core</span>:v2.<span class="number">4.1</span>          <span class="string">&quot;/harbor/entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    harbor<span class="literal">-core</span></span><br><span class="line">eeb4d224dfc4   goharbor/harbor<span class="literal">-portal</span>:v2.<span class="number">4.1</span>        <span class="string">&quot;nginx -g &#x27;daemon of…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    harbor<span class="literal">-portal</span></span><br><span class="line"><span class="number">70</span>e162c38b59   goharbor/redis<span class="literal">-photon</span>:v2.<span class="number">4.1</span>         <span class="string">&quot;redis-server /etc/r…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    redis</span><br><span class="line"><span class="number">8</span>bcc0e9b06ec   goharbor/harbor<span class="literal">-registryctl</span>:v2.<span class="number">4.1</span>   <span class="string">&quot;/home/harbor/start.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    registryctl</span><br><span class="line">d88196398df7   goharbor/registry<span class="literal">-photon</span>:v2.<span class="number">4.1</span>      <span class="string">&quot;/home/harbor/entryp…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    registry</span><br><span class="line">ed5ba2ba9c82   goharbor/harbor<span class="literal">-db</span>:v2.<span class="number">4.1</span>            <span class="string">&quot;/docker-entrypoint.…&quot;</span>   About a minute ago   Up About a minute (healthy)                                                                                    harbor<span class="literal">-db</span></span><br><span class="line">dcb4b57c7542   goharbor/harbor<span class="literal">-log</span>:v2.<span class="number">4.1</span>           <span class="string">&quot;/bin/sh -c /usr/loc…&quot;</span>   About a minute ago   Up About a minute (healthy)   <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">1514</span>-&gt;<span class="number">10514</span>/tcp                                                        harbor<span class="literal">-log</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="2-2-8-访问harbor-UI界面"><a href="#2-2-8-访问harbor-UI界面" class="headerlink" title="2.2.8 访问harbor UI界面"></a>2.2.8 访问harbor UI界面</h3><h4 id="2-2-8-1-在物理机通过浏览器访问"><a href="#2-2-8-1-在物理机通过浏览器访问" class="headerlink" title="2.2.8.1 在物理机通过浏览器访问"></a>2.2.8.1 在物理机通过浏览器访问</h4><p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000804490.png" alt="image-20220126000804490"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000825616.png" alt="image-20220126000825616"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126000840905.png" alt="image-20220126000840905"></p>
+<h4 id="2-2-8-2-在Docker-Host主机通过域名访问"><a href="#2-2-8-2-在Docker-Host主机通过域名访问" class="headerlink" title="2.2.8.2 在Docker Host主机通过域名访问"></a>2.2.8.2 在Docker Host主机通过域名访问</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">添加域名解析</span><br><span class="line"><span class="comment"># vim /etc/hosts</span></span><br><span class="line"><span class="comment"># cat /etc/hosts</span></span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::<span class="number">1</span>         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.155</span> www.kubemsb.com</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001253192.png" alt="image-20220126001253192"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001447862.png" alt="image-20220126001447862"></p>
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126001510880.png" alt="image-20220126001510880"></p>
+<h1 id="三、docker镜像上传至Harbor及从harbor下载"><a href="#三、docker镜像上传至Harbor及从harbor下载" class="headerlink" title="三、docker镜像上传至Harbor及从harbor下载"></a>三、docker镜像上传至Harbor及从harbor下载</h1><h2 id="3-1-修改docker-daemon使用harbor"><a href="#3-1-修改docker-daemon使用harbor" class="headerlink" title="3.1  修改docker daemon使用harbor"></a>3.1  修改docker daemon使用harbor</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">添加/etc/docker/daemon.json文件，默认不存在，需要手动添加</span><br><span class="line"><span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line"><span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;insecure-registries&quot;</span>: [<span class="string">&quot;www.kubemsb.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">重启加载daemon配置</span><br><span class="line"><span class="comment"># systemctl daemon-reload</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">重启docker</span><br><span class="line"><span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="3-2-docker-tag"><a href="#3-2-docker-tag" class="headerlink" title="3.2 docker tag"></a>3.2 docker tag</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">查看已有容器镜像文件</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY                      TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos                          latest    <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">为已存在镜像重新添加tag</span><br><span class="line"><span class="comment"># docker tag centos:latest www.kubemsb.com/library/centos:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">再次查看本地容器镜像</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY                       TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">centos                           latest    <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br><span class="line">www.kubemsb.com/library/centos   v1        <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="3-3-docker-push"><a href="#3-3-docker-push" class="headerlink" title="3.3 docker push"></a>3.3 docker push</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker login www.kubemsb.com</span></span><br><span class="line">Username: admin  用户名 admin</span><br><span class="line">Password:        密码   <span class="number">12345</span></span><br><span class="line">WARNING! Your password will be stored unencrypted <span class="keyword">in</span> /root/.docker/config.json.</span><br><span class="line">Configure a credential helper to remove this warning. See</span><br><span class="line">https://docs.docker.com/engine/reference/commandline/login/<span class="comment">#credentials-store</span></span><br><span class="line"></span><br><span class="line">Login Succeeded 登陆成功</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">推送本地容器镜像到harbor仓库</span><br><span class="line"><span class="comment"># docker push www.kubemsb.com/library/centos:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Docker/docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93.assets/image-20220126002747864.png" alt="image-20220126002747864"></p>
+<h2 id="3-4-docker-pull"><a href="#3-4-docker-pull" class="headerlink" title="3.4 docker pull"></a>3.4 docker pull</h2><blockquote>
+<p>在其它主机上下载或使用harbor容器镜像仓库中的容器镜像</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在本地添加域名解析</span><br><span class="line"><span class="comment"># vim /etc/hosts</span></span><br><span class="line"><span class="comment"># cat /etc/hosts</span></span><br><span class="line"><span class="number">127.0</span>.<span class="number">0.1</span>   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::<span class="number">1</span>         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line"><span class="number">192.168</span>.<span class="number">10.155</span> www.kubemsb.com</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在本地添加/etc/docker/daemon.json文件，其中为本地主机访问的容器镜像仓库</span><br><span class="line"><span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line"><span class="comment"># cat /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;insecure-registries&quot;</span>: [<span class="string">&quot;www.kubemsb.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl daemon-reload</span></span><br><span class="line"><span class="comment"># systemctl restart docker</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">下载容器镜像</span><br><span class="line"><span class="comment"># docker pull www.kubemsb.com/library/centos:v1</span></span><br><span class="line">v1: Pulling from library/centos</span><br><span class="line">Digest: sha256:a1801b843b1bfaf77c501e7a6d3f709401a1e0c83863037fa3aab063a7fdb9dc</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> www.kubemsb.com/library/centos:v1</span><br><span class="line">www.kubemsb.com/library/centos:v1</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">查看已下载的容器镜像</span><br><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY                       TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">www.kubemsb.com/library/centos   v1        <span class="number">5</span>d0da3dc9764   <span class="number">4</span> months ago   <span class="number">231</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#docker%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8%E5%8F%8A%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">docker容器镜像加速器及本地容器镜像仓库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">一、容器镜像加速器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E8%8E%B7%E5%8F%96%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E5%9C%B0%E5%9D%80"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 获取阿里云容器镜像加速地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E9%85%8D%E7%BD%AEdocker-daemon%E4%BD%BF%E7%94%A8%E5%8A%A0%E9%80%9F%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 配置docker daemon使用加速器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">3.</span> <span class="toc-text">二、容器镜像仓库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-docker-hub"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 docker hub</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E6%B3%A8%E5%86%8C"><span class="toc-number">3.1.1.</span> <span class="toc-text">2.1.1 注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E7%99%BB%E5%BD%95"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.1.2 登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E5%88%9B%E5%BB%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">3.1.3.</span> <span class="toc-text">2.1.3 创建容器镜像仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-4-%E5%9C%A8%E6%9C%AC%E5%9C%B0%E7%99%BB%E5%BD%95Docker-Hub"><span class="toc-number">3.1.4.</span> <span class="toc-text">2.1.4 在本地登录Docker Hub</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-5-%E4%B8%8A%E4%BC%A0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">3.1.5.</span> <span class="toc-text">2.1.5 上传容器镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-6-%E4%B8%8B%E8%BD%BD%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">3.1.6.</span> <span class="toc-text">2.1.6 下载容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-harbor"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 harbor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E8%8E%B7%E5%8F%96-docker-compose%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.1.</span> <span class="toc-text">2.2.1 获取 docker compose二进制文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E8%8E%B7%E5%8F%96harbor%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.2.2 获取harbor安装文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E8%8E%B7%E5%8F%96TLS%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.3.</span> <span class="toc-text">2.2.3 获取TLS文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-4-%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.4.</span> <span class="toc-text">2.2.4 修改配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-5-%E6%89%A7%E8%A1%8C%E9%A2%84%E5%A4%87%E8%84%9A%E6%9C%AC"><span class="toc-number">3.2.5.</span> <span class="toc-text">2.2.5 执行预备脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-6-%E6%89%A7%E8%A1%8C%E5%AE%89%E8%A3%85%E8%84%9A%E6%9C%AC"><span class="toc-number">3.2.6.</span> <span class="toc-text">2.2.6 执行安装脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-7-%E9%AA%8C%E8%AF%81%E8%BF%90%E8%A1%8C%E6%83%85%E5%86%B5"><span class="toc-number">3.2.7.</span> <span class="toc-text">2.2.7 验证运行情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-8-%E8%AE%BF%E9%97%AEharbor-UI%E7%95%8C%E9%9D%A2"><span class="toc-number">3.2.8.</span> <span class="toc-text">2.2.8 访问harbor UI界面</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-8-1-%E5%9C%A8%E7%89%A9%E7%90%86%E6%9C%BA%E9%80%9A%E8%BF%87%E6%B5%8F%E8%A7%88%E5%99%A8%E8%AE%BF%E9%97%AE"><span class="toc-number">3.2.8.1.</span> <span class="toc-text">2.2.8.1 在物理机通过浏览器访问</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-8-2-%E5%9C%A8Docker-Host%E4%B8%BB%E6%9C%BA%E9%80%9A%E8%BF%87%E5%9F%9F%E5%90%8D%E8%AE%BF%E9%97%AE"><span class="toc-number">3.2.8.2.</span> <span class="toc-text">2.2.8.2 在Docker Host主机通过域名访问</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81docker%E9%95%9C%E5%83%8F%E4%B8%8A%E4%BC%A0%E8%87%B3Harbor%E5%8F%8A%E4%BB%8Eharbor%E4%B8%8B%E8%BD%BD"><span class="toc-number">4.</span> <span class="toc-text">三、docker镜像上传至Harbor及从harbor下载</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BF%AE%E6%94%B9docker-daemon%E4%BD%BF%E7%94%A8harbor"><span class="toc-number">4.1.</span> <span class="toc-text">3.1  修改docker daemon使用harbor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-docker-tag"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 docker tag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-docker-push"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 docker push</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-docker-pull"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 docker pull</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&text=Docker核心概念镜像仓库"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&is_video=false&description=Docker核心概念镜像仓库"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker核心概念镜像仓库&body=Check out this article: https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&title=Docker核心概念镜像仓库"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/07/29/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93/&name=Docker核心概念镜像仓库&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

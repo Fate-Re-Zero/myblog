@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、容器与容器镜像之间的关系说到Docker管理的容器不得不说容器镜像，主要因为容器镜像是容器模板，通过容器镜像我们才能快速创建容器。 如下图所示：   Docker Daemon通过容器镜像创建容器。  二、容器镜像分类 操作系统类 CentOS Ubuntu 在dockerhub下载或自行制作   应用类 Tomcat Nginx MySQL Redis    三、容器镜像获取的方法主要有以下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dockerfile容器镜像构建技术">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、容器与容器镜像之间的关系说到Docker管理的容器不得不说容器镜像，主要因为容器镜像是容器模板，通过容器镜像我们才能快速创建容器。 如下图所示：   Docker Daemon通过容器镜像创建容器。  二、容器镜像分类 操作系统类 CentOS Ubuntu 在dockerhub下载或自行制作   应用类 Tomcat Nginx MySQL Redis    三、容器镜像获取的方法主要有以下">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/clip_image002.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/image-20220210123047484.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Dockerfile精讲及新型容器镜像构建技术.assets/clip_image002-1644469873598.jpg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/image-20220210132232826.png">
+<meta property="article:published_time" content="2023-08-03T00:48:22.000Z">
+<meta property="article:modified_time" content="2025-04-23T15:47:12.160Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/clip_image002.jpg">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Dockerfile容器镜像构建技术</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/08/06/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C%E4%B8%8E%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/08/02/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E7%94%9F%E6%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E9%83%A8%E7%BD%B2/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&text=Dockerfile容器镜像构建技术"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&is_video=false&description=Dockerfile容器镜像构建技术"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Dockerfile容器镜像构建技术&body=Check out this article: https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&name=Dockerfile容器镜像构建技术&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">一、容器与容器镜像之间的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">二、容器镜像分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%8E%B7%E5%8F%96%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">三、容器镜像获取的方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95%E6%BC%94%E7%A4%BA"><span class="toc-number">4.</span> <span class="toc-text">四、容器镜像获取方法演示</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%9C%A8DockerHub%E7%9B%B4%E6%8E%A5%E4%B8%8B%E8%BD%BD"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 在DockerHub直接下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%8A%8A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 把操作系统中文件系统打包为容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E5%AE%89%E8%A3%85%E4%B8%80%E4%B8%AA%E6%9C%80%E5%8C%96%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 安装一个最化的操作系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E6%8A%8A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E6%89%93%E5%8C%85"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 把操作系统中文件系统进行打包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-3-%E6%8A%8A%E6%89%93%E5%8C%85%E5%90%8E%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%87%B3%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%94%9F%E6%88%90%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3 把打包后文件加载至本地文件系统生成本地容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E6%8A%8A%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 把正在运行的容器打包为容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-1-%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AA%E5%AE%B9%E5%99%A8"><span class="toc-number">4.3.1.</span> <span class="toc-text">4.3.1 运行一个容器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-2-%E5%9C%A8%E5%AE%B9%E5%99%A8%E4%B8%AD%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8"><span class="toc-number">4.3.2.</span> <span class="toc-text">4.3.2 在容器中安装应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-3-%E6%8A%8A%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.3.3.</span> <span class="toc-text">4.3.3 把正在运行的容器打包为容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-%E9%80%9A%E8%BF%87Dockerfile%E5%AE%9E%E7%8E%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8F%8A%E7%94%9F%E6%88%90"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 通过Dockerfile实现容器镜像的自定义及生成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-1-Dockerfile%E4%BB%8B%E7%BB%8D"><span class="toc-number">4.4.1.</span> <span class="toc-text">4.4.1 Dockerfile介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-2-Dockerfile%E6%8C%87%E4%BB%A4"><span class="toc-number">4.4.2.</span> <span class="toc-text">4.4.2 Dockerfile指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-3-Dockerfile%E5%9F%BA%E6%9C%AC%E6%9E%84%E6%88%90"><span class="toc-number">4.4.3.</span> <span class="toc-text">4.4.3 Dockerfile基本构成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-4-Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%96%B9%E6%B3%95"><span class="toc-number">4.4.4.</span> <span class="toc-text">4.4.4 Dockerfile生成容器镜像方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-5-Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%A1%88%E4%BE%8B"><span class="toc-number">4.4.5.</span> <span class="toc-text">4.4.5 Dockerfile生成容器镜像案例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-0-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.4.5.1.</span> <span class="toc-text">4.4.5.0 使用Dockerfile生成容器镜像步骤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-1-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90Nginx%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.5.2.</span> <span class="toc-text">4.4.5.1 使用Dockerfile生成Nginx容器镜像</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-2-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90Tomcat%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.5.3.</span> <span class="toc-text">4.4.5.2 使用Dockerfile生成Tomcat容器镜像</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-6-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BC%98%E5%8C%96"><span class="toc-number">4.4.6.</span> <span class="toc-text">4.4.6 使用Dockerfile生成容器镜像优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-1-%E5%87%8F%E5%B0%91%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82"><span class="toc-number">4.4.6.1.</span> <span class="toc-text">4.4.6.1 减少镜像分层</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-2-%E6%B8%85%E7%90%86%E6%97%A0%E7%94%A8%E6%95%B0%E6%8D%AE"><span class="toc-number">4.4.6.2.</span> <span class="toc-text">4.4.6.2 清理无用数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-3-%E5%A4%9A%E9%98%B6%E6%AE%B5%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.6.3.</span> <span class="toc-text">4.4.6.3 多阶段构建镜像</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF-BuildPacks"><span class="toc-number">5.</span> <span class="toc-text">五、新型容器镜像构建技术 BuildPacks</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Dockerfile容器镜像构建技术
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-08-03T00:48:22.000Z" itemprop="datePublished">2023-08-03</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/" class="leancloud-visitors" data-flag-title="Dockerfile容器镜像构建技术" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Docker/" rel="tag">Docker</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、容器与容器镜像之间的关系"><a href="#一、容器与容器镜像之间的关系" class="headerlink" title="一、容器与容器镜像之间的关系"></a>一、容器与容器镜像之间的关系</h1><p>说到Docker管理的容器不得不说容器镜像，主要因为容器镜像是容器模板，通过容器镜像我们才能快速创建容器。</p>
+<p>如下图所示：</p>
+<p><img src="/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/clip_image002.jpg" alt="img"></p>
+<blockquote>
+<p>Docker Daemon通过容器镜像创建容器。</p>
+</blockquote>
+<h1 id="二、容器镜像分类"><a href="#二、容器镜像分类" class="headerlink" title="二、容器镜像分类"></a>二、容器镜像分类</h1><ul>
+<li>操作系统类<ul>
+<li>CentOS</li>
+<li>Ubuntu</li>
+<li>在dockerhub下载或自行制作</li>
+</ul>
+</li>
+<li>应用类<ul>
+<li>Tomcat</li>
+<li>Nginx</li>
+<li>MySQL</li>
+<li>Redis</li>
+</ul>
+</li>
+</ul>
+<h1 id="三、容器镜像获取的方法"><a href="#三、容器镜像获取的方法" class="headerlink" title="三、容器镜像获取的方法"></a>三、容器镜像获取的方法</h1><p>主要有以下几种：</p>
+<p>1、在DockerHub直接下载</p>
+<p>2、把操作系统中文件系统打包为容器镜像</p>
+<p>3、把正在运行的容器打包为容器镜像，即docker commit</p>
+<p>4、通过Dockerfile实现容器镜像的自定义及生成</p>
+<h1 id="四、容器镜像获取方法演示"><a href="#四、容器镜像获取方法演示" class="headerlink" title="四、容器镜像获取方法演示"></a>四、容器镜像获取方法演示</h1><h2 id="4-1-在DockerHub直接下载"><a href="#4-1-在DockerHub直接下载" class="headerlink" title="4.1 在DockerHub直接下载"></a>4.1 在DockerHub直接下载</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker pull centos:latest</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker pull nginx:latest</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="4-2-把操作系统中文件系统打包为容器镜像"><a href="#4-2-把操作系统中文件系统打包为容器镜像" class="headerlink" title="4.2 把操作系统中文件系统打包为容器镜像"></a>4.2 把操作系统中文件系统打包为容器镜像</h2><h3 id="4-2-1-安装一个最化的操作系统"><a href="#4-2-1-安装一个最化的操作系统" class="headerlink" title="4.2.1 安装一个最化的操作系统"></a>4.2.1 安装一个最化的操作系统</h3><p><img src="/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/image-20220210123047484.png" alt="image-20220210123047484"></p>
+<h3 id="4-2-2-把操作系统中文件系统进行打包"><a href="#4-2-2-把操作系统中文件系统进行打包" class="headerlink" title="4.2.2 把操作系统中文件系统进行打包"></a>4.2.2 把操作系统中文件系统进行打包</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tar --numeric-owner --exclude=/proc --exclude=/sys -cvf centos7u6.tar /</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-2-3-把打包后文件加载至本地文件系统生成本地容器镜像"><a href="#4-2-3-把打包后文件加载至本地文件系统生成本地容器镜像" class="headerlink" title="4.2.3 把打包后文件加载至本地文件系统生成本地容器镜像"></a>4.2.3 把打包后文件加载至本地文件系统生成本地容器镜像</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ls</span></span><br><span class="line">centos7u6.tar</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker import centos7u6.tar centos7u6:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY   TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">centos7u6    v1        <span class="number">130</span>cb005b2dc   <span class="number">7</span> seconds ago   <span class="number">1.09</span>GB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it centos7u6:v1 bash</span></span><br><span class="line">[<span class="type">root</span>@<span class="number">50</span><span class="type">f24f688b4d</span> /]<span class="comment"># ip a s</span></span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="number">65536</span> qdisc noqueue state UNKNOWN <span class="built_in">group</span> default qlen <span class="number">1000</span></span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">    inet <span class="number">127.0</span>.<span class="number">0.1</span>/<span class="number">8</span> scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="number">7</span>: eth0@if8: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="number">1500</span> qdisc noqueue state UP <span class="built_in">group</span> default</span><br><span class="line">    link/ether <span class="number">02</span>:<span class="number">42</span>:<span class="built_in">ac</span>:<span class="number">11</span>:<span class="number">00</span>:<span class="number">02</span> brd ff:ff:ff:ff:ff:ff link<span class="literal">-netnsid</span> <span class="number">0</span></span><br><span class="line">    inet <span class="number">172.17</span>.<span class="number">0.2</span>/<span class="number">16</span> brd <span class="number">172.17</span>.<span class="number">255.255</span> scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="4-3-把正在运行的容器打包为容器镜像"><a href="#4-3-把正在运行的容器打包为容器镜像" class="headerlink" title="4.3 把正在运行的容器打包为容器镜像"></a>4.3 把正在运行的容器打包为容器镜像</h2><h3 id="4-3-1-运行一个容器"><a href="#4-3-1-运行一个容器" class="headerlink" title="4.3.1 运行一个容器"></a>4.3.1 运行一个容器</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it centos7u6:v1 bash</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-3-2-在容器中安装应用"><a href="#4-3-2-在容器中安装应用" class="headerlink" title="4.3.2 在容器中安装应用"></a>4.3.2 在容器中安装应用</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="number">064</span><span class="type">aace45718</span> /]<span class="comment"># yum -y install httpd</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-3-3-把正在运行的容器打包为容器镜像"><a href="#4-3-3-把正在运行的容器打包为容器镜像" class="headerlink" title="4.3.3 把正在运行的容器打包为容器镜像"></a>4.3.3 把正在运行的容器打包为容器镜像</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="number">064</span><span class="type">aace45718</span> /]<span class="comment"># ctrl + p +q</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker commit 064aace45718 centos7u6-httpd:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY        TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">centos7u6<span class="literal">-httpd</span>   v1        <span class="number">30</span>ec9d728880   <span class="number">6</span> seconds ago   <span class="number">1.29</span>GB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it centos7u6-httpd:v1 bash</span></span><br><span class="line">[<span class="type">root</span>@<span class="number">01</span><span class="type">a1373b4a3f</span> /]<span class="comment"># rpm -qa | grep httpd</span></span><br><span class="line">httpd<span class="literal">-tools</span><span class="literal">-2</span>.<span class="number">4.6</span><span class="literal">-97</span>.el7.centos.<span class="number">4</span>.x86_64</span><br><span class="line">httpd<span class="literal">-2</span>.<span class="number">4.6</span><span class="literal">-97</span>.el7.centos.<span class="number">4</span>.x86_64</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="4-4-通过Dockerfile实现容器镜像的自定义及生成"><a href="#4-4-通过Dockerfile实现容器镜像的自定义及生成" class="headerlink" title="4.4 通过Dockerfile实现容器镜像的自定义及生成"></a>4.4 通过Dockerfile实现容器镜像的自定义及生成</h2><h3 id="4-4-1-Dockerfile介绍"><a href="#4-4-1-Dockerfile介绍" class="headerlink" title="4.4.1 Dockerfile介绍"></a>4.4.1 Dockerfile介绍</h3><p>Dockerfile是一种能够被Docker程序解释的剧本。Dockerfile由一条一条的指令组成，并且有自己的书写格式和支持的命令。当我们需要在容器镜像中指定自己额外的需求时，只需在Dockerfile上添加或修改指令，然后通过docker build生成我们自定义的容器镜像（image）。</p>
+<img src="/images/Docker/Dockerfile精讲及新型容器镜像构建技术.assets/clip_image002-1644469873598.jpg" alt="img">
+
+
+
+
+
+
+
+<h3 id="4-4-2-Dockerfile指令"><a href="#4-4-2-Dockerfile指令" class="headerlink" title="4.4.2 Dockerfile指令"></a>4.4.2 Dockerfile指令</h3><ul>
+<li><p>构建类指令</p>
+<ul>
+<li>用于构建image</li>
+<li>其指定的操作不会在运行image的容器上执行（FROM、MAINTAINER、RUN、ENV、ADD、COPY）</li>
+</ul>
+</li>
+<li><p>设置类指令</p>
+<ul>
+<li>用于设置image的属性</li>
+<li>其指定的操作将在运行image的容器中执行（CMD、ENTRYPOINT、USER 、EXPOSE、VOLUME、WORKDIR、ONBUILD）</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>指令说明</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FROM</td>
+<td>构建新镜像基于的基础镜像</td>
+</tr>
+<tr>
+<td>LABEL</td>
+<td>标签</td>
+</tr>
+<tr>
+<td>RUN</td>
+<td>构建镜像时运行的Shell命令</td>
+</tr>
+<tr>
+<td>COPY</td>
+<td>拷贝文件或目录到镜像中</td>
+</tr>
+<tr>
+<td>ADD</td>
+<td>解压压缩包并拷贝</td>
+</tr>
+<tr>
+<td>ENV</td>
+<td>设置环境变量</td>
+</tr>
+<tr>
+<td>USER</td>
+<td>为RUN、CMD和ENTRYPOINT执行命令指定运行用户</td>
+</tr>
+<tr>
+<td>EXPOSE</td>
+<td>声明容器运行的服务端口</td>
+</tr>
+<tr>
+<td>WORKDIR</td>
+<td>为RUN、CMD、ENTRYPOINT、COPY和ADD设置工作目录</td>
+</tr>
+<tr>
+<td>CMD</td>
+<td>运行容器时默认执行，如果有多个CMD指令，最后一个生效</td>
+</tr>
+</tbody></table>
+<ul>
+<li>指令详细解释</li>
+</ul>
+<p>通过<code>man dockerfile</code>可以查看到详细的说明,这里简单的翻译并列出常用的指令</p>
+<p>1, <strong>FROM</strong></p>
+<p>FROM指令用于指定其后构建新镜像所使用的基础镜像。</p>
+<p>FROM指令必是Dockerfile文件中的首条命令。</p>
+<p>FROM指令指定的基础image可以是官方远程仓库中的，也可以位于本地仓库，优先本地仓库。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">格式:FROM &lt;image&gt;:&lt;tag&gt;</span><br><span class="line">例:FROM centos:latest</span><br></pre></td></tr></table></figure>
+
+<p>2, <strong>RUN</strong></p>
+<p>RUN指令用于在<strong>构建</strong>镜像中执行命令，有以下两种格式:</p>
+<ul>
+<li>shell格式</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">格式:RUN &lt;命令&gt;</span><br><span class="line">例:RUN <span class="built_in">echo</span> <span class="string">&#x27;kubelixiang&#x27;</span> &gt; /var/www/html/index.html</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>exec格式</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">格式:RUN [<span class="string">&quot;可执行文件&quot;</span>, <span class="string">&quot;参数1&quot;</span>, <span class="string">&quot;参数2&quot;</span>]</span><br><span class="line">例:RUN [<span class="string">&quot;/bin/bash&quot;</span>, <span class="string">&quot;-c&quot;</span>, <span class="string">&quot;echo kubelixiang &gt; /var/www/html/index.html&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意:</strong> 按优化的角度来讲:当有多条要执行的命令,不要使用多条RUN,尽量使用&amp;&amp;符号与\符号连接成一行。因为多条RUN命令会让镜像建立多层(总之就是会变得臃肿了:smiley:)。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">RUN yum install httpd httpd<span class="literal">-devel</span> <span class="literal">-y</span></span><br><span class="line">RUN <span class="built_in">echo</span> test &gt; /var/www/html/index.html</span><br><span class="line">可以改成</span><br><span class="line">RUN yum install httpd httpd<span class="literal">-devel</span> <span class="literal">-y</span> &amp;&amp; <span class="built_in">echo</span> test &gt; /var/www/html/index.html</span><br><span class="line">或者改成</span><br><span class="line">RUN yum install httpd httpd<span class="literal">-devel</span> <span class="literal">-y</span>  \</span><br><span class="line">    &amp;&amp; <span class="built_in">echo</span> test &gt; /var/www/html/index.html</span><br></pre></td></tr></table></figure>
+
+<p>3, <strong>CMD</strong></p>
+<p>CMD不同于RUN,CMD用于指定在容器启动时所要执行的命令,而RUN用于指定镜像构建时所要执行的命令。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">格式有三种:</span><br><span class="line">CMD [<span class="string">&quot;executable&quot;</span>,<span class="string">&quot;param1&quot;</span>,<span class="string">&quot;param2&quot;</span>]</span><br><span class="line">CMD [<span class="string">&quot;param1&quot;</span>,<span class="string">&quot;param2&quot;</span>]</span><br><span class="line">CMD command param1 param2</span><br></pre></td></tr></table></figure>
+
+<p>每个Dockerfile只能有一条CMD命令。如果指定了多条命令，只有最后一条会被执行。</p>
+<p>如果用户启动容器时候指定了运行的命令，则会覆盖掉CMD指定的命令。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">什么是启动容器时指定运行的命令?</span><br><span class="line"><span class="comment"># docker run -d -p 80:80 镜像名 运行的命令</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>4, <strong>EXPOSE</strong></p>
+<p>EXPOSE指令用于指定容器在运行时监听的端口</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">格式:EXPOSE &lt;port&gt; [&lt;<span class="type">port</span>&gt;<span class="type">...</span>]</span><br><span class="line">例:EXPOSE <span class="number">80</span> <span class="number">3306</span> <span class="number">8080</span></span><br></pre></td></tr></table></figure>
+
+<p>上述运行的端口还需要使用docker run运行容器时通过-p参数映射到宿主机的端口.</p>
+<p>5, <strong>ENV</strong></p>
+<p>ENV指令用于指定一个环境变量.</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">格式:ENV &lt;key&gt; &lt;value&gt; 或者 ENV &lt;key&gt;=&lt;value&gt;</span><br><span class="line">例:ENV JAVA_HOME /usr/local/jdkxxxx/</span><br></pre></td></tr></table></figure>
+
+<p>6, <strong>ADD</strong></p>
+<p>ADD指令用于把宿主机上的文件拷贝到镜像中</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">格式:ADD &lt;src&gt; &lt;dest&gt;</span><br><span class="line">&lt;src&gt;可以是一个本地文件或本地压缩文件，还可以是一个url,</span><br><span class="line">如果把&lt;src&gt;写成一个url，那么ADD就类似于<span class="built_in">wget</span>命令</span><br><span class="line">&lt;dest&gt;路径的填写可以是容器内的绝对路径，也可以是相对于工作目录的相对路径</span><br></pre></td></tr></table></figure>
+
+<p>7, <strong>COPY</strong></p>
+<p>COPY指令与ADD指令类似,但COPY的源文件只能是本地文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">格式:<span class="built_in">COPY</span> &lt;src&gt; &lt;dest&gt;</span><br></pre></td></tr></table></figure>
+
+<p>8, <strong>ENTRYPOINT</strong></p>
+<p>ENTRYPOINT与CMD非常类似</p>
+<p>相同点：<br>一个Dockerfile只写一条，如果写了多条，那么只有最后一条生效<br>都是容器启动时才运行</p>
+<p>不同点：<br>如果用户启动容器时候指定了运行的命令，ENTRYPOINT不会被运行的命令覆盖，而CMD则会被覆盖</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">格式有两种:</span><br><span class="line">ENTRYPOINT [<span class="string">&quot;executable&quot;</span>, <span class="string">&quot;param1&quot;</span>, <span class="string">&quot;param2&quot;</span>]</span><br><span class="line">ENTRYPOINT command param1 param2</span><br></pre></td></tr></table></figure>
+
+<p>9,  <strong>VOLUME</strong></p>
+<p>VOLUME指令用于把宿主机里的目录与容器里的目录映射. </p>
+<p>只指定挂载点,docker宿主机映射的目录为自动生成的。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">格式:VOLUME [<span class="string">&quot;&lt;mountpoint&gt;&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>10, <strong>USER</strong></p>
+<p>USER指令设置启动容器的用户(像hadoop需要hadoop用户操作，oracle需要oracle用户操作),可以是用户名或UID</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">USER daemon</span><br><span class="line">USER <span class="number">1001</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：如果设置了容器以daemon用户去运行，那么RUN,CMD和ENTRYPOINT都会以这个用户去运行<br>镜像构建完成后，通过docker run运行容器时，可以通过-u参数来覆盖所指定的用户</p>
+<p>11, <strong>WORKDIR</strong></p>
+<p>WORKDIR指令设置工作目录,类似于cd命令。不建议使用<code>RUN cd /root</code> ,建议使用WORKDIR</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WORKDIR /root</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="4-4-3-Dockerfile基本构成"><a href="#4-4-3-Dockerfile基本构成" class="headerlink" title="4.4.3 Dockerfile基本构成"></a>4.4.3 Dockerfile基本构成</h3><ul>
+<li><p>基础镜像信息</p>
+</li>
+<li><p>维护者信息</p>
+</li>
+<li><p>镜像操作指令</p>
+</li>
+<li><p>容器启动时执行指令</p>
+</li>
+</ul>
+<h3 id="4-4-4-Dockerfile生成容器镜像方法"><a href="#4-4-4-Dockerfile生成容器镜像方法" class="headerlink" title="4.4.4 Dockerfile生成容器镜像方法"></a>4.4.4 Dockerfile生成容器镜像方法</h3><p><img src="/images/Docker/Dockerfile%E7%B2%BE%E8%AE%B2%E5%8F%8A%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF.assets/image-20220210132232826.png" alt="image-20220210132232826"></p>
+<h3 id="4-4-5-Dockerfile生成容器镜像案例"><a href="#4-4-5-Dockerfile生成容器镜像案例" class="headerlink" title="4.4.5 Dockerfile生成容器镜像案例"></a>4.4.5 Dockerfile生成容器镜像案例</h3><h4 id="4-4-5-0-使用Dockerfile生成容器镜像步骤"><a href="#4-4-5-0-使用Dockerfile生成容器镜像步骤" class="headerlink" title="4.4.5.0 使用Dockerfile生成容器镜像步骤"></a>4.4.5.0 使用Dockerfile生成容器镜像步骤</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">第一步：创建一个文件夹（目录）</span><br><span class="line"></span><br><span class="line">第二步：在文件夹（目录）中创建Dockerfile文件(并编写)及其它文件</span><br><span class="line"></span><br><span class="line">第三步：使用`docker build`命令构建镜像</span><br><span class="line"></span><br><span class="line">第四步：使用构建的镜像启动容器</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-4-5-1-使用Dockerfile生成Nginx容器镜像"><a href="#4-4-5-1-使用Dockerfile生成Nginx容器镜像" class="headerlink" title="4.4.5.1 使用Dockerfile生成Nginx容器镜像"></a>4.4.5.1 使用Dockerfile生成Nginx容器镜像</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># mkdir nginxroot</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># cd nginxroot</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># echo &quot;nginx&#x27;s running&quot; &gt;&gt; index.html</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># ls</span></span><br><span class="line">index.html</span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># cat index.html</span></span><br><span class="line">nginx<span class="string">&#x27;s running</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># vim Dockerfile</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># cat Dockerfile</span></span><br><span class="line">FROM centos:centos7</span><br><span class="line"></span><br><span class="line">MAINTAINER <span class="string">&quot;www.kubelixiang.com&quot;</span></span><br><span class="line"></span><br><span class="line">RUN yum <span class="literal">-y</span> install <span class="built_in">wget</span></span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">wget</span> <span class="literal">-O</span> /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel<span class="literal">-7</span>.repo</span><br><span class="line"></span><br><span class="line">RUN yum <span class="literal">-y</span> install nginx</span><br><span class="line"></span><br><span class="line">ADD index.html /usr/share/nginx/html/</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;daemon off;&quot;</span> &gt;&gt; /etc/nginx/nginx.conf</span><br><span class="line"></span><br><span class="line">EXPOSE <span class="number">80</span></span><br><span class="line"></span><br><span class="line">CMD /usr/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># docker build -t centos7-nginx:v1 .</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br></pre></td><td class="code"><pre><span class="line">输出：</span><br><span class="line">Sending build context to Docker daemon  <span class="number">3.072</span>kB</span><br><span class="line">第一步：下载基础镜像</span><br><span class="line">Step <span class="number">1</span>/<span class="number">9</span> : FROM centos:centos7</span><br><span class="line"> ---&gt; eeb6ee3f44bd</span><br><span class="line">第二步：维护者信息</span><br><span class="line">Step <span class="number">2</span>/<span class="number">9</span> : MAINTAINER <span class="string">&quot;www.kubelixiang.com&quot;</span></span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; f978e524772c</span><br><span class="line"> </span><br><span class="line">第三步：安装<span class="built_in">wget</span></span><br><span class="line">Step <span class="number">3</span>/<span class="number">9</span> : RUN yum <span class="literal">-y</span> install <span class="built_in">wget</span></span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">4</span>e0fc3854088</span><br><span class="line">Loaded plugins: fastestmirror, ovl</span><br><span class="line">Determining fastest mirrors</span><br><span class="line"> * base: mirrors.huaweicloud.com</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package wget.x86_64 <span class="number">0</span>:<span class="number">1.14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span> will be installed</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br><span class="line"></span><br><span class="line">Dependencies Resolved</span><br><span class="line"></span><br><span class="line">================================================================================</span><br><span class="line"> Package        Arch             Version                   Repository      Size</span><br><span class="line">================================================================================</span><br><span class="line">Installing:</span><br><span class="line"> <span class="built_in">wget</span>           x86_64           <span class="number">1.14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span>           base           <span class="number">547</span> k</span><br><span class="line"></span><br><span class="line">Transaction Summary</span><br><span class="line">================================================================================</span><br><span class="line">Install  <span class="number">1</span> Package</span><br><span class="line"></span><br><span class="line">Total download size: <span class="number">547</span> k</span><br><span class="line">Installed size: <span class="number">2.0</span> M</span><br><span class="line">Downloading packages:</span><br><span class="line">warning: /var/cache/yum/x86_64/<span class="number">7</span>/base/packages/w<span class="built_in">get-1</span>.<span class="number">14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span>.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID f4a80eb5: NOKEY</span><br><span class="line">Public key <span class="keyword">for</span> w<span class="built_in">get-1</span>.<span class="number">14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span>.x86_64.rpm is not installed</span><br><span class="line">Retrieving key from file:///etc/pki/rpm<span class="literal">-gpg</span>/RPM<span class="literal">-GPG</span><span class="literal">-KEY</span><span class="literal">-CentOS</span><span class="literal">-7</span></span><br><span class="line">Importing GPG key <span class="number">0</span>xF4A80EB5:</span><br><span class="line"> Userid     : <span class="string">&quot;CentOS-7 Key (CentOS 7 Official Signing Key) &lt;security@centos.org&gt;&quot;</span></span><br><span class="line"> Fingerprint: <span class="number">6341</span> ab27 <span class="number">53</span>d7 <span class="number">8</span>a78 a7c2 <span class="number">7</span>bb1 <span class="number">24</span>c6 a8a7 f4a8 <span class="number">0</span>eb5</span><br><span class="line"> Package    : centos<span class="literal">-release</span><span class="literal">-7</span><span class="literal">-9</span>.<span class="number">2009.0</span>.el7.centos.x86_64 (@CentOS)</span><br><span class="line"> From       : /etc/pki/rpm<span class="literal">-gpg</span>/RPM<span class="literal">-GPG</span><span class="literal">-KEY</span><span class="literal">-CentOS</span><span class="literal">-7</span></span><br><span class="line">Running transaction check</span><br><span class="line">Running transaction test</span><br><span class="line">Transaction test succeeded</span><br><span class="line">Running transaction</span><br><span class="line">  Installing : w<span class="built_in">get-1</span>.<span class="number">14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span>.x86_64                                  <span class="number">1</span>/<span class="number">1</span></span><br><span class="line"><span class="built_in">install-info</span>: No such file or directory <span class="keyword">for</span> /usr/share/info/wget.info.gz</span><br><span class="line">  Verifying  : w<span class="built_in">get-1</span>.<span class="number">14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span>.x86_64                                  <span class="number">1</span>/<span class="number">1</span></span><br><span class="line"></span><br><span class="line">Installed:</span><br><span class="line">  wget.x86_64 <span class="number">0</span>:<span class="number">1.14</span><span class="literal">-18</span>.el7_6.<span class="number">1</span></span><br><span class="line"></span><br><span class="line">Complete!</span><br><span class="line">Removing intermediate container <span class="number">4</span>e0fc3854088</span><br><span class="line"> ---&gt; <span class="number">369</span>e33a2152a</span><br><span class="line"> </span><br><span class="line">第四步：使用<span class="built_in">wget</span>下载YUM源</span><br><span class="line">Step <span class="number">4</span>/<span class="number">9</span> : RUN <span class="built_in">wget</span> <span class="literal">-O</span> /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel<span class="literal">-7</span>.repo</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">4</span>bdfc0a1c844</span><br><span class="line">-<span class="literal">-2022</span><span class="literal">-02</span><span class="literal">-10</span> <span class="number">06</span>:<span class="number">18</span>:<span class="number">07</span>--  http://mirrors.aliyun.com/repo/epel<span class="literal">-7</span>.repo</span><br><span class="line">Resolving mirrors.aliyun.com (mirrors.aliyun.com)... <span class="number">221.195</span>.<span class="number">209.65</span>, <span class="number">221.195</span>.<span class="number">209.64</span>, <span class="number">221.195</span>.<span class="number">209.70</span>, ...</span><br><span class="line">Connecting to mirrors.aliyun.com (mirrors.aliyun.com)|<span class="number">221.195</span>.<span class="number">209.65</span>|:<span class="number">80</span>... connected.</span><br><span class="line">HTTP request sent, awaiting response... <span class="number">200</span> OK</span><br><span class="line">Length: <span class="number">664</span> [<span class="type">application</span>/<span class="type">octet</span>-<span class="type">stream</span>]</span><br><span class="line">Saving to: <span class="string">&#x27;/etc/yum.repos.d/epel.repo&#x27;</span></span><br><span class="line"></span><br><span class="line">     <span class="number">0</span>K                                                       <span class="number">100</span>%  <span class="number">158</span>M=<span class="number">0</span>s</span><br><span class="line"></span><br><span class="line"><span class="number">2022</span><span class="literal">-02</span><span class="literal">-10</span> <span class="number">06</span>:<span class="number">18</span>:<span class="number">07</span> (<span class="number">158</span> MB/s) - <span class="string">&#x27;/etc/yum.repos.d/epel.repo&#x27;</span> saved [<span class="number">664</span>/<span class="number">664</span>]</span><br><span class="line"></span><br><span class="line">Removing intermediate container <span class="number">4</span>bdfc0a1c844</span><br><span class="line"> ---&gt; <span class="number">1</span>d73faa62447</span><br><span class="line"> </span><br><span class="line">第五步：安装Nginx</span><br><span class="line">Step <span class="number">5</span>/<span class="number">9</span> : RUN yum <span class="literal">-y</span> install nginx</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">51</span>b50c2ce841</span><br><span class="line">Loaded plugins: fastestmirror, ovl</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.huaweicloud.com</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line">Resolving Dependencies</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package nginx.x86_64 <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7 will be installed</span><br><span class="line">--&gt; Processing Dependency: nginx<span class="literal">-filesystem</span> = <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7 <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libcrypto.so.<span class="number">1.1</span>(OPENSSL_1_1_0)(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libssl.so.<span class="number">1.1</span>(OPENSSL_1_1_0)(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libssl.so.<span class="number">1.1</span>(OPENSSL_1_1_1)(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: nginx<span class="literal">-filesystem</span> <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: openssl <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: redhat<span class="literal">-indexhtml</span> <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: system<span class="literal">-logos</span> <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libcrypto.so.<span class="number">1.1</span>()(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libprofiler.so.<span class="number">0</span>()(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Processing Dependency: libssl.so.<span class="number">1.1</span>()(<span class="number">64</span>bit) <span class="keyword">for</span> package: <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package centos<span class="literal">-indexhtml</span>.noarch <span class="number">0</span>:<span class="number">7</span><span class="literal">-9</span>.el7.centos will be installed</span><br><span class="line">---&gt; Package centos<span class="literal">-logos</span>.noarch <span class="number">0</span>:<span class="number">70.0</span>.<span class="number">6</span><span class="literal">-3</span>.el7.centos will be installed</span><br><span class="line">---&gt; Package gperftools<span class="literal">-libs</span>.x86_64 <span class="number">0</span>:<span class="number">2.6</span>.<span class="number">1</span><span class="literal">-1</span>.el7 will be installed</span><br><span class="line">---&gt; Package nginx<span class="literal">-filesystem</span>.noarch <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7 will be installed</span><br><span class="line">---&gt; Package openssl.x86_64 <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9 will be installed</span><br><span class="line">--&gt; Processing Dependency: openssl<span class="literal">-libs</span>(x86<span class="literal">-64</span>) = <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9 <span class="keyword">for</span> package: <span class="number">1</span>:openssl<span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64</span><br><span class="line">--&gt; Processing Dependency: make <span class="keyword">for</span> package: <span class="number">1</span>:openssl<span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64</span><br><span class="line">---&gt; Package openssl11<span class="literal">-libs</span>.x86_64 <span class="number">1</span>:<span class="number">1.1</span>.<span class="number">1</span>k<span class="literal">-2</span>.el7 will be installed</span><br><span class="line">--&gt; Running transaction check</span><br><span class="line">---&gt; Package make.x86_64 <span class="number">1</span>:<span class="number">3.82</span><span class="literal">-24</span>.el7 will be installed</span><br><span class="line">---&gt; Package openssl<span class="literal">-libs</span>.x86_64 <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-19</span>.el7 will be updated</span><br><span class="line">---&gt; Package openssl<span class="literal">-libs</span>.x86_64 <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9 will be an update</span><br><span class="line">--&gt; Finished Dependency Resolution</span><br><span class="line"></span><br><span class="line">Dependencies Resolved</span><br><span class="line"></span><br><span class="line">================================================================================</span><br><span class="line"> Package               Arch        Version                   Repository    Size</span><br><span class="line">================================================================================</span><br><span class="line">Installing:</span><br><span class="line"> nginx                 x86_64      <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7            epel         <span class="number">587</span> k</span><br><span class="line">Installing <span class="keyword">for</span> dependencies:</span><br><span class="line"> centos<span class="literal">-indexhtml</span>      noarch      <span class="number">7</span><span class="literal">-9</span>.el7.centos            base          <span class="number">92</span> k</span><br><span class="line"> centos<span class="literal">-logos</span>          noarch      <span class="number">70.0</span>.<span class="number">6</span><span class="literal">-3</span>.el7.centos       base          <span class="number">21</span> M</span><br><span class="line"> gperftools<span class="literal">-libs</span>       x86_64      <span class="number">2.6</span>.<span class="number">1</span><span class="literal">-1</span>.el7               base         <span class="number">272</span> k</span><br><span class="line"> make                  x86_64      <span class="number">1</span>:<span class="number">3.82</span><span class="literal">-24</span>.el7             base         <span class="number">421</span> k</span><br><span class="line"> nginx<span class="literal">-filesystem</span>      noarch      <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7            epel          <span class="number">24</span> k</span><br><span class="line"> openssl               x86_64      <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9         updates      <span class="number">494</span> k</span><br><span class="line"> openssl11<span class="literal">-libs</span>        x86_64      <span class="number">1</span>:<span class="number">1.1</span>.<span class="number">1</span>k<span class="literal">-2</span>.el7            epel         <span class="number">1.5</span> M</span><br><span class="line">Updating <span class="keyword">for</span> dependencies:</span><br><span class="line"> openssl<span class="literal">-libs</span>          x86_64      <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9         updates      <span class="number">1.2</span> M</span><br><span class="line"></span><br><span class="line">Transaction Summary</span><br><span class="line">================================================================================</span><br><span class="line">Install  <span class="number">1</span> Package  (+<span class="number">7</span> Dependent packages)</span><br><span class="line">Upgrade             ( <span class="number">1</span> Dependent package)</span><br><span class="line"></span><br><span class="line">Total download size: <span class="number">26</span> M</span><br><span class="line">Downloading packages:</span><br><span class="line">Delta RPMs disabled because /usr/bin/applydeltarpm not installed.</span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">Total                                              <span class="number">3.1</span> MB/s |  <span class="number">26</span> MB  <span class="number">00</span>:<span class="number">08</span></span><br><span class="line">Running transaction check</span><br><span class="line">Running transaction test</span><br><span class="line">Transaction test succeeded</span><br><span class="line">Running transaction</span><br><span class="line">  Installing : centos<span class="literal">-logos</span><span class="literal">-70</span>.<span class="number">0.6</span><span class="literal">-3</span>.el7.centos.noarch                     <span class="number">1</span>/<span class="number">10</span></span><br><span class="line">  Installing : centos<span class="literal">-indexhtml</span><span class="literal">-7</span><span class="literal">-9</span>.el7.centos.noarch                      <span class="number">2</span>/<span class="number">10</span></span><br><span class="line">  Installing : <span class="number">1</span>:make<span class="literal">-3</span>.<span class="number">82</span><span class="literal">-24</span>.el7.x86_64                                   <span class="number">3</span>/<span class="number">10</span></span><br><span class="line">  Installing : gperftools<span class="literal">-libs</span><span class="literal">-2</span>.<span class="number">6.1</span><span class="literal">-1</span>.el7.x86_64                          <span class="number">4</span>/<span class="number">10</span></span><br><span class="line">  Installing : <span class="number">1</span>:openssl11<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">1.1</span>k<span class="literal">-2</span>.el7.x86_64                        <span class="number">5</span>/<span class="number">10</span></span><br><span class="line">  Updating   : <span class="number">1</span>:openssl<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64                       <span class="number">6</span>/<span class="number">10</span></span><br><span class="line">  Installing : <span class="number">1</span>:openssl<span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64                            <span class="number">7</span>/<span class="number">10</span></span><br><span class="line">  Installing : <span class="number">1</span>:nginx<span class="literal">-filesystem</span><span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.noarch                      <span class="number">8</span>/<span class="number">10</span></span><br><span class="line">  Installing : <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64                                 <span class="number">9</span>/<span class="number">10</span></span><br><span class="line">  Cleanup    : <span class="number">1</span>:openssl<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-19</span>.el7.x86_64                        <span class="number">10</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:nginx<span class="literal">-filesystem</span><span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.noarch                      <span class="number">1</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:nginx<span class="literal">-1</span>.<span class="number">20.1</span><span class="literal">-9</span>.el7.x86_64                                 <span class="number">2</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:openssl<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64                       <span class="number">3</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:openssl11<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">1.1</span>k<span class="literal">-2</span>.el7.x86_64                        <span class="number">4</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : gperftools<span class="literal">-libs</span><span class="literal">-2</span>.<span class="number">6.1</span><span class="literal">-1</span>.el7.x86_64                          <span class="number">5</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:make<span class="literal">-3</span>.<span class="number">82</span><span class="literal">-24</span>.el7.x86_64                                   <span class="number">6</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:openssl<span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-24</span>.el7_9.x86_64                            <span class="number">7</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : centos<span class="literal">-indexhtml</span><span class="literal">-7</span><span class="literal">-9</span>.el7.centos.noarch                      <span class="number">8</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : centos<span class="literal">-logos</span><span class="literal">-70</span>.<span class="number">0.6</span><span class="literal">-3</span>.el7.centos.noarch                     <span class="number">9</span>/<span class="number">10</span></span><br><span class="line">  Verifying  : <span class="number">1</span>:openssl<span class="literal">-libs</span><span class="literal">-1</span>.<span class="number">0.2</span>k<span class="literal">-19</span>.el7.x86_64                        <span class="number">10</span>/<span class="number">10</span></span><br><span class="line"></span><br><span class="line">Installed:</span><br><span class="line">  nginx.x86_64 <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7</span><br><span class="line"></span><br><span class="line">Dependency Installed:</span><br><span class="line">  centos<span class="literal">-indexhtml</span>.noarch <span class="number">0</span>:<span class="number">7</span><span class="literal">-9</span>.el7.centos</span><br><span class="line">  centos<span class="literal">-logos</span>.noarch <span class="number">0</span>:<span class="number">70.0</span>.<span class="number">6</span><span class="literal">-3</span>.el7.centos</span><br><span class="line">  gperftools<span class="literal">-libs</span>.x86_64 <span class="number">0</span>:<span class="number">2.6</span>.<span class="number">1</span><span class="literal">-1</span>.el7</span><br><span class="line">  make.x86_64 <span class="number">1</span>:<span class="number">3.82</span><span class="literal">-24</span>.el7</span><br><span class="line">  nginx<span class="literal">-filesystem</span>.noarch <span class="number">1</span>:<span class="number">1.20</span>.<span class="number">1</span><span class="literal">-9</span>.el7</span><br><span class="line">  openssl.x86_64 <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9</span><br><span class="line">  openssl11<span class="literal">-libs</span>.x86_64 <span class="number">1</span>:<span class="number">1.1</span>.<span class="number">1</span>k<span class="literal">-2</span>.el7</span><br><span class="line"></span><br><span class="line">Dependency Updated:</span><br><span class="line">  openssl<span class="literal">-libs</span>.x86_64 <span class="number">1</span>:<span class="number">1.0</span>.<span class="number">2</span>k<span class="literal">-24</span>.el7_9</span><br><span class="line"></span><br><span class="line">Complete!</span><br><span class="line">Removing intermediate container <span class="number">51</span>b50c2ce841</span><br><span class="line"> ---&gt; <span class="number">88</span>a7d7a2c522</span><br><span class="line"> </span><br><span class="line">第六步：添加文件至容器</span><br><span class="line">Step <span class="number">6</span>/<span class="number">9</span> : ADD index.html /usr/share/nginx/html/</span><br><span class="line"> ---&gt; a2226a4d6720</span><br><span class="line">第七步：设置nginx服务运行方式</span><br><span class="line">Step <span class="number">7</span>/<span class="number">9</span> : RUN <span class="built_in">echo</span> <span class="string">&quot;daemon off;&quot;</span> &gt;&gt; /etc/nginx/nginx.conf</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">01</span>d623937807</span><br><span class="line">Removing intermediate container <span class="number">01</span>d623937807</span><br><span class="line"> ---&gt; <span class="number">53</span>fddea5b491</span><br><span class="line"> </span><br><span class="line">第八步：暴露端口</span><br><span class="line">Step <span class="number">8</span>/<span class="number">9</span> : EXPOSE <span class="number">80</span></span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">9</span>b73fcf7ee1b</span><br><span class="line">Removing intermediate container <span class="number">9</span>b73fcf7ee1b</span><br><span class="line"> ---&gt; <span class="number">903377216</span>b23</span><br><span class="line">第九步：运行命令，执行nginx二进制文件</span><br><span class="line">Step <span class="number">9</span>/<span class="number">9</span> : CMD /usr/sbin/nginx</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">58037652952</span>c</span><br><span class="line">Removing intermediate container <span class="number">58037652952</span>c</span><br><span class="line"> ---&gt; <span class="number">944</span>d27b80f1f</span><br><span class="line"> </span><br><span class="line">生成镜像，并为镜像打标记：</span><br><span class="line">Successfully built <span class="number">944</span>d27b80f1f</span><br><span class="line">Successfully tagged centos7<span class="literal">-nginx</span>:v1</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">nginxroot</span>]<span class="comment"># docker images</span></span><br><span class="line">REPOSITORY        TAG       IMAGE ID       CREATED             SIZE</span><br><span class="line">centos7<span class="literal">-nginx</span>     v1        <span class="number">944</span>d27b80f1f   <span class="number">3</span> minutes ago       <span class="number">587</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># docker run -d -p 8081:80 centos7-nginx:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># curl http://localhost:8081</span></span><br><span class="line">nginx<span class="string">&#x27;s running</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="4-4-5-2-使用Dockerfile生成Tomcat容器镜像"><a href="#4-4-5-2-使用Dockerfile生成Tomcat容器镜像" class="headerlink" title="4.4.5.2 使用Dockerfile生成Tomcat容器镜像"></a>4.4.5.2 使用Dockerfile生成Tomcat容器镜像</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># mkdir tomcatdir</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> ~]<span class="comment"># cd tomcatdir/</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment"># echo &quot;tomcat is running&quot; &gt;&gt; index.html</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment"># ls</span></span><br><span class="line">Dockerfile  jdk index.html</span><br><span class="line">jdk为目录</span><br><span class="line">index.html 网站首页</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment"># vim Dockerfile</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment"># cat Dockerfile</span></span><br><span class="line">FROM centos:centos7</span><br><span class="line"></span><br><span class="line">MAINTAINER <span class="string">&quot;www.kubelixiang.com&quot;</span></span><br><span class="line"></span><br><span class="line">ENV VERSION=<span class="number">8.5</span>.<span class="number">75</span></span><br><span class="line">ENV JAVA_HOME=/usr/local/jdk</span><br><span class="line">ENV TOMCAT_HOME=/usr/local/tomcat</span><br><span class="line"></span><br><span class="line">RUN yum <span class="literal">-y</span> install <span class="built_in">wget</span></span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">wget</span> https://dlcdn.apache.org/tomcat/tomcat<span class="literal">-8</span>/v<span class="variable">$</span>&#123;VERSION&#125;/bin/apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz</span><br><span class="line"></span><br><span class="line">RUN tar xf apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">mv</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125; /usr/local/tomcat</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">rm</span> <span class="literal">-rf</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz /usr/local/tomcat/webapps/*</span><br><span class="line"></span><br><span class="line">RUN mkdir /usr/local/tomcat/webapps/ROOT</span><br><span class="line"></span><br><span class="line">ADD ./index.html /usr/local/tomcat/webapps/ROOT/</span><br><span class="line"></span><br><span class="line">ADD ./jdk /usr/local/jdk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export TOMCAT_HOME=/usr/local/tomcat&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export JAVA_HOME=/usr/local/jdk&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$</span>&#123;TOMCAT_HOME&#125;/bin:<span class="variable">$</span>&#123;JAVA_HOME&#125;/bin:<span class="variable">$PATH</span>&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">&quot;export CLASSPATH=.:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/dt.jar:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/tools.jar&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RUN source /etc/profile</span><br><span class="line"></span><br><span class="line">EXPOSE <span class="number">8080</span></span><br><span class="line"></span><br><span class="line">CMD [<span class="string">&quot;/usr/local/tomcat/bin/catalina.sh&quot;</span>,<span class="string">&quot;run&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">localhost</span> <span class="type">tomcatdir</span>]<span class="comment"># docker build -t centos-tomcat:v1 .                           </span></span><br><span class="line"></span><br><span class="line">Sending build context to Docker daemon  <span class="number">398.9</span>MB</span><br><span class="line">Step <span class="number">1</span>/<span class="number">20</span> : FROM centos:centos7</span><br><span class="line"> ---&gt; eeb6ee3f44bd</span><br><span class="line">Step <span class="number">2</span>/<span class="number">20</span> : MAINTAINER <span class="string">&quot;www.kubelixiang.com&quot;</span></span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; f978e524772c</span><br><span class="line">Step <span class="number">3</span>/<span class="number">20</span> : ENV VERSION=<span class="number">8.5</span>.<span class="number">75</span></span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">792767</span>bbdb22</span><br><span class="line">Step <span class="number">4</span>/<span class="number">20</span> : ENV JAVA_HOME=/usr/local/jdk</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">6</span>eb3855650f0</span><br><span class="line">Step <span class="number">5</span>/<span class="number">20</span> : ENV TOMCAT_HOME=/usr/local/tomcat</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; e38bdbbfd19d</span><br><span class="line">Step <span class="number">6</span>/<span class="number">20</span> : RUN yum <span class="literal">-y</span> install <span class="built_in">wget</span></span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">4</span>c6aafa6d8ba</span><br><span class="line">Step <span class="number">7</span>/<span class="number">20</span> : RUN <span class="built_in">wget</span> http://dlcdn.apache.org/tomcat/tomcat<span class="literal">-8</span>/v<span class="variable">$</span>&#123;VERSION&#125;/bin/apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">9</span>bdb6f636a5f</span><br><span class="line">Step <span class="number">8</span>/<span class="number">20</span> : RUN tar xf apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">6</span>abe5cb0ef26</span><br><span class="line">Step <span class="number">9</span>/<span class="number">20</span> : RUN <span class="built_in">mv</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125; /usr/local/tomcat</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; b3907af15c22</span><br><span class="line">Step <span class="number">10</span>/<span class="number">20</span> : RUN <span class="built_in">rm</span> <span class="literal">-rf</span> apache<span class="literal">-tomcat</span>-<span class="variable">$</span>&#123;VERSION&#125;.tar.gz /usr/local/tomcat/webapps/*</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; b775439344e3</span><br><span class="line">Step <span class="number">11</span>/<span class="number">20</span> : RUN mkdir /usr/local/tomcat/webapps/ROOT</span><br><span class="line"> ---&gt; <span class="keyword">Using</span> cache</span><br><span class="line"> ---&gt; <span class="number">149</span>ad46776eb</span><br><span class="line">Step <span class="number">12</span>/<span class="number">20</span> : ADD ./index.html /usr/local/tomcat/webapps/ROOT/</span><br><span class="line"> ---&gt; <span class="number">064579</span>c39a46</span><br><span class="line">Step <span class="number">13</span>/<span class="number">20</span> : ADD ./jdk /usr/local/jdk</span><br><span class="line"> ---&gt; <span class="number">477</span>fd38dfbcf</span><br><span class="line">Step <span class="number">14</span>/<span class="number">20</span> : RUN <span class="built_in">echo</span> <span class="string">&quot;export TOMCAT_HOME=/usr/local/tomcat&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">3</span>fc9bc5e8ba5</span><br><span class="line">Removing intermediate container <span class="number">3</span>fc9bc5e8ba5</span><br><span class="line"> ---&gt; <span class="number">3</span>c43bccd5779</span><br><span class="line">Step <span class="number">15</span>/<span class="number">20</span> : RUN <span class="built_in">echo</span> <span class="string">&quot;export JAVA_HOME=/usr/local/jdk&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">80</span>f8150f0e80</span><br><span class="line">Removing intermediate container <span class="number">80</span>f8150f0e80</span><br><span class="line"> ---&gt; e01307ccb02a</span><br><span class="line">Step <span class="number">16</span>/<span class="number">20</span> : RUN <span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$</span>&#123;TOMCAT_HOME&#125;/bin:<span class="variable">$</span>&#123;JAVA_HOME&#125;/bin:<span class="variable">$PATH</span>&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">92</span>a6a4fd1cbc</span><br><span class="line">Removing intermediate container <span class="number">92</span>a6a4fd1cbc</span><br><span class="line"> ---&gt; <span class="number">1</span>d26f53b7095</span><br><span class="line">Step <span class="number">17</span>/<span class="number">20</span> : RUN <span class="built_in">echo</span> <span class="string">&quot;export CLASSPATH=.:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/dt.jar:<span class="variable">$</span>&#123;JAVA_HOME&#125;/lib/tools.jar&quot;</span> &gt;&gt; /etc/profile</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> fb5ee1710c36</span><br><span class="line">Removing intermediate container fb5ee1710c36</span><br><span class="line"> ---&gt; d2eaff35dce3</span><br><span class="line">Step <span class="number">18</span>/<span class="number">20</span> : RUN source /etc/profile</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">0422</span>af810b35</span><br><span class="line">Removing intermediate container <span class="number">0422</span>af810b35</span><br><span class="line"> ---&gt; fc6d285288ca</span><br><span class="line">Step <span class="number">19</span>/<span class="number">20</span> : EXPOSE <span class="number">8080</span></span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> eeb64d4f9e94</span><br><span class="line">Removing intermediate container eeb64d4f9e94</span><br><span class="line"> ---&gt; <span class="number">05</span>ec1c6d06cf</span><br><span class="line">Step <span class="number">20</span>/<span class="number">20</span> : CMD [<span class="string">&quot;/usr/local/tomcat/bin/catalina.sh&quot;</span>,<span class="string">&quot;run&quot;</span>]</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> <span class="number">66</span>b7851e2772</span><br><span class="line">Removing intermediate container <span class="number">66</span>b7851e2772</span><br><span class="line"> ---&gt; ad338289055c</span><br><span class="line">Successfully built ad338289055c</span><br><span class="line">Successfully tagged centos<span class="literal">-tomcat</span>:v1</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker images</span></span><br><span class="line">REPOSITORY        TAG       IMAGE ID       CREATED          SIZE</span><br><span class="line">centos<span class="literal">-tomcat</span>     v1        ad338289055c   <span class="number">6</span> minutes ago    <span class="number">797</span>MB</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -d -p 8082:8080 centos-tomcat:v1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># curl http://localhost:8082</span></span><br><span class="line">tomcat is running</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="4-4-6-使用Dockerfile生成容器镜像优化"><a href="#4-4-6-使用Dockerfile生成容器镜像优化" class="headerlink" title="4.4.6 使用Dockerfile生成容器镜像优化"></a>4.4.6 使用Dockerfile生成容器镜像优化</h3><h4 id="4-4-6-1-减少镜像分层"><a href="#4-4-6-1-减少镜像分层" class="headerlink" title="4.4.6.1 减少镜像分层"></a>4.4.6.1 减少镜像分层</h4><p>Dockerfile中包含多种指令，如果涉及到部署最多使用的算是RUN命令了，使用RUN命令时，不建议每次安装都使用一条单独的RUN命令，可以把能够合并安装指令合并为一条，这样就可以减少镜像分层。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:latest</span><br><span class="line">MAINTAINER www.kubelixiang.com</span><br><span class="line">RUN yum install epel<span class="literal">-release</span> <span class="literal">-y</span> </span><br><span class="line">RUN yum install <span class="literal">-y</span> gcc gcc<span class="literal">-c</span>++ make <span class="literal">-y</span></span><br><span class="line">RUN <span class="built_in">wget</span> http://docs.php.net/distributions/php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz</span><br><span class="line">RUN tar zxf php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz</span><br><span class="line">RUN <span class="built_in">cd</span> php<span class="literal">-5</span>.<span class="number">6.36</span></span><br><span class="line">RUN ./configure -<span class="literal">-prefix</span>=/usr/local/php </span><br><span class="line">RUN make <span class="literal">-j</span> <span class="number">4</span> </span><br><span class="line">RUN make install</span><br><span class="line">EXPOSE <span class="number">9000</span></span><br><span class="line">CMD [<span class="string">&quot;php-fpm&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>优化内容如下：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:latest</span><br><span class="line">MAINTAINER www.kubelixiang.com</span><br><span class="line">RUN yum install epel<span class="literal">-release</span> <span class="literal">-y</span> &amp;&amp; \</span><br><span class="line">    yum install <span class="literal">-y</span> gcc gcc<span class="literal">-c</span>++ make</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">wget</span> http://docs.php.net/distributions/php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz &amp;&amp; \</span><br><span class="line">    tar zxf php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz &amp;&amp; \</span><br><span class="line">    <span class="built_in">cd</span> php<span class="literal">-5</span>.<span class="number">6.36</span> &amp;&amp; \</span><br><span class="line">    ./configure -<span class="literal">-prefix</span>=/usr/local/php &amp;&amp; \</span><br><span class="line">    make <span class="literal">-j</span> <span class="number">4</span> &amp;&amp; make install</span><br><span class="line">EXPOSE <span class="number">9000</span></span><br><span class="line">CMD [<span class="string">&quot;php-fpm&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-4-6-2-清理无用数据"><a href="#4-4-6-2-清理无用数据" class="headerlink" title="4.4.6.2 清理无用数据"></a>4.4.6.2 清理无用数据</h4><ul>
+<li>一次RUN形成新的一层，如果没有在同一层删除，无论文件是否最后删除，都会带到下一层，所以要在每一层清理对应的残留数据，减小镜像大小。</li>
+<li>把生成容器镜像过程中部署的应用软件包做删除处理</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:latest</span><br><span class="line">MAINTAINER www.kubelixiang.com</span><br><span class="line">RUN yum install epel<span class="literal">-release</span> <span class="literal">-y</span> &amp;&amp; \</span><br><span class="line">    yum install <span class="literal">-y</span> gcc gcc<span class="literal">-c</span>++ make gd<span class="literal">-devel</span> libxml2<span class="literal">-devel</span> \</span><br><span class="line">    libcurl<span class="literal">-devel</span> libjpeg<span class="literal">-devel</span> libpng<span class="literal">-devel</span> openssl<span class="literal">-devel</span> \</span><br><span class="line">    libmcrypt<span class="literal">-devel</span> libxslt<span class="literal">-devel</span> libtidy<span class="literal">-devel</span> autoconf \</span><br><span class="line">    iproute net<span class="literal">-tools</span> telnet <span class="built_in">wget</span> <span class="built_in">curl</span> &amp;&amp; \</span><br><span class="line">    yum clean all &amp;&amp; \</span><br><span class="line">    <span class="built_in">rm</span> <span class="literal">-rf</span> /var/cache/yum/*</span><br><span class="line"></span><br><span class="line">RUN <span class="built_in">wget</span> http://docs.php.net/distributions/php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz &amp;&amp; \</span><br><span class="line">    tar zxf php<span class="literal">-5</span>.<span class="number">6.36</span>.tar.gz &amp;&amp; \</span><br><span class="line">    <span class="built_in">cd</span> php<span class="literal">-5</span>.<span class="number">6.36</span> &amp;&amp; \</span><br><span class="line">    ./configure -<span class="literal">-prefix</span>=/usr/local/php \</span><br><span class="line">    make <span class="literal">-j</span> <span class="number">4</span> &amp;&amp; make install &amp;&amp; \</span><br><span class="line">    <span class="built_in">cd</span> / &amp;&amp; <span class="built_in">rm</span> <span class="literal">-rf</span> php*</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-4-6-3-多阶段构建镜像"><a href="#4-4-6-3-多阶段构建镜像" class="headerlink" title="4.4.6.3 多阶段构建镜像"></a>4.4.6.3 多阶段构建镜像</h4><p>项目容器镜像有两种，一种直接把项目代码复制到容器镜像中，下次使用容器镜像时即可直接启动；另一种把需要对项目源码进行编译，再复制到容器镜像中使用。</p>
+<p>不论是哪种方法都会让制作镜像复杂了些，并也会让容器镜像比较大，建议采用分阶段构建镜像的方法实现。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$</span> git clone https://github.com/kubelixiang/tomcat<span class="literal">-java</span><span class="literal">-demo</span></span><br><span class="line"><span class="variable">$</span> <span class="built_in">cd</span> tomcat<span class="literal">-java</span><span class="literal">-demo</span></span><br><span class="line"><span class="variable">$</span> vi Dockerfile</span><br><span class="line">FROM maven AS build</span><br><span class="line">ADD ./pom.xml pom.xml</span><br><span class="line">ADD ./src src/</span><br><span class="line">RUN mvn clean package</span><br><span class="line"></span><br><span class="line">FROM kubelixiang/tomcat</span><br><span class="line">RUN <span class="built_in">rm</span> <span class="literal">-rf</span> /usr/local/tomcat/webapps/ROOT</span><br><span class="line"><span class="built_in">COPY</span> -<span class="literal">-from</span>=build target/*.war /usr/local/tomcat/webapps/ROOT.war</span><br><span class="line"></span><br><span class="line"><span class="variable">$</span> docker build <span class="literal">-t</span> demo:v1 .</span><br><span class="line"><span class="variable">$</span> docker container run <span class="literal">-d</span> <span class="literal">-v</span> demo:v1</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">第一个 FROM 后边多了个 AS 关键字，可以给这个阶段起个名字</span><br><span class="line">第二个 FROM 使用上面构建的 Tomcat 镜像，<span class="built_in">COPY</span> 关键字增加了 —from 参数，用于拷贝某个阶段的文件到当前阶段。</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="五、新型容器镜像构建技术-BuildPacks"><a href="#五、新型容器镜像构建技术-BuildPacks" class="headerlink" title="五、新型容器镜像构建技术 BuildPacks"></a>五、新型容器镜像构建技术 BuildPacks</h1>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">一、容器与容器镜像之间的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">二、容器镜像分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%8E%B7%E5%8F%96%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">三、容器镜像获取的方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95%E6%BC%94%E7%A4%BA"><span class="toc-number">4.</span> <span class="toc-text">四、容器镜像获取方法演示</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%9C%A8DockerHub%E7%9B%B4%E6%8E%A5%E4%B8%8B%E8%BD%BD"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 在DockerHub直接下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%8A%8A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 把操作系统中文件系统打包为容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E5%AE%89%E8%A3%85%E4%B8%80%E4%B8%AA%E6%9C%80%E5%8C%96%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 安装一个最化的操作系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E6%8A%8A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E6%89%93%E5%8C%85"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 把操作系统中文件系统进行打包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-3-%E6%8A%8A%E6%89%93%E5%8C%85%E5%90%8E%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%87%B3%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%94%9F%E6%88%90%E6%9C%AC%E5%9C%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3 把打包后文件加载至本地文件系统生成本地容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E6%8A%8A%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 把正在运行的容器打包为容器镜像</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-1-%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AA%E5%AE%B9%E5%99%A8"><span class="toc-number">4.3.1.</span> <span class="toc-text">4.3.1 运行一个容器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-2-%E5%9C%A8%E5%AE%B9%E5%99%A8%E4%B8%AD%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8"><span class="toc-number">4.3.2.</span> <span class="toc-text">4.3.2 在容器中安装应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-3-%E6%8A%8A%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8%E6%89%93%E5%8C%85%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.3.3.</span> <span class="toc-text">4.3.3 把正在运行的容器打包为容器镜像</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-%E9%80%9A%E8%BF%87Dockerfile%E5%AE%9E%E7%8E%B0%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8F%8A%E7%94%9F%E6%88%90"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 通过Dockerfile实现容器镜像的自定义及生成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-1-Dockerfile%E4%BB%8B%E7%BB%8D"><span class="toc-number">4.4.1.</span> <span class="toc-text">4.4.1 Dockerfile介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-2-Dockerfile%E6%8C%87%E4%BB%A4"><span class="toc-number">4.4.2.</span> <span class="toc-text">4.4.2 Dockerfile指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-3-Dockerfile%E5%9F%BA%E6%9C%AC%E6%9E%84%E6%88%90"><span class="toc-number">4.4.3.</span> <span class="toc-text">4.4.3 Dockerfile基本构成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-4-Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%96%B9%E6%B3%95"><span class="toc-number">4.4.4.</span> <span class="toc-text">4.4.4 Dockerfile生成容器镜像方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-5-Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%A1%88%E4%BE%8B"><span class="toc-number">4.4.5.</span> <span class="toc-text">4.4.5 Dockerfile生成容器镜像案例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-0-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.4.5.1.</span> <span class="toc-text">4.4.5.0 使用Dockerfile生成容器镜像步骤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-1-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90Nginx%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.5.2.</span> <span class="toc-text">4.4.5.1 使用Dockerfile生成Nginx容器镜像</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-5-2-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90Tomcat%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.5.3.</span> <span class="toc-text">4.4.5.2 使用Dockerfile生成Tomcat容器镜像</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-6-%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E4%BC%98%E5%8C%96"><span class="toc-number">4.4.6.</span> <span class="toc-text">4.4.6 使用Dockerfile生成容器镜像优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-1-%E5%87%8F%E5%B0%91%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82"><span class="toc-number">4.4.6.1.</span> <span class="toc-text">4.4.6.1 减少镜像分层</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-2-%E6%B8%85%E7%90%86%E6%97%A0%E7%94%A8%E6%95%B0%E6%8D%AE"><span class="toc-number">4.4.6.2.</span> <span class="toc-text">4.4.6.2 清理无用数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-6-3-%E5%A4%9A%E9%98%B6%E6%AE%B5%E6%9E%84%E5%BB%BA%E9%95%9C%E5%83%8F"><span class="toc-number">4.4.6.3.</span> <span class="toc-text">4.4.6.3 多阶段构建镜像</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%96%B0%E5%9E%8B%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF-BuildPacks"><span class="toc-number">5.</span> <span class="toc-text">五、新型容器镜像构建技术 BuildPacks</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&text=Dockerfile容器镜像构建技术"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&is_video=false&description=Dockerfile容器镜像构建技术"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Dockerfile容器镜像构建技术&body=Check out this article: https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&title=Dockerfile容器镜像构建技术"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/08/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Dockerfile%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/&name=Dockerfile容器镜像构建技术&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
