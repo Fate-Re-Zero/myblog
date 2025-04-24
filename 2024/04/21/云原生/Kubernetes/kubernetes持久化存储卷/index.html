@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、存储卷介绍pod有生命周期，生命周期结束后pod里的数据会消失(如配置文件,业务数据等)。解决: 我们需要将数据与pod分离,将数据放在专门的存储卷上pod在k8s集群的节点中是可以调度的, 如果pod挂了被调度到另一个节点,那么数据和pod的联系会中断。解决: 所以我们需要与集群节点分离的存储系统才能实现数据持久化简单来说: volume提供了在容器上挂载外部存储的能力 二、存储卷的分类ku">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubernetes持久化存储卷">
+<meta property="og:url" content="https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、存储卷介绍pod有生命周期，生命周期结束后pod里的数据会消失(如配置文件,业务数据等)。解决: 我们需要将数据与pod分离,将数据放在专门的存储卷上pod在k8s集群的节点中是可以调度的, 如果pod挂了被调度到另一个节点,那么数据和pod的联系会中断。解决: 所以我们需要与集群节点分离的存储系统才能实现数据持久化简单来说: volume提供了在容器上挂载外部存储的能力 二、存储卷的分类ku">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/6">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/1">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/2">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/3">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/4">
+<meta property="article:published_time" content="2024-04-21T00:40:46.000Z">
+<meta property="article:modified_time" content="2025-04-24T15:06:06.214Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/6">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>kubernetes持久化存储卷</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2024/05/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%20%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2Nginx%20Ingress%20Controller/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2024/04/06/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4Node%E7%AE%A1%E7%90%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&text=kubernetes持久化存储卷"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&is_video=false&description=kubernetes持久化存储卷"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=kubernetes持久化存储卷&body=Check out this article: https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&name=kubernetes持久化存储卷&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">一、存储卷介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">二、存储卷的分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E7%9A%84%E9%80%89%E6%8B%A9"><span class="toc-number">3.</span> <span class="toc-text">三、存储卷的选择</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%AC%E5%9C%B0%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8BemptyDir"><span class="toc-number">4.</span> <span class="toc-text">四、本地存储卷之emptyDir</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%9C%AC%E5%9C%B0%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8BhostPath"><span class="toc-number">5.</span> <span class="toc-text">五、本地存储卷之hostPath</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%BD%91%E7%BB%9C%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8Bnfs"><span class="toc-number">6.</span> <span class="toc-text">六、网络存储卷之nfs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81PV-%E6%8C%81%E4%B9%85%E5%AD%98%E5%82%A8%E5%8D%B7-%E4%B8%8EPVC-%E6%8C%81%E4%B9%85%E5%AD%98%E5%82%A8%E5%8D%B7%E5%A3%B0%E6%98%8E"><span class="toc-number">7.</span> <span class="toc-text">七、PV(持久存储卷)与PVC(持久存储卷声明)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E8%AE%A4%E8%AF%86pv%E4%B8%8Epvc"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 认识pv与pvc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-pv%E4%B8%8Epvc%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 pv与pvc之间的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-3-%E5%AE%9E%E7%8E%B0nfs%E7%B1%BB%E5%9E%8Bpv%E4%B8%8Epvc"><span class="toc-number">7.3.</span> <span class="toc-text">7.3 实现nfs类型pv与pvc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-4-subpath%E4%BD%BF%E7%94%A8"><span class="toc-number">7.4.</span> <span class="toc-text">7.4 subpath使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%AD%98%E5%82%A8%E7%9A%84%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.</span> <span class="toc-text">八、存储的动态供给</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.1.</span> <span class="toc-text">8.1 什么是动态供给</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-2-%E4%BD%BF%E7%94%A8NFS%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.2.</span> <span class="toc-text">8.2 使用NFS文件系统创建存储动态供给</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        kubernetes持久化存储卷
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-04-21T00:40:46.000Z" itemprop="datePublished">2024-04-21</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/" class="leancloud-visitors" data-flag-title="kubernetes持久化存储卷" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kubernetes/" rel="tag">Kubernetes</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、存储卷介绍"><a href="#一、存储卷介绍" class="headerlink" title="一、存储卷介绍"></a>一、存储卷介绍</h1><p>pod有生命周期，生命周期结束后pod里的数据会消失(如配置文件,业务数据等)。<br><strong>解决: 我们需要将数据与pod分离,将数据放在专门的存储卷上</strong><br>pod在k8s集群的节点中是可以调度的, 如果pod挂了被调度到另一个节点,那么数据和pod的联系会中断。<br><strong>解决: 所以我们需要与集群节点分离的存储系统才能实现数据持久化</strong><br>简单来说: <strong>volume提供了在容器上挂载外部存储的能力</strong></p>
+<h1 id="二、存储卷的分类"><a href="#二、存储卷的分类" class="headerlink" title="二、存储卷的分类"></a>二、存储卷的分类</h1><p>kubernetes支持的存储卷类型非常丰富,使用下面的命令查看:</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl explain pod.spec.volumes</span></span><br></pre></td></tr></table></figure>
+
+<p>或者参考: <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/">https://kubernetes.io/docs/concepts/storage/</a></p>
+<p>kubernetes支持的存储卷列表如下:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#awselasticblockstore">awsElasticBlockStore</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#azuredisk">azureDisk</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#azurefile">azureFile</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#cephfs">cephfs</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#cinder">cinder</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#configmap">configMap</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#csi">csi</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#downwardapi">downwardAPI</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#emptydir">emptyDir</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#fc">fc (fibre channel)</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#flexVolume">flexVolume</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#flocker">flocker</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#gcepersistentdisk">gcePersistentDisk</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#gitrepo">gitRepo (deprecated)</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#glusterfs">glusterfs</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#hostpath">hostPath</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#iscsi">iscsi</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#local">local</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#nfs">nfs</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#persistentvolumeclaim">persistentVolumeClaim</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#projected">projected</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#portworxvolume">portworxVolume</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#quobyte">quobyte</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#rbd">rbd</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#scaleio">scaleIO</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#secret">secret</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#storageos">storageos</a></li>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/#vspherevolume">vsphereVolume</a></li>
+</ul>
+<p>我们将上面的存储卷列表进行简单的分类: </p>
+<ul>
+<li>本地存储卷 <ul>
+<li>emptyDir    pod删除,数据也会被清除, 用于数据的临时存储</li>
+<li>hostPath     宿主机目录映射(本地存储卷)</li>
+</ul>
+</li>
+<li>网络存储卷<ul>
+<li>NAS类           nfs等</li>
+<li>SAN类           iscsi,FC等</li>
+<li>分布式存储   glusterfs,cephfs,rbd,cinder等</li>
+<li>云存储           aws,azurefile等</li>
+</ul>
+</li>
+</ul>
+<h1 id="三、存储卷的选择"><a href="#三、存储卷的选择" class="headerlink" title="三、存储卷的选择"></a>三、存储卷的选择</h1><p>市面上的存储产品种类繁多, 但按应用角度主要分为三类:</p>
+<ul>
+<li>文件存储  如:nfs,glusterfs,cephfs等<ul>
+<li>优点: 数据共享(多pod挂载可以同读同写)</li>
+<li>缺点: 性能较差</li>
+</ul>
+</li>
+<li>块存储  如: iscsi,rbd等<ul>
+<li>优点: 性能相对于文件存储好</li>
+<li>缺点: 不能实现数据共享（部分）</li>
+</ul>
+</li>
+<li>对象存储 如: ceph对象存储<ul>
+<li>优点: 性能好, 数据共享</li>
+<li>缺点: 使用方式特殊,支持较少</li>
+</ul>
+</li>
+</ul>
+<p>面对kubernetes支持的形形色色的存储卷,如何选择成了难题。在选择存储时,我们要抓住核心需求:</p>
+<ul>
+<li>数据是否需要持久性   </li>
+<li>数据可靠性  如存储集群节点是否有单点故障,数据是否有副本等</li>
+<li>性能  </li>
+<li>扩展性  如是否能方便扩容,应对数据增长的需求</li>
+<li>运维难度  存储的运维难度是比较高的,尽量选择稳定的开源方案或商业产品</li>
+<li>成本</li>
+</ul>
+<p>总之, 存储的选择是需要考虑很多因素的, 熟悉各类存储产品, 了解它们的优缺点，结合自身需求才能选择合适自己的。</p>
+<h1 id="四、本地存储卷之emptyDir"><a href="#四、本地存储卷之emptyDir" class="headerlink" title="四、本地存储卷之emptyDir"></a>四、本地存储卷之emptyDir</h1><ul>
+<li><p>应用场景</p>
+<p>实现pod内容器之间数据共享</p>
+</li>
+<li><p>特点</p>
+<p>随着pod被删除，该卷也会被删除</p>
+</li>
+</ul>
+<p>1.创建yaml文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim volume-emptydir.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: volume<span class="literal">-emptydir</span></span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: <span class="built_in">write</span></span><br><span class="line">    image: centos</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    command: [<span class="string">&quot;bash&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;echo haha &gt; /data/1.txt ; sleep 6000&quot;</span>]</span><br><span class="line">    volumeMounts:</span><br><span class="line">    - name: <span class="keyword">data</span></span><br><span class="line">      mountPath: /<span class="keyword">data</span></span><br><span class="line"></span><br><span class="line">  - name: read</span><br><span class="line">    image: centos</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    command: [<span class="string">&quot;bash&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;cat /data/1.txt; sleep 6000&quot;</span>]</span><br><span class="line">    volumeMounts:</span><br><span class="line">    - name: <span class="keyword">data</span></span><br><span class="line">      mountPath: /<span class="keyword">data</span></span><br><span class="line">      </span><br><span class="line">  volumes:</span><br><span class="line">  - name: <span class="keyword">data</span></span><br><span class="line">    emptyDir: &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.基于yaml文件创建pod</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f volume-emptydir.yml</span></span><br><span class="line">pod/volume<span class="literal">-emptydir</span> created</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3.查看pod启动情况</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pods |grep volume-emptydir</span></span><br><span class="line">NAME                               READY   STATUS    RESTARTS   AGE</span><br><span class="line">volume<span class="literal">-emptydir</span>                    <span class="number">2</span>/<span class="number">2</span>     Running   <span class="number">0</span>          <span class="number">15</span>s</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4.查看pod描述信息</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl describe pod volume-emptydir | tail -10</span></span><br><span class="line">Events:</span><br><span class="line">  <span class="built_in">Type</span>    Reason     Age   From               Message</span><br><span class="line">  ----    ------     ----  ----               -------</span><br><span class="line">  Normal  Scheduled  <span class="number">50</span>s   default<span class="literal">-scheduler</span>  Successfully assigned default/volume<span class="literal">-emptydir</span> to k8s<span class="literal">-worker1</span></span><br><span class="line">  Normal  Pulling    <span class="number">50</span>s   kubelet            Pulling image <span class="string">&quot;centos:centos7&quot;</span></span><br><span class="line">  Normal  Pulled     <span class="number">28</span>s   kubelet            Successfully pulled image <span class="string">&quot;centos:centos7&quot;</span> <span class="keyword">in</span> <span class="number">21.544912361</span>s</span><br><span class="line">  Normal  Created    <span class="number">28</span>s   kubelet            Created container <span class="built_in">write</span></span><br><span class="line">  Normal  Started    <span class="number">28</span>s   kubelet            Started container <span class="built_in">write</span></span><br><span class="line">  Normal  Pulled     <span class="number">28</span>s   kubelet            Container image <span class="string">&quot;centos:centos7&quot;</span> already present on machine</span><br><span class="line">  Normal  Created    <span class="number">28</span>s   kubelet            Created container read</span><br><span class="line">  Normal  Started    <span class="number">28</span>s   kubelet            Started container read</span><br></pre></td></tr></table></figure>
+
+
+
+<p>5.验证</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl logs volume-emptydir -c write</span></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl logs volume-emptydir -c read</span></span><br><span class="line">haha</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="五、本地存储卷之hostPath"><a href="#五、本地存储卷之hostPath" class="headerlink" title="五、本地存储卷之hostPath"></a>五、本地存储卷之hostPath</h1><ul>
+<li><p>应用场景</p>
+<p>pod内与集群节点目录映射（pod中容器想访问节点上数据，例如监控，只有监控访问到节点主机文件才能知道集群节点主机状态）</p>
+</li>
+<li><p>缺点</p>
+<p>如果集群节点挂掉，控制器在另一个集群节点拉起容器，数据就会变成另一台集群节点主机的了（无法实现数据共享)</p>
+</li>
+</ul>
+<p>1.创建yaml文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim volume-hostpath.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: volume<span class="literal">-hostpath</span></span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: busybox</span><br><span class="line">    image: busybox</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    command: [<span class="string">&quot;/bin/sh&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;echo haha &gt; /data/1.txt ; sleep 600&quot;</span>]</span><br><span class="line">    volumeMounts:</span><br><span class="line">    - name: <span class="keyword">data</span></span><br><span class="line">      mountPath: /<span class="keyword">data</span></span><br><span class="line">      </span><br><span class="line">  volumes:</span><br><span class="line">  - name: <span class="keyword">data</span></span><br><span class="line">    hostPath:</span><br><span class="line">      path: /opt</span><br><span class="line">      <span class="built_in">type</span>: Directory</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2.基于yaml文件创建pod</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply  -f volume-hostpath.yml</span></span><br><span class="line">pod/volume<span class="literal">-hostpath</span> created</span><br></pre></td></tr></table></figure>
+
+<p>3.查看pod状态</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pods -o wide |grep volume-hostpath</span></span><br><span class="line">volume<span class="literal">-hostpath</span>     <span class="number">1</span>/<span class="number">1</span>   Running   <span class="number">0</span>    <span class="number">29</span>s     <span class="number">10.224</span>.<span class="number">194.120</span>   k8s<span class="literal">-worker1</span>   &lt;none&gt;     &lt;none&gt;</span><br><span class="line">可以看到pod是在k8s<span class="literal">-worker1</span>节点上</span><br></pre></td></tr></table></figure>
+
+<p>4.验证pod所在机器上的挂载文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">worker1</span> ~]<span class="comment"># cat /opt/1.txt</span></span><br><span class="line">haha</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="六、网络存储卷之nfs"><a href="#六、网络存储卷之nfs" class="headerlink" title="六、网络存储卷之nfs"></a>六、网络存储卷之nfs</h1><p>1.搭建nfs服务器</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># mkdir -p /data/nfs</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># vim /etc/exports</span></span><br><span class="line">/<span class="keyword">data</span>/nfs       *(rw,no_root_squash,sync)</span><br><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># systemctl restart nfs-server</span></span><br><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># systemctl enable nfs-server</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.所有node节点安装nfs客户端相关软件包</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">worker1</span> ~]<span class="comment"># yum install nfs-utils -y</span></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">worker2</span> ~]<span class="comment"># yum install nfs-utils -y</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>3.验证nfs可用性</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">node1</span> ~]<span class="comment"># showmount -e 192.168.10.129</span></span><br><span class="line">Export list <span class="keyword">for</span> <span class="number">192.168</span>.<span class="number">10.129</span>:</span><br><span class="line">/<span class="keyword">data</span>/nfs *</span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">node2</span> ~]<span class="comment"># showmount -e 192.168.10.129</span></span><br><span class="line">Export list <span class="keyword">for</span> <span class="number">192.168</span>.<span class="number">10.129</span>:</span><br><span class="line">/<span class="keyword">data</span>/nfs *</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4.master节点上创建yaml文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim volume-nfs.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: volume<span class="literal">-nfs</span></span><br><span class="line">spec:</span><br><span class="line">  replicas: <span class="number">2</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:<span class="number">1.15</span><span class="literal">-alpine</span></span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: documentroot</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: <span class="number">80</span></span><br><span class="line">      volumes:</span><br><span class="line">      - name: documentroot</span><br><span class="line">        nfs:</span><br><span class="line">          server: <span class="number">192.168</span>.<span class="number">10.129</span></span><br><span class="line">          path: /<span class="keyword">data</span>/nfs</span><br></pre></td></tr></table></figure>
+
+<p>5.应用yaml创建</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment">#  kubectl apply -f volume-nfs.yml</span></span><br><span class="line">deployment.apps/nginx<span class="literal">-deployment</span> created</span><br></pre></td></tr></table></figure>
+
+
+
+<p>6.在nfs服务器共享目录中创建验证文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># echo &quot;volume-nfs&quot; &gt; /data/nfs/index.html</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>7.验证pod</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pod |grep volume-nfs</span></span><br><span class="line">volume<span class="literal">-nfs</span><span class="literal">-649d848b57</span><span class="literal">-qg4bz</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">10</span>s</span><br><span class="line">volume<span class="literal">-nfs</span><span class="literal">-649d848b57</span><span class="literal">-wrnpn</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">10</span>s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl exec -it volume-nfs-649d848b57-qg4bz -- /bin/sh</span></span><br><span class="line">/ <span class="comment"># ls /usr/share/nginx/html/</span></span><br><span class="line">index.html</span><br><span class="line">/ <span class="comment"># cat /usr/share/nginx/html/index.html</span></span><br><span class="line">volume<span class="literal">-nfs</span>										<span class="comment"># 文件内容与nfs服务器上创建的一致</span></span><br><span class="line">/ <span class="comment"># exit</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl exec -it volume-nfs-649d848b57-wrnpn -- /bin/sh</span></span><br><span class="line">/ <span class="comment"># ls /usr/share/nginx/html/</span></span><br><span class="line">index.html</span><br><span class="line">/ <span class="comment"># cat /usr/share/nginx/html/index.html</span></span><br><span class="line">volume<span class="literal">-nfs</span>										<span class="comment"># 文件内容与nfs服务器上创建的一致</span></span><br><span class="line">/ <span class="comment"># exit</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="七、PV-持久存储卷-与PVC-持久存储卷声明"><a href="#七、PV-持久存储卷-与PVC-持久存储卷声明" class="headerlink" title="七、PV(持久存储卷)与PVC(持久存储卷声明)"></a>七、PV(持久存储卷)与PVC(持久存储卷声明)</h1><h2 id="7-1-认识pv与pvc"><a href="#7-1-认识pv与pvc" class="headerlink" title="7.1 认识pv与pvc"></a>7.1 认识pv与pvc</h2><p>kubernetes存储卷的分类太丰富了,每种类型都要写相应的接口与参数才行，这就让维护与管理难度加大。</p>
+<p>persistenvolume(<strong>PV</strong>) 是配置好的一段存储(可以是任意类型的存储卷)</p>
+<ul>
+<li>也就是说将网络存储共享出来,配置定义成PV。</li>
+</ul>
+<p>PersistentVolumeClaim(<strong>PVC</strong>)是用户pod使用PV的申请请求。</p>
+<ul>
+<li>用户不需要关心具体的volume实现细节,只需要关心使用需求。</li>
+</ul>
+<h2 id="7-2-pv与pvc之间的关系"><a href="#7-2-pv与pvc之间的关系" class="headerlink" title="7.2 pv与pvc之间的关系"></a>7.2 pv与pvc之间的关系</h2><ul>
+<li><p>pv提供存储资源(生产者)</p>
+</li>
+<li><p>pvc使用存储资源(消费者)</p>
+</li>
+<li><p>使用pvc绑定pv</p>
+</li>
+</ul>
+<p><img src="/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/6"></p>
+<h2 id="7-3-实现nfs类型pv与pvc"><a href="#7-3-实现nfs类型pv与pvc" class="headerlink" title="7.3 实现nfs类型pv与pvc"></a>7.3 实现nfs类型pv与pvc</h2><p>1.编写创建pv的YAML文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim pv-nfs.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolume						<span class="comment"># 类型为PersistentVolume(pv)</span></span><br><span class="line">metadata:		</span><br><span class="line">  name: pv<span class="literal">-nfs</span>								<span class="comment"># 名称</span></span><br><span class="line">spec:</span><br><span class="line">  capacity:</span><br><span class="line">    storage: <span class="number">1</span><span class="built_in">Gi</span>							<span class="comment"># 大小</span></span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteMany							<span class="comment"># 访问模式</span></span><br><span class="line">  nfs:</span><br><span class="line">    path: /<span class="keyword">data</span>/nfs							<span class="comment"># nfs共享目录</span></span><br><span class="line">    server: <span class="number">192.168</span>.<span class="number">10.129</span>					<span class="comment"># nfs服务器IP</span></span><br></pre></td></tr></table></figure>
+
+<p>访问模式有3种       参考: <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes</a></p>
+<ul>
+<li>ReadWriteOnce 单节点读写挂载</li>
+<li>ReadOnlyMany  多节点只读挂载</li>
+<li>ReadWriteMany  多节点读写挂载</li>
+</ul>
+<p>cephfs存储卷3种类型都支持, 我们要实现多个nginx跨节点之间的数据共享,所以选择ReadWriteMany模式。</p>
+<p>2.创建pv并验证</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f pv-nfs.yml</span></span><br><span class="line">persistentvolume/pv<span class="literal">-nfs</span> created</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pv</span></span><br><span class="line">NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE</span><br><span class="line">pv<span class="literal">-nfs</span>   <span class="number">1</span><span class="built_in">Gi</span>        RWX            Retain           Available                                   <span class="number">81</span>s</span><br></pre></td></tr></table></figure>
+
+<p>说明: </p>
+<ul>
+<li>RWX为ReadWriteMany的简写</li>
+<li>Retain是回收策略  <ul>
+<li>Retain表示需要不使用了需要手动回收</li>
+<li>参考: <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#reclaim-policy">https://kubernetes.io/docs/concepts/storage/persistent-volumes/#reclaim-policy</a></li>
+</ul>
+</li>
+</ul>
+<p>3.编写创建pvc的YAML文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim pvc-nfs.yml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim				<span class="comment"># 类型为PersistentVolumeClaim(pvc)</span></span><br><span class="line">metadata:</span><br><span class="line">  name: pvc<span class="literal">-nfs</span>							<span class="comment"># pvc的名称</span></span><br><span class="line">spec:</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteMany						<span class="comment"># 访问模式</span></span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="number">1</span><span class="built_in">Gi</span>						<span class="comment"># 大小要与pv的大小保持一致</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>4.创建pvc并验证</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f pvc-nfs.yml</span></span><br><span class="line">persistentvolumeclaim/pvc<span class="literal">-nfs</span> created</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pvc</span></span><br><span class="line">NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE</span><br><span class="line">pvc<span class="literal">-nfs</span>   Bound    pv<span class="literal">-nfs</span>   <span class="number">1</span><span class="built_in">Gi</span>        RWX                           <span class="number">38</span>s</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意:</strong> STATUS必须为Bound状态(Bound状态表示pvc与pv绑定OK)</p>
+<p>5.编写deployment的YMAL</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim deploy-nginx-nfs.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: <span class="built_in">deploy-nginx</span><span class="literal">-nfs</span></span><br><span class="line">spec:</span><br><span class="line">  replicas: <span class="number">2</span></span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:<span class="number">1.15</span><span class="literal">-alpine</span></span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: <span class="number">80</span></span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: www</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">      volumes:</span><br><span class="line">      - name: www</span><br><span class="line">        persistentVolumeClaim:</span><br><span class="line">          claimName: pvc<span class="literal">-nfs</span></span><br></pre></td></tr></table></figure>
+
+<p>6.应用YAML创建deploment</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f deploy-nginx-nfs.yml</span></span><br><span class="line">deployment.apps/<span class="built_in">deploy-nginx</span><span class="literal">-nfs</span> created</span><br></pre></td></tr></table></figure>
+
+<p>7.验证pod</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pod |grep deploy-nginx-nfs</span></span><br><span class="line"><span class="built_in">deploy-nginx</span><span class="literal">-nfs</span><span class="literal">-6f9bc4546c</span><span class="literal">-gbzcl</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">1</span>m46s</span><br><span class="line"><span class="built_in">deploy-nginx</span><span class="literal">-nfs</span><span class="literal">-6f9bc4546c</span><span class="literal">-hp4cv</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">1</span>m46s</span><br></pre></td></tr></table></figure>
+
+<p>8.验证pod内卷的数据</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl exec -it deploy-nginx-nfs-6f9bc4546c-gbzcl -- /bin/sh</span></span><br><span class="line">/ <span class="comment"># ls /usr/share/nginx/html/</span></span><br><span class="line">index.html</span><br><span class="line">/ <span class="comment"># cat /usr/share/nginx/html/index.html</span></span><br><span class="line">volume<span class="literal">-nfs</span></span><br><span class="line">/ <span class="comment"># exit</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl exec -it deploy-nginx-nfs-6f9bc4546c-hp4cv -- /bin/sh</span></span><br><span class="line">/ <span class="comment"># ls /usr/share/nginx/html/</span></span><br><span class="line">index.html</span><br><span class="line">/ <span class="comment"># cat /usr/share/nginx/html/index.html</span></span><br><span class="line">volume<span class="literal">-nfs</span></span><br><span class="line">/ <span class="comment"># exit</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="7-4-subpath使用"><a href="#7-4-subpath使用" class="headerlink" title="7.4 subpath使用"></a>7.4 subpath使用</h2><p>subpath是指可以把相同目录中不同子目录挂载到容器中不同的目录中使用的方法。以下通过案例演示：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">编辑文件</span><br><span class="line"><span class="comment"># vim 01_create_pod.yaml</span></span><br><span class="line"></span><br><span class="line">编辑后查看，保持内容一致即可</span><br><span class="line"><span class="comment"># cat 01_create_pod.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: pod1</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: c1</span><br><span class="line">    image: busybox</span><br><span class="line">    command: [<span class="string">&quot;/bin/sleep&quot;</span>,<span class="string">&quot;100000&quot;</span>]</span><br><span class="line">    volumeMounts:</span><br><span class="line">      - name: <span class="keyword">data</span></span><br><span class="line">        mountPath: /opt/data1</span><br><span class="line">        subPath: data1</span><br><span class="line">      - name: <span class="keyword">data</span></span><br><span class="line">        mountPath: /opt/data2</span><br><span class="line">        subPath: data2</span><br><span class="line">  volumes:</span><br><span class="line">    - name: <span class="keyword">data</span></span><br><span class="line">      persistentVolumeClaim:</span><br><span class="line">        claimName: pvc<span class="literal">-nfs</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">执行文件，创建pod</span><br><span class="line"><span class="comment"># kubectl apply -f 01_create_pod.yaml</span></span><br><span class="line">pod/pod1 created</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">编辑文件</span><br><span class="line"><span class="comment"># vim 02_create_pvc.yaml</span></span><br><span class="line"></span><br><span class="line">查看编辑后文件，保持内容一致即可</span><br><span class="line"><span class="comment"># cat 02_create_pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim                             <span class="comment"># 类型为PersistentVolumeClaim(pvc)</span></span><br><span class="line">metadata:</span><br><span class="line">  name: pvc<span class="literal">-nfs</span>                                                 <span class="comment"># pvc的名称</span></span><br><span class="line">spec:</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteMany                                             <span class="comment"># 访问模式</span></span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="number">1</span><span class="built_in">Gi</span>                                              <span class="comment"># 大小要与pv的大小保持一致</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">执行文件，创建pvc</span><br><span class="line"><span class="comment"># kubectl apply  -f 02_create_pvc.yaml</span></span><br><span class="line">persistentvolumeclaim/pvc<span class="literal">-nfs</span> created</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">编辑文件</span><br><span class="line"><span class="comment"># vim 03_create_pv_nfs.yaml</span></span><br><span class="line"></span><br><span class="line">查看编辑后文件，保持内容一致，注意修改nfs服务器及其共享的目录</span><br><span class="line"><span class="comment"># cat 03_create_pv_nfs.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolume                                          <span class="comment"># 类型为PersistentVolume(pv)</span></span><br><span class="line">metadata:</span><br><span class="line">  name: pv<span class="literal">-nfs</span>                                                          <span class="comment"># 名称</span></span><br><span class="line">spec:</span><br><span class="line">  capacity:</span><br><span class="line">    storage: <span class="number">1</span><span class="built_in">Gi</span>                                                        <span class="comment"># 大小</span></span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteMany                                              <span class="comment"># 访问模式</span></span><br><span class="line">  nfs:</span><br><span class="line">    path: /sdb                                                     <span class="comment"># nfs共享目录</span></span><br><span class="line">    server: <span class="number">192.168</span>.<span class="number">10.214</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">执行文件，创建pv</span><br><span class="line"><span class="comment"># kubectl apply -f 03_create_pv_nfs.yaml</span></span><br><span class="line">persistentvolume/pv<span class="literal">-nfs</span> created</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">在nfs服务器查看pod中目录是否自动添加到nfs服务器/sdb目录中</span><br><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># ls /sdb</span></span><br><span class="line">data1  data2</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="八、存储的动态供给"><a href="#八、存储的动态供给" class="headerlink" title="八、存储的动态供给"></a>八、存储的动态供给</h1><h2 id="8-1-什么是动态供给"><a href="#8-1-什么是动态供给" class="headerlink" title="8.1 什么是动态供给"></a>8.1 什么是动态供给</h2><p>每次使用存储要先创建pv, 再创建pvc，真累!   所以我们可以实现使用存储的动态供给特性。</p>
+<ul>
+<li>静态存储需要用户申请PVC时保证容量和读写类型与预置PV的容量及读写类型完全匹配, 而动态存储则无需如此.</li>
+<li>管理员无需预先创建大量的PV作为存储资源</li>
+</ul>
+<p>Kubernetes从1.4版起引入了一个新的资源对象StorageClass，可用于将存储资源定义为具有显著特性的类（Class）而不是具体</p>
+<p>的PV。用户通过PVC直接向意向的类别发出申请，匹配由管理员事先创建的PV，或者由其按需为用户动态创建PV，这样就免去</p>
+<p>了需要先创建PV的过程。</p>
+<h2 id="8-2-使用NFS文件系统创建存储动态供给"><a href="#8-2-使用NFS文件系统创建存储动态供给" class="headerlink" title="8.2 使用NFS文件系统创建存储动态供给"></a>8.2 使用NFS文件系统创建存储动态供给</h2><p>PV对存储系统的支持可通过其插件来实现，目前，Kubernetes支持如下类型的插件。</p>
+<p>官方地址：<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/storage-classes/">https://kubernetes.io/docs/concepts/storage/storage-classes/</a></p>
+<p>官方插件是不支持NFS动态供给的，但是我们可以用第三方的插件来实现</p>
+<p>第三方插件地址: <a target="_blank" rel="noopener" href="https://github.com/kubernetes-retired/external-storage">https://github.com/kubernetes-retired/external-storage</a></p>
+<p><img src="/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/1" alt="1604838285045"></p>
+<p><img src="/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/2" alt="1604838445318"></p>
+<p><img src="/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/3" alt="1604838485281"></p>
+<p><img src="/images/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7%E5%8F%8A%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99.assets/4" alt="1604838524969"></p>
+<p>1.下载并创建storageclass</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># wget https://raw.githubusercontent.com/kubernetes-sigs/nfs-subdir-external-provisioner/master/deploy/class.yaml</span></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># mv class.yaml storageclass-nfs.yml</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># cat storageclass-nfs.yml</span></span><br><span class="line">apiVersion: storage.k8s.io/v1</span><br><span class="line">kind: StorageClass				<span class="comment"># 类型</span></span><br><span class="line">metadata:</span><br><span class="line">  name: nfs<span class="literal">-client</span>		<span class="comment"># 名称,要使用就需要调用此名称</span></span><br><span class="line">provisioner: k8s<span class="literal">-sigs</span>.io/nfs<span class="literal">-subdir</span><span class="literal">-external</span><span class="literal">-provisioner</span> 	<span class="comment"># 动态供给插件</span></span><br><span class="line">parameters:</span><br><span class="line">  archiveOnDelete: <span class="string">&quot;false&quot;</span>		<span class="comment"># 删除数据时是否存档，false表示不存档，true表示存档</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f storageclass-nfs.yml</span></span><br><span class="line">storageclass.storage.k8s.io/managed<span class="literal">-nfs</span><span class="literal">-storage</span> created</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get storageclass</span></span><br><span class="line">NAME         PROVISIONER                                   RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE</span><br><span class="line">nfs<span class="literal">-client</span>   k8s<span class="literal">-sigs</span>.io/nfs<span class="literal">-subdir</span><span class="literal">-external</span><span class="literal">-provisioner</span>   Delete          Immediate           false                  <span class="number">10</span>s</span><br><span class="line"></span><br><span class="line"><span class="comment"># RECLAIMPOLICY pv回收策略，pod或pvc被删除后，pv是否删除还是保留。</span></span><br><span class="line"><span class="comment"># VOLUMEBINDINGMODE Immediate 模式下PVC与PV立即绑定，主要是不等待相关Pod调度完成，不关心其运行节点，直接完成绑定。相反的 WaitForFirstConsumer模式下需要等待Pod调度完成后进行PV绑定。</span></span><br><span class="line"><span class="comment"># ALLOWVOLUMEEXPANSION pvc扩容</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.下载并创建rbac</p>
+<p>因为storage自动创建pv需要经过kube-apiserver，所以需要授权。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># wget https://raw.githubusercontent.com/kubernetes-sigs/nfs-subdir-external-provisioner/master/deploy/rbac.yaml</span></span><br><span class="line"></span><br><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># mv rbac.yaml storageclass-nfs-rbac.yaml</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># cat storageclass-nfs-rbac.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">  <span class="comment"># replace with namespace where provisioner is deployed</span></span><br><span class="line">  namespace: default</span><br><span class="line">---</span><br><span class="line">kind: ClusterRole</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span><span class="literal">-runner</span></span><br><span class="line">rules:</span><br><span class="line">  - apiGroups: [<span class="string">&quot;&quot;</span>]</span><br><span class="line">    resources: [<span class="string">&quot;persistentvolumes&quot;</span>]</span><br><span class="line">    verbs: [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;list&quot;</span>, <span class="string">&quot;watch&quot;</span>, <span class="string">&quot;create&quot;</span>, <span class="string">&quot;delete&quot;</span>]</span><br><span class="line">  - apiGroups: [<span class="string">&quot;&quot;</span>]</span><br><span class="line">    resources: [<span class="string">&quot;persistentvolumeclaims&quot;</span>]</span><br><span class="line">    verbs: [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;list&quot;</span>, <span class="string">&quot;watch&quot;</span>, <span class="string">&quot;update&quot;</span>]</span><br><span class="line">  - apiGroups: [<span class="string">&quot;storage.k8s.io&quot;</span>]</span><br><span class="line">    resources: [<span class="string">&quot;storageclasses&quot;</span>]</span><br><span class="line">    verbs: [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;list&quot;</span>, <span class="string">&quot;watch&quot;</span>]</span><br><span class="line">  - apiGroups: [<span class="string">&quot;&quot;</span>]</span><br><span class="line">    resources: [<span class="string">&quot;events&quot;</span>]</span><br><span class="line">    verbs: [<span class="string">&quot;create&quot;</span>, <span class="string">&quot;update&quot;</span>, <span class="string">&quot;patch&quot;</span>]</span><br><span class="line">---</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: run<span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">subjects:</span><br><span class="line">  - kind: ServiceAccount</span><br><span class="line">    name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">    <span class="comment"># replace with namespace where provisioner is deployed</span></span><br><span class="line">    namespace: default</span><br><span class="line">roleRef:</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span><span class="literal">-runner</span></span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">---</span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: leader<span class="literal">-locking</span><span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">  <span class="comment"># replace with namespace where provisioner is deployed</span></span><br><span class="line">  namespace: default</span><br><span class="line">rules:</span><br><span class="line">  - apiGroups: [<span class="string">&quot;&quot;</span>]</span><br><span class="line">    resources: [<span class="string">&quot;endpoints&quot;</span>]</span><br><span class="line">    verbs: [<span class="string">&quot;get&quot;</span>, <span class="string">&quot;list&quot;</span>, <span class="string">&quot;watch&quot;</span>, <span class="string">&quot;create&quot;</span>, <span class="string">&quot;update&quot;</span>, <span class="string">&quot;patch&quot;</span>]</span><br><span class="line">---</span><br><span class="line">kind: RoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: leader<span class="literal">-locking</span><span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">  <span class="comment"># replace with namespace where provisioner is deployed</span></span><br><span class="line">  namespace: default</span><br><span class="line">subjects:</span><br><span class="line">  - kind: ServiceAccount</span><br><span class="line">    name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">    <span class="comment"># replace with namespace where provisioner is deployed</span></span><br><span class="line">    namespace: default</span><br><span class="line">roleRef:</span><br><span class="line">  kind: Role</span><br><span class="line">  name: leader<span class="literal">-locking</span><span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f rbac.yaml</span></span><br><span class="line">serviceaccount/nfs<span class="literal">-client</span><span class="literal">-provisioner</span> created</span><br><span class="line">clusterrole.rbac.authorization.k8s.io/nfs<span class="literal">-client</span><span class="literal">-provisioner</span><span class="literal">-runner</span> created</span><br><span class="line">clusterrolebinding.rbac.authorization.k8s.io/run<span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span> created</span><br><span class="line">role.rbac.authorization.k8s.io/leader<span class="literal">-locking</span><span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span> created</span><br><span class="line">rolebinding.rbac.authorization.k8s.io/leader<span class="literal">-locking</span><span class="literal">-nfs</span><span class="literal">-client</span><span class="literal">-provisioner</span> created</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3.创建动态供给的deployment</p>
+<p>需要一个deployment来专门实现pv与pvc的自动创建</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># vim deploy-nfs-client-provisioner.yml</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">spec:</span><br><span class="line">  replicas: <span class="number">1</span></span><br><span class="line">  strategy:</span><br><span class="line">    <span class="built_in">type</span>: Recreate</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">    spec:</span><br><span class="line">      serviceAccount: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">      containers:</span><br><span class="line">        - name: nfs<span class="literal">-client</span><span class="literal">-provisioner</span></span><br><span class="line">          image: registry.cn<span class="literal">-beijing</span>.aliyuncs.com/pylixm/nfs<span class="literal">-subdir</span><span class="literal">-external</span><span class="literal">-provisioner</span>:v4.<span class="number">0.0</span></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: nfs<span class="literal">-client</span><span class="literal">-root</span></span><br><span class="line">              mountPath: /persistentvolumes</span><br><span class="line">          env:</span><br><span class="line">            - name: PROVISIONER_NAME</span><br><span class="line">              value: k8s<span class="literal">-sigs</span>.io/nfs<span class="literal">-subdir</span><span class="literal">-external</span><span class="literal">-provisioner</span></span><br><span class="line">            - name: NFS_SERVER</span><br><span class="line">              value: <span class="number">192.168</span>.<span class="number">10.129</span></span><br><span class="line">            - name: NFS_PATH</span><br><span class="line">              value: /<span class="keyword">data</span>/nfs</span><br><span class="line">      volumes:</span><br><span class="line">        - name: nfs<span class="literal">-client</span><span class="literal">-root</span></span><br><span class="line">          nfs:</span><br><span class="line">            server: <span class="number">192.168</span>.<span class="number">10.129</span></span><br><span class="line">            path: /<span class="keyword">data</span>/nfs</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl apply -f deploy-nfs-client-provisioner.yml</span></span><br><span class="line">deployment.apps/nfs<span class="literal">-client</span><span class="literal">-provisioner</span> created</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> ~]<span class="comment"># kubectl get pods |grep nfs-client-provisioner</span></span><br><span class="line">nfs<span class="literal">-client</span><span class="literal">-provisioner</span><span class="literal">-5b5ddcd6c8</span><span class="literal">-b6zbq</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">34</span>s</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">测试存储动态供给是否可用</span><br><span class="line"></span><br><span class="line"><span class="comment"># vim nginx-sc.yaml</span></span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx</span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: <span class="number">80</span></span><br><span class="line">    name: web</span><br><span class="line">  clusterIP: None</span><br><span class="line">  selector:</span><br><span class="line">    app: nginx</span><br><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: web</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: nginx</span><br><span class="line">  serviceName: <span class="string">&quot;nginx&quot;</span></span><br><span class="line">  replicas: <span class="number">2</span></span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">    spec:</span><br><span class="line">      imagePullSecrets:</span><br><span class="line">      - name: huoban<span class="literal">-harbor</span></span><br><span class="line">      terminationGracePeriodSeconds: <span class="number">10</span></span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: nginx:latest</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: <span class="number">80</span></span><br><span class="line">          name: web</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: www</span><br><span class="line">          mountPath: /usr/share/nginx/html</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: www</span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">&quot;ReadWriteOnce&quot;</span> ]</span><br><span class="line">      storageClassName: <span class="string">&quot;nfs-client&quot;</span></span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: <span class="number">1</span><span class="built_in">Gi</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">k8s</span>-<span class="type">master1</span> <span class="type">nfs</span>]<span class="comment"># kubectl get pods</span></span><br><span class="line">NAME                                     READY   STATUS    RESTARTS   AGE</span><br><span class="line">nfs<span class="literal">-client</span><span class="literal">-provisioner</span><span class="literal">-9c988bc46</span><span class="literal">-pr55n</span>   <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">95</span>s</span><br><span class="line">web<span class="literal">-0</span>                                    <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">95</span>s</span><br><span class="line">web<span class="literal">-1</span>                                    <span class="number">1</span>/<span class="number">1</span>     Running   <span class="number">0</span>          <span class="number">61</span>s</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="type">root</span>@<span class="type">nfsserver</span> ~]<span class="comment"># ls /data/nfs/</span></span><br><span class="line">default<span class="literal">-www</span><span class="literal">-web</span><span class="literal">-0</span><span class="literal">-pvc</span><span class="literal">-c4f7aeb0</span><span class="literal">-6ee9</span><span class="literal">-447f</span><span class="literal">-a893</span><span class="literal">-821774b8d11f</span>  default<span class="literal">-www</span><span class="literal">-web</span><span class="literal">-1</span><span class="literal">-pvc</span><span class="literal">-8b8a4d3d</span><span class="literal">-f75f</span><span class="literal">-43af</span><span class="literal">-8387</span><span class="literal">-b7073d07ec01</span> </span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>扩展：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">批量下载文件：</span><br><span class="line"><span class="comment"># for file in class.yaml deployment.yaml rbac.yaml  ; do wget https://raw.githubusercontent.com/kubernetes-incubator/external-storage/master/nfs-client/deploy/$file ; done</span></span><br></pre></td></tr></table></figure>
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">一、存储卷介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">二、存储卷的分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AD%98%E5%82%A8%E5%8D%B7%E7%9A%84%E9%80%89%E6%8B%A9"><span class="toc-number">3.</span> <span class="toc-text">三、存储卷的选择</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%AC%E5%9C%B0%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8BemptyDir"><span class="toc-number">4.</span> <span class="toc-text">四、本地存储卷之emptyDir</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%9C%AC%E5%9C%B0%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8BhostPath"><span class="toc-number">5.</span> <span class="toc-text">五、本地存储卷之hostPath</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%BD%91%E7%BB%9C%E5%AD%98%E5%82%A8%E5%8D%B7%E4%B9%8Bnfs"><span class="toc-number">6.</span> <span class="toc-text">六、网络存储卷之nfs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81PV-%E6%8C%81%E4%B9%85%E5%AD%98%E5%82%A8%E5%8D%B7-%E4%B8%8EPVC-%E6%8C%81%E4%B9%85%E5%AD%98%E5%82%A8%E5%8D%B7%E5%A3%B0%E6%98%8E"><span class="toc-number">7.</span> <span class="toc-text">七、PV(持久存储卷)与PVC(持久存储卷声明)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E8%AE%A4%E8%AF%86pv%E4%B8%8Epvc"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 认识pv与pvc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-pv%E4%B8%8Epvc%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 pv与pvc之间的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-3-%E5%AE%9E%E7%8E%B0nfs%E7%B1%BB%E5%9E%8Bpv%E4%B8%8Epvc"><span class="toc-number">7.3.</span> <span class="toc-text">7.3 实现nfs类型pv与pvc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-4-subpath%E4%BD%BF%E7%94%A8"><span class="toc-number">7.4.</span> <span class="toc-text">7.4 subpath使用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%AD%98%E5%82%A8%E7%9A%84%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.</span> <span class="toc-text">八、存储的动态供给</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.1.</span> <span class="toc-text">8.1 什么是动态供给</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-2-%E4%BD%BF%E7%94%A8NFS%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E5%8A%A8%E6%80%81%E4%BE%9B%E7%BB%99"><span class="toc-number">8.2.</span> <span class="toc-text">8.2 使用NFS文件系统创建存储动态供给</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&text=kubernetes持久化存储卷"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&is_video=false&description=kubernetes持久化存储卷"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=kubernetes持久化存储卷&body=Check out this article: https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&title=kubernetes持久化存储卷"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/04/21/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E5%8D%B7/&name=kubernetes持久化存储卷&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="在分布式系统中，确保数据的一致性是一项关键任务。特别是当你使用像Redis这样的缓存系统和MySQL这样的关系型数据库时，如何在这两者之间保持数据一致性是一个复杂的问题。以下是五种常见的实现方法：同步双写、基于MQ异步多写、定时任务、闪电缓存、Binlog监听。本文将详细介绍每种方案的原理、优缺点以及适用场景。 一、同步双写 1.1 原理同步双写是指在进行数据更新时，同时更新MySQL和Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库与缓存保障一致性的五种做法">
+<meta property="og:url" content="https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="在分布式系统中，确保数据的一致性是一项关键任务。特别是当你使用像Redis这样的缓存系统和MySQL这样的关系型数据库时，如何在这两者之间保持数据一致性是一个复杂的问题。以下是五种常见的实现方法：同步双写、基于MQ异步多写、定时任务、闪电缓存、Binlog监听。本文将详细介绍每种方案的原理、优缺点以及适用场景。 一、同步双写 1.1 原理同步双写是指在进行数据更新时，同时更新MySQL和Redis">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-4.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-5.png">
+<meta property="article:published_time" content="2024-07-08T01:23:38.000Z">
+<meta property="article:modified_time" content="2025-04-24T16:28:50.932Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>数据库与缓存保障一致性的五种做法</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2024/09/10/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E8%A6%81%E7%82%B9/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2024/05/03/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%20%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2Nginx%20Ingress%20Controller/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&text=数据库与缓存保障一致性的五种做法"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&is_video=false&description=数据库与缓存保障一致性的五种做法"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=数据库与缓存保障一致性的五种做法&body=Check out this article: https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&name=数据库与缓存保障一致性的五种做法&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%8C%E6%AD%A5%E5%8F%8C%E5%86%99"><span class="toc-number">1.</span> <span class="toc-text">一、同步双写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8EMQ%E5%BC%82%E6%AD%A5%E5%A4%9A%E5%86%99"><span class="toc-number">2.</span> <span class="toc-text">二、基于MQ异步多写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">三、定时任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%97%AA%E7%94%B5%E7%BC%93%E5%AD%98"><span class="toc-number">4.</span> <span class="toc-text">四、闪电缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81Binlog%E7%9B%91%E5%90%AC"><span class="toc-number">5.</span> <span class="toc-text">五、Binlog监听</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        数据库与缓存保障一致性的五种做法
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-07-08T01:23:38.000Z" itemprop="datePublished">2024-07-08</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/" class="leancloud-visitors" data-flag-title="数据库与缓存保障一致性的五种做法" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" rel="tag">架构设计</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>在分布式系统中，确保数据的一致性是一项关键任务。特别是当你使用像Redis这样的缓存系统和MySQL这样的关系型数据库时，如何在这两者之间保持数据一致性是一个复杂的问题。以下是五种常见的实现方法：同步双写、基于MQ异步多写、定时任务、闪电缓存、Binlog监听。本文将详细介绍每种方案的原理、优缺点以及适用场景。</p>
+<h3 id="一、同步双写"><a href="#一、同步双写" class="headerlink" title="一、同步双写"></a>一、同步双写</h3><p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-1.png" alt="image-2024-07-08-1"></p>
+<p>1.1 原理<br>同步双写是指在进行数据更新时，同时更新MySQL和Redis。即，在操作MySQL的同时，立刻进行Redis的更新。这种方式可以确保两者之间的数据始终保持一致。<br>1.2 实现方式<br>假设我们有一个更新用户信息的操作，在同步双写中，流程如下：</p>
+<ol>
+<li>更新MySQL数据库中的用户信息。</li>
+<li>若MySQL更新成功，则更新Redis中的用户缓存。</li>
+</ol>
+<p>1.3 优点<br>● 数据一致性高：由于是在同一个事务中完成对MySQL和Redis的更新，因此可以确保数据的一致性。<br>● 简单易实现：同步双写的逻辑相对简单，容易实现。</p>
+<p>1.4 缺点<br>● 性能影响大：同步双写要求在每次写操作中都要进行两次写操作（一次是MySQL，一次是Redis），这会导致写操作的延迟增加，影响系统性能。<br>● 故障处理复杂：在更新过程中，如果Redis更新失败，需要进行回滚操作，否则会导致数据不一致。<br>● 扩展性较差：随着系统规模的扩大，同步双写的性能瓶颈会愈加明显。</p>
+<p>1.5 适用场景<br>同步双写适用于对数据一致性要求极高且写操作频率不高的系统。对于读操作频繁但写操作较少的场景，同步双写能够确保较高的一致性。</p>
+<h3 id="二、基于MQ异步多写"><a href="#二、基于MQ异步多写" class="headerlink" title="二、基于MQ异步多写"></a>二、基于MQ异步多写</h3><p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-2.png" alt="image-2024-07-08-2"></p>
+<p>2.1 原理<br>基于消息队列（MQ）的异步多写是指在更新MySQL后，通过消息队列将更新信息传递给处理Redis更新的异步任务。这样，MySQL和Redis的更新在时间上不再同步，但通过消息队列的保证，最终会达到一致性。<br>2.2 实现方式<br>假设我们有一个更新用户信息的操作，在基于MQ异步多写中，流程如下：</p>
+<ol>
+<li>更新MySQL数据库中的用户信息。</li>
+<li>若MySQL更新成功，将更新信息发送到消息队列。</li>
+<li>消费者从消息队列中读取消息，并更新Redis中的用户缓存。</li>
+</ol>
+<p>2.3 优点<br>● 性能影响小：因为Redis的更新是异步进行的，不会阻塞主流程，降低了写操作的延迟。<br>● 故障处理相对简单：如果Redis更新失败，可以通过重试机制从消息队列重新获取消息并重试更新。<br>● 扩展性好：消息队列天然具有高并发和高扩展性的特点，可以有效应对大规模的更新请求。</p>
+<p>2.4 缺点<br>● 最终一致性：由于Redis的更新是异步的，因此在某个时间点上，Redis中的数据可能与MySQL不一致。<br>● 复杂性增加：需要引入消息队列系统，并处理消息的生产、消费、重试等逻辑，系统复杂性增加。</p>
+<p>2.5 适用场景<br>基于MQ异步多写适用于对最终一致性要求较高的系统，尤其是在高并发场景下。对于读操作频繁且写操作频繁的系统，这种方式可以有效提高性能和扩展性。</p>
+<h3 id="三、定时任务"><a href="#三、定时任务" class="headerlink" title="三、定时任务"></a>三、定时任务</h3><p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-3.png" alt="image-2024-07-08-3"></p>
+<p>3.1 原理<br>定时任务方案是指定期从MySQL中读取数据，并更新Redis缓存。这种方式通常用于那些数据变化频率不高且对实时性要求不高的场景。<br>3.2 实现方式<br>假设我们有一个用户数据的定期同步操作，在定时任务方案中，流程如下：</p>
+<ol>
+<li>设定一个定时任务，定期从MySQL中读取用户数据。</li>
+<li>将读取的数据更新到Redis缓存中。</li>
+</ol>
+<p>3.3 优点<br>● 实现简单：定时任务的实现逻辑简单，只需定期执行相应的同步操作。<br>● 性能影响小：由于更新是定期批量进行的，不会对系统性能产生显著影响。</p>
+<p>3.4 缺点<br>● 实时性差：由于是定时更新，Redis中的数据可能存在滞后，无法保证数据的实时一致性。<br>● 数据一致性差：在定时任务执行的间隔期间，MySQL和Redis的数据可能会不一致。</p>
+<p>3.5 适用场景<br>定时任务适用于对数据实时性要求不高的场景，特别是那些数据更新频率较低的系统。例如一些统计数据、日志数据的同步。</p>
+<h3 id="四、闪电缓存"><a href="#四、闪电缓存" class="headerlink" title="四、闪电缓存"></a>四、闪电缓存</h3><p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-4.png" alt="image-2024-07-08-4"></p>
+<p>4.1 原理<br>闪电缓存是一种较为激进的缓存策略，通常用于在高并发读写场景下确保缓存的一致性。其基本思路是在写操作发生时，立即删除对应的缓存，然后在下一次读取时，重新加载缓存。<br>4.2 实现方式<br>假设我们有一个更新用户信息的操作，在闪电缓存中，流程如下：</p>
+<ol>
+<li>更新MySQL数据库中的用户信息。</li>
+<li>若MySQL更新成功，则立即删除Redis中的对应缓存。</li>
+<li>当下次读取时，若缓存不存在，则从MySQL中读取数据并更新缓存。</li>
+</ol>
+<p>4.3 优点<br>● 实现简单：删除缓存的操作简单直接，容易实现。<br>● 一致性高：由于每次写操作都会删除缓存，确保了读取操作总是能够获取最新的数据。</p>
+<p>4.4 缺点<br>● 缓存穿透问题：每次写操作都会导致缓存失效，可能引发缓存穿透，增加数据库的负担。<br>● 读操作延迟增加：每次缓存失效后，第一次读操作会因为重新加载数据而增加延迟。</p>
+<p>4.5 适用场景<br>闪电缓存适用于高并发写场景，特别是那些读操作频繁且对数据一致性要求高的系统。对于一些需要实时更新且读操作可以容忍一定延迟的系统，这种方案非常适用。</p>
+<h3 id="五、Binlog监听"><a href="#五、Binlog监听" class="headerlink" title="五、Binlog监听"></a>五、Binlog监听</h3><p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/2024-07-08-5.png" alt="image-2024-07-08-5"></p>
+<p>5.1 原理<br>Binlog监听是通过监听MySQL的二进制日志（Binlog）来实现对Redis的同步更新。MySQL的Binlog记录了所有对数据库的写操作，通过解析Binlog，可以实时获取更新信息并同步到Redis。<br>5.2 实现方式<br>假设我们有一个更新用户信息的操作，在Binlog监听方案中，流程如下：</p>
+<ol>
+<li>MySQL记录更新操作到Binlog。</li>
+<li>Binlog监听器解析Binlog，获取更新信息。</li>
+<li>将更新信息同步到Redis。</li>
+</ol>
+<p>5.3 优点<br>● 实时性高：由于Binlog记录了所有写操作，并且监听器可以实时解析，确保了数据的实时一致性。<br>● 性能影响小：Binlog监听对MySQL的性能影响较小，不会显著增加写操作的延迟。</p>
+<p>5.4 缺点<br>● 实现复杂：需要实现对Binlog的解析和同步逻辑，系统复杂性较高。<br>● 故障处理复杂：在监听过程中，如果出现故障，需要处理数据同步的恢复和一致性检查。</p>
+<p>5.5 适用场景<br>Binlog监听适用于对数据实时一致性要求高的系统，尤其是那些写操作频繁且需要及时同步到缓存的场景。例如金融交易系统、订单系统等对数据实时性要求高的业务系统。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这五种方法各有优缺点和适用场景，具体选择哪种方案需要根据系统的实际需求和特点进行权衡：</p>
+<ol>
+<li>同步双写：适用于数据一致性要求高、写操作频率不高的系统。</li>
+<li>基于MQ异步多写：适用于高并发场景，能够有效提高性能和扩展性。</li>
+<li>定时任务：适用于数据变化频率不高且对实时性要求不高的系统。</li>
+<li>闪电缓存：适用于高并发写场景，能够确保数据一致性。</li>
+<li>Binlog监听：适用于数据实时一致性要求高的系统。</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%8C%E6%AD%A5%E5%8F%8C%E5%86%99"><span class="toc-number">1.</span> <span class="toc-text">一、同步双写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8EMQ%E5%BC%82%E6%AD%A5%E5%A4%9A%E5%86%99"><span class="toc-number">2.</span> <span class="toc-text">二、基于MQ异步多写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">三、定时任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%97%AA%E7%94%B5%E7%BC%93%E5%AD%98"><span class="toc-number">4.</span> <span class="toc-text">四、闪电缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81Binlog%E7%9B%91%E5%90%AC"><span class="toc-number">5.</span> <span class="toc-text">五、Binlog监听</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&text=数据库与缓存保障一致性的五种做法"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&is_video=false&description=数据库与缓存保障一致性的五种做法"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=数据库与缓存保障一致性的五种做法&body=Check out this article: https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&title=数据库与缓存保障一致性的五种做法"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/07/08/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E7%BC%93%E5%AD%98%E4%BF%9D%E9%9A%9C%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E4%BA%94%E7%A7%8D%E5%81%9A%E6%B3%95/&name=数据库与缓存保障一致性的五种做法&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
