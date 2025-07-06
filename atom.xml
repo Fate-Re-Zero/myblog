@@ -6,7 +6,7 @@
   <link href="https://fate-re-zero.github.io/atom.xml" rel="self"/>
   
   <link href="https://fate-re-zero.github.io/"/>
-  <updated>2025-04-24T16:15:50.131Z</updated>
+  <updated>2025-07-06T16:07:19.921Z</updated>
   <id>https://fate-re-zero.github.io/</id>
   
   <author>
@@ -15,6 +15,191 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Function Calling函数调用</title>
+    <link href="https://fate-re-zero.github.io/2025/04/12/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Function%20Calling%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8/"/>
+    <id>https://fate-re-zero.github.io/2025/04/12/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Function%20Calling%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8/</id>
+    <published>2025-04-12T02:22:37.000Z</published>
+    <updated>2025-07-06T16:07:19.921Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Function-Calling函数调用&quot;&gt;&lt;a href=&quot;#Function-Calling函数调用&quot; class=&quot;headerlink&quot; title=&quot;Function Calling函数调用&quot;&gt;&lt;/a&gt;Function</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Web环境AI流式交互</title>
+    <link href="https://fate-re-zero.github.io/2025/04/06/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Web%E7%8E%AF%E5%A2%83AI%E6%B5%81%E5%BC%8F%E4%BA%A4%E4%BA%92/"/>
+    <id>https://fate-re-zero.github.io/2025/04/06/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Web%E7%8E%AF%E5%A2%83AI%E6%B5%81%E5%BC%8F%E4%BA%A4%E4%BA%92/</id>
+    <published>2025-04-06T06:51:21.000Z</published>
+    <updated>2025-07-06T16:05:49.632Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Web环境AI流式交互&quot;&gt;&lt;a href=&quot;#Web环境AI流式交互&quot; class=&quot;headerlink&quot; title=&quot;Web环境AI流式交互&quot;&gt;&lt;/a&gt;Web环境AI流式交互&lt;/h3&gt;&lt;p&gt;SSE，即服务器发送事件（Server-Sent</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Spring Boot集成LangChain4j</title>
+    <link href="https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/"/>
+    <id>https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/</id>
+    <published>2025-03-29T02:11:31.000Z</published>
+    <updated>2025-07-06T15:54:30.977Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;Spring-Boot集成LangChain4j&quot;&gt;&lt;a href=&quot;#Spring-Boot集成LangChain4j&quot; class=&quot;headerlink&quot; title=&quot;Spring Boot集成LangChain4j&quot;&gt;&lt;/a&gt;Spring</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>RAG自定义外部存储</title>
+    <link href="https://fate-re-zero.github.io/2025/03/22/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/RAG%E8%87%AA%E5%AE%9A%E4%B9%89%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8/"/>
+    <id>https://fate-re-zero.github.io/2025/03/22/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/RAG%E8%87%AA%E5%AE%9A%E4%B9%89%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8/</id>
+    <published>2025-03-22T00:51:51.000Z</published>
+    <updated>2025-07-06T15:58:14.002Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;RAG自定义外部存储&quot;&gt;&lt;a href=&quot;#RAG自定义外部存储&quot; class=&quot;headerlink&quot; title=&quot;RAG自定义外部存储&quot;&gt;&lt;/a&gt;RAG自定义外部存储&lt;/h3&gt;&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LangChain4j RAG</title>
+    <link href="https://fate-re-zero.github.io/2025/03/15/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%20RAG/"/>
+    <id>https://fate-re-zero.github.io/2025/03/15/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%20RAG/</id>
+    <published>2025-03-15T07:21:51.000Z</published>
+    <updated>2025-07-06T15:58:25.079Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;LangChain4j-Easy-RAG&quot;&gt;&lt;a href=&quot;#LangChain4j-Easy-RAG&quot; class=&quot;headerlink&quot; title=&quot;LangChain4j Easy RAG&quot;&gt;&lt;/a&gt;LangChain4j Easy</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LangChain4j AI Services</title>
+    <link href="https://fate-re-zero.github.io/2025/03/08/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%20AI%20Services/"/>
+    <id>https://fate-re-zero.github.io/2025/03/08/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%20AI%20Services/</id>
+    <published>2025-03-08T02:21:51.000Z</published>
+    <updated>2025-07-06T15:36:16.478Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;AI-Services（AI服务）&quot;&gt;&lt;a href=&quot;#AI-Services（AI服务）&quot; class=&quot;headerlink&quot; title=&quot;AI Services（AI服务）&quot;&gt;&lt;/a&gt;AI</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LangChain4j集成LLM</title>
+    <link href="https://fate-re-zero.github.io/2025/03/03/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%E9%9B%86%E6%88%90LLM/"/>
+    <id>https://fate-re-zero.github.io/2025/03/03/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%E9%9B%86%E6%88%90LLM/</id>
+    <published>2025-03-03T05:41:58.000Z</published>
+    <updated>2025-07-06T15:28:10.759Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;LangChain4j多轮AI对话&quot;&gt;&lt;a href=&quot;#LangChain4j多轮AI对话&quot; class=&quot;headerlink&quot; title=&quot;LangChain4j多轮AI对话&quot;&gt;&lt;/a&gt;LangChain4j多轮AI对话&lt;/h3&gt;&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>初识LangChain4j</title>
+    <link href="https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/"/>
+    <id>https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/</id>
+    <published>2025-03-02T01:23:38.000Z</published>
+    <updated>2025-07-06T15:20:32.243Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;&lt;a href=&quot;https://docs.langchain4j.dev/&quot;&gt;https://docs.langchain4j.dev/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img</summary>
+        
+      
+    
+    
+    
+    
+    <category term="人工智能" scheme="https://fate-re-zero.github.io/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
   
   <entry>
     <title>海量数据迁移解决方案</title>
@@ -291,190 +476,6 @@
     
     
     <category term="Kubernetes" scheme="https://fate-re-zero.github.io/tags/Kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kubernetes集群核心概念 Pod</title>
-    <link href="https://fate-re-zero.github.io/2024/02/16/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%20Pod/"/>
-    <id>https://fate-re-zero.github.io/2024/02/16/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%20Pod/</id>
-    <published>2024-02-16T00:40:46.000Z</published>
-    <updated>2025-04-24T15:02:48.114Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、工作负载-workloads&quot;&gt;&lt;a href=&quot;#一、工作负载-workloads&quot; class=&quot;headerlink&quot; title=&quot;一、工作负载(workloads)&quot;&gt;&lt;/a&gt;一、工作负载(workloads)&lt;/h1&gt;&lt;p&gt;参考链接：&lt;a</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Kubernetes" scheme="https://fate-re-zero.github.io/tags/Kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>kubernetes集群客户端命令 kubectl</title>
-    <link href="https://fate-re-zero.github.io/2024/02/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E9%9B%86%E7%BE%A4%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%91%BD%E4%BB%A4%20kubectl/"/>
-    <id>https://fate-re-zero.github.io/2024/02/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/kubernetes%E9%9B%86%E7%BE%A4%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%91%BD%E4%BB%A4%20kubectl/</id>
-    <published>2024-02-13T00:40:46.000Z</published>
-    <updated>2025-04-24T15:05:11.659Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、kubectl命令帮助&quot;&gt;&lt;a href=&quot;#一、kubectl命令帮助&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Kubernetes" scheme="https://fate-re-zero.github.io/tags/Kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kubernetes核心概念</title>
-    <link href="https://fate-re-zero.github.io/2024/02/11/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/"/>
-    <id>https://fate-re-zero.github.io/2024/02/11/%E4%BA%91%E5%8E%9F%E7%94%9F/Kubernetes/Kubernetes%E9%9B%86%E7%BE%A4%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/</id>
-    <published>2024-02-11T00:40:46.000Z</published>
-    <updated>2025-04-24T14:42:36.024Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;1-1-Pod&quot;&gt;&lt;a href=&quot;#1-1-Pod&quot; class=&quot;headerlink&quot; title=&quot;1.1 Pod&quot;&gt;&lt;/a&gt;1.1 Pod&lt;/h2&gt;&lt;p&gt;Pod是可以在 Kubernetes</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Kubernetes" scheme="https://fate-re-zero.github.io/tags/Kubernetes/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>基于Docker容器DevOps应用方案</title>
-    <link href="https://fate-re-zero.github.io/2023/08/25/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/"/>
-    <id>https://fate-re-zero.github.io/2023/08/25/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/%E5%9F%BA%E4%BA%8EDocker%E5%AE%B9%E5%99%A8DevOps%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88/</id>
-    <published>2023-08-25T12:01:06.000Z</published>
-    <updated>2025-04-23T15:43:41.635Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、业务代码发布方式&quot;&gt;&lt;a href=&quot;#一、业务代码发布方式&quot; class=&quot;headerlink&quot; title=&quot;一、业务代码发布方式&quot;&gt;&lt;/a&gt;一、业务代码发布方式&lt;/h1&gt;&lt;h2 id=&quot;1-1-传统方式&quot;&gt;&lt;a href=&quot;#1-1-传统方式&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Docker" scheme="https://fate-re-zero.github.io/tags/Docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Docker生态架构及部署</title>
-    <link href="https://fate-re-zero.github.io/2023/08/20/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E7%94%9F%E6%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E9%83%A8%E7%BD%B2/"/>
-    <id>https://fate-re-zero.github.io/2023/08/20/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E7%94%9F%E6%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E9%83%A8%E7%BD%B2/</id>
-    <published>2023-08-20T07:30:09.000Z</published>
-    <updated>2025-04-24T14:30:29.661Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、Docker生态架构&quot;&gt;&lt;a href=&quot;#一、Docker生态架构&quot; class=&quot;headerlink&quot; title=&quot;一、Docker生态架构&quot;&gt;&lt;/a&gt;一、Docker生态架构&lt;/h1&gt;&lt;h2</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Docker" scheme="https://fate-re-zero.github.io/tags/Docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Docker主机集群化方案Docker Swarm</title>
-    <link href="https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E4%B8%BB%E6%9C%BA%E9%9B%86%E7%BE%A4%E5%8C%96Docker%20Swarm/"/>
-    <id>https://fate-re-zero.github.io/2023/08/17/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E4%B8%BB%E6%9C%BA%E9%9B%86%E7%BE%A4%E5%8C%96Docker%20Swarm/</id>
-    <published>2023-08-17T00:48:22.000Z</published>
-    <updated>2025-04-23T15:57:45.687Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、docker-swarm介绍&quot;&gt;&lt;a href=&quot;#一、docker-swarm介绍&quot; class=&quot;headerlink&quot; title=&quot;一、docker swarm介绍&quot;&gt;&lt;/a&gt;一、docker swarm介绍&lt;/h1&gt;&lt;p&gt;Docker</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Docker" scheme="https://fate-re-zero.github.io/tags/Docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Docker容器服务编排利器Docker Compose</title>
-    <link href="https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/"/>
-    <id>https://fate-re-zero.github.io/2023/08/13/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%88%A9%E5%99%A8Docker%20Compose/</id>
-    <published>2023-08-13T00:48:22.000Z</published>
-    <updated>2025-04-23T15:54:06.912Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、使用Docker-Compose必要性及定义&quot;&gt;&lt;a href=&quot;#一、使用Docker-Compose必要性及定义&quot; class=&quot;headerlink&quot; title=&quot;一、使用Docker Compose必要性及定义&quot;&gt;&lt;/a&gt;一、使用Docker</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Docker" scheme="https://fate-re-zero.github.io/tags/Docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Docker容器数据持久化存储机制</title>
-    <link href="https://fate-re-zero.github.io/2023/08/09/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6/"/>
-    <id>https://fate-re-zero.github.io/2023/08/09/%E4%BA%91%E5%8E%9F%E7%94%9F/Docker/Docker%E5%AE%B9%E5%99%A8%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6/</id>
-    <published>2023-08-09T00:48:22.000Z</published>
-    <updated>2025-04-23T15:50:52.750Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;一、Docker容器数据持久化存储介绍&quot;&gt;&lt;a href=&quot;#一、Docker容器数据持久化存储介绍&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Docker" scheme="https://fate-re-zero.github.io/tags/Docker/"/>
     
   </entry>
   
