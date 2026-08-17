@@ -591,7 +591,7 @@ body {
   }
 }
 .max-width {
-  max-width: 48rem;
+  max-width: 120rem;
 }
 @media (max-width: 480px) {
   .px3 {
@@ -860,10 +860,6 @@ body {
   color: #c9cacc;
   font-size: 0.8rem;
 }
-#header-post #toc .toc-level-2:before {
-  color: #2bbc8a;
-  content: "#";
-}
 #header-post #toc .toc-level-3 {
   color: #666;
   font-size: 0.7rem;
@@ -1032,10 +1028,6 @@ body {
   color: #c9cacc;
   font-size: 0.8rem;
 }
-#footer-post #toc-footer .toc-level-2:before {
-  color: #2bbc8a;
-  content: "#";
-}
 #footer-post #toc-footer .toc-level-3 {
   color: #666;
   font-size: 0.7rem;
@@ -1118,15 +1110,6 @@ article header .postdate {
 article header .posteye {
   display: inline;
   margin-left: 10px;
-}
-article .content h2:before {
-  position: absolute;
-  top: -4px;
-  left: -1rem;
-  color: #2bbc8a;
-  content: "#";
-  font-weight: bold;
-  font-size: 1.2rem;
 }
 article .content img,
 article .content video {
