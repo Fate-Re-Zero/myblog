@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="865" height="1025" viewBox="0 0 865 1025">
-  <title>Agent 运行时设计</title>
-  <!-- 与同目录 PNG 1:1；修改画面请替换 Agent运行时设计.png 后重新生成嵌入版 -->
-  <image width="865" height="1025" href="Agent运行时设计.png" xlink:href="Agent运行时设计.png"/>
-</svg>
