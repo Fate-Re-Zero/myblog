@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="语义分割和数据集在 边界框— 区域卷积神经网络（R-CNN）中讨论的目标检测问题中，我们一直使用方形边界框来标注和预测图像中的目标。本节将探讨语义分割（semantic segmentation）问题，它重点关注于如何将图像分割成属于不同语义类别的区域。与目标检测不同，语义分割可以识别并理解图像中每一个像素的内容：其语义区域的标注和预测是像素级的。 fig_segmentation展示了语义分割中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="语义分割和数据集">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="语义分割和数据集在 边界框— 区域卷积神经网络（R-CNN）中讨论的目标检测问题中，我们一直使用方形边界框来标注和预测图像中的目标。本节将探讨语义分割（semantic segmentation）问题，它重点关注于如何将图像分割成属于不同语义类别的区域。与目标检测不同，语义分割可以识别并理解图像中每一个像素的内容：其语义区域的标注和预测是像素级的。 fig_segmentation展示了语义分割中">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-12T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:20:31.420Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>语义分割和数据集</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%BD%AC%E7%BD%AE%E5%8D%B7%E7%A7%AF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A0%B7%E5%BC%8F%E8%BF%81%E7%A7%BB/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&text=语义分割和数据集"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=语义分割和数据集"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=语义分割和数据集&body=Check out this article: https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&name=语义分割和数据集&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">语义分割和数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2%E5%92%8C%E5%AE%9E%E4%BE%8B%E5%88%86%E5%89%B2"><span class="toc-number">1.1.</span> <span class="toc-text">图像分割和实例分割</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pascal-VOC2012-%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.</span> <span class="toc-text">Pascal VOC2012 语义分割数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE"><span class="toc-number">1.2.1.</span> <span class="toc-text">预处理数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E6%95%B0%E6%8D%AE%E9%9B%86%E7%B1%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">自定义语义分割数据集类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E5%90%88%E6%89%80%E6%9C%89%E7%BB%84%E4%BB%B6"><span class="toc-number">1.2.4.</span> <span class="toc-text">整合所有组件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        语义分割和数据集
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-12T09:00:00.000Z" itemprop="datePublished">2025-04-12</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/" class="leancloud-visitors" data-flag-title="语义分割和数据集" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="语义分割和数据集"><a href="#语义分割和数据集" class="headerlink" title="语义分割和数据集"></a>语义分割和数据集</h1><p>在 边界框— 区域卷积神经网络（R-CNN）中讨论的目标检测问题中，我们一直使用方形边界框来标注和预测图像中的目标。<br>本节将探讨<em>语义分割</em>（semantic segmentation）问题，它重点关注于如何将图像分割成属于不同语义类别的区域。<br>与目标检测不同，语义分割可以识别并理解图像中每一个像素的内容：其语义区域的标注和预测是像素级的。<br> fig_segmentation展示了语义分割中图像有关狗、猫和背景的标签。<br>与目标检测相比，语义分割标注的像素级的边框显然更加精细。</p>
+<p>（图：语义分割中图像有关狗、猫和背景的标签）</p>
+<h2 id="图像分割和实例分割"><a href="#图像分割和实例分割" class="headerlink" title="图像分割和实例分割"></a>图像分割和实例分割</h2><p>计算机视觉领域还有2个与语义分割相似的重要问题，即<em>图像分割</em>（image segmentation）和<em>实例分割</em>（instance segmentation）。<br>我们在这里将它们同语义分割简单区分一下。</p>
+<ul>
+<li><em>图像分割</em>将图像划分为若干组成区域，这类问题的方法通常利用图像中像素之间的相关性。它在训练时不需要有关图像像素的标签信息，在预测时也无法保证分割出的区域具有我们希望得到的语义。以 fig_segmentation中的图像作为输入，图像分割可能会将狗分为两个区域：一个覆盖以黑色为主的嘴和眼睛，另一个覆盖以黄色为主的其余部分身体。</li>
+<li><em>实例分割</em>也叫<em>同时检测并分割</em>（simultaneous detection and segmentation），它研究如何识别图像中各个目标实例的像素级区域。与语义分割不同，实例分割不仅需要区分语义，还要区分不同的目标实例。例如，如果图像中有两条狗，则实例分割需要区分像素属于的两条狗中的哪一条。</li>
+</ul>
+<h2 id="Pascal-VOC2012-语义分割数据集"><a href="#Pascal-VOC2012-语义分割数据集" class="headerlink" title="Pascal VOC2012 语义分割数据集"></a>Pascal VOC2012 语义分割数据集</h2><p>最重要的语义分割数据集之一是<a target="_blank" rel="noopener" href="http://host.robots.ox.ac.uk/pascal/VOC/voc2012/">Pascal VOC2012</a>。<br>下面我们深入了解一下这个数据集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> os</span><br></pre></td></tr></table></figure>
+
+<p>数据集的tar文件大约为2GB，所以下载可能需要一段时间。<br>提取出的数据集位于<code>../data/VOCdevkit/VOC2012</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line">d2l.DATA_HUB[<span class="string">&#x27;voc2012&#x27;</span>] = (d2l.DATA_URL + <span class="string">&#x27;VOCtrainval_11-May-2012.tar&#x27;</span>,</span><br><span class="line">                           <span class="string">&#x27;4e443f8a2eca6b1dac8a6c57641b67dd40621a49&#x27;</span>)</span><br><span class="line"></span><br><span class="line">voc_dir = d2l.download_extract(<span class="string">&#x27;voc2012&#x27;</span>, <span class="string">&#x27;VOCdevkit/VOC2012&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>进入路径<code>../data/VOCdevkit/VOC2012</code>之后，我们可以看到数据集的不同组件。<br><code>ImageSets/Segmentation</code>路径包含用于训练和测试样本的文本文件，而<code>JPEGImages</code>和<code>SegmentationClass</code>路径分别存储着每个示例的输入图像和标签。<br>此处的标签也采用图像格式，其尺寸和它所标注的输入图像的尺寸相同。<br>此外，标签中颜色相同的像素属于同一个语义类别。<br>下面将<code>read_voc_images</code>函数定义为将所有输入的图像和标签读入内存。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_voc_images</span>(<span class="params">voc_dir, is_train=<span class="literal">True</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取所有VOC图像并标注&quot;&quot;&quot;</span></span><br><span class="line">    txt_fname = os.path.join(voc_dir, <span class="string">&#x27;ImageSets&#x27;</span>, <span class="string">&#x27;Segmentation&#x27;</span>,</span><br><span class="line">                             <span class="string">&#x27;train.txt&#x27;</span> <span class="keyword">if</span> is_train <span class="keyword">else</span> <span class="string">&#x27;val.txt&#x27;</span>)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(txt_fname, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        images = f.read().split()</span><br><span class="line">    features, labels = [], []</span><br><span class="line">    <span class="keyword">for</span> i, fname <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">        features.append(image.imread(os.path.join(</span><br><span class="line">            voc_dir, <span class="string">&#x27;JPEGImages&#x27;</span>, <span class="string">f&#x27;<span class="subst">&#123;fname&#125;</span>.jpg&#x27;</span>)))</span><br><span class="line">        labels.append(image.imread(os.path.join(</span><br><span class="line">            voc_dir, <span class="string">&#x27;SegmentationClass&#x27;</span>, <span class="string">f&#x27;<span class="subst">&#123;fname&#125;</span>.png&#x27;</span>)))</span><br><span class="line">    <span class="keyword">return</span> features, labels</span><br><span class="line"></span><br><span class="line">train_features, train_labels = read_voc_images(voc_dir, <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_voc_images</span>(<span class="params">voc_dir, is_train=<span class="literal">True</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取所有VOC图像并标注&quot;&quot;&quot;</span></span><br><span class="line">    txt_fname = os.path.join(voc_dir, <span class="string">&#x27;ImageSets&#x27;</span>, <span class="string">&#x27;Segmentation&#x27;</span>,</span><br><span class="line">                             <span class="string">&#x27;train.txt&#x27;</span> <span class="keyword">if</span> is_train <span class="keyword">else</span> <span class="string">&#x27;val.txt&#x27;</span>)</span><br><span class="line">    mode = torchvision.io.image.ImageReadMode.RGB</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(txt_fname, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        images = f.read().split()</span><br><span class="line">    features, labels = [], []</span><br><span class="line">    <span class="keyword">for</span> i, fname <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">        features.append(torchvision.io.read_image(os.path.join(</span><br><span class="line">            voc_dir, <span class="string">&#x27;JPEGImages&#x27;</span>, <span class="string">f&#x27;<span class="subst">&#123;fname&#125;</span>.jpg&#x27;</span>)))</span><br><span class="line">        labels.append(torchvision.io.read_image(os.path.join(</span><br><span class="line">            voc_dir, <span class="string">&#x27;SegmentationClass&#x27;</span> ,<span class="string">f&#x27;<span class="subst">&#123;fname&#125;</span>.png&#x27;</span>), mode))</span><br><span class="line">    <span class="keyword">return</span> features, labels</span><br><span class="line"></span><br><span class="line">train_features, train_labels = read_voc_images(voc_dir, <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>下面我们绘制前5个输入图像及其标签。<br>在标签图像中，白色和黑色分别表示边框和背景，而其他颜色则对应不同的类别。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n = <span class="number">5</span></span><br><span class="line">imgs = train_features[<span class="number">0</span>:n] + train_labels[<span class="number">0</span>:n]</span><br><span class="line">d2l.show_images(imgs, <span class="number">2</span>, n);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">n = <span class="number">5</span></span><br><span class="line">imgs = train_features[<span class="number">0</span>:n] + train_labels[<span class="number">0</span>:n]</span><br><span class="line">imgs = [img.permute(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>) <span class="keyword">for</span> img <span class="keyword">in</span> imgs]</span><br><span class="line">d2l.show_images(imgs, <span class="number">2</span>, n);</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们列举RGB颜色值和类名。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line">VOC_COLORMAP = [[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">128</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">128</span>, <span class="number">0</span>], [<span class="number">128</span>, <span class="number">128</span>, <span class="number">0</span>],</span><br><span class="line">                [<span class="number">0</span>, <span class="number">0</span>, <span class="number">128</span>], [<span class="number">128</span>, <span class="number">0</span>, <span class="number">128</span>], [<span class="number">0</span>, <span class="number">128</span>, <span class="number">128</span>], [<span class="number">128</span>, <span class="number">128</span>, <span class="number">128</span>],</span><br><span class="line">                [<span class="number">64</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">192</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">64</span>, <span class="number">128</span>, <span class="number">0</span>], [<span class="number">192</span>, <span class="number">128</span>, <span class="number">0</span>],</span><br><span class="line">                [<span class="number">64</span>, <span class="number">0</span>, <span class="number">128</span>], [<span class="number">192</span>, <span class="number">0</span>, <span class="number">128</span>], [<span class="number">64</span>, <span class="number">128</span>, <span class="number">128</span>], [<span class="number">192</span>, <span class="number">128</span>, <span class="number">128</span>],</span><br><span class="line">                [<span class="number">0</span>, <span class="number">64</span>, <span class="number">0</span>], [<span class="number">128</span>, <span class="number">64</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">192</span>, <span class="number">0</span>], [<span class="number">128</span>, <span class="number">192</span>, <span class="number">0</span>],</span><br><span class="line">                [<span class="number">0</span>, <span class="number">64</span>, <span class="number">128</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment">#@save</span></span><br><span class="line">VOC_CLASSES = [<span class="string">&#x27;background&#x27;</span>, <span class="string">&#x27;aeroplane&#x27;</span>, <span class="string">&#x27;bicycle&#x27;</span>, <span class="string">&#x27;bird&#x27;</span>, <span class="string">&#x27;boat&#x27;</span>,</span><br><span class="line">               <span class="string">&#x27;bottle&#x27;</span>, <span class="string">&#x27;bus&#x27;</span>, <span class="string">&#x27;car&#x27;</span>, <span class="string">&#x27;cat&#x27;</span>, <span class="string">&#x27;chair&#x27;</span>, <span class="string">&#x27;cow&#x27;</span>,</span><br><span class="line">               <span class="string">&#x27;diningtable&#x27;</span>, <span class="string">&#x27;dog&#x27;</span>, <span class="string">&#x27;horse&#x27;</span>, <span class="string">&#x27;motorbike&#x27;</span>, <span class="string">&#x27;person&#x27;</span>,</span><br><span class="line">               <span class="string">&#x27;potted plant&#x27;</span>, <span class="string">&#x27;sheep&#x27;</span>, <span class="string">&#x27;sofa&#x27;</span>, <span class="string">&#x27;train&#x27;</span>, <span class="string">&#x27;tv/monitor&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>通过上面定义的两个常量，我们可以方便地查找标签中每个像素的类索引。<br>我们定义了<code>voc_colormap2label</code>函数来构建从上述RGB颜色值到类别索引的映射，而<code>voc_label_indices</code>函数将RGB值映射到在Pascal VOC2012数据集中的类别索引。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_colormap2label</span>():</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;构建从RGB到VOC类别索引的映射&quot;&quot;&quot;</span></span><br><span class="line">    colormap2label = np.zeros(<span class="number">256</span> ** <span class="number">3</span>)</span><br><span class="line">    <span class="keyword">for</span> i, colormap <span class="keyword">in</span> <span class="built_in">enumerate</span>(VOC_COLORMAP):</span><br><span class="line">        colormap2label[</span><br><span class="line">            (colormap[<span class="number">0</span>] * <span class="number">256</span> + colormap[<span class="number">1</span>]) * <span class="number">256</span> + colormap[<span class="number">2</span>]] = i</span><br><span class="line">    <span class="keyword">return</span> colormap2label</span><br><span class="line"></span><br><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_label_indices</span>(<span class="params">colormap, colormap2label</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;将VOC标签中的RGB值映射到它们的类别索引&quot;&quot;&quot;</span></span><br><span class="line">    colormap = colormap.astype(np.int32)</span><br><span class="line">    idx = ((colormap[:, :, <span class="number">0</span>] * <span class="number">256</span> + colormap[:, :, <span class="number">1</span>]) * <span class="number">256</span></span><br><span class="line">           + colormap[:, :, <span class="number">2</span>])</span><br><span class="line">    <span class="keyword">return</span> colormap2label[idx]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_colormap2label</span>():</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;构建从RGB到VOC类别索引的映射&quot;&quot;&quot;</span></span><br><span class="line">    colormap2label = torch.zeros(<span class="number">256</span> ** <span class="number">3</span>, dtype=torch.long)</span><br><span class="line">    <span class="keyword">for</span> i, colormap <span class="keyword">in</span> <span class="built_in">enumerate</span>(VOC_COLORMAP):</span><br><span class="line">        colormap2label[</span><br><span class="line">            (colormap[<span class="number">0</span>] * <span class="number">256</span> + colormap[<span class="number">1</span>]) * <span class="number">256</span> + colormap[<span class="number">2</span>]] = i</span><br><span class="line">    <span class="keyword">return</span> colormap2label</span><br><span class="line"></span><br><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_label_indices</span>(<span class="params">colormap, colormap2label</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;将VOC标签中的RGB值映射到它们的类别索引&quot;&quot;&quot;</span></span><br><span class="line">    colormap = colormap.permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>).numpy().astype(<span class="string">&#x27;int32&#x27;</span>)</span><br><span class="line">    idx = ((colormap[:, :, <span class="number">0</span>] * <span class="number">256</span> + colormap[:, :, <span class="number">1</span>]) * <span class="number">256</span></span><br><span class="line">           + colormap[:, :, <span class="number">2</span>])</span><br><span class="line">    <span class="keyword">return</span> colormap2label[idx]</span><br></pre></td></tr></table></figure>
+
+<p>例如，在第一张样本图像中，飞机头部区域的类别索引为1，而背景索引为0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y = voc_label_indices(train_labels[<span class="number">0</span>], voc_colormap2label())</span><br><span class="line">y[<span class="number">105</span>:<span class="number">115</span>, <span class="number">130</span>:<span class="number">140</span>], VOC_CLASSES[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="预处理数据"><a href="#预处理数据" class="headerlink" title="预处理数据"></a>预处理数据</h3><p>在之前的实验，例如 深度卷积神经网络（AlexNet）— sec_googlenet中，我们通过再缩放图像使其符合模型的输入形状。<br>然而在语义分割中，这样做需要将预测的像素类别重新映射回原始尺寸的输入图像。<br>这样的映射可能不够精确，尤其在不同语义的分割区域。<br>为了避免这个问题，我们将图像裁剪为固定尺寸，而不是再缩放。<br>具体来说，我们使用图像增广中的随机裁剪，裁剪输入图像和标签的相同区域。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_rand_crop</span>(<span class="params">feature, label, height, width</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;随机裁剪特征和标签图像&quot;&quot;&quot;</span></span><br><span class="line">    feature, rect = image.random_crop(feature, (width, height))</span><br><span class="line">    label = image.fixed_crop(label, *rect)</span><br><span class="line">    <span class="keyword">return</span> feature, label</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">voc_rand_crop</span>(<span class="params">feature, label, height, width</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;随机裁剪特征和标签图像&quot;&quot;&quot;</span></span><br><span class="line">    rect = torchvision.transforms.RandomCrop.get_params(</span><br><span class="line">        feature, (height, width))</span><br><span class="line">    feature = torchvision.transforms.functional.crop(feature, *rect)</span><br><span class="line">    label = torchvision.transforms.functional.crop(label, *rect)</span><br><span class="line">    <span class="keyword">return</span> feature, label</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">imgs = []</span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    imgs += voc_rand_crop(train_features[<span class="number">0</span>], train_labels[<span class="number">0</span>], <span class="number">200</span>, <span class="number">300</span>)</span><br><span class="line">d2l.show_images(imgs[::<span class="number">2</span>] + imgs[<span class="number">1</span>::<span class="number">2</span>], <span class="number">2</span>, n);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">imgs = []</span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    imgs += voc_rand_crop(train_features[<span class="number">0</span>], train_labels[<span class="number">0</span>], <span class="number">200</span>, <span class="number">300</span>)</span><br><span class="line"></span><br><span class="line">imgs = [img.permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>) <span class="keyword">for</span> img <span class="keyword">in</span> imgs]</span><br><span class="line">d2l.show_images(imgs[::<span class="number">2</span>] + imgs[<span class="number">1</span>::<span class="number">2</span>], <span class="number">2</span>, n);</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义语义分割数据集类"><a href="#自定义语义分割数据集类" class="headerlink" title="自定义语义分割数据集类"></a>自定义语义分割数据集类</h3><p>我们通过继承高级API提供的<code>Dataset</code>类，自定义了一个语义分割数据集类<code>VOCSegDataset</code>。<br>通过实现<code>__getitem__</code>函数，我们可以任意访问数据集中索引为<code>idx</code>的输入图像及其每个像素的类别索引。<br>由于数据集中有些图像的尺寸可能小于随机裁剪所指定的输出尺寸，这些样本可以通过自定义的<code>filter</code>函数移除掉。<br>此外，我们还定义了<code>normalize_image</code>函数，从而对输入图像的RGB三个通道的值分别做标准化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">VOCSegDataset</span>(<span class="params">torch.utils.data.Dataset</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;一个用于加载VOC数据集的自定义数据集&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, is_train, crop_size, voc_dir</span>):</span></span><br><span class="line">        self.transform = torchvision.transforms.Normalize(</span><br><span class="line">            mean=[<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>], std=[<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>])</span><br><span class="line">        self.crop_size = crop_size</span><br><span class="line">        features, labels = read_voc_images(voc_dir, is_train=is_train)</span><br><span class="line">        self.features = [self.normalize_image(feature)</span><br><span class="line">                         <span class="keyword">for</span> feature <span class="keyword">in</span> self.<span class="built_in">filter</span>(features)]</span><br><span class="line">        self.labels = self.<span class="built_in">filter</span>(labels)</span><br><span class="line">        self.colormap2label = voc_colormap2label()</span><br><span class="line">        print(<span class="string">&#x27;read &#x27;</span> + <span class="built_in">str</span>(<span class="built_in">len</span>(self.features)) + <span class="string">&#x27; examples&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">normalize_image</span>(<span class="params">self, img</span>):</span></span><br><span class="line">        <span class="keyword">return</span> self.transform(img.<span class="built_in">float</span>() / <span class="number">255</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">filter</span>(<span class="params">self, imgs</span>):</span></span><br><span class="line">        <span class="keyword">return</span> [img <span class="keyword">for</span> img <span class="keyword">in</span> imgs <span class="keyword">if</span> (</span><br><span class="line">            img.shape[<span class="number">1</span>] &gt;= self.crop_size[<span class="number">0</span>] <span class="keyword">and</span></span><br><span class="line">            img.shape[<span class="number">2</span>] &gt;= self.crop_size[<span class="number">1</span>])]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span>(<span class="params">self, idx</span>):</span></span><br><span class="line">        feature, label = voc_rand_crop(self.features[idx], self.labels[idx],</span><br><span class="line">                                       *self.crop_size)</span><br><span class="line">        <span class="keyword">return</span> (feature, voc_label_indices(label, self.colormap2label))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.features)</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><p>我们通过自定义的<code>VOCSegDataset</code>类来分别创建训练集和测试集的实例。<br>假设我们指定随机裁剪的输出图像的形状为$320\times 480$，<br>下面我们可以查看训练集和测试集所保留的样本个数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">crop_size = (<span class="number">320</span>, <span class="number">480</span>)</span><br><span class="line">voc_train = VOCSegDataset(<span class="literal">True</span>, crop_size, voc_dir)</span><br><span class="line">voc_test = VOCSegDataset(<span class="literal">False</span>, crop_size, voc_dir)</span><br></pre></td></tr></table></figure>
+
+<p>设批量大小为64，我们定义训练集的迭代器。<br>打印第一个小批量的形状会发现：与图像分类或目标检测不同，这里的标签是一个三维数组。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">batch_size = <span class="number">64</span></span><br><span class="line">train_iter = torch.utils.data.DataLoader(voc_train, batch_size, shuffle=<span class="literal">True</span>,</span><br><span class="line">                                    drop_last=<span class="literal">True</span>,</span><br><span class="line">                                    num_workers=d2l.get_dataloader_workers())</span><br><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> train_iter:</span><br><span class="line">    print(X.shape)</span><br><span class="line">    print(Y.shape)</span><br><span class="line">    <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="整合所有组件"><a href="#整合所有组件" class="headerlink" title="整合所有组件"></a>整合所有组件</h3><p>最后，我们定义以下<code>load_data_voc</code>函数来下载并读取Pascal VOC2012语义分割数据集。<br>它返回训练集和测试集的数据迭代器。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_data_voc</span>(<span class="params">batch_size, crop_size</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;加载VOC语义分割数据集&quot;&quot;&quot;</span></span><br><span class="line">    voc_dir = d2l.download_extract(<span class="string">&#x27;voc2012&#x27;</span>, os.path.join(</span><br><span class="line">        <span class="string">&#x27;VOCdevkit&#x27;</span>, <span class="string">&#x27;VOC2012&#x27;</span>))</span><br><span class="line">    num_workers = d2l.get_dataloader_workers()</span><br><span class="line">    train_iter = torch.utils.data.DataLoader(</span><br><span class="line">        VOCSegDataset(<span class="literal">True</span>, crop_size, voc_dir), batch_size,</span><br><span class="line">        shuffle=<span class="literal">True</span>, drop_last=<span class="literal">True</span>, num_workers=num_workers)</span><br><span class="line">    test_iter = torch.utils.data.DataLoader(</span><br><span class="line">        VOCSegDataset(<span class="literal">False</span>, crop_size, voc_dir), batch_size,</span><br><span class="line">        drop_last=<span class="literal">True</span>, num_workers=num_workers)</span><br><span class="line">    <span class="keyword">return</span> train_iter, test_iter</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>语义分割通过将图像划分为属于不同语义类别的区域，来识别并理解图像中像素级别的内容。</li>
+<li>语义分割的一个重要的数据集叫做Pascal VOC2012。</li>
+<li>由于语义分割的输入图像和标签在像素上一一对应，输入图像会被随机裁剪为固定尺寸而不是缩放。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">语义分割和数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2%E5%92%8C%E5%AE%9E%E4%BE%8B%E5%88%86%E5%89%B2"><span class="toc-number">1.1.</span> <span class="toc-text">图像分割和实例分割</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pascal-VOC2012-%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.</span> <span class="toc-text">Pascal VOC2012 语义分割数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE"><span class="toc-number">1.2.1.</span> <span class="toc-text">预处理数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E6%95%B0%E6%8D%AE%E9%9B%86%E7%B1%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">自定义语义分割数据集类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E5%90%88%E6%89%80%E6%9C%89%E7%BB%84%E4%BB%B6"><span class="toc-number">1.2.4.</span> <span class="toc-text">整合所有组件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&text=语义分割和数据集"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=语义分割和数据集"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=语义分割和数据集&body=Check out this article: https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语义分割和数据集"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&name=语义分割和数据集&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

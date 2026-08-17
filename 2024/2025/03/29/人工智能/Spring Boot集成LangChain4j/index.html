@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Spring Boot集成LangChain4j12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot集成LangChain4j">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="Spring Boot集成LangChain4j12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-29T02:11:31.000Z">
+<meta property="article:modified_time" content="2025-07-06T15:54:30.977Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="人工智能">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring Boot集成LangChain4j</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/06/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Web%E7%8E%AF%E5%A2%83AI%E6%B5%81%E5%BC%8F%E4%BA%A4%E4%BA%92/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/22/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/RAG%E8%87%AA%E5%AE%9A%E4%B9%89%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&text=Spring Boot集成LangChain4j"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&is_video=false&description=Spring Boot集成LangChain4j"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring Boot集成LangChain4j&body=Check out this article: https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&name=Spring Boot集成LangChain4j&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Boot%E9%9B%86%E6%88%90LangChain4j"><span class="toc-number">1.</span> <span class="toc-text">Spring Boot集成LangChain4j</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Boot%E9%9B%86%E6%88%90AiServices"><span class="toc-number">2.</span> <span class="toc-text">Spring Boot集成AiServices</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring Boot集成LangChain4j
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-29T02:11:31.000Z" itemprop="datePublished">2025-03-29</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/" class="leancloud-visitors" data-flag-title="Spring Boot集成LangChain4j" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag">人工智能</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="Spring-Boot集成LangChain4j"><a href="#Spring-Boot集成LangChain4j" class="headerlink" title="Spring Boot集成LangChain4j"></a>Spring Boot集成LangChain4j</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="line">&lt;!-- 项目基本信息配置 --&gt;</span><br><span class="line">&lt;project xmlns=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="line">	xsi:schemaLocation=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br><span class="line">	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!-- 继承Spring Boot父POM，提供默认配置和依赖管理 --&gt;</span><br><span class="line">	&lt;parent&gt;</span><br><span class="line">		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;</span><br><span class="line">		&lt;version&gt;3.4.4&lt;/version&gt;</span><br><span class="line">		&lt;relativePath/&gt; &lt;!-- 优先从本地查找父POM --&gt;</span><br><span class="line">	&lt;/parent&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!-- 项目坐标信息 --&gt;</span><br><span class="line">	&lt;groupId&gt;com.lixiang&lt;/groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;langchan4j&lt;/artifactId&gt;</span><br><span class="line">	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">	&lt;name&gt;langchan4j&lt;/name&gt;</span><br><span class="line">	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!-- 项目元信息 --&gt;</span><br><span class="line">	&lt;url/&gt;</span><br><span class="line">	&lt;licenses&gt;</span><br><span class="line">		&lt;license/&gt;</span><br><span class="line">	&lt;/licenses&gt;</span><br><span class="line">	&lt;developers&gt;</span><br><span class="line">		&lt;developer/&gt;</span><br><span class="line">	&lt;/developers&gt;</span><br><span class="line">	&lt;scm&gt;</span><br><span class="line">		&lt;connection/&gt;</span><br><span class="line">		&lt;developerConnection/&gt;</span><br><span class="line">		&lt;tag/&gt;</span><br><span class="line">		&lt;url/&gt;</span><br><span class="line">	&lt;/scm&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!-- 自定义属性 --&gt;</span><br><span class="line">	&lt;properties&gt;</span><br><span class="line">		&lt;java.version&gt;17&lt;/java.version&gt; &lt;!-- 指定Java版本 --&gt;</span><br><span class="line">	&lt;/properties&gt;</span><br><span class="line">	</span><br><span class="line">	&lt;!-- 项目依赖 --&gt;</span><br><span class="line">	&lt;dependencies&gt;</span><br><span class="line">		&lt;!-- Spring Boot Web Starter --&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">		&lt;!-- Lombok 简化代码 --&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">			&lt;optional&gt;true&lt;/optional&gt; &lt;!-- 可选依赖 --&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		</span><br><span class="line">		&lt;!-- 测试依赖 --&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">			&lt;scope&gt;test&lt;/scope&gt; &lt;!-- 仅测试范围 --&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		</span><br><span class="line">		&lt;!-- LangChain4J 相关依赖 --&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;dev.langchain4j&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;langchain4j-community-dashscope-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;1.0.0-beta3&lt;/version&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">		&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;dev.langchain4j&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;langchain4j-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">			&lt;version&gt;1.0.0-beta3&lt;/version&gt;</span><br><span class="line">		&lt;/dependency&gt;</span><br><span class="line">	&lt;/dependencies&gt;</span><br><span class="line"></span><br><span class="line">	&lt;!-- 构建配置 --&gt;</span><br><span class="line">	&lt;build&gt;</span><br><span class="line">		&lt;plugins&gt;</span><br><span class="line">			&lt;!-- 编译器插件配置 --&gt;</span><br><span class="line">			&lt;plugin&gt;</span><br><span class="line">				&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;</span><br><span class="line">				&lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;</span><br><span class="line">				&lt;configuration&gt;</span><br><span class="line">					&lt;annotationProcessorPaths&gt;</span><br><span class="line">						&lt;path&gt;</span><br><span class="line">							&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">							&lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">						&lt;/path&gt;</span><br><span class="line">					&lt;/annotationProcessorPaths&gt;</span><br><span class="line">				&lt;/configuration&gt;</span><br><span class="line">			&lt;/plugin&gt;</span><br><span class="line">			</span><br><span class="line">			&lt;!-- Spring Boot Maven插件 --&gt;</span><br><span class="line">			&lt;plugin&gt;</span><br><span class="line">				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line">				&lt;configuration&gt;</span><br><span class="line">					&lt;excludes&gt;</span><br><span class="line">						&lt;exclude&gt;</span><br><span class="line">							&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">							&lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">						&lt;/exclude&gt;</span><br><span class="line">					&lt;/excludes&gt;</span><br><span class="line">				&lt;/configuration&gt;</span><br><span class="line">			&lt;/plugin&gt;</span><br><span class="line">		&lt;/plugins&gt;</span><br><span class="line">	&lt;/build&gt;</span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">langchain4j.community.dashscope.chat-model.api-key=sk-937aee4c3e***********654d04b84634d</span><br><span class="line">langchain4j.community.dashscope.chat-model.model-name=qwen-plus</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.langchain4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestParam;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.community.model.dashscope.QwenChatModel;</span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.model.chat.ChatLanguageModel;</span><br><span class="line"><span class="keyword">import</span> jakarta.annotation.Resource;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 聊天控制器，提供与AI模型的交互接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestController</span> <span class="comment">// 标识这是一个REST控制器</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ChatController</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注入LangChain4J的聊天语言模型</span></span><br><span class="line"><span class="comment">     * 具体实现由Spring Boot自动配置决定</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    ChatLanguageModel chatLanguageModel;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 处理聊天请求</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> message 用户输入的消息，默认为&quot;Hello&quot;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> AI模型的回复</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/chat&quot;)</span> <span class="comment">// 映射GET请求到/chat路径</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">model</span><span class="params">(<span class="meta">@RequestParam(value = &quot;message&quot;, defaultValue = &quot;Hello&quot;)</span> String message)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 调用语言模型的chat方法并返回结果</span></span><br><span class="line">        <span class="keyword">return</span> chatLanguageModel.chat(message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Spring-Boot集成AiServices"><a href="#Spring-Boot集成AiServices" class="headerlink" title="Spring Boot集成AiServices"></a>Spring Boot集成AiServices</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="line">&lt;project xmlns=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="line">    xsi:schemaLocation=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br><span class="line">    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</span><br><span class="line">    &lt;parent&gt;</span><br><span class="line">        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;3.4.4&lt;/version&gt;</span><br><span class="line">        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;</span><br><span class="line">    &lt;/parent&gt;</span><br><span class="line">    &lt;groupId&gt;com.lixiang&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;langchain4j&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;</span><br><span class="line">    &lt;name&gt;ex00700&lt;/name&gt;</span><br><span class="line">    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;</span><br><span class="line">    &lt;url/&gt;</span><br><span class="line">    &lt;licenses&gt;</span><br><span class="line">        &lt;license/&gt;</span><br><span class="line">    &lt;/licenses&gt;</span><br><span class="line">    &lt;developers&gt;</span><br><span class="line">        &lt;developer/&gt;</span><br><span class="line">    &lt;/developers&gt;</span><br><span class="line">    &lt;scm&gt;</span><br><span class="line">        &lt;connection/&gt;</span><br><span class="line">        &lt;developerConnection/&gt;</span><br><span class="line">        &lt;tag/&gt;</span><br><span class="line">        &lt;url/&gt;</span><br><span class="line">    &lt;/scm&gt;</span><br><span class="line">    &lt;properties&gt;</span><br><span class="line">        &lt;java.version&gt;17&lt;/java.version&gt;</span><br><span class="line">    &lt;/properties&gt;</span><br><span class="line">    &lt;dependencies&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">            &lt;optional&gt;true&lt;/optional&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;</span><br><span class="line">            &lt;scope&gt;test&lt;/scope&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;dev.langchain4j&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;langchain4j-community-dashscope-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.0.0-beta3&lt;/version&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line">        &lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;dev.langchain4j&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;langchain4j-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.0.0-beta3&lt;/version&gt;</span><br><span class="line">        &lt;/dependency&gt;</span><br><span class="line">    &lt;/dependencies&gt;</span><br><span class="line"></span><br><span class="line">    &lt;build&gt;</span><br><span class="line">        &lt;plugins&gt;</span><br><span class="line">            &lt;plugin&gt;</span><br><span class="line">                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;</span><br><span class="line">                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;</span><br><span class="line">                &lt;configuration&gt;</span><br><span class="line">                    &lt;annotationProcessorPaths&gt;</span><br><span class="line">                        &lt;path&gt;</span><br><span class="line">                            &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">                            &lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">                        &lt;/path&gt;</span><br><span class="line">                    &lt;/annotationProcessorPaths&gt;</span><br><span class="line">                &lt;/configuration&gt;</span><br><span class="line">            &lt;/plugin&gt;</span><br><span class="line">            &lt;plugin&gt;</span><br><span class="line">                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line">                &lt;configuration&gt;</span><br><span class="line">                    &lt;excludes&gt;</span><br><span class="line">                        &lt;exclude&gt;</span><br><span class="line">                            &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;</span><br><span class="line">                            &lt;artifactId&gt;lombok&lt;/artifactId&gt;</span><br><span class="line">                        &lt;/exclude&gt;</span><br><span class="line">                    &lt;/excludes&gt;</span><br><span class="line">                &lt;/configuration&gt;</span><br><span class="line">            &lt;/plugin&gt;</span><br><span class="line">        &lt;/plugins&gt;</span><br><span class="line">    &lt;/build&gt;</span><br><span class="line"></span><br><span class="line">&lt;/project&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">langchain4j.community.dashscope.chat-model.api-key=sk-937aee4c3e***********654d04b84634d</span><br><span class="line">langchain4j.community.dashscope.chat-model.model-name=qwen-plus</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.langchain4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.memory.ChatMemory;</span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.memory.chat.MessageWindowChatMemory;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LangChain4jConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * The following components will be automatically wired into the AI Service if</span></span><br><span class="line"><span class="comment">    * available in the application context:</span></span><br><span class="line"><span class="comment">    * </span></span><br><span class="line"><span class="comment">    * ChatLanguageModel</span></span><br><span class="line"><span class="comment">    * StreamingChatLanguageModel</span></span><br><span class="line"><span class="comment">    * ChatMemory</span></span><br><span class="line"><span class="comment">    * ChatMemoryProvider</span></span><br><span class="line"><span class="comment">    * ContentRetriever</span></span><br><span class="line"><span class="comment">    * RetrievalAugmentor</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">ChatMemory <span class="title">chatMemory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> MessageWindowChatMemory.withMaxMessages(<span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.langchain4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.service.SystemMessage;</span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.service.UserMessage;</span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.service.V;</span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.service.spring.AiService;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * AI助手服务接口</span></span><br><span class="line"><span class="comment"> * 使用LangChain4j框架实现的AI服务，提供聊天和自我介绍功能</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@AiService</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Assistant</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 与AI进行愤怒风格的对话</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userMessage 用户输入的消息内容</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> AI愤怒风格的回复</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@UserMessage(&quot;你愤怒的说到：&#123;&#123;msg&#125;&#125;&quot;)</span></span><br><span class="line">    <span class="function">String <span class="title">chat</span><span class="params">(<span class="meta">@V(&quot;msg&quot;)</span> String userMessage)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取AI的自我介绍信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 包含姓名、年龄、性别、住址等信息的Person对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@SystemMessage(&quot;你是美籍华裔&quot;)</span></span><br><span class="line">    <span class="meta">@UserMessage(&quot;请自我介绍，包含姓名、年龄、性别、住址等信息&quot;)</span></span><br><span class="line">    <span class="function">Person <span class="title">intro</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.langchain4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> dev.langchain4j.model.output.structured.Description;</span><br><span class="line"><span class="keyword">import</span> lombok.AllArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"><span class="keyword">import</span> lombok.NoArgsConstructor;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 人员信息实体类</span></span><br><span class="line"><span class="comment"> * 用于存储AI助手的个人信息</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@Description(&quot;Person人员信息类&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="comment">/** 姓名 */</span></span><br><span class="line">    <span class="meta">@Description(&quot;姓名&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/** 年龄 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/** 性别 */</span></span><br><span class="line">    <span class="keyword">private</span> String gender;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/** 住址 */</span></span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.langchain4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestParam;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> jakarta.annotation.Resource;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 聊天控制器</span></span><br><span class="line"><span class="comment"> * 提供与AI助手交互的RESTful API接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ChatController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> Assistant assistant;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 处理聊天请求</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> message 用户消息，默认值为&quot;你欠的钱什么时候还？&quot;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> AI助手的回复</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/chat&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">model</span><span class="params">(<span class="meta">@RequestParam(value = &quot;message&quot;, defaultValue = &quot;你欠的钱什么时候还？&quot;)</span> String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> assistant.chat(message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取AI助手的自我介绍信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 包含个人信息的Person对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/intro&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Person <span class="title">intro</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> assistant.intro();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Boot%E9%9B%86%E6%88%90LangChain4j"><span class="toc-number">1.</span> <span class="toc-text">Spring Boot集成LangChain4j</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Boot%E9%9B%86%E6%88%90AiServices"><span class="toc-number">2.</span> <span class="toc-text">Spring Boot集成AiServices</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&text=Spring Boot集成LangChain4j"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&is_video=false&description=Spring Boot集成LangChain4j"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring Boot集成LangChain4j&body=Check out this article: https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&title=Spring Boot集成LangChain4j"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/29/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/Spring%20Boot%E9%9B%86%E6%88%90LangChain4j/&name=Spring Boot集成LangChain4j&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

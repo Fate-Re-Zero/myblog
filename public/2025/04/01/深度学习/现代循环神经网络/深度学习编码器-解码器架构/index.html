@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="编码器-解码器架构正如我们在 机器翻译与数据集中所讨论的，机器翻译是序列转换模型的一个核心问题，其输入和输出都是长度可变的序列。为了处理这种类型的输入和输出，我们可以设计一个包含两个主要组件的架构：第一个组件是一个编码器（encoder）：它接受一个长度可变的序列作为输入，并将其转换为具有固定形状的编码状态。第二个组件是解码器（decoder）：它将固定形状的编码状态映射到长度可变的序列。这被称为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编码器-解码器架构">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="编码器-解码器架构正如我们在 机器翻译与数据集中所讨论的，机器翻译是序列转换模型的一个核心问题，其输入和输出都是长度可变的序列。为了处理这种类型的输入和输出，我们可以设计一个包含两个主要组件的架构：第一个组件是一个编码器（encoder）：它接受一个长度可变的序列作为输入，并将其转换为具有固定形状的编码状态。第二个组件是解码器（decoder）：它将固定形状的编码状态映射到长度可变的序列。这被称为">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-01T06:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:13:10.760Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>编码器-解码器架构</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%97%A8%E6%8E%A7%E5%BE%AA%E7%8E%AF%E5%8D%95%E5%85%83%EF%BC%88GRU%EF%BC%89/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&text=编码器-解码器架构"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&is_video=false&description=编码器-解码器架构"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=编码器-解码器架构&body=Check out this article: https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&name=编码器-解码器架构&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">编码器-解码器架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8"><span class="toc-number">1.1.</span> <span class="toc-text">编码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="toc-number">1.2.</span> <span class="toc-text">解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E7%BC%96%E7%A0%81%E5%99%A8%E5%92%8C%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">合并编码器和解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        编码器-解码器架构
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-01T06:00:00.000Z" itemprop="datePublished">2025-04-01</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/" class="leancloud-visitors" data-flag-title="编码器-解码器架构" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="编码器-解码器架构"><a href="#编码器-解码器架构" class="headerlink" title="编码器-解码器架构"></a>编码器-解码器架构</h1><p>正如我们在 机器翻译与数据集中所讨论的，<br>机器翻译是序列转换模型的一个核心问题，<br>其输入和输出都是长度可变的序列。<br>为了处理这种类型的输入和输出，<br>我们可以设计一个包含两个主要组件的架构：<br>第一个组件是一个<em>编码器</em>（encoder）：<br>它接受一个长度可变的序列作为输入，<br>并将其转换为具有固定形状的编码状态。<br>第二个组件是<em>解码器</em>（decoder）：<br>它将固定形状的编码状态映射到长度可变的序列。<br>这被称为<em>编码器-解码器</em>（encoder-decoder）架构，<br>如 fig_encoder_decoder 所示。</p>
+<p>（图：编码器-解码器架构）</p>
+<p>我们以英语到法语的机器翻译为例：<br>给定一个英文的输入序列：“They”“are”“watching”“.”。<br>首先，这种“编码器－解码器”架构将长度可变的输入序列编码成一个“状态”，<br>然后对该状态进行解码，<br>一个词元接着一个词元地生成翻译后的序列作为输出：<br>“Ils”“regordent”“.”。<br>由于“编码器－解码器”架构是形成后续章节中不同序列转换模型的基础，<br>因此本节将把这个架构转换为接口方便后面的代码实现。</p>
+<h2 id="编码器"><a href="#编码器" class="headerlink" title="编码器"></a>编码器</h2><p>在编码器接口中，我们只指定长度可变的序列作为编码器的输入<code>X</code>。<br>任何继承这个<code>Encoder</code>基类的模型将完成代码实现。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Encoder</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器-解码器架构的基本编码器接口&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Encoder, self).__init__(**kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, X, *args</span>):</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<h2 id="解码器"><a href="#解码器" class="headerlink" title="解码器"></a>解码器</h2><p>在下面的解码器接口中，我们新增一个<code>init_state</code>函数，<br>用于将编码器的输出（<code>enc_outputs</code>）转换为编码后的状态。<br>注意，此步骤可能需要额外的输入，例如：输入序列的有效长度，<br>这在 subsec_mt_data_loading中进行了解释。<br>为了逐个地生成长度可变的词元序列，<br>解码器在每个时间步都会将输入<br>（例如：在前一时间步生成的词元）和编码后的状态<br>映射成当前时间步的输出词元。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Decoder</span>(<span class="params">nn.Block</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器-解码器架构的基本解码器接口&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Decoder, self).__init__(**kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">init_state</span>(<span class="params">self, enc_outputs, *args</span>):</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, X, state</span>):</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Decoder</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器-解码器架构的基本解码器接口&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Decoder, self).__init__(**kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">init_state</span>(<span class="params">self, enc_outputs, *args</span>):</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, X, state</span>):</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<h2 id="合并编码器和解码器"><a href="#合并编码器和解码器" class="headerlink" title="合并编码器和解码器"></a>合并编码器和解码器</h2><p>总而言之，“编码器-解码器”架构包含了一个编码器和一个解码器，<br>并且还拥有可选的额外的参数。<br>在前向传播中，编码器的输出用于生成编码状态，<br>这个状态又被解码器作为其输入的一部分。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EncoderDecoder</span>(<span class="params">nn.Block</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器-解码器架构的基类&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, encoder, decoder, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(EncoderDecoder, self).__init__(**kwargs)</span><br><span class="line">        self.encoder = encoder</span><br><span class="line">        self.decoder = decoder</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, enc_X, dec_X, *args</span>):</span></span><br><span class="line">        enc_outputs = self.encoder(enc_X, *args)</span><br><span class="line">        dec_state = self.decoder.init_state(enc_outputs, *args)</span><br><span class="line">        <span class="keyword">return</span> self.decoder(dec_X, dec_state)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EncoderDecoder</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;编码器-解码器架构的基类&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, encoder, decoder, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(EncoderDecoder, self).__init__(**kwargs)</span><br><span class="line">        self.encoder = encoder</span><br><span class="line">        self.decoder = decoder</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, enc_X, dec_X, *args</span>):</span></span><br><span class="line">        enc_outputs = self.encoder(enc_X, *args)</span><br><span class="line">        dec_state = self.decoder.init_state(enc_outputs, *args)</span><br><span class="line">        <span class="keyword">return</span> self.decoder(dec_X, dec_state)</span><br></pre></td></tr></table></figure>
+
+<p>“编码器－解码器”体系架构中的术语<em>状态</em><br>会启发人们使用具有状态的神经网络来实现该架构。<br>在下一节中，我们将学习如何应用循环神经网络，<br>来设计基于“编码器－解码器”架构的序列转换模型。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>“编码器－解码器”架构可以将长度可变的序列作为输入和输出，因此适用于机器翻译等序列转换问题。</li>
+<li>编码器将长度可变的序列作为输入，并将其转换为具有固定形状的编码状态。</li>
+<li>解码器将具有固定形状的编码状态映射为长度可变的序列。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">编码器-解码器架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8"><span class="toc-number">1.1.</span> <span class="toc-text">编码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="toc-number">1.2.</span> <span class="toc-text">解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E7%BC%96%E7%A0%81%E5%99%A8%E5%92%8C%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">合并编码器和解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&text=编码器-解码器架构"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&is_video=false&description=编码器-解码器架构"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=编码器-解码器架构&body=Check out this article: https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&title=编码器-解码器架构"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/&name=编码器-解码器架构&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

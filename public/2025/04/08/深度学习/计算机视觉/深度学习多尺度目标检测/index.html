@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="多尺度目标检测在 锚框中，我们以输入图像的每个像素为中心，生成了多个锚框。基本而言，这些锚框代表了图像不同区域的样本。然而，如果为每个像素都生成的锚框，我们最终可能会得到太多需要计算的锚框。想象一个$561 \times 728$的输入图像，如果以每个像素为中心生成五个形状不同的锚框，就需要在图像上标记和预测超过200万个锚框（$561 \times 728 \times 5$）。 多尺度锚框减少">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多尺度目标检测">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="多尺度目标检测在 锚框中，我们以输入图像的每个像素为中心，生成了多个锚框。基本而言，这些锚框代表了图像不同区域的样本。然而，如果为每个像素都生成的锚框，我们最终可能会得到太多需要计算的锚框。想象一个$561 \times 728$的输入图像，如果以每个像素为中心生成五个形状不同的锚框，就需要在图像上标记和预测超过200万个锚框（$561 \times 728 \times 5$）。 多尺度锚框减少">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-08T05:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:18:35.844Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>多尺度目标检测</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8D%95%E5%8F%91%E5%A4%9A%E6%A1%86%E6%A3%80%E6%B5%8B%EF%BC%88SSD%EF%BC%89/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%BE%B9%E7%95%8C%E6%A1%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&text=多尺度目标检测"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&is_video=false&description=多尺度目标检测"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=多尺度目标检测&body=Check out this article: https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&name=多尺度目标检测&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B"><span class="toc-number">1.</span> <span class="toc-text">多尺度目标检测</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E9%94%9A%E6%A1%86"><span class="toc-number">1.1.</span> <span class="toc-text">多尺度锚框</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E6%A3%80%E6%B5%8B"><span class="toc-number">1.2.</span> <span class="toc-text">多尺度检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        多尺度目标检测
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-08T05:00:00.000Z" itemprop="datePublished">2025-04-08</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" class="leancloud-visitors" data-flag-title="多尺度目标检测" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="多尺度目标检测"><a href="#多尺度目标检测" class="headerlink" title="多尺度目标检测"></a>多尺度目标检测</h1><p>在 锚框中，我们以输入图像的每个像素为中心，生成了多个锚框。<br>基本而言，这些锚框代表了图像不同区域的样本。<br>然而，如果为每个像素都生成的锚框，我们最终可能会得到太多需要计算的锚框。<br>想象一个$561 \times 728$的输入图像，如果以每个像素为中心生成五个形状不同的锚框，就需要在图像上标记和预测超过200万个锚框（$561 \times 728 \times 5$）。</p>
+<h2 id="多尺度锚框"><a href="#多尺度锚框" class="headerlink" title="多尺度锚框"></a>多尺度锚框</h2><p>减少图像上的锚框数量并不困难。<br>比如，我们可以在输入图像中均匀采样一小部分像素，并以它们为中心生成锚框。<br>此外，在不同尺度下，我们可以生成不同数量和不同大小的锚框。<br>直观地说，比起较大的目标，较小的目标在图像上出现的可能性更多样。<br>例如，$1 \times 1$、$1 \times 2$和$2 \times 2$的目标可以分别以4、2和1种可能的方式出现在$2 \times 2$图像上。<br>因此，当使用较小的锚框检测较小的物体时，我们可以采样更多的区域，而对于较大的物体，我们可以采样较少的区域。</p>
+<p>为了演示如何在多个尺度下生成锚框，让我们先读取一张图像。<br>它的高度和宽度分别为561和728像素。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">img = d2l.plt.imread(<span class="string">&#x27;../img/catdog.jpg&#x27;</span>)</span><br><span class="line">h, w = img.shape[:<span class="number">2</span>]</span><br><span class="line">h, w</span><br></pre></td></tr></table></figure>
+
+<p>回想一下，在 sec_conv_layer中，我们将卷积图层的二维数组输出称为特征图。<br>通过定义特征图的形状，我们可以确定任何图像上均匀采样锚框的中心。</p>
+<p><code>display_anchors</code>函数定义如下。<br>我们在特征图（<code>fmap</code>）上生成锚框（<code>anchors</code>），每个单位（像素）作为锚框的中心。<br>由于锚框中的$(x, y)$轴坐标值（<code>anchors</code>）已经被除以特征图（<code>fmap</code>）的宽度和高度，因此这些值介于0和1之间，表示特征图中锚框的相对位置。</p>
+<p>由于锚框（<code>anchors</code>）的中心分布于特征图（<code>fmap</code>）上的所有单位，因此这些中心必须根据其相对空间位置在任何输入图像上<em>均匀</em>分布。<br>更具体地说，给定特征图的宽度和高度<code>fmap_w</code>和<code>fmap_h</code>，以下函数将<em>均匀地</em>对任何输入图像中<code>fmap_h</code>行和<code>fmap_w</code>列中的像素进行采样。<br>以这些均匀采样的像素为中心，将会生成大小为<code>s</code>（假设列表<code>s</code>的长度为1）且宽高比（<code>ratios</code>）不同的锚框。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">display_anchors</span>(<span class="params">fmap_w, fmap_h, s</span>):</span></span><br><span class="line">    d2l.set_figsize()</span><br><span class="line">    <span class="comment"># 前两个维度上的值不影响输出</span></span><br><span class="line">    fmap = d2l.zeros((<span class="number">1</span>, <span class="number">10</span>, fmap_h, fmap_w))</span><br><span class="line">    anchors = d2l.multibox_prior(fmap, sizes=s, ratios=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">0.5</span>])</span><br><span class="line">    bbox_scale = d2l.tensor((w, h, w, h))</span><br><span class="line">    d2l.show_bboxes(d2l.plt.imshow(img).axes,</span><br><span class="line">                    anchors[<span class="number">0</span>] * bbox_scale)</span><br></pre></td></tr></table></figure>
+
+<p>首先，让我们考虑探测小目标。<br>为了在显示时更容易分辨，在这里具有不同中心的锚框不会重叠：<br>锚框的尺度设置为0.15，特征图的高度和宽度设置为4。<br>我们可以看到，图像上4行和4列的锚框的中心是均匀分布的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display_anchors(fmap_w=<span class="number">4</span>, fmap_h=<span class="number">4</span>, s=[<span class="number">0.15</span>])</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们将特征图的高度和宽度减小一半，然后使用较大的锚框来检测较大的目标。<br>当尺度设置为0.4时，一些锚框将彼此重叠。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display_anchors(fmap_w=<span class="number">2</span>, fmap_h=<span class="number">2</span>, s=[<span class="number">0.4</span>])</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们进一步将特征图的高度和宽度减小一半，然后将锚框的尺度增加到0.8。<br>此时，锚框的中心即是图像的中心。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display_anchors(fmap_w=<span class="number">1</span>, fmap_h=<span class="number">1</span>, s=[<span class="number">0.8</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="多尺度检测"><a href="#多尺度检测" class="headerlink" title="多尺度检测"></a>多尺度检测</h2><p>既然我们已经生成了多尺度的锚框，我们就将使用它们来检测不同尺度下各种大小的目标。<br>下面，我们介绍一种基于CNN的多尺度目标检测方法，将在 单发多框检测（SSD）中实现。</p>
+<p>在某种规模上，假设我们有$c$张形状为$h \times w$的特征图。<br>使用 subsec_multiscale-anchor-boxes中的方法，我们生成了$hw$组锚框，其中每组都有$a$个中心相同的锚框。<br>例如，在 subsec_multiscale-anchor-boxes实验的第一个尺度上，给定10个（通道数量）$4 \times 4$的特征图，我们生成了16组锚框，每组包含3个中心相同的锚框。<br>接下来，每个锚框都根据真实值边界框来标记了类和偏移量。<br>在当前尺度下，目标检测模型需要预测输入图像上$hw$组锚框类别和偏移量，其中不同组锚框具有不同的中心。</p>
+<p>假设此处的$c$张特征图是CNN基于输入图像的正向传播算法获得的中间输出。<br>既然每张特征图上都有$hw$个不同的空间位置，那么相同空间位置可以看作含有$c$个单元。<br>根据 sec_conv_layer中对感受野的定义，特征图在相同空间位置的$c$个单元在输入图像上的感受野相同：<br>它们表征了同一感受野内的输入图像信息。<br>因此，我们可以将特征图在同一空间位置的$c$个单元变换为使用此空间位置生成的$a$个锚框类别和偏移量。<br>本质上，我们用输入图像在某个感受野区域内的信息，来预测输入图像上与该区域位置相近的锚框类别和偏移量。</p>
+<p>当不同层的特征图在输入图像上分别拥有不同大小的感受野时，它们可以用于检测不同大小的目标。<br>例如，我们可以设计一个神经网络，其中靠近输出层的特征图单元具有更宽的感受野，这样它们就可以从输入图像中检测到较大的目标。</p>
+<p>简言之，我们可以利用深层神经网络在多个层次上对图像进行分层表示，从而实现多尺度目标检测。<br>在 单发多框检测（SSD），我们将通过一个具体的例子来说明它是如何工作的。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>在多个尺度下，我们可以生成不同尺寸的锚框来检测不同尺寸的目标。</li>
+<li>通过定义特征图的形状，我们可以决定任何图像上均匀采样的锚框的中心。</li>
+<li>我们使用输入图像在某个感受野区域内的信息，来预测输入图像上与该区域位置相近的锚框类别和偏移量。</li>
+<li>我们可以通过深入学习，在多个层次上的图像分层表示进行多尺度目标检测。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B"><span class="toc-number">1.</span> <span class="toc-text">多尺度目标检测</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E9%94%9A%E6%A1%86"><span class="toc-number">1.1.</span> <span class="toc-text">多尺度锚框</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E6%A3%80%E6%B5%8B"><span class="toc-number">1.2.</span> <span class="toc-text">多尺度检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&text=多尺度目标检测"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&is_video=false&description=多尺度目标检测"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=多尺度目标检测&body=Check out this article: https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&title=多尺度目标检测"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/&name=多尺度目标检测&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

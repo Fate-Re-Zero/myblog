@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一.标准参数选项：    (1).常用命令：        -version，-help 二.-X类型参数：    java -X命令可以查看所有-X类型命令    -Xbatch           禁用后台编译    -Xbootclasspath&#x2F;a:&lt;以 ; 分隔的目录和 zip&#x2F;jar 文件&gt;                      附加在引导类路径末尾    -Xchec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM运行时参数">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一.标准参数选项：    (1).常用命令：        -version，-help 二.-X类型参数：    java -X命令可以查看所有-X类型命令    -Xbatch           禁用后台编译    -Xbootclasspath&#x2F;a:&lt;以 ; 分隔的目录和 zip&#x2F;jar 文件&gt;                      附加在引导类路径末尾    -Xchec">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-06-04T08:15:38.000Z">
+<meta property="article:modified_time" content="2025-04-24T15:14:36.715Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>JVM运行时参数</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/06/11/Redis/Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/06/01/JVM%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7%E4%B8%8E%E8%B0%83%E4%BC%98/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&text=JVM运行时参数"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&is_video=false&description=JVM运行时参数"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JVM运行时参数&body=Check out this article: https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&name=JVM运行时参数&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        JVM运行时参数
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-06-04T08:15:38.000Z" itemprop="datePublished">2021-06-04</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/" class="leancloud-visitors" data-flag-title="JVM运行时参数" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>一.标准参数选项：<br>    (1).常用命令：<br>        -version，-help</p>
+<p>二.-X类型参数：<br>    java -X命令可以查看所有-X类型命令<br>    -Xbatch           禁用后台编译<br>    -Xbootclasspath/a:&lt;以 ; 分隔的目录和 zip/jar 文件&gt;<br>                      附加在引导类路径末尾<br>    -Xcheck:jni       对 JNI 函数执行其他检查<br>    -Xcomp            在首次调用时强制编译方法<br>    -Xdebug           为实现向后兼容而提供<br>    -Xdiag            显示附加诊断消息<br>    -Xfuture          启用最严格的检查，预期将来的默认值<br>    -Xint             仅解释模式执行<br>    -Xinternalversion<br>                      显示比 -version 选项更详细的 JVM<br>                      版本信息<br>    -Xloggc:&lt;文件&gt;    将 GC 状态记录在文件中（带时间戳）<br>    -Xmixed           混合模式执行（默认值）<br>    -Xmn&lt;大小&gt;        为年轻代（新生代）设置初始和最大堆大小<br>                      （以字节为单位）<br>    -Xms&lt;大小&gt;        设置初始 Java 堆大小<br>    -Xmx&lt;大小&gt;        设置最大 Java 堆大小<br>    -Xnoclassgc       禁用类垃圾收集<br>    -Xrs              减少 Java/VM 对操作系统信号的使用（请参见文档）<br>    -Xshare:auto      在可能的情况下使用共享类数据（默认值）<br>    -Xshare:off       不尝试使用共享类数据<br>    -Xshare:on        要求使用共享类数据，否则将失败。<br>    -XshowSettings    显示所有设置并继续<br>    -XshowSettings:all<br>                      显示所有设置并继续<br>    -XshowSettings:locale<br>                      显示所有与区域设置相关的设置并继续<br>    -XshowSettings:properties<br>                      显示所有属性设置并继续<br>    -XshowSettings:vm<br>                      显示所有与 vm 相关的设置并继续<br>    -XshowSettings:system<br>                      （仅 Linux）显示主机系统或容器<br>                      配置并继续<br>    -Xss&lt;大小&gt;        设置 Java 线程堆栈大小<br>    -Xverify          设置字节码验证器的模式</p>
+<pre><code>(1).重要参数解释：
+ -Xint             仅解释模式执行
+ -Xcomp            在首次调用时强制编译方法
+ -Xmixed           混合模式执行（默认值）
+
+ -Xmn&lt;大小&gt;        为年轻代（新生代）设置初始和最大堆大小（以字节为单位）
+ -Xms&lt;大小&gt;        设置初始 Java 堆大小，等价于-XX:InitialHeapSize
+ -Xmx&lt;大小&gt;        设置最大 Java 堆大小，等价于-XX:MaxHeapSize
+ -Xss&lt;大小&gt;        设置 Java 线程堆栈大小，等价于-XX:ThreadStackSize
+</code></pre>
+<p>三.-XX类型参数：<br>    -XX:+PrintFlagsFinal   输出所有JVM参数名称和默认值</p>
+<p>四.添加JVM参数：<br>    运行jar包：java -Xms500m -Xmx500m -xx:+PrintGCDetails -xx:+PrintGCTimeStamps -jar demo.jar<br>    程序运行过程中：jinfo -flag 参数 值 <pid> 只有部分值支持修改</pid></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\shuaixiang&gt;jinfo -flag +UseG1GC <span class="number">14228</span></span><br><span class="line">Exception in thread <span class="string">&quot;main&quot;</span> com.sun.tools.attach.AttachOperationFailedException: flag <span class="string">&#x27;UseG1GC&#x27;</span> cannot be changed</span><br><span class="line">        at jdk.attach/sun.tools.attach.VirtualMachineImpl.execute(VirtualMachineImpl.java:<span class="number">130</span>)</span><br><span class="line">        at jdk.attach/sun.tools.attach.HotSpotVirtualMachine.executeCommand(HotSpotVirtualMachine.java:<span class="number">309</span>)</span><br><span class="line">        at jdk.attach/sun.tools.attach.HotSpotVirtualMachine.setFlag(HotSpotVirtualMachine.java:<span class="number">282</span>)</span><br><span class="line">        at jdk.jcmd/sun.tools.jinfo.JInfo.flag(JInfo.java:<span class="number">152</span>)</span><br><span class="line">        at jdk.jcmd/sun.tools.jinfo.JInfo.main(JInfo.java:<span class="number">127</span>)</span><br></pre></td></tr></table></figure>
+
+<p>五.常用的JVM参数选项：<br>    (1).打印设置的XX选项及值:<br>        -XX:+PrintFlagsFinal   打印出XX选项在运行程序时生效的值<br>        jinfo -flag UseParNewGC <pid>  查看具体某项的值<br>    (2).堆，栈，方法区等内存大小的设置：<br>        1.栈：<br>            -Xss128k        设置 Java 线程的栈大小，等价于-XX:ThreadStackSize<br>        2.堆内存：<br>            -Xmn&lt;大小&gt;                        设置年轻代（新生代）大小，官方推荐配置为整个堆的3/8<br>            -Xms&lt;大小&gt;                        设置初始 Java 堆大小，等价于-XX:InitialHeapSize<br>            -Xmx&lt;大小&gt;                        设置最大 Java 堆大小，等价于-XX:MaxHeapSize<br>            -XX:NewSize=1024m                 设置年轻代初始值为1024m<br>            -XX:MaxNewSize=1024m              设置年轻代最大值为1024m<br>            -XX:SurvivorRatio=8               设置年轻代中Eden区与一个Survivor区的比值，默认为8<br>            -XX:+UseAdaptiveSizePolicy        自动选择新生代各区大小比例（默认是开启状态，会对Eden，Survivor的比例自动分配）<br>            // 若想禁用除了加上-XX:-UseAdaptiveSizePolicy外，还需要加上-XX:SurvivorRatio=8<br>            -XX:NewRatio=4                    设置老年代与年轻代（包括一个Eden和两个Survivor区）的比值,默认2：1<br>            -XX:PretenureSizeThreadshold=1024 设置让大于此阈值的对象直接分配在老年代，单位为字节，只对Serial,ParNew收集器有效<br>            -XX:MaxTenuringThreshold=15       默认值为15，新生代每次MinorGC后，还存活的对象年龄 + 1，当对象的年龄大于这个值时就会进入老年代<br>            -XX:+PrintTenuringDistribution    让JVM在每次MinorGC后打印出当前使用的Survivor中对象的年龄分布<br>            -XX:TargetSurvivorRatio           表示MinorGC结束后Survivor区域中占用空间的期望比例<br>        3.永久代（jdk7）,元空间（jdk8+）:<br>            永久代：-XX:PermSize=256m      设置永久代初始值为256m<br>                   -XX:MaxPermSize=256m   设置永久代最大值为256m<br>            元空间：-XX:MetaspaceSize      初始空间大小<br>                   -XX:MaxMetaspaceSize   最大空间，默认没有限制<br>                   -XX:+UseCompressedOops 压缩对象指针<br>                   -XX:+UseCompressedClassPointers    压缩类指针<br>                   -XX:CompressedClassSpaceSize       设置Klass Metaspace的大小，默认1G<br>        4.直接内存：-XX:MaxDirectMemorySize      指定DirectMemory容量，若未指定，则默认与java堆最大值一样<br>    (3).OMM相关参数：<br>        -XX:+HeapDumpOnOutOfMemoryError   表示在内存出现OOM的时候，把Heap转存（Dump）到文件以便后续分析<br>        -XX:+HeapDumpBeforeFullGC         表示在出现FullGC之前，生成Heap转储文件<br>        -XX:HeapDumpPath=d:\heapdumpinstance.hprof  指定heap转储文件路径<br>        -XX:OnOutOfMemoryError            指定一个可行性程序或者脚本路径，当发生OOM的时候，去执行这个脚本<br>        例如：-XX:OnOutOfMemoryError=/opt/Server/restart.sh   发生OOM，执行restart.sh文件进行重启<br>    (4).垃圾收集相关参数：<br>        -XX:+PrintCommandLineFlags       查看命令行相关参数（包含使用的垃圾回收器）<br>        jinfo -flag 相关垃圾回收器参数 <pid><br>        1.SerialGC与SerialOldGC(MSC):-XX:+UseSerialGC(主要应用于特定的低配环境，单核cup的情景)<br>        2.ParNewGC:-XX:+UseParNewGC(并行的垃圾回收器),-XX:ParallelGCThreads=N(设置线程数量, 8个CPU内默认和CPU数量相同)<br>        3.ParallelScavengeGC(吞吐量优先)与ParallelOldGC:<br>          -XX:+UseParallelGC与-XX:+UseParallelOldGC搭配，这两可以互相激活，<br>          -XX:ParallelGCThreads=N当CPU个数大于8个时，ParallelGCThreads的值等于3+[5 * CPU_Count/8]<br>          -XX:MaxGCPauseMillis 设置垃圾收集的最大停顿时间（即STW的时间），单位毫秒<br>          为了尽可能的把停顿时间控制在MaxGCPauseMillis以内，收集器在工作时会调整java堆大小或者其他的一些参数，<br>          该参数谨慎使用<br>          -XX:GCTimeRatio=N 设置垃圾收集时间占总时间的比例（1 / (N + 1)）。用于衡量吞吐量的大小<br>          取值范围（0，100），默认值99，也就是垃圾回收时间不超过1%<br>          与上面的MaxGCPauseMillis参数有一定的矛盾性。暂停时间越长，Radio参数就容易超过设定比例<br>          -XX:+UseAdaptiveSizePolicy 设置Parallel Scavenge收集器具有自适应调节策略<br>        4.CMSGC:-XX:+UseConcMarkSweepGC (HostPort虚拟机第一款并发的垃圾回收器，用户线程和垃圾回收线程可以同时执行)<br>          可惜的是CMS只能与ParNewGC和SerialGC搭配，不能与ParallelGC搭配<br>          使用的是标记清除算法，会导致内存碎片化的问题，可以使用-XX:+UseCMSCompactAtFullCollection在Full GC之后进行碎片化的整理，但是这样会导致STW的时间会更长<br>          在JDK9已经被标记为过时了，在JDK14中已经被拿掉了<br>        5.G1：-XX:+UseG1GC（分代收集，堆空间被分为一个一个的Region）<br>          -XX:G1HeapRegionSize  设置每个Region的大小，值是2的幂，范围在1MB到32MB之间，目标是根据java堆大小划分出约2048个<br>          区域，默认是堆内存的1/2000<br>          -XX:MaxGCPauseMillis 设置垃圾收集的最大停顿时间（即STW的时间），默认值200ms<br>          -XX:ParallelGCThreads=N  设置STW时GC线程数量,最多设置为8个<br>          -XX:ConcGCThreads  设置并发标记的线程数，将设置为ParallelGCThreads的1/4左右<br>          -XX:InitiatingHeapOccupancyPercent 设置触发并发GC周期的Java堆占用率阈值，超过此值，就触发GC<br>          -XX:G1NewSizePercent、-XX:G1MaxNewSizePercent  设置新生代占用整个堆内存的最小百分比<br>          （默认5%）,最大百分比（默认60%）<br>          -XX:G1ReservePercent=10保留内存区域，防止to space(Survivor中的to区)溢出<br>    垃圾回收器组合关系图：</pid></pid></p>
+<pre><code>(5).GC日志相关参数：
+    -verbose:gc或者-XX:+PrintGC 表示打开简化的GC日志
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[GC (Allocation Failure)  16302K-&gt;14914K(59392K), <span class="number">0.0044727</span> secs]</span><br><span class="line">[GC (Allocation Failure)  31234K-&gt;31192K(59392K), <span class="number">0.0059224</span> secs]</span><br><span class="line">[<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span>  31192K-&gt;30961<span class="title">K</span><span class="params">(59392K)</span>, 0.0094891 secs]</span></span><br><span class="line"><span class="function">[Full <span class="title">GC</span> <span class="params">(Ergonomics)</span>  47312K-&gt;46963<span class="title">K</span><span class="params">(59392K)</span>, 0.0071196 secs]</span></span><br></pre></td></tr></table></figure>
+<pre><code>    -XX:+PrintGCDetails        在发生垃圾回收时打印内存回收详细的日志，并在进程退出时输出当前的内存各区域分配的情况
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[GC (Allocation Failure) [PSYoungGen: 16302K-&gt;2016K(18432K)] 16302K-&gt;14850K(59392K), <span class="number">0.0056557</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line">[GC (Allocation Failure) [PSYoungGen: 18336K-&gt;2032K(18432K)] 31170K-&gt;31204K(59392K), <span class="number">0.0070365</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line">[<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 2032K-&gt;0<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 29172K-&gt;30961<span class="title">K</span><span class="params">(40960K)</span>] 31204K-&gt;30961<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0074910 secs] [Times: user</span>=<span class="number">0.14</span> sys=<span class="number">0.02</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line">[<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 16350K-&gt;6100<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 30961K-&gt;40862<span class="title">K</span><span class="params">(40960K)</span>] 47312K-&gt;46963<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0075273 secs] [Times: user</span>=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line">Heap</span><br><span class="line"> PSYoungGen      total 18432K, used 9983K [<span class="number">0x00000000fec00000</span>, <span class="number">0x0000000100000000</span>, <span class="number">0x0000000100000000</span>)</span><br><span class="line">  eden space 16384K, <span class="number">60</span>% used [<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000ff5bfdc0</span>,<span class="number">0x00000000ffc00000</span>)</span><br><span class="line">  from space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffe00000</span>,<span class="number">0x00000000ffe00000</span>,<span class="number">0x0000000100000000</span>)</span><br><span class="line">  to   space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffe00000</span>)</span><br><span class="line"> ParOldGen       total 40960K, used 40862K [<span class="number">0x00000000fc400000</span>, <span class="number">0x00000000fec00000</span>, <span class="number">0x00000000fec00000</span>)</span><br><span class="line">  object space 40960K, <span class="number">99</span>% used [<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000febe7be0</span>,<span class="number">0x00000000fec00000</span>)</span><br><span class="line"> Metaspace       used 3454K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 378<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br></pre></td></tr></table></figure>
+<pre><code>    -XX:+PrintGCTimeStamps(不可以单独使用):输出GC发生时的时间戳 -XX:+PrintGCDetails
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">4.489</span>: [GC (Allocation Failure) [PSYoungGen: 16302K-&gt;2032K(18432K)] 16302K-&gt;14858K(59392K), <span class="number">0.0058347</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line"><span class="number">9.539</span>: [GC (Allocation Failure) [PSYoungGen: 18352K-&gt;2016K(18432K)] 31178K-&gt;31160K(59392K), <span class="number">0.0069080</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line"><span class="number">9.546</span>: [<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 2016K-&gt;0<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 29144K-&gt;30961<span class="title">K</span><span class="params">(40960K)</span>] 31160K-&gt;30961<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0076182 secs] [Times: user</span>=<span class="number">0.16</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line"><span class="number">14.521</span>: [<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 16350K-&gt;6100<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 30961K-&gt;40862<span class="title">K</span><span class="params">(40960K)</span>] 47312K-&gt;46963<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0071428 secs] [Times: user</span>=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br></pre></td></tr></table></figure>
+<pre><code>    -XX:+PrintGCDateStamps(不可以单独使用)：输出GC发生的日期 -XX:+PrintGCDetails
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2022</span>-<span class="number">06</span>-04T23:<span class="number">20</span>:<span class="number">35.268</span>+0800: [GC (Allocation Failure) [PSYoungGen: 16302K-&gt;2016K(18432K)] 16302K-&gt;14890K(59392K), <span class="number">0.0979226</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.10</span> secs] </span><br><span class="line"><span class="number">2022</span>-<span class="number">06</span>-04T23:<span class="number">20</span>:<span class="number">40.410</span>+0800: [GC (Allocation Failure) [PSYoungGen: 18336K-&gt;2008K(18432K)] 31210K-&gt;31192K(59392K), <span class="number">0.0048006</span> secs] [Times: user=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.00</span> secs] </span><br><span class="line"><span class="number">2022</span>-<span class="number">06</span>-04T23:<span class="number">20</span>:<span class="number">40.415</span>+0800: [<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 2008K-&gt;0<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 29184K-&gt;30963<span class="title">K</span><span class="params">(40960K)</span>] 31192K-&gt;30963<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0086367 secs] [Times: user</span>=<span class="number">0.16</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br><span class="line"><span class="number">2022</span>-<span class="number">06</span>-04T23:<span class="number">20</span>:<span class="number">45.483</span>+0800: [<span class="function">Full <span class="title">GC</span> <span class="params">(Ergonomics)</span> [PSYoungGen: 16322K-&gt;6501<span class="title">K</span><span class="params">(18432K)</span>] [ParOldGen: 30963K-&gt;40764<span class="title">K</span><span class="params">(40960K)</span>] 47286K-&gt;47265<span class="title">K</span><span class="params">(59392K)</span>, [Metaspace: 3448K-&gt;3448<span class="title">K</span><span class="params">(1056768K)</span>], 0.0116466 secs] [Times: user</span>=<span class="number">0.00</span> sys=<span class="number">0.00</span>, real=<span class="number">0.01</span> secs] </span><br></pre></td></tr></table></figure>
+<pre><code>    -XX:+PrintHeapAtGC    每一次GC前和GC后，都打印堆信息
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations=<span class="number">1</span> (full <span class="number">0</span>):</span><br><span class="line"> PSYoungGen      total 18432K, used 16302K [<span class="number">0x00000000fec00000</span>, <span class="number">0x0000000100000000</span>, <span class="number">0x0000000100000000</span>)</span><br><span class="line">  eden space 16384K, <span class="number">99</span>% used [<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000ffbeb818</span>,<span class="number">0x00000000ffc00000</span>)</span><br><span class="line">  from space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffe00000</span>,<span class="number">0x00000000ffe00000</span>,<span class="number">0x0000000100000000</span>)</span><br><span class="line">  to   space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffe00000</span>)</span><br><span class="line"> ParOldGen       total 40960K, used 0K [<span class="number">0x00000000fc400000</span>, <span class="number">0x00000000fec00000</span>, <span class="number">0x00000000fec00000</span>)</span><br><span class="line">  object space 40960K, <span class="number">0</span>% used [<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000fec00000</span>)</span><br><span class="line"> Metaspace       used 3447K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 377<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br><span class="line"><span class="class"><span class="title">Heap</span> <span class="title">after</span> <span class="title">GC</span> <span class="title">invocations</span></span>=<span class="number">1</span> (full <span class="number">0</span>):</span><br><span class="line"> PSYoungGen      total 18432K, used 2016K [<span class="number">0x00000000fec00000</span>, <span class="number">0x0000000100000000</span>, <span class="number">0x0000000100000000</span>)</span><br><span class="line">  eden space 16384K, <span class="number">0</span>% used [<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000ffc00000</span>)</span><br><span class="line">  from space 2048K, <span class="number">98</span>% used [<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffdf8100</span>,<span class="number">0x00000000ffe00000</span>)</span><br><span class="line">  to   space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffe00000</span>,<span class="number">0x00000000ffe00000</span>,<span class="number">0x0000000100000000</span>)</span><br><span class="line"> ParOldGen       total 40960K, used 12865K [<span class="number">0x00000000fc400000</span>, <span class="number">0x00000000fec00000</span>, <span class="number">0x00000000fec00000</span>)</span><br><span class="line">  object space 40960K, <span class="number">31</span>% used [<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000fd0907e0</span>,<span class="number">0x00000000fec00000</span>)</span><br><span class="line"> Metaspace       used 3447K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 377<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br><span class="line"><span class="class">&#125;</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span>&#123;Heap before GC invocations=<span class="number">3</span> (full <span class="number">1</span>):</span><br><span class="line"> PSYoungGen      total 18432K, used 2040K [<span class="number">0x00000000fec00000</span>, <span class="number">0x0000000100000000</span>, <span class="number">0x0000000100000000</span>)</span><br><span class="line">  eden space 16384K, <span class="number">0</span>% used [<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000ffc00000</span>)</span><br><span class="line">  from space 2048K, <span class="number">99</span>% used [<span class="number">0x00000000ffe00000</span>,<span class="number">0x00000000ffffe110</span>,<span class="number">0x0000000100000000</span>)</span><br><span class="line">  to   space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffe00000</span>)</span><br><span class="line"> ParOldGen       total 40960K, used 29184K [<span class="number">0x00000000fc400000</span>, <span class="number">0x00000000fec00000</span>, <span class="number">0x00000000fec00000</span>)</span><br><span class="line">  object space 40960K, <span class="number">71</span>% used [<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000fe080210</span>,<span class="number">0x00000000fec00000</span>)</span><br><span class="line"> Metaspace       used 3448K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 377<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br><span class="line"><span class="class"><span class="title">Heap</span> <span class="title">after</span> <span class="title">GC</span> <span class="title">invocations</span></span>=<span class="number">3</span> (full <span class="number">1</span>):</span><br><span class="line"> PSYoungGen      total 18432K, used 0K [<span class="number">0x00000000fec00000</span>, <span class="number">0x0000000100000000</span>, <span class="number">0x0000000100000000</span>)</span><br><span class="line">  eden space 16384K, <span class="number">0</span>% used [<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000fec00000</span>,<span class="number">0x00000000ffc00000</span>)</span><br><span class="line">  from space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffe00000</span>,<span class="number">0x00000000ffe00000</span>,<span class="number">0x0000000100000000</span>)</span><br><span class="line">  to   space 2048K, <span class="number">0</span>% used [<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffc00000</span>,<span class="number">0x00000000ffe00000</span>)</span><br><span class="line"> ParOldGen       total 40960K, used 30961K [<span class="number">0x00000000fc400000</span>, <span class="number">0x00000000fec00000</span>, <span class="number">0x00000000fec00000</span>)</span><br><span class="line">  object space 40960K, <span class="number">75</span>% used [<span class="number">0x00000000fc400000</span>,<span class="number">0x00000000fe23c758</span>,<span class="number">0x00000000fec00000</span>)</span><br><span class="line"> Metaspace       used 3448K, capacity 4496K, committed 4864K, reserved 1056768K</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">space</span>    <span class="title">used</span> 377<span class="title">K</span>, <span class="title">capacity</span> 388<span class="title">K</span>, <span class="title">committed</span> 512<span class="title">K</span>, <span class="title">reserved</span> 1048576<span class="title">K</span></span></span><br><span class="line"><span class="class">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre><code>    -Xloggc:d:/JVM/heaplog.log   将日志信息输出到指定位置
+(6).其他参数：
+    -XX:+UseTLAB  使用TLAB，默认开启的
+</code></pre>
+<p>六.通过java代码获取JVM参数：(监控我们的应用服务器的堆内存使用情况，设置一些阈值进行报警等处理)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MemoryMXBean memorymbean = ManagementFactory.getMemoryMXBean();</span><br><span class="line">      MemoryUsage usage = memorymbean.getHeapMemoryUsage();</span><br><span class="line">      System.out.println(<span class="string">&quot;INIT HEAP: &quot;</span> + usage.getInit() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);</span><br><span class="line">      System.out.println(<span class="string">&quot;MAX HEAP: &quot;</span> + usage.getMax() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);</span><br><span class="line">      System.out.println(<span class="string">&quot;USE HEAP: &quot;</span> + usage.getUsed() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);</span><br><span class="line">      System.out.println(<span class="string">&quot;\nFull Information:&quot;</span>);</span><br><span class="line">      System.out.println(<span class="string">&quot;Heap Memory Usage: &quot;</span> + memorymbean.getHeapMemoryUsage());</span><br><span class="line">      System.out.println(<span class="string">&quot;Non-Heap Memory Usage: &quot;</span> + memorymbean.getNonHeapMemoryUsage());</span><br><span class="line"></span><br><span class="line">      System.out.println(<span class="string">&quot;=======================通过java来获取相关系统状态============================ &quot;</span>);</span><br><span class="line">      System.out.println(<span class="string">&quot;当前堆内存大小totalMemory &quot;</span> + (<span class="keyword">int</span>) Runtime.getRuntime().totalMemory() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);<span class="comment">// 当前堆内存大小</span></span><br><span class="line">      System.out.println(<span class="string">&quot;空闲堆内存大小freeMemory &quot;</span> + (<span class="keyword">int</span>) Runtime.getRuntime().freeMemory() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);<span class="comment">// 空闲堆内存大小</span></span><br><span class="line">      System.out.println(<span class="string">&quot;最大可用总堆内存maxMemory &quot;</span> + Runtime.getRuntime().maxMemory() / <span class="number">1024</span> / <span class="number">1024</span> + <span class="string">&quot;m&quot;</span>);<span class="comment">// 最大可用总堆内存大小</span></span><br></pre></td></tr></table></figure>
+<p>七.GC日志分类：<br>    部分收集：<br>    (1).新生代收集(Minor GC / Young GC):只是新生代（Eden\S0,S1）的垃圾收集<br>    (2).老年代收集(Major GC / Old GC):只是老年代的垃圾收集。<br>        目前：只有CMS GC会有单独收集老年代的行为。<br>        注意：很多时候Major GC会和Full GC混淆使用，需要具体分辨是老年代回收还是整堆回收<br>    (3).混合收集（Mixed GC):收集整个新生代以及部分老年代的垃圾收集<br>        目前：只有G1、GC会有这种行为<br>    整堆收集：<br>    (1).Full GC：收集整个java堆和方法区的垃圾收集</p>
+<p>八.那些情况会触发Full GC?<br>    1.老年代空间不足；<br>    2.方法区空间不足；<br>    3.显示调用System.gc();<br>    4.Minor GC进入老年代的数据的平均大小大于老年代的可用内存；<br>    5.大对象直接进入老年代，而老年代空间不足；</p>
+<p>九.常见的日志分析工具：<br>    GCEasy:<a target="_blank" rel="noopener" href="https://gceasy.io/">https://gceasy.io/</a><br>    GCViewer</p>
+<p>十.OOM常见各种场景及解决方案：<br>    1.堆溢出：<br>    2.元空间溢出：<br>    3.GC overhead limit exceeded:<br>    4.线程溢出：</p>
+<p>十一.性能优化案例：<br>    性能测试工具：Jmeter<br>    1.调整堆大小提高服务的吞吐量;<br>    2.调整垃圾回收器提高服务的吞吐量；<br>    3.JVM优化之JIT优化；<br>    4.G1并发执行的线程数对性能的影响；<br>    5.合理配置堆内存；<br>    6.特殊问题：新生代与老年代的比例；<br>    7.CPU占用很高排查方案；<br>    8.日均百万级订单交易系统如何设置JVM参数；</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&text=JVM运行时参数"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&is_video=false&description=JVM运行时参数"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JVM运行时参数&body=Check out this article: https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&title=JVM运行时参数"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/04/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%82%E6%95%B0/&name=JVM运行时参数&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

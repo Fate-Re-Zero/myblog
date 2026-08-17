@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前向传播、反向传播和计算图我们已经学习了如何用小批量随机梯度下降训练模型。然而当实现该算法时，我们只考虑了通过前向传播（forward propagation）所涉及的计算。在计算梯度时，我们只调用了深度学习框架提供的反向传播函数，而不知其所以然。 梯度的自动计算（自动微分）大大简化了深度学习算法的实现。在自动微分之前，即使是对复杂模型的微小调整也需要手工重新计算复杂的导数，学术论文也不得不分配大">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前向传播、反向传播和计算图">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="前向传播、反向传播和计算图我们已经学习了如何用小批量随机梯度下降训练模型。然而当实现该算法时，我们只考虑了通过前向传播（forward propagation）所涉及的计算。在计算梯度时，我们只调用了深度学习框架提供的反向传播函数，而不知其所以然。 梯度的自动计算（自动微分）大大简化了深度学习算法的实现。在自动微分之前，即使是对复杂模型的微小调整也需要手工重新计算复杂的导数，学术论文也不得不分配大">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-19T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:06:32.763Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>前向传播、反向传播和计算图</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%8E%AF%E5%A2%83%E5%92%8C%E5%88%86%E5%B8%83%E5%81%8F%E7%A7%BB/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&text=前向传播、反向传播和计算图"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&is_video=false&description=前向传播、反向传播和计算图"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=前向传播、反向传播和计算图&body=Check out this article: https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&name=前向传播、反向传播和计算图&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE"><span class="toc-number">1.</span> <span class="toc-text">前向传播、反向传播和计算图</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.1.</span> <span class="toc-text">前向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97%E5%9B%BE"><span class="toc-number">1.2.</span> <span class="toc-text">前向传播计算图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.3.</span> <span class="toc-text">反向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="toc-number">1.4.</span> <span class="toc-text">训练神经网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        前向传播、反向传播和计算图
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-19T07:00:00.000Z" itemprop="datePublished">2025-03-19</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/" class="leancloud-visitors" data-flag-title="前向传播、反向传播和计算图" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="前向传播、反向传播和计算图"><a href="#前向传播、反向传播和计算图" class="headerlink" title="前向传播、反向传播和计算图"></a>前向传播、反向传播和计算图</h1><p>我们已经学习了如何用小批量随机梯度下降训练模型。<br>然而当实现该算法时，我们只考虑了通过<em>前向传播</em>（forward propagation）所涉及的计算。<br>在计算梯度时，我们只调用了深度学习框架提供的反向传播函数，而不知其所以然。</p>
+<p>梯度的自动计算（自动微分）大大简化了深度学习算法的实现。<br>在自动微分之前，即使是对复杂模型的微小调整也需要手工重新计算复杂的导数，<br>学术论文也不得不分配大量页面来推导更新规则。<br>本节将通过一些基本的数学和计算图，<br>深入探讨<em>反向传播</em>的细节。<br>首先，我们将重点放在带权重衰减（$L_2$正则化）的单隐藏层多层感知机上。</p>
+<h2 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h2><p><em>前向传播</em>（forward propagation或forward pass）<br>指的是：按顺序（从输入层到输出层）计算和存储神经网络中每层的结果。</p>
+<p>我们将一步步研究单隐藏层神经网络的机制，<br>为了简单起见，我们假设输入样本是 $\mathbf{x}\in \mathbb{R}^d$，<br>并且我们的隐藏层不包括偏置项。<br>这里的中间变量是：</p>
+<p>$$\mathbf{z}= \mathbf{W}^{(1)} \mathbf{x},$$</p>
+<p>其中$\mathbf{W}^{(1)} \in \mathbb{R}^{h \times d}$<br>是隐藏层的权重参数。<br>将中间变量$\mathbf{z}\in \mathbb{R}^h$通过激活函数$\phi$后，<br>我们得到长度为$h$的隐藏激活向量：</p>
+<p>$$\mathbf{h}= \phi (\mathbf{z}).$$</p>
+<p>隐藏变量$\mathbf{h}$也是一个中间变量。<br>假设输出层的参数只有权重$\mathbf{W}^{(2)} \in \mathbb{R}^{q \times h}$，<br>我们可以得到输出层变量，它是一个长度为$q$的向量：</p>
+<p>$$\mathbf{o}= \mathbf{W}^{(2)} \mathbf{h}.$$</p>
+<p>假设损失函数为$l$，样本标签为$y$，我们可以计算单个数据样本的损失项，</p>
+<p>$$L = l(\mathbf{o}, y).$$</p>
+<p>根据$L_2$正则化的定义，给定超参数$\lambda$，正则化项为</p>
+<p>$$s = \frac{\lambda}{2} \left(|\mathbf{W}^{(1)}|_F^2 + |\mathbf{W}^{(2)}|_F^2\right),$$</p>
+<p>其中矩阵的Frobenius范数是将矩阵展平为向量后应用的$L_2$范数。<br>最后，模型在给定数据样本上的正则化损失为：</p>
+<p>$$J = L + s.$$</p>
+<p>在下面的讨论中，我们将$J$称为<em>目标函数</em>（objective function）。</p>
+<h2 id="前向传播计算图"><a href="#前向传播计算图" class="headerlink" title="前向传播计算图"></a>前向传播计算图</h2><p>绘制<em>计算图</em>有助于我们可视化计算中操作符和变量的依赖关系。<br> 前向传播计算图 是与上述简单网络相对应的计算图，<br> 其中正方形表示变量，圆圈表示操作符。<br> 左下角表示输入，右上角表示输出。<br> 注意显示数据流的箭头方向主要是向右和向上的。</p>
+<p>（图：前向传播的计算图）</p>
+<h2 id="反向传播"><a href="#反向传播" class="headerlink" title="反向传播"></a>反向传播</h2><p><em>反向传播</em>（backward propagation或backpropagation）指的是计算神经网络参数梯度的方法。<br>简言之，该方法根据微积分中的<em>链式规则</em>，按相反的顺序从输出层到输入层遍历网络。<br>该算法存储了计算某些参数梯度时所需的任何中间变量（偏导数）。<br>假设我们有函数$\mathsf{Y}=f(\mathsf{X})$和$\mathsf{Z}=g(\mathsf{Y})$，<br>其中输入和输出$\mathsf{X}, \mathsf{Y}, \mathsf{Z}$是任意形状的张量。<br>利用链式法则，我们可以计算$\mathsf{Z}$关于$\mathsf{X}$的导数</p>
+<p>$$\frac{\partial \mathsf{Z}}{\partial \mathsf{X}} = \text{prod}\left(\frac{\partial \mathsf{Z}}{\partial \mathsf{Y}}, \frac{\partial \mathsf{Y}}{\partial \mathsf{X}}\right).$$</p>
+<p>在这里，我们使用$\text{prod}$运算符在执行必要的操作（如换位和交换输入位置）后将其参数相乘。<br>对于向量，这很简单，它只是矩阵-矩阵乘法。<br>对于高维张量，我们使用适当的对应项。<br>运算符$\text{prod}$指代了所有的这些符号。</p>
+<p>回想一下，在计算图 前向传播计算图中的单隐藏层简单网络的参数是<br>$\mathbf{W}^{(1)}$和$\mathbf{W}^{(2)}$。<br>反向传播的目的是计算梯度$\partial J/\partial \mathbf{W}^{(1)}$和<br>$\partial J/\partial \mathbf{W}^{(2)}$。<br>为此，我们应用链式法则，依次计算每个中间变量和参数的梯度。<br>计算的顺序与前向传播中执行的顺序相反，因为我们需要从计算图的结果开始，并朝着参数的方向努力。第一步是计算目标函数$J=L+s$相对于损失项$L$和正则项$s$的梯度。</p>
+<p>$$\frac{\partial J}{\partial L} = 1 ; \text{and} ; \frac{\partial J}{\partial s} = 1.$$</p>
+<p>接下来，我们根据链式法则计算目标函数关于输出层变量$\mathbf{o}$的梯度：</p>
+<p>$$<br>\frac{\partial J}{\partial \mathbf{o}}<br>= \text{prod}\left(\frac{\partial J}{\partial L}, \frac{\partial L}{\partial \mathbf{o}}\right)<br>= \frac{\partial L}{\partial \mathbf{o}}<br>\in \mathbb{R}^q.<br>$$</p>
+<p>接下来，我们计算正则化项相对于两个参数的梯度：</p>
+<p>$$\frac{\partial s}{\partial \mathbf{W}^{(1)}} = \lambda \mathbf{W}^{(1)}<br>; \text{and} ;<br>\frac{\partial s}{\partial \mathbf{W}^{(2)}} = \lambda \mathbf{W}^{(2)}.$$</p>
+<p>现在我们可以计算最接近输出层的模型参数的梯度<br>$\partial J/\partial \mathbf{W}^{(2)} \in \mathbb{R}^{q \times h}$。<br>使用链式法则得出：</p>
+<p>$$\frac{\partial J}{\partial \mathbf{W}^{(2)}}= \text{prod}\left(\frac{\partial J}{\partial \mathbf{o}}, \frac{\partial \mathbf{o}}{\partial \mathbf{W}^{(2)}}\right) + \text{prod}\left(\frac{\partial J}{\partial s}, \frac{\partial s}{\partial \mathbf{W}^{(2)}}\right)= \frac{\partial J}{\partial \mathbf{o}} \mathbf{h}^\top + \lambda \mathbf{W}^{(2)}.$$</p>
+<p>为了获得关于$\mathbf{W}^{(1)}$的梯度，我们需要继续沿着输出层到隐藏层反向传播。<br>关于隐藏层输出的梯度$\partial J/\partial \mathbf{h} \in \mathbb{R}^h$由下式给出：</p>
+<p>$$<br>\frac{\partial J}{\partial \mathbf{h}}<br>= \text{prod}\left(\frac{\partial J}{\partial \mathbf{o}}, \frac{\partial \mathbf{o}}{\partial \mathbf{h}}\right)<br>= {\mathbf{W}^{(2)}}^\top \frac{\partial J}{\partial \mathbf{o}}.<br>$$</p>
+<p>由于激活函数$\phi$是按元素计算的，<br>计算中间变量$\mathbf{z}$的梯度$\partial J/\partial \mathbf{z} \in \mathbb{R}^h$<br>需要使用按元素乘法运算符，我们用$\odot$表示：</p>
+<p>$$<br>\frac{\partial J}{\partial \mathbf{z}}<br>= \text{prod}\left(\frac{\partial J}{\partial \mathbf{h}}, \frac{\partial \mathbf{h}}{\partial \mathbf{z}}\right)<br>= \frac{\partial J}{\partial \mathbf{h}} \odot \phi’\left(\mathbf{z}\right).<br>$$</p>
+<p>最后，我们可以得到最接近输入层的模型参数的梯度<br>$\partial J/\partial \mathbf{W}^{(1)} \in \mathbb{R}^{h \times d}$。<br>根据链式法则，我们得到：</p>
+<p>$$<br>\frac{\partial J}{\partial \mathbf{W}^{(1)}}<br>= \text{prod}\left(\frac{\partial J}{\partial \mathbf{z}}, \frac{\partial \mathbf{z}}{\partial \mathbf{W}^{(1)}}\right) + \text{prod}\left(\frac{\partial J}{\partial s}, \frac{\partial s}{\partial \mathbf{W}^{(1)}}\right)<br>= \frac{\partial J}{\partial \mathbf{z}} \mathbf{x}^\top + \lambda \mathbf{W}^{(1)}.<br>$$</p>
+<h2 id="训练神经网络"><a href="#训练神经网络" class="headerlink" title="训练神经网络"></a>训练神经网络</h2><p>在训练神经网络时，前向传播和反向传播相互依赖。<br>对于前向传播，我们沿着依赖的方向遍历计算图并计算其路径上的所有变量。<br>然后将这些用于反向传播，其中计算顺序与计算图的相反。</p>
+<p>以上述简单网络为例：一方面，在前向传播期间计算正则项<br> 上式取决于模型参数$\mathbf{W}^{(1)}$和<br>$\mathbf{W}^{(2)}$的当前值。<br>它们是由优化算法根据最近迭代的反向传播给出的。<br>另一方面，反向传播期间参数 上式的梯度计算，<br>取决于由前向传播给出的隐藏变量$\mathbf{h}$的当前值。</p>
+<p>因此，在训练神经网络时，在初始化模型参数后，<br>我们交替使用前向传播和反向传播，利用反向传播给出的梯度来更新模型参数。<br>注意，反向传播重复利用前向传播中存储的中间值，以避免重复计算。<br>带来的影响之一是我们需要保留中间值，直到反向传播完成。<br>这也是训练比单纯的预测需要更多的内存（显存）的原因之一。<br>此外，这些中间值的大小与网络层的数量和批量的大小大致成正比。<br>因此，使用更大的批量来训练更深层次的网络更容易导致<em>内存不足</em>（out of memory）错误。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>前向传播在神经网络定义的计算图中按顺序计算和存储中间变量，它的顺序是从输入层到输出层。</li>
+<li>反向传播按相反的顺序（从输出层到输入层）计算和存储神经网络的中间变量和参数的梯度。</li>
+<li>在训练深度学习模型时，前向传播和反向传播是相互依赖的。</li>
+<li>训练比预测需要更多的内存。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE"><span class="toc-number">1.</span> <span class="toc-text">前向传播、反向传播和计算图</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.1.</span> <span class="toc-text">前向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97%E5%9B%BE"><span class="toc-number">1.2.</span> <span class="toc-text">前向传播计算图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.3.</span> <span class="toc-text">反向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="toc-number">1.4.</span> <span class="toc-text">训练神经网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&text=前向传播、反向传播和计算图"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&is_video=false&description=前向传播、反向传播和计算图"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=前向传播、反向传播和计算图&body=Check out this article: https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&title=前向传播、反向传播和计算图"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/&name=前向传播、反向传播和计算图&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

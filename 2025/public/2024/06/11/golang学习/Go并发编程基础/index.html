@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="并发编程基础Go 的并发模型基于 CSP（Communicating Sequential Processes）：不要通过共享内存来通信，而要通过通信来共享内存。 goroutinegoroutine 是 Go 的轻量级线程，由 Go runtime 调度，创建成本极低： 123456789101112func say(s string) &amp;#123;    for i :&#x3D; 0; i &lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go并发编程基础">
+<meta property="og:url" content="https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="并发编程基础Go 的并发模型基于 CSP（Communicating Sequential Processes）：不要通过共享内存来通信，而要通过通信来共享内存。 goroutinegoroutine 是 Go 的轻量级线程，由 Go runtime 调度，创建成本极低： 123456789101112func say(s string) &amp;#123;    for i :&#x3D; 0; i &lt;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-06-11T08:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:41:02.050Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Go并发编程基础</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2024/06/12/golang%E5%AD%A6%E4%B9%A0/Go%E6%A0%87%E5%87%86%E5%BA%93%E5%AE%9E%E6%88%98/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2024/06/10/golang%E5%AD%A6%E4%B9%A0/Go%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&text=Go并发编程基础"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&is_video=false&description=Go并发编程基础"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go并发编程基础&body=Check out this article: https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&name=Go并发编程基础&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80"><span class="toc-number">1.</span> <span class="toc-text">并发编程基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#goroutine"><span class="toc-number">1.1.</span> <span class="toc-text">goroutine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-WaitGroup"><span class="toc-number">1.2.</span> <span class="toc-text">sync.WaitGroup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-Mutex"><span class="toc-number">1.3.</span> <span class="toc-text">sync.Mutex</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-Once"><span class="toc-number">1.4.</span> <span class="toc-text">sync.Once</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%9E%E6%80%81%E6%A3%80%E6%B5%8B"><span class="toc-number">1.5.</span> <span class="toc-text">竞态检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">1.6.</span> <span class="toc-text">常见并发问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Go并发编程基础
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-06-11T08:00:00.000Z" itemprop="datePublished">2024-06-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="leancloud-visitors" data-flag-title="Go并发编程基础" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/golang/" rel="tag">golang</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="并发编程基础"><a href="#并发编程基础" class="headerlink" title="并发编程基础"></a>并发编程基础</h1><p>Go 的并发模型基于 <strong>CSP（Communicating Sequential Processes）</strong>：<strong>不要通过共享内存来通信，而要通过通信来共享内存</strong>。</p>
+<h2 id="goroutine"><a href="#goroutine" class="headerlink" title="goroutine"></a>goroutine</h2><p>goroutine 是 Go 的轻量级线程，由 Go runtime 调度，创建成本极低：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">say</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">3</span>; i++ &#123;</span><br><span class="line">        fmt.Println(s)</span><br><span class="line">        time.Sleep(<span class="number">100</span> * time.Millisecond)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">go</span> say(<span class="string">&quot;world&quot;</span>)   <span class="comment">// 启动 goroutine</span></span><br><span class="line">    say(<span class="string">&quot;hello&quot;</span>)      <span class="comment">// 主 goroutine 继续执行</span></span><br><span class="line">    time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动 goroutine 只需在函数调用前加 <code>go</code> 关键字。</p>
+<h2 id="sync-WaitGroup"><a href="#sync-WaitGroup" class="headerlink" title="sync.WaitGroup"></a>sync.WaitGroup</h2><p>等待一组 goroutine 完成：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;sync&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">worker</span><span class="params">(id <span class="keyword">int</span>, wg *sync.WaitGroup)</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> wg.Done()</span><br><span class="line">    fmt.Printf(<span class="string">&quot;worker %d done\n&quot;</span>, id)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= <span class="number">5</span>; i++ &#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> worker(i, &amp;wg)</span><br><span class="line">    &#125;</span><br><span class="line">    wg.Wait()</span><br><span class="line">    fmt.Println(<span class="string">&quot;all done&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="sync-Mutex"><a href="#sync-Mutex" class="headerlink" title="sync.Mutex"></a>sync.Mutex</h2><p>保护共享数据：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Counter <span class="keyword">struct</span> &#123;</span><br><span class="line">    mu    sync.Mutex</span><br><span class="line">    value <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Counter)</span> <span class="title">Inc</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> c.mu.Unlock()</span><br><span class="line">    c.value++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Counter)</span> <span class="title">Value</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> c.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> c.value</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>sync.RWMutex</code> 支持读写分离：读多写少时性能更好。</p>
+<h2 id="sync-Once"><a href="#sync-Once" class="headerlink" title="sync.Once"></a>sync.Once</h2><p>保证函数只执行一次，常用于单例初始化：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">    instance *Config</span><br><span class="line">    once     sync.Once</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GetConfig</span><span class="params">()</span> *<span class="title">Config</span></span> &#123;</span><br><span class="line">    once.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        instance = loadConfig()</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="竞态检测"><a href="#竞态检测" class="headerlink" title="竞态检测"></a>竞态检测</h2><p>编译或测试时开启竞态检测器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go run -race main.go</span><br><span class="line">go <span class="built_in">test</span> -race ./...</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见并发问题"><a href="#常见并发问题" class="headerlink" title="常见并发问题"></a>常见并发问题</h2><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据竞态</td>
+<td>多 goroutine 无保护写同一变量</td>
+<td>Mutex / channel</td>
+</tr>
+<tr>
+<td>goroutine 泄漏</td>
+<td>阻塞在 channel 上无人接收</td>
+<td>context 取消、超时</td>
+</tr>
+<tr>
+<td>死锁</td>
+<td>互相等待锁或 channel</td>
+<td>固定加锁顺序、避免循环等待</td>
+</tr>
+</tbody></table>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>goroutine 是 Go 并发的基础，开销小、数量可多</li>
+<li><code>WaitGroup</code> 等待任务完成，<code>Mutex</code> 保护共享状态</li>
+<li>生产代码务必用 <code>-race</code> 检测数据竞态</li>
+<li>下一章介绍 channel，Go 更推荐的通信方式</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80"><span class="toc-number">1.</span> <span class="toc-text">并发编程基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#goroutine"><span class="toc-number">1.1.</span> <span class="toc-text">goroutine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-WaitGroup"><span class="toc-number">1.2.</span> <span class="toc-text">sync.WaitGroup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-Mutex"><span class="toc-number">1.3.</span> <span class="toc-text">sync.Mutex</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sync-Once"><span class="toc-number">1.4.</span> <span class="toc-text">sync.Once</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%9E%E6%80%81%E6%A3%80%E6%B5%8B"><span class="toc-number">1.5.</span> <span class="toc-text">竞态检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">1.6.</span> <span class="toc-text">常见并发问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&text=Go并发编程基础"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&is_video=false&description=Go并发编程基础"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go并发编程基础&body=Check out this article: https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&title=Go并发编程基础"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/06/11/golang%E5%AD%A6%E4%B9%A0/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/&name=Go并发编程基础&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

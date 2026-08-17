@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="先写库还是先发消息首先，咱们来看一下工作场景，订单ID1030被创建后要保存到数据库，同时该1030订单通过MQ投递给其他系统进行消费。如果要保证订单数据入库与消息投递状态要保证最终一致，要怎么做？这里有两种常见做法： ● 第一种，先写库，再发送数据 1234567891011121314&#x2F;&#x2F;伪代码 &#x2F;&#x2F;插入1030号订单 orderDao.insert(1030,order); &#x2F;&#x2F;向1030号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ事务消息">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="先写库还是先发消息首先，咱们来看一下工作场景，订单ID1030被创建后要保存到数据库，同时该1030订单通过MQ投递给其他系统进行消费。如果要保证订单数据入库与消息投递状态要保证最终一致，要怎么做？这里有两种常见做法： ● 第一种，先写库，再发送数据 1234567891011121314&#x2F;&#x2F;伪代码 &#x2F;&#x2F;插入1030号订单 orderDao.insert(1030,order); &#x2F;&#x2F;向1030号">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-4.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-5.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-6.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-7.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-8.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-9.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-10.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-11.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-12.png">
+<meta property="article:published_time" content="2022-01-17T05:52:18.000Z">
+<meta property="article:modified_time" content="2025-04-20T15:14:55.219Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RocketMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220117-3.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RocketMQ事务消息</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/01/23/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E6%A6%82%E8%BF%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/01/17/RocketMQ/RocketMQ%E5%BB%B6%E8%BF%9F%E6%B6%88%E6%81%AF/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&text=RocketMQ事务消息"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&is_video=false&description=RocketMQ事务消息"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ事务消息&body=Check out this article: https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&name=RocketMQ事务消息&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%88%E5%86%99%E5%BA%93%E8%BF%98%E6%98%AF%E5%85%88%E5%8F%91%E6%B6%88%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">先写库还是先发消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF"><span class="toc-number">2.</span> <span class="toc-text">RocketMQ事务消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">RocketMQ事务执行过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E6%89%A7%E8%A1%8C%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">RocketMQ事务消息执行执行流程</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RocketMQ事务消息
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-01-17T05:52:18.000Z" itemprop="datePublished">2022-01-17</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/" class="leancloud-visitors" data-flag-title="RocketMQ事务消息" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="先写库还是先发消息"><a href="#先写库还是先发消息" class="headerlink" title="先写库还是先发消息"></a>先写库还是先发消息</h3><p>首先，咱们来看一下工作场景，订单ID1030被创建后要保存到数据库，同时该1030订单通过MQ投递给其他系统进行消费。如果要保证订单数据入库与消息投递状态要保证最终一致，要怎么做？这里有两种常见做法：</p>
+<p>● 第一种，先写库，再发送数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//伪代码 </span></span><br><span class="line"><span class="comment">//插入1030号订单 </span></span><br><span class="line">orderDao.insert(<span class="number">1030</span>,order); </span><br><span class="line"><span class="comment">//向1030号订单新增3条订单明细，10081-10083， </span></span><br><span class="line">orderDetailDao.insert(<span class="number">10081</span>,<span class="number">1030</span>,orderDetail1); </span><br><span class="line">orderDetailDao.insert(<span class="number">10082</span>,<span class="number">1030</span>,orderDetail2); </span><br><span class="line">orderDetailDao.insert(<span class="number">10083</span>,<span class="number">1030</span>,orderDetail3); </span><br><span class="line"><span class="comment">//向MQ发送数据，如果数据发送失败 </span></span><br><span class="line">SendResult result = producer.send(orderMessage) </span><br><span class="line"><span class="keyword">if</span> (result.getState().equals(<span class="string">&quot;SEND_OK&quot;</span>))) &#123; </span><br><span class="line">    connection.commit(); </span><br><span class="line">&#125; <span class="keyword">else</span> &#123; </span><br><span class="line">    connection.rollback(); </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<ol>
+<li>如果生产者发送消息时，因为网络原因导致10秒消息才返回SendResult结果，这就意味这10秒内数据库事务无法提交，大量并发下，数据库连接资源会在这10秒内迅速耗尽，后续请求进入连接池等待状态，最终导致系统停止响应。</li>
+<li>事务还没有提交，消息就已经被消费者消费了，消费者做数据检查时会报错，导致需要等到下次重试才能被消费者消费成功，大量出现这种消息，可能造成消息积压。</li>
+</ol>
+<p>● 第二种，先发消息，再写库</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//伪代码 </span></span><br><span class="line"><span class="comment">//向MQ发送数据，如果数据发送失败 </span></span><br><span class="line">SendResult result = producer.send(orderMessage) </span><br><span class="line"><span class="keyword">if</span>(result.getState().equals(<span class="string">&quot;SEND_OK&quot;</span>)))&#123; </span><br><span class="line">    <span class="comment">//插入1030号订单 </span></span><br><span class="line">    orderDao.insert(<span class="number">1030</span>,order); </span><br><span class="line">    <span class="comment">//向1030号订单新增3条订单明细，10081-10083， </span></span><br><span class="line">    orderDetailDao.insert(<span class="number">10081</span>,<span class="number">1030</span>,orderDetail1); </span><br><span class="line">    orderDetailDao.insert(<span class="number">10082</span>,<span class="number">1030</span>,orderDetail2); </span><br><span class="line">   orderDetailDao.insert(<span class="number">10083</span>,<span class="number">1030</span>,orderDetail3); </span><br><span class="line">   connection.commit; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>问题更严重，因为消息已经被发送了，消费者可以立即消费，比如下游消费者为1030订单自动设置了“快递信息”，可是如果后续orderDao向数据库插入数据产生异常导致业务失败。我们还需要再次发送“取消1030订单”的消息把下游1030订单分配的“快递信息”给撤销，这些都是在业务层面上的额外处理，这无疑提高了对程序员的要求与处理的难度。</p>
+<h3 id="RocketMQ事务消息"><a href="#RocketMQ事务消息" class="headerlink" title="RocketMQ事务消息"></a>RocketMQ事务消息</h3><p>● 架构拓扑</p>
+<p><img src="/images/RocketMQ/20220117-3.png" alt="image-20220117-3"></p>
+<p>● 代码案例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageType4</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> MQClientException, InterruptedException, UnsupportedEncodingException </span>&#123; </span><br><span class="line">         </span><br><span class="line">        <span class="comment">//事务消息一定要使用TransactionMQProducer事务生产者创建 </span></span><br><span class="line">        TransactionMQProducer producer = <span class="keyword">new</span> </span><br><span class="line">		TransactionMQProducer(<span class="string">&quot;transaction_producer_group&quot;</span>); </span><br><span class="line">        <span class="comment">//从NameServer获取配置数据 </span></span><br><span class="line">        producer.setNamesrvAddr(<span class="string">&quot;192.168.31.103:9876&quot;</span>); </span><br><span class="line">         </span><br><span class="line">        <span class="comment">//CachedThreadPool线程池用于回查本地事务状态 </span></span><br><span class="line">        ExecutorService cachedThreadPool = Executors.newCachedThreadPool(<span class="keyword">new</span> ThreadFactory() &#123; </span><br><span class="line">            <span class="meta">@Override</span> </span><br><span class="line">            <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123; </span><br><span class="line">                Thread thread = <span class="keyword">new</span> Thread(r); </span><br><span class="line">                thread.setName(<span class="string">&quot;check-transaction-thread&quot;</span>); </span><br><span class="line">                <span class="keyword">return</span> thread; </span><br><span class="line">            &#125; </span><br><span class="line">        &#125;); </span><br><span class="line">        <span class="comment">//将生产者与线程池绑定 </span></span><br><span class="line">        producer.setExecutorService(cachedThreadPool); </span><br><span class="line">        <span class="comment">//绑定事务监听器，用于执行代码 </span></span><br><span class="line">        TransactionListener transactionListener = <span class="keyword">new</span> OrderTransactionListenerImpl(); </span><br><span class="line">        producer.setTransactionListener(transactionListener); </span><br><span class="line">        <span class="comment">//启动生产者 </span></span><br><span class="line">        producer.start(); </span><br><span class="line">         </span><br><span class="line">        <span class="comment">//创建消息对象         </span></span><br><span class="line">		Message msg = <span class="keyword">new</span> Message(<span class="string">&quot;order&quot;</span>,<span class="string">&quot;order-1030&quot;</span>, <span class="string">&quot;1030&quot;</span>, <span class="string">&quot;1030订单与明细的完整JSON数据（略）&quot;</span>.getBytes()); </span><br><span class="line">        <span class="comment">//一定要调用sendMessageInTransaction发送事务消息 </span></span><br><span class="line">        <span class="comment">//参数1：消息对象 </span></span><br><span class="line">        <span class="comment">//参数2：其他参数，目前用不到 </span></span><br><span class="line">        producer.sendMessageInTransaction(msg, <span class="keyword">null</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">// TransactionListenerImpl-处理本地事务业务代码</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderTransactionListenerImpl</span> <span class="keyword">implements</span> <span class="title">TransactionListener</span> </span>&#123;   </span><br><span class="line">    <span class="meta">@Override</span> </span><br><span class="line">    <span class="comment">//执行本地事务代码 </span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">executeLocalTransaction</span><span class="params">(Message msg, Object arg)</span> </span>&#123; </span><br><span class="line">        log.info(<span class="string">&quot;正在执行本地事务,订单编号:&quot;</span> + msg.getKeys()); </span><br><span class="line">        <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">        try&#123; </span></span><br><span class="line"><span class="comment">            //插入1030号订单 </span></span><br><span class="line"><span class="comment">            orderDao.insert(1030,order); </span></span><br><span class="line"><span class="comment">            //向1030号订单新增3条订单明细，10081-10083， </span></span><br><span class="line"><span class="comment">            orderDetailDao.insert(10081,1030,orderDetail1); </span></span><br><span class="line"><span class="comment">            orderDetailDao.insert(10082,1030,orderDetail2); </span></span><br><span class="line"><span class="comment">            orderDetailDao.insert(10083,1030,orderDetail3); </span></span><br><span class="line"><span class="comment">            connection.commit(); </span></span><br><span class="line"><span class="comment">            //返回Commit，消费者可以消费1030订单消息 </span></span><br><span class="line"><span class="comment">            return LocalTransactionState.COMMIT_MESSAGE; </span></span><br><span class="line"><span class="comment">        &#125;catch(Exception e)&#123; </span></span><br><span class="line"><span class="comment">            //返回Rollback，Broker直接将数据删除，消费者不能收到1030订单消息 </span></span><br><span class="line"><span class="comment">            connection.rollback(); </span></span><br><span class="line"><span class="comment">            return LocalTransactionState.ROLLBACK_MESSAGE; </span></span><br><span class="line"><span class="comment">        &#125; </span></span><br><span class="line"><span class="comment">        */</span> </span><br><span class="line">        log.info(<span class="string">&quot;模拟网络中断，Broker并未收到生产者本地事务状态回执，返回UNKNOW&quot;</span>); </span><br><span class="line">        <span class="keyword">return</span> LocalTransactionState.UNKNOW; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="meta">@Override</span> </span><br><span class="line">    <span class="comment">//会查本地事务处理状态 </span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">checkLocalTransaction</span><span class="params">(MessageExt msg)</span> </span>&#123; </span><br><span class="line">        String keys = msg.getKeys(); </span><br><span class="line">        log.info(<span class="string">&quot;触发回查，正在检查&quot;</span> + keys + <span class="string">&quot;订单状态&quot;</span>); </span><br><span class="line">        <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">        Order order = orderDao.selectById(1030); </span></span><br><span class="line"><span class="comment">        if (order != null) &#123; </span></span><br><span class="line"><span class="comment">            //查询到记录，代表数据库已处理成功，回查返回Commit，消费者可以消费1030订单消息            </span></span><br><span class="line"><span class="comment">			return LocalTransactionState.COMMIT_MESSAGE; </span></span><br><span class="line"><span class="comment">        &#125; else &#123; </span></span><br><span class="line"><span class="comment">            //未查询到记录，代表数据库处理失败，回查返回Rollback，Broker直接将数据删除，消费者不能收到1030订单消息 </span></span><br><span class="line"><span class="comment">            return LocalTransactionState.ROLLBACK_MESSAGE; </span></span><br><span class="line"><span class="comment">        &#125; </span></span><br><span class="line"><span class="comment">        */</span> </span><br><span class="line">        log.info(<span class="string">&quot;回查结果，&quot;</span> + keys + <span class="string">&quot;订单已入库，发送Commit指令&quot;</span>); </span><br><span class="line">        <span class="keyword">return</span> LocalTransactionState.COMMIT_MESSAGE; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h3 id="RocketMQ事务执行过程"><a href="#RocketMQ事务执行过程" class="headerlink" title="RocketMQ事务执行过程"></a>RocketMQ事务执行过程</h3><p>● producer.sendMessageInTransaction(msg, null); 执行成功<br>此时1030订单消息已被发送到MQ服务器（Broker），不过该消息在Broker此时状态为“half-message”，相当于存储在MQ中的“临时消息”，此状态下消息无法被投递给消费者。</p>
+<p><img src="/images/RocketMQ/20220117-4.png" alt="image-20220117-4"></p>
+<p>● 生产者发送消息成功后自动触发<br>OrderTransactionListenerImpl.executeLocalTransaction()执行本地事务。<br>当消息发送成功，紧接着生产者向本地数据库写数据，数据库写入后提交commit，同时executeLocalTransaction方法返回COMMIT_MESSAGE，生产者会再次向MQ服务器发送一个commit提交消息，此前在Broker中保存1030订单消息状态就从“half-message”变为”已提交”，broker将消息发给下游的消费者处理。</p>
+<p><img src="/images/RocketMQ/20220117-5.png" alt="image-20220117-5"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">executeLocalTransaction</span><span class="params">(Message msg, Object arg)</span> </span>&#123; </span><br><span class="line">    <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">    try&#123; </span></span><br><span class="line"><span class="comment">        orderDao.insert(1030,order); </span></span><br><span class="line"><span class="comment">        //向1030号订单新增3条订单明细，10081-10083， </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10081,1030,orderDetail1); </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10082,1030,orderDetail2); </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10083,1030,orderDetail3); </span></span><br><span class="line"><span class="comment">        connection.commit(); </span></span><br><span class="line"><span class="comment">        //返回Commit，消费者可以消费1030订单消息 </span></span><br><span class="line"><span class="comment">        return LocalTransactionState.COMMIT_MESSAGE; </span></span><br><span class="line"><span class="comment">    &#125;catch(Exception e)&#123;...&#125; </span></span><br><span class="line"><span class="comment">&#125; </span></span><br></pre></td></tr></table></figure>
+
+<p>● 异常流程1：producer.sendMessageInTransaction(msg, null); 执行失败，抛出异常<br>此时没有任何消息被发出，本地事务也不会执行，除了报错外不会产生任何不一致。</p>
+<p><img src="/images/RocketMQ/20220117-6.png" alt="image-20220117-6"></p>
+<p>● 异常流程2：producer.sendMessageInTransaction(msg, null); 执行成功，本地事务执行失败</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">executeLocalTransaction</span><span class="params">(Message msg, Object arg)</span> </span>&#123; </span><br><span class="line">    <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">    try&#123; </span></span><br><span class="line"><span class="comment">        //插入1030号订单 </span></span><br><span class="line"><span class="comment">        orderDao.insert(1030,order); </span></span><br><span class="line"><span class="comment">        //插入失败 </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10081,1030,orderDetail1); </span></span><br><span class="line"><span class="comment">        ... </span></span><br><span class="line"><span class="comment">    &#125;catch(Exception e)&#123; </span></span><br><span class="line"><span class="comment">        //返回Rollback，Broker直接将数据删除，消费者不能收到1030订单消息 </span></span><br><span class="line"><span class="comment">        connection.rollback(); </span></span><br><span class="line"><span class="comment">        return LocalTransactionState.ROLLBACK_MESSAGE; </span></span><br><span class="line"><span class="comment">    &#125; </span></span><br><span class="line"><span class="comment">&#125; </span></span><br></pre></td></tr></table></figure>
+<p>此时本地事务执行rollback回滚，数据库数据被撤销，同时executeLocalTransaction方法返回ROLLBACK_MESSAGE代表回滚，生产者会再次向MQ服务器发送一个rollback回滚消息，此前在Broker中保存1030订单消息就会被直接删除，不会发送给消费者，本地事务也可以保证与MQ消息一致。</p>
+<p><img src="/images/RocketMQ/20220117-7.png" alt="image-20220117-7"></p>
+<p>● 异常流程3：producer.sendMessageInTransaction(msg, null); 执行成功，本地事务执行成功，但给Broker返回Commit消息时断网了，导致broker无法收到提交指令。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">executeLocalTransaction</span><span class="params">(Message msg, Object arg)</span> </span>&#123; </span><br><span class="line">    <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">    try&#123; </span></span><br><span class="line"><span class="comment">        orderDao.insert(1030,order); </span></span><br><span class="line"><span class="comment">        //向1030号订单新增3条订单明细，10081-10083， </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10081,1030,orderDetail1); </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10082,1030,orderDetail2); </span></span><br><span class="line"><span class="comment">        orderDetailDao.insert(10083,1030,orderDetail3); </span></span><br><span class="line"><span class="comment">        connection.commit(); </span></span><br><span class="line"><span class="comment">        //返回Commit时网络中断 </span></span><br><span class="line"><span class="comment">        return LocalTransactionState.COMMIT_MESSAGE;     &#125;catch(Exception e)&#123;...&#125; </span></span><br><span class="line"><span class="comment">&#125; </span></span><br></pre></td></tr></table></figure>
+<p>此时本地数据库订单数据已入库，但MQ因为断网无法收到生产者的发来的“commit”消息，1030订单数据一直处于“half message”的状态，消息无法被投递到消费者，本地事务与MQ消息的一致性被破坏。</p>
+<p><img src="/images/RocketMQ/20220117-8.png" alt="image-20220117-8"></p>
+<p>RocketMQ为了解决这个问题，设计了回查机制，对于broker中的half message，每过一小段时间就自动尝试与生产者通信，试图调用通OrderTransactionListenerImpl.checkLocalTransaction()方法确认之前的本地事务是否成功。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//会查本地事务处理状态 </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> LocalTransactionState <span class="title">checkLocalTransaction</span><span class="params">(MessageExt msg)</span> </span>&#123; </span><br><span class="line">    String keys = msg.getKeys(); </span><br><span class="line">    log.info(<span class="string">&quot;触发回查，正在检查&quot;</span> + keys + <span class="string">&quot;订单状态&quot;</span>); </span><br><span class="line">    <span class="comment">/* 伪代码 </span></span><br><span class="line"><span class="comment">    Order order = orderDao.selectById(1030); </span></span><br><span class="line"><span class="comment">    if (order != null) &#123; </span></span><br><span class="line"><span class="comment">        // 查询到记录，代表数据库已处理成功，回查返回Commit，消费者可以消费1030订单消息 </span></span><br><span class="line"><span class="comment">        return LocalTransactionState.COMMIT_MESSAGE; </span></span><br><span class="line"><span class="comment">    &#125; else &#123; </span></span><br><span class="line"><span class="comment">        // 未查询到记录，代表数据库处理失败，回查返回Rollback，Broker直接将数据删除，消费者不能收到1030订单消息 </span></span><br><span class="line"><span class="comment">        return LocalTransactionState.ROLLBACK_MESSAGE; </span></span><br><span class="line"><span class="comment">    &#125; </span></span><br><span class="line"><span class="comment">    */</span> </span><br><span class="line">    log.info(<span class="string">&quot;回查结果，&quot;</span> + keys + <span class="string">&quot;订单已入库，发送Commit指令&quot;</span>); </span><br><span class="line">    <span class="keyword">return</span> LocalTransactionState.COMMIT_MESSAGE; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>由MQ服务器主动发起，生产者调用OrderTransactionListenerImpl.checkLocalTransaction()检查之前数据库事务是否完成。</p>
+<p><img src="/images/RocketMQ/20220117-9.png" alt="image-20220117-9"></p>
+<p>checkLocalTransaction()查询到订单数据，说明之前的数据库事务已经完成，返回COMMIT_MESSAGE，这样Broker中的1030订单消息就可以被发送给消费者进行处理。</p>
+<p><img src="/images/RocketMQ/20220117-10.png" alt="image-20220117-10"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">运行结果：</span><br><span class="line"><span class="number">22</span>:<span class="number">31</span>:<span class="number">35.670</span> [main] INFO com.lixiang.rocketmq.mtype.OrderTransactionListenerImpl - 正在执行本地事务,订单编号:<span class="number">1030</span> </span><br><span class="line"><span class="number">22</span>:<span class="number">31</span>:<span class="number">35.672</span> [main] INFO com.lixiang.rocketmq.mtype.OrderTransactionListenerImpl - 模拟网络中断，Broker并未收到生产者本地事务状态回执，返回UNKNOW </span><br><span class="line"><span class="number">22</span>:<span class="number">31</span>:<span class="number">45.995</span> [check-transaction-thread] INFO com.lixiang.rocketmq.mtype.OrderTransactionListenerImpl - 触发回查，正在检查<span class="number">1030</span>订单状态</span><br><span class="line"><span class="number">22</span>:<span class="number">31</span>:<span class="number">45.996</span> [check-transaction-thread] INFO com.lixiang.rocketmq.mtype.OrderTransactionListenerImpl - 回查结果，<span class="number">1030</span>订单已入库，发送Commit指令 </span><br></pre></td></tr></table></figure>
+
+<p>checkLocalTransaction()未查询到订单数据，说明之前的数据库事务没有处理成功，返回ROLLBACK_MESSAGE，这样Broker中的1030订单消息就会被删除。</p>
+<p><img src="/images/RocketMQ/20220117-11.png" alt="image-20220117-11"></p>
+<h3 id="RocketMQ事务消息执行执行流程"><a href="#RocketMQ事务消息执行执行流程" class="headerlink" title="RocketMQ事务消息执行执行流程"></a>RocketMQ事务消息执行执行流程</h3><p><img src="/images/RocketMQ/20220117-12.png" alt="image-20220117-12"></p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%88%E5%86%99%E5%BA%93%E8%BF%98%E6%98%AF%E5%85%88%E5%8F%91%E6%B6%88%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">先写库还是先发消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF"><span class="toc-number">2.</span> <span class="toc-text">RocketMQ事务消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">RocketMQ事务执行过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E6%89%A7%E8%A1%8C%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">RocketMQ事务消息执行执行流程</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&text=RocketMQ事务消息"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&is_video=false&description=RocketMQ事务消息"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ事务消息&body=Check out this article: https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&title=RocketMQ事务消息"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/17/RocketMQ/RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/&name=RocketMQ事务消息&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="在发送消息时，需要设置消息的“标记Tag”，Tag用于说明消息的某项特征，消费者可以根据这个特征决定是否接收这些消息。 消息发送者下面案例模拟了来自“京东”、“天猫”、“淘宝”的电商模拟数据，要求负责“阿里”业务的程序消费tmall与taobao的数据，负责“京东”的程序消费“jd”的数据。 12345678910111213141516171819202122232425262728293031">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ消费者基于Tag实现消息过滤">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="在发送消息时，需要设置消息的“标记Tag”，Tag用于说明消息的某项特征，消费者可以根据这个特征决定是否接收这些消息。 消息发送者下面案例模拟了来自“京东”、“天猫”、“淘宝”的电商模拟数据，要求负责“阿里”业务的程序消费tmall与taobao的数据，负责“京东”的程序消费“jd”的数据。 12345678910111213141516171819202122232425262728293031">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220123-9.png">
+<meta property="article:published_time" content="2022-01-24T00:22:41.000Z">
+<meta property="article:modified_time" content="2025-04-20T15:44:45.463Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RocketMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220123-9.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RocketMQ消费者基于Tag实现消息过滤</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8E%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E5%AE%9E%E7%8E%B0SQL%E8%BF%87%E6%BB%A4/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/01/23/RocketMQ/RocketMQ%E9%9B%86%E7%BE%A4%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%BC%8F%E4%B8%8E%E5%B9%BF%E6%92%AD%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%BC%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&text=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&is_video=false&description=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ消费者基于Tag实现消息过滤&body=Check out this article: https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&name=RocketMQ消费者基于Tag实现消息过滤&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E8%80%85"><span class="toc-number">1.</span> <span class="toc-text">消息发送者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">2.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-number">3.</span> <span class="toc-text">消息消费者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C-1"><span class="toc-number">4.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C-2"><span class="toc-number">5.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tags%E7%9A%84%E5%86%99%E6%B3%95"><span class="toc-number">6.</span> <span class="toc-text">Tags的写法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%AE%BE%E7%BD%AE%E4%B8%A4%E7%BB%84%E4%B8%8D%E5%90%8C%E7%9A%84%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="toc-number">7.</span> <span class="toc-text">为什么要设置两组不同的消费者组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E6%97%A5%E5%BF%97%EF%BC%9A"><span class="toc-number">8.</span> <span class="toc-text">生产者日志：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RocketMQ消费者基于Tag实现消息过滤
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-01-24T00:22:41.000Z" itemprop="datePublished">2022-01-24</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/" class="leancloud-visitors" data-flag-title="RocketMQ消费者基于Tag实现消息过滤" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>在发送消息时，需要设置消息的“标记Tag”，Tag用于说明消息的某项特征，消费者可以根据这个特征决定是否接收这些消息。</p>
+<h3 id="消息发送者"><a href="#消息发送者" class="headerlink" title="消息发送者"></a>消息发送者</h3><p>下面案例模拟了来自“京东”、“天猫”、“淘宝”的电商模拟数据，要求负责“阿里”业务的程序消费tmall与taobao的数据，负责“京东”的程序消费“jd”的数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//消息过滤案例生产者 </span></span><br><span class="line"><span class="meta">@Slf4j</span> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TfProducer</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123; </span><br><span class="line">        <span class="comment">//DefaultMQProducer用于发送非事务消息 </span></span><br><span class="line">        DefaultMQProducer producer = <span class="keyword">new</span> DefaultMQProducer(<span class="string">&quot;tf-producer-group&quot;</span>); </span><br><span class="line">        <span class="comment">//注册NameServer地址 </span></span><br><span class="line">        producer.setNamesrvAddr(<span class="string">&quot;192.168.31.103:9876&quot;</span>); </span><br><span class="line">        <span class="keyword">try</span> &#123; </span><br><span class="line">            <span class="comment">//启动生产者实例 </span></span><br><span class="line">            producer.start(); </span><br><span class="line">            <span class="keyword">for</span>(Integer i = <span class="number">0</span> ; i &lt; <span class="number">10</span> ; i++) &#123; </span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                Integer rnd = <span class="keyword">new</span> Random().nextInt(<span class="number">10</span>); </span><br><span class="line">                String tag = <span class="string">&quot;&quot;</span>; </span><br><span class="line">                <span class="keyword">switch</span> (rnd % <span class="number">3</span>)&#123; </span><br><span class="line">                    <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                        tag = <span class="string">&quot;jd&quot;</span>; </span><br><span class="line">                        <span class="keyword">break</span>; </span><br><span class="line">                    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                        tag = <span class="string">&quot;tmall&quot;</span>; </span><br><span class="line">                        <span class="keyword">break</span>; </span><br><span class="line">                    <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                        tag = <span class="string">&quot;taobao&quot;</span>;</span><br><span class="line">                        <span class="keyword">break</span>; </span><br><span class="line">                &#125; </span><br><span class="line">                <span class="comment">//消息数据 </span></span><br><span class="line">                String data = <span class="string">&quot;第&quot;</span> + i + <span class="string">&quot;条消息数据&quot;</span>; </span><br><span class="line">                <span class="comment">//消息主题 </span></span><br><span class="line">                Message message = <span class="keyword">new</span> Message(<span class="string">&quot;tf-sample-data&quot;</span>, tag, i.toString(), data.getBytes()); </span><br><span class="line">                <span class="comment">//发送结果 </span></span><br><span class="line">                SendResult result = producer.send(message); </span><br><span class="line">                log.info(<span class="string">&quot;tag:&#123;&#125;,keys:&#123;&#125;,data:&#123;&#125;&quot;</span> , tag,i.toString(),data); </span><br><span class="line">            &#125;         </span><br><span class="line">		&#125;<span class="keyword">catch</span> (Exception e)&#123; </span><br><span class="line">            e.printStackTrace(); </span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123; </span><br><span class="line">            <span class="keyword">try</span> &#123; </span><br><span class="line">                <span class="comment">//关闭连接 </span></span><br><span class="line">                producer.shutdown(); </span><br><span class="line">                log.info(<span class="string">&quot;连接已关闭&quot;</span>); </span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123; </span><br><span class="line">                e.printStackTrace(); </span><br><span class="line">            &#125; </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">TfProducer - tag:tmall,keys:<span class="number">0</span>,data:第<span class="number">0</span>条消息数据 </span><br><span class="line">TfProducer - tag:jd,keys:<span class="number">1</span>,data:第<span class="number">1</span>条消息数据 </span><br><span class="line">TfProducer - tag:tmall,keys:<span class="number">2</span>,data:第<span class="number">2</span>条消息数据 </span><br><span class="line">TfProducer - tag:tmall,keys:<span class="number">3</span>,data:第<span class="number">3</span>条消息数据 </span><br><span class="line">TfProducer - tag:tmall,keys:<span class="number">4</span>,data:第<span class="number">4</span>条消息数据 </span><br><span class="line">TfProducer - tag:taobao,keys:<span class="number">5</span>,data:第<span class="number">5</span>条消息数据 </span><br><span class="line">TfProducer - tag:jd,keys:<span class="number">6</span>,data:第<span class="number">6</span>条消息数据 </span><br><span class="line">TfProducer - tag:tmall,keys:<span class="number">7</span>,data:第<span class="number">7</span>条消息数据 </span><br><span class="line">TfProducer - tag:tmall,keys:<span class="number">8</span>,data:第<span class="number">8</span>条消息数据 </span><br><span class="line">TfProducer - tag:jd,keys:<span class="number">9</span>,data:第<span class="number">9</span>条消息数据</span><br></pre></td></tr></table></figure>
+
+<h3 id="消息消费者"><a href="#消息消费者" class="headerlink" title="消息消费者"></a>消息消费者</h3><p>关键在第12行代码，consumer.subscribe第二个参数指明只消费tag=jd的数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TfJDConsumer</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">        <span class="comment">// 声明并初始化一个 consumer </span></span><br><span class="line">        <span class="comment">// 需要一个 consumer group 名字作为构造方法的参数 </span></span><br><span class="line">        DefaultMQPushConsumer consumer = <span class="keyword">new</span> DefaultMQPushConsumer(<span class="string">&quot;tf-jd-consumer-group&quot;</span>); </span><br><span class="line">        <span class="comment">// 同样也要设置 NameServer 地址，须要与提供者的地址列表保持一致 </span></span><br><span class="line">        consumer.setNamesrvAddr(<span class="string">&quot;192.168.31.103:9876&quot;</span>); </span><br><span class="line">        <span class="comment">//设置为集群模式 </span></span><br><span class="line">        consumer.setMessageModel(MessageModel.CLUSTERING); </span><br><span class="line">        <span class="comment">// 设置 consumer 所订阅的 Topic 和 Tag，*代表全部的 Tag </span></span><br><span class="line">        consumer.subscribe(<span class="string">&quot;tf-sample-data&quot;</span>, <span class="string">&quot;jd&quot;</span>); </span><br><span class="line">        <span class="comment">// 注册消息监听者 </span></span><br><span class="line">        consumer.registerMessageListener(<span class="keyword">new</span> MessageListenerConcurrently() &#123; </span><br><span class="line">            <span class="meta">@Override</span> </span><br><span class="line">            <span class="function"><span class="keyword">public</span> ConsumeConcurrentlyStatus <span class="title">consumeMessage</span><span class="params">(List&lt;MessageExt&gt; list, ConsumeConcurrentlyContext consumeConcurrentlyContext)</span> </span>&#123; </span><br><span class="line">                list.forEach(msg-&gt;&#123; </span><br><span class="line">                    log.info( msg.getTags() + <span class="string">&quot;:&quot;</span> + <span class="keyword">new</span> String(msg.getBody())); </span><br><span class="line">                &#125;); </span><br><span class="line">                <span class="comment">// 返回消费状态 </span></span><br><span class="line">                <span class="comment">// CONSUME_SUCCESS 消费成功 </span></span><br><span class="line">                <span class="comment">// RECONSUME_LATER 消费失败，需要稍后重新消费 </span></span><br><span class="line">                <span class="keyword">return</span> ConsumeConcurrentlyStatus.CONSUME_SUCCESS; </span><br><span class="line">            &#125; </span><br><span class="line">        &#125;); </span><br><span class="line">        <span class="comment">// 调用 start() 方法启动 consumer </span></span><br><span class="line">        consumer.start(); </span><br><span class="line">        log.info(<span class="string">&quot;集群消费者启动成功，正在监听新消息&quot;</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h3 id="运行结果-1"><a href="#运行结果-1" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">25.209</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - 集群消费者启动成功，正在监听新消息</span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">44.418</span> [ConsumeMessageThread_1] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">1</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">45.389</span> [ConsumeMessageThread_2] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">6</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">47.417</span> [ConsumeMessageThread_3] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">9</span>条消息数据 </span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">com.lixiang.rocketmq.tagfilter.TfAliConsumer</span><br><span class="line">consumer.subscribe第二个参数指明只消费tag=tmall || taobao的数据，遇到这种多个</span><br><span class="line">DefaultMQPushConsumer consumer = <span class="keyword">new</span> DefaultMQPushConsumer(<span class="string">&quot;tf-ali-consumer-group&quot;</span>); </span><br><span class="line">... </span><br><span class="line"><span class="comment">//设置为广播模式 </span></span><br><span class="line">consumer.setMessageModel(MessageModel.BROADCASTING); </span><br><span class="line">consumer.subscribe(<span class="string">&quot;tf-sample-data&quot;</span>, <span class="string">&quot;tmall || taobao&quot;</span>); </span><br><span class="line">... </span><br></pre></td></tr></table></figure>
+
+<h3 id="运行结果-2"><a href="#运行结果-2" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">17</span>:<span class="number">11</span>:<span class="number">26.136</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - 广播消费者启动成功，正在监听新消息</span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">42.376</span> [ConsumeMessageThread_1] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - tmall:第<span class="number">0</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">43.362</span> [ConsumeMessageThread_2] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - taobao:第<span class="number">2</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">46.403</span> [ConsumeMessageThread_3] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - taobao:第<span class="number">3</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">48.441</span> [ConsumeMessageThread_4] INFOcom.lixiang.rocketmq.tagfilter.TfAliConsumer - taobao:第<span class="number">4</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">49.444</span> [ConsumeMessageThread_5] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - tmall:第<span class="number">5</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">50.457</span> [ConsumeMessageThread_6] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - tmall:第<span class="number">7</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">12</span>:<span class="number">51.470</span> [ConsumeMessageThread_7] INFO com.lixiang.rocketmq.tagfilter.TfAliConsumer - tmall:第<span class="number">8</span>条消息数据</span><br></pre></td></tr></table></figure>
+
+<h3 id="Tags的写法"><a href="#Tags的写法" class="headerlink" title="Tags的写法"></a>Tags的写法</h3><pre><code>* ：消费所有消息
+Tag：只消费指定的Tag
+Tag || Tag || Tag：只要有一个Tag符合要求就会被消费
+</code></pre>
+<h3 id="为什么要设置两组不同的消费者组"><a href="#为什么要设置两组不同的消费者组" class="headerlink" title="为什么要设置两组不同的消费者组"></a>为什么要设置两组不同的消费者组</h3><p>如果通过不同Tag标注的数据，往往要交由不同的消费者处理，就像当前案例中，“jd”数据被京东消费组处理，“taobao”、“tmall”被阿里消费组处理。这两个消费组可以拥有不同的处理逻辑，例如京东消费者组采用“广播模式”，所有消费者都接收到相同数据；而阿里消费者组则采用“集群模式”将消费分发给不同的消费者实现”负载均衡“功能。如果放在同一个消费者组便无法实现上述功能。</p>
+<p><img src="/images/RocketMQ/20220123-9.png" alt="image-20220123-9"></p>
+<h3 id="生产者日志："><a href="#生产者日志：" class="headerlink" title="生产者日志："></a>生产者日志：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">53.539</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:tmall,keys:<span class="number">0</span>,data:第<span class="number">0</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">54.564</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:jd,keys:<span class="number">1</span>,data:第<span class="number">1</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">55.571</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:tmall,keys:<span class="number">2</span>,data:第<span class="number">2</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">56.588</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:jd,keys:<span class="number">3</span>,data:第<span class="number">3</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">57.603</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:taobao,keys:<span class="number">4</span>,data:第<span class="number">4</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">58.612</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:tmall,keys:<span class="number">5</span>,data:第<span class="number">5</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">59.630</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:tmall,keys:<span class="number">6</span>,data:第<span class="number">6</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">00.650</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:jd,keys:<span class="number">7</span>,data:第<span class="number">7</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">01.661</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:jd,keys:<span class="number">8</span>,data:第<span class="number">8</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">02.673</span> [main] INFO com.lixiang.rocketmq.tagfilter.TfProducer - tag:jd,keys:<span class="number">9</span>,data:第<span class="number">9</span>条消息数据</span><br></pre></td></tr></table></figure>
+
+<p>启动两个京东消费者实例的运行结果说明集群模式已生效。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">实例<span class="number">1</span>：</span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">56.633</span> [ConsumeMessageThread_1] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">3</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">01.662</span> [ConsumeMessageThread_3] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">8</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">02.673</span> [ConsumeMessageThread_4] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">9</span>条消息数据 </span><br><span class="line">实例<span class="number">2</span>：</span><br><span class="line"><span class="number">17</span>:<span class="number">22</span>:<span class="number">54.562</span> [ConsumeMessageThread_3] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">1</span>条消息数据 </span><br><span class="line"><span class="number">17</span>:<span class="number">23</span>:<span class="number">00.650</span> [ConsumeMessageThread_2] INFO com.lixiang.rocketmq.tagfilter.TfJDConsumer - jd:第<span class="number">7</span>条消息数据</span><br></pre></td></tr></table></figure>
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E8%80%85"><span class="toc-number">1.</span> <span class="toc-text">消息发送者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">2.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-number">3.</span> <span class="toc-text">消息消费者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C-1"><span class="toc-number">4.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C-2"><span class="toc-number">5.</span> <span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tags%E7%9A%84%E5%86%99%E6%B3%95"><span class="toc-number">6.</span> <span class="toc-text">Tags的写法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%AE%BE%E7%BD%AE%E4%B8%A4%E7%BB%84%E4%B8%8D%E5%90%8C%E7%9A%84%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="toc-number">7.</span> <span class="toc-text">为什么要设置两组不同的消费者组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E6%97%A5%E5%BF%97%EF%BC%9A"><span class="toc-number">8.</span> <span class="toc-text">生产者日志：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&text=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&is_video=false&description=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ消费者基于Tag实现消息过滤&body=Check out this article: https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&title=RocketMQ消费者基于Tag实现消息过滤"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/24/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E8%80%85%E5%9F%BA%E4%BA%8ETag%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4/&name=RocketMQ消费者基于Tag实现消息过滤&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

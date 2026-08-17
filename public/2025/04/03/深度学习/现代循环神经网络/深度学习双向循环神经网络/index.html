@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="双向循环神经网络在序列学习中，我们以往假设的目标是：在给定观测的情况下（例如，在时间序列的上下文中或在语言模型的上下文中），对下一个输出进行建模。虽然这是一个典型情景，但不是唯一的。还可能发生什么其它的情况呢？我们考虑以下三个在文本序列中填空的任务。  我___。 我___饿了。 我___饿了，我可以吃半头猪。  根据可获得的信息量，我们可以用不同的词填空，如“很高兴”（”happy”）、“不”（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="双向循环神经网络">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="双向循环神经网络在序列学习中，我们以往假设的目标是：在给定观测的情况下（例如，在时间序列的上下文中或在语言模型的上下文中），对下一个输出进行建模。虽然这是一个典型情景，但不是唯一的。还可能发生什么其它的情况呢？我们考虑以下三个在文本序列中填空的任务。  我___。 我___饿了。 我___饿了，我可以吃半头猪。  根据可获得的信息量，我们可以用不同的词填空，如“很高兴”（”happy”）、“不”（">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-03T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:15:59.582Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>双向循环神经网络</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&text=双向循环神经网络"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&is_video=false&description=双向循环神经网络"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=双向循环神经网络&body=Check out this article: https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&name=双向循环神经网络&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="toc-number">1.</span> <span class="toc-text">双向循环神经网络</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="toc-number">1.1.</span> <span class="toc-text">隐马尔可夫模型中的动态规划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">双向模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%A1%E7%AE%97%E4%BB%A3%E4%BB%B7%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8"><span class="toc-number">1.2.2.</span> <span class="toc-text">模型的计算代价及其应用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%94%99%E8%AF%AF%E5%BA%94%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">双向循环神经网络的错误应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        双向循环神经网络
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-03T04:00:00.000Z" itemprop="datePublished">2025-04-03</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="leancloud-visitors" data-flag-title="双向循环神经网络" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="双向循环神经网络"><a href="#双向循环神经网络" class="headerlink" title="双向循环神经网络"></a>双向循环神经网络</h1><p>在序列学习中，我们以往假设的目标是：<br>在给定观测的情况下<br>（例如，在时间序列的上下文中或在语言模型的上下文中），<br>对下一个输出进行建模。<br>虽然这是一个典型情景，但不是唯一的。<br>还可能发生什么其它的情况呢？<br>我们考虑以下三个在文本序列中填空的任务。</p>
+<ul>
+<li>我<code>___</code>。</li>
+<li>我<code>___</code>饿了。</li>
+<li>我<code>___</code>饿了，我可以吃半头猪。</li>
+</ul>
+<p>根据可获得的信息量，我们可以用不同的词填空，<br>如“很高兴”（”happy”）、“不”（”not”）和“非常”（”very”）。<br>很明显，每个短语的“下文”传达了重要信息（如果有的话），<br>而这些信息关乎到选择哪个词来填空，<br>所以无法利用这一点的序列模型将在相关任务上表现不佳。<br>例如，如果要做好命名实体识别<br>（例如，识别“Green”指的是“格林先生”还是绿色），<br>不同长度的上下文范围重要性是相同的。<br>为了获得一些解决问题的灵感，让我们先迂回到概率图模型。</p>
+<h2 id="隐马尔可夫模型中的动态规划"><a href="#隐马尔可夫模型中的动态规划" class="headerlink" title="隐马尔可夫模型中的动态规划"></a>隐马尔可夫模型中的动态规划</h2><p>这一小节是用来说明动态规划问题的，<br>具体的技术细节对于理解深度学习模型并不重要，<br>但它有助于我们思考为什么要使用深度学习，<br>以及为什么要选择特定的架构。</p>
+<p>如果我们想用概率图模型来解决这个问题，<br>可以设计一个隐变量模型：<br>在任意时间步$t$，假设存在某个隐变量$h_t$，<br>通过概率$P(x_t \mid h_t)$控制我们观测到的$x_t$。<br>此外，任何$h_t \to h_{t+1}$转移<br>都是由一些状态转移概率$P(h_{t+1} \mid h_{t})$给出。<br>这个概率图模型就是一个<em>隐马尔可夫模型</em>（hidden Markov model，HMM），<br>如 fig_hmm所示。</p>
+<p>（图：隐马尔可夫模型）</p>
+<p>因此，对于有$T$个观测值的序列，<br>我们在观测状态和隐状态上具有以下联合概率分布：</p>
+<p>$$P(x_1, \ldots, x_T, h_1, \ldots, h_T) = \prod_{t=1}^T P(h_t \mid h_{t-1}) P(x_t \mid h_t), \text{ where } P(h_1 \mid h_0) = P(h_1).$$</p>
+<p>现在，假设我们观测到所有的$x_i$，除了$x_j$，<br>并且我们的目标是计算$P(x_j \mid x_{-j})$，<br>其中$x_{-j} = (x_1, \ldots, x_{j-1}, x_{j+1}, \ldots, x_{T})$。<br>由于$P(x_j \mid x_{-j})$中没有隐变量，<br>因此我们考虑对$h_1, \ldots, h_T$选择构成的<br>所有可能的组合进行求和。<br>如果任何$h_i$可以接受$k$个不同的值（有限的状态数），<br>这意味着我们需要对$k^T$个项求和，<br>这个任务显然难于登天。<br>幸运的是，有个巧妙的解决方案：<em>动态规划</em>（dynamic programming）。</p>
+<p>要了解动态规划的工作方式，<br>我们考虑对隐变量$h_1, \ldots, h_T$的依次求和。<br>根据 上式，将得出：</p>
+<p>$$\begin{aligned}<br> &amp;P(x_1, \ldots, x_T) \<br> =&amp; \sum_{h_1, \ldots, h_T} P(x_1, \ldots, x_T, h_1, \ldots, h_T) \<br> =&amp; \sum_{h_1, \ldots, h_T} \prod_{t=1}^T P(h_t \mid h_{t-1}) P(x_t \mid h_t) \<br> =&amp; \sum_{h_2, \ldots, h_T} \underbrace{\left[\sum_{h_1} P(h_1) P(x_1 \mid h_1) P(h_2 \mid h_1)\right]}<em>{\pi_2(h_2) \stackrel{\mathrm{def}}{=}}<br> P(x_2 \mid h_2) \prod</em>{t=3}^T P(h_t \mid h_{t-1}) P(x_t \mid h_t) \<br> =&amp; \sum_{h_3, \ldots, h_T} \underbrace{\left[\sum_{h_2} \pi_2(h_2) P(x_2 \mid h_2) P(h_3 \mid h_2)\right]}<em>{\pi_3(h_3)\stackrel{\mathrm{def}}{=}}<br> P(x_3 \mid h_3) \prod</em>{t=4}^T P(h_t \mid h_{t-1}) P(x_t \mid h_t)\<br> =&amp; \dots \<br> =&amp; \sum_{h_T} \pi_T(h_T) P(x_T \mid h_T).<br>\end{aligned}$$</p>
+<p>通常，我们将<em>前向递归</em>（forward recursion）写为：</p>
+<p>$$\pi_{t+1}(h_{t+1}) = \sum_{h_t} \pi_t(h_t) P(x_t \mid h_t) P(h_{t+1} \mid h_t).$$</p>
+<p>递归被初始化为$\pi_1(h_1) = P(h_1)$。<br>符号简化，也可以写成$\pi_{t+1} = f(\pi_t, x_t)$，<br>其中$f$是一些可学习的函数。<br>这看起来就像我们在循环神经网络中讨论的隐变量模型中的更新方程。</p>
+<p>与前向递归一样，我们也可以使用后向递归对同一组隐变量求和。这将得到：</p>
+<p>$$\begin{aligned}<br> &amp; P(x_1, \ldots, x_T) \<br> =&amp; \sum_{h_1, \ldots, h_T} P(x_1, \ldots, x_T, h_1, \ldots, h_T) \<br> =&amp; \sum_{h_1, \ldots, h_T} \prod_{t=1}^{T-1} P(h_t \mid h_{t-1}) P(x_t \mid h_t) \cdot P(h_T \mid h_{T-1}) P(x_T \mid h_T) \<br> =&amp; \sum_{h_1, \ldots, h_{T-1}} \prod_{t=1}^{T-1} P(h_t \mid h_{t-1}) P(x_t \mid h_t) \cdot<br> \underbrace{\left[\sum_{h_T} P(h_T \mid h_{T-1}) P(x_T \mid h_T)\right]}<em>{\rho</em>{T-1}(h_{T-1})\stackrel{\mathrm{def}}{=}} \<br> =&amp; \sum_{h_1, \ldots, h_{T-2}} \prod_{t=1}^{T-2} P(h_t \mid h_{t-1}) P(x_t \mid h_t) \cdot<br> \underbrace{\left[\sum_{h_{T-1}} P(h_{T-1} \mid h_{T-2}) P(x_{T-1} \mid h_{T-1}) \rho_{T-1}(h_{T-1}) \right]}<em>{\rho</em>{T-2}(h_{T-2})\stackrel{\mathrm{def}}{=}} \<br> =&amp; \ldots \<br> =&amp; \sum_{h_1} P(h_1) P(x_1 \mid h_1)\rho_{1}(h_{1}).<br>\end{aligned}$$</p>
+<p>因此，我们可以将<em>后向递归</em>（backward recursion）写为：</p>
+<p>$$\rho_{t-1}(h_{t-1})= \sum_{h_{t}} P(h_{t} \mid h_{t-1}) P(x_{t} \mid h_{t}) \rho_{t}(h_{t}),$$</p>
+<p>初始化$\rho_T(h_T) = 1$。<br>前向和后向递归都允许我们对$T$个隐变量在$\mathcal{O}(kT)$<br>（线性而不是指数）时间内对$(h_1, \ldots, h_T)$的所有值求和。<br>这是使用图模型进行概率推理的巨大好处之一。<br>它也是通用消息传递算法 的一个非常特殊的例子。<br>结合前向和后向递归，我们能够计算</p>
+<p>$$P(x_j \mid x_{-j}) \propto \sum_{h_j} \pi_j(h_j) \rho_j(h_j) P(x_j \mid h_j).$$</p>
+<p>因为符号简化的需要，后向递归也可以写为$\rho_{t-1} = g(\rho_t, x_t)$，<br>其中$g$是一个可以学习的函数。<br>同样，这看起来非常像一个更新方程，<br>只是不像我们在循环神经网络中看到的那样前向运算，而是后向计算。<br>事实上，知道未来数据何时可用对隐马尔可夫模型是有益的。<br>信号处理学家将是否知道未来观测这两种情况区分为内插和外推，<br>有关更多详细信息，请参阅 。</p>
+<h2 id="双向模型"><a href="#双向模型" class="headerlink" title="双向模型"></a>双向模型</h2><p>如果我们希望在循环神经网络中拥有一种机制，<br>使之能够提供与隐马尔可夫模型类似的前瞻能力，<br>我们就需要修改循环神经网络的设计。<br>幸运的是，这在概念上很容易，<br>只需要增加一个“从最后一个词元开始从后向前运行”的循环神经网络，<br>而不是只有一个在前向模式下“从第一个词元开始运行”的循环神经网络。<br><em>双向循环神经网络</em>（bidirectional RNNs）<br>添加了反向传递信息的隐藏层，以便更灵活地处理此类信息。<br> fig_birnn描述了具有单个隐藏层的双向循环神经网络的架构。</p>
+<p>（图：双向循环神经网络架构）</p>
+<p>事实上，这与隐马尔可夫模型中的动态规划的前向和后向递归没有太大区别。<br>其主要区别是，在隐马尔可夫模型中的方程具有特定的统计意义。<br>双向循环神经网络没有这样容易理解的解释，<br>我们只能把它们当作通用的、可学习的函数。<br>这种转变集中体现了现代深度网络的设计原则：<br>首先使用经典统计模型的函数依赖类型，然后将其参数化为通用形式。</p>
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>双向循环神经网络是由 提出的，<br>关于各种架构的详细讨论请参阅 。<br>让我们看看这样一个网络的细节。</p>
+<p>对于任意时间步$t$，给定一个小批量的输入数据<br>$\mathbf{X}_t \in \mathbb{R}^{n \times d}$<br>（样本数$n$，每个示例中的输入数$d$），<br>并且令隐藏层激活函数为$\phi$。<br>在双向架构中，我们设该时间步的前向和反向隐状态分别为<br>$\overrightarrow{\mathbf{H}}_t \in \mathbb{R}^{n \times h}$和<br>$\overleftarrow{\mathbf{H}}_t \in \mathbb{R}^{n \times h}$，<br>其中$h$是隐藏单元的数目。<br>前向和反向隐状态的更新如下：</p>
+<p>$$<br>\begin{aligned}<br>\overrightarrow{\mathbf{H}}<em>t &amp;= \phi(\mathbf{X}<em>t \mathbf{W}</em>{xh}^{(f)} + \overrightarrow{\mathbf{H}}</em>{t-1} \mathbf{W}<em>{hh}^{(f)} + \mathbf{b}<em>h^{(f)}),\<br>\overleftarrow{\mathbf{H}}_t &amp;= \phi(\mathbf{X}_t \mathbf{W}</em>{xh}^{(b)} + \overleftarrow{\mathbf{H}}</em>{t+1} \mathbf{W}_{hh}^{(b)} + \mathbf{b}_h^{(b)}),<br>\end{aligned}<br>$$</p>
+<p>其中，权重$\mathbf{W}<em>{xh}^{(f)} \in \mathbb{R}^{d \times h}, \mathbf{W}</em>{hh}^{(f)} \in \mathbb{R}^{h \times h}, \mathbf{W}<em>{xh}^{(b)} \in \mathbb{R}^{d \times h}, \mathbf{W}</em>{hh}^{(b)} \in \mathbb{R}^{h \times h}$<br>和偏置$\mathbf{b}_h^{(f)} \in \mathbb{R}^{1 \times h}, \mathbf{b}_h^{(b)} \in \mathbb{R}^{1 \times h}$都是模型参数。</p>
+<p>接下来，将前向隐状态$\overrightarrow{\mathbf{H}}_t$<br>和反向隐状态$\overleftarrow{\mathbf{H}}_t$连接起来，<br>获得需要送入输出层的隐状态$\mathbf{H}_t \in \mathbb{R}^{n \times 2h}$。<br>在具有多个隐藏层的深度双向循环神经网络中，<br>该信息作为输入传递到下一个双向层。<br>最后，输出层计算得到的输出为<br>$\mathbf{O}_t \in \mathbb{R}^{n \times q}$（$q$是输出单元的数目）：</p>
+<p>$$\mathbf{O}_t = \mathbf{H}<em>t \mathbf{W}</em>{hq} + \mathbf{b}_q.$$</p>
+<p>这里，权重矩阵$\mathbf{W}_{hq} \in \mathbb{R}^{2h \times q}$<br>和偏置$\mathbf{b}_q \in \mathbb{R}^{1 \times q}$<br>是输出层的模型参数。<br>事实上，这两个方向可以拥有不同数量的隐藏单元。</p>
+<h3 id="模型的计算代价及其应用"><a href="#模型的计算代价及其应用" class="headerlink" title="模型的计算代价及其应用"></a>模型的计算代价及其应用</h3><p>双向循环神经网络的一个关键特性是：使用来自序列两端的信息来估计输出。<br>也就是说，我们使用来自过去和未来的观测信息来预测当前的观测。<br>但是在对下一个词元进行预测的情况中，这样的模型并不是我们所需的。<br>因为在预测下一个词元时，我们终究无法知道下一个词元的下文是什么，<br>所以将不会得到很好的精度。<br>具体地说，在训练期间，我们能够利用过去和未来的数据来估计现在空缺的词；<br>而在测试期间，我们只有过去的数据，因此精度将会很差。<br>下面的实验将说明这一点。</p>
+<p>另一个严重问题是，双向循环神经网络的计算速度非常慢。<br>其主要原因是网络的前向传播需要在双向层中进行前向和后向递归，<br>并且网络的反向传播还依赖于前向传播的结果。<br>因此，梯度求解将有一个非常长的链。</p>
+<p>双向层的使用在实践中非常少，并且仅仅应用于部分场合。<br>例如，填充缺失的单词、词元注释（例如，用于命名实体识别）<br>以及作为序列处理流水线中的一个步骤对序列进行编码（例如，用于机器翻译）。<br>在 sec_bert和 sec_sentiment_rnn中，<br>我们将介绍如何使用双向循环神经网络编码文本序列。</p>
+<h2 id="双向循环神经网络的错误应用"><a href="#双向循环神经网络的错误应用" class="headerlink" title="双向循环神经网络的错误应用"></a>双向循环神经网络的错误应用</h2><p>由于双向循环神经网络使用了过去的和未来的数据，<br>所以我们不能盲目地将这一语言模型应用于任何预测任务。<br>尽管模型产出的困惑度是合理的，<br>该模型预测未来词元的能力却可能存在严重缺陷。<br>我们用下面的示例代码引以为戒，以防在错误的环境中使用它们。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载数据</span></span><br><span class="line">batch_size, num_steps, device = <span class="number">32</span>, <span class="number">35</span>, d2l.try_gpu()</span><br><span class="line">train_iter, vocab = d2l.load_data_time_machine(batch_size, num_steps)</span><br><span class="line"><span class="comment"># 通过设置“bidirective=True”来定义双向LSTM模型</span></span><br><span class="line">vocab_size, num_hiddens, num_layers = <span class="built_in">len</span>(vocab), <span class="number">256</span>, <span class="number">2</span></span><br><span class="line">num_inputs = vocab_size</span><br><span class="line">lstm_layer = nn.LSTM(num_inputs, num_hiddens, num_layers, bidirectional=<span class="literal">True</span>)</span><br><span class="line">model = d2l.RNNModel(lstm_layer, <span class="built_in">len</span>(vocab))</span><br><span class="line">model = model.to(device)</span><br><span class="line"><span class="comment"># 训练模型</span></span><br><span class="line">num_epochs, lr = <span class="number">500</span>, <span class="number">1</span></span><br><span class="line">d2l.train_ch8(model, train_iter, vocab, lr, num_epochs, device)</span><br></pre></td></tr></table></figure>
+
+<p>上述结果显然令人瞠目结舌。<br>关于如何更有效地使用双向循环神经网络的讨论，<br>请参阅 sec_sentiment_rnn中的情感分类应用。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>在双向循环神经网络中，每个时间步的隐状态由当前时间步的前后数据同时决定。</li>
+<li>双向循环神经网络与概率图模型中的“前向-后向”算法具有相似性。</li>
+<li>双向循环神经网络主要用于序列编码和给定双向上下文的观测估计。</li>
+<li>由于梯度链更长，因此双向循环神经网络的训练代价非常高。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="toc-number">1.</span> <span class="toc-text">双向循环神经网络</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="toc-number">1.1.</span> <span class="toc-text">隐马尔可夫模型中的动态规划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">双向模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%A1%E7%AE%97%E4%BB%A3%E4%BB%B7%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8"><span class="toc-number">1.2.2.</span> <span class="toc-text">模型的计算代价及其应用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E9%94%99%E8%AF%AF%E5%BA%94%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">双向循环神经网络的错误应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&text=双向循环神经网络"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&is_video=false&description=双向循环神经网络"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=双向循环神经网络&body=Check out this article: https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&title=双向循环神经网络"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/&name=双向循环神经网络&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

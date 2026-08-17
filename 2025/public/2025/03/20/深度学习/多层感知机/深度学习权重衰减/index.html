@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="权重衰减前一节我们描述了过拟合的问题，本节我们将介绍一些正则化模型的技术。我们总是可以通过去收集更多的训练数据来缓解过拟合。但这可能成本很高，耗时颇多，或者完全超出我们的控制，因而在短期内不可能做到。假设我们已经拥有尽可能多的高质量数据，我们便可以将重点放在正则化技术上。 回想一下，在多项式回归的例子（ 模型选择、欠拟合和过拟合）中，我们可以通过调整拟合多项式的阶数来限制模型的容量。实际上，限制特">
+<meta property="og:type" content="article">
+<meta property="og:title" content="权重衰减">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="权重衰减前一节我们描述了过拟合的问题，本节我们将介绍一些正则化模型的技术。我们总是可以通过去收集更多的训练数据来缓解过拟合。但这可能成本很高，耗时颇多，或者完全超出我们的控制，因而在短期内不可能做到。假设我们已经拥有尽可能多的高质量数据，我们便可以将重点放在正则化技术上。 回想一下，在多项式回归的例子（ 模型选择、欠拟合和过拟合）中，我们可以通过调整拟合多项式的阶数来限制模型的容量。实际上，限制特">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-20T05:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:06:30.158Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>权重衰减</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%8E%AF%E5%A2%83%E5%92%8C%E5%88%86%E5%B8%83%E5%81%8F%E7%A7%BB/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&text=权重衰减"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&is_video=false&description=权重衰减"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=权重衰减&body=Check out this article: https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&name=权重衰减&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.</span> <span class="toc-text">权重衰减</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8C%83%E6%95%B0%E4%B8%8E%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.1.</span> <span class="toc-text">范数与权重衰减</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AB%98%E7%BB%B4%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="toc-number">1.2.</span> <span class="toc-text">高维线性回归</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">从零开始实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">初始化模型参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89-L-2-%E8%8C%83%E6%95%B0%E6%83%A9%E7%BD%9A"><span class="toc-number">1.3.2.</span> <span class="toc-text">定义$L_2$范数惩罚</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.3.</span> <span class="toc-text">定义训练代码实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%BD%E7%95%A5%E6%AD%A3%E5%88%99%E5%8C%96%E7%9B%B4%E6%8E%A5%E8%AE%AD%E7%BB%83"><span class="toc-number">1.3.4.</span> <span class="toc-text">忽略正则化直接训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.3.5.</span> <span class="toc-text">使用权重衰减</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.4.</span> <span class="toc-text">简洁实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        权重衰减
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-20T05:00:00.000Z" itemprop="datePublished">2025-03-20</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/" class="leancloud-visitors" data-flag-title="权重衰减" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="权重衰减"><a href="#权重衰减" class="headerlink" title="权重衰减"></a>权重衰减</h1><p>前一节我们描述了过拟合的问题，本节我们将介绍一些正则化模型的技术。<br>我们总是可以通过去收集更多的训练数据来缓解过拟合。<br>但这可能成本很高，耗时颇多，或者完全超出我们的控制，因而在短期内不可能做到。<br>假设我们已经拥有尽可能多的高质量数据，我们便可以将重点放在正则化技术上。</p>
+<p>回想一下，在多项式回归的例子（ 模型选择、欠拟合和过拟合）中，<br>我们可以通过调整拟合多项式的阶数来限制模型的容量。<br>实际上，限制特征的数量是缓解过拟合的一种常用技术。<br>然而，简单地丢弃特征对这项工作来说可能过于生硬。<br>我们继续思考多项式回归的例子，考虑高维输入可能发生的情况。<br>多项式对多变量数据的自然扩展称为<em>单项式</em>（monomials），<br>也可以说是变量幂的乘积。<br>单项式的阶数是幂的和。<br>例如，$x_1^2 x_2$和$x_3 x_5^2$都是3次单项式。</p>
+<p>注意，随着阶数$d$的增长，带有阶数$d$的项数迅速增加。<br>给定$k$个变量，阶数为$d$的项的个数为<br>${k - 1 + d} \choose {k - 1}$，即$C^{k-1}_{k-1+d} = \frac{(k-1+d)!}{(d)!(k-1)!}$。<br>因此即使是阶数上的微小变化，比如从$2$到$3$，也会显著增加我们模型的复杂性。<br>仅仅通过简单的限制特征数量（在多项式回归中体现为限制阶数），可能仍然使模型在过简单和过复杂中徘徊，<br>我们需要一个更细粒度的工具来调整函数的复杂性，使其达到一个合适的平衡位置。</p>
+<h2 id="范数与权重衰减"><a href="#范数与权重衰减" class="headerlink" title="范数与权重衰减"></a>范数与权重衰减</h2><p>在 subsec_lin-algebra-norms中，<br>我们已经描述了$L_2$范数和$L_1$范数，<br>它们是更为一般的$L_p$范数的特殊情况。</p>
+<p>在训练参数化机器学习模型时，<br><em>权重衰减</em>（weight decay）是最广泛使用的正则化的技术之一，<br>它通常也被称为$L_2$<em>正则化</em>。<br>这项技术通过函数与零的距离来衡量函数的复杂度，<br>因为在所有函数$f$中，函数$f = 0$（所有输入都得到值$0$）<br>在某种意义上是最简单的。<br>但是我们应该如何精确地测量一个函数和零之间的距离呢？<br>没有一个正确的答案。<br>事实上，函数分析和巴拿赫空间理论的研究，都在致力于回答这个问题。</p>
+<p>一种简单的方法是通过线性函数<br>$f(\mathbf{x}) = \mathbf{w}^\top \mathbf{x}$<br>中的权重向量的某个范数来度量其复杂性，<br>例如$| \mathbf{w} |^2$。<br>要保证权重向量比较小，<br>最常用方法是将其范数作为惩罚项加到最小化损失的问题中。<br>将原来的训练目标<em>最小化训练标签上的预测损失</em>，<br>调整为<em>最小化预测损失和惩罚项之和</em>。<br>现在，如果我们的权重向量增长的太大，<br>我们的学习算法可能会更集中于最小化权重范数$| \mathbf{w} |^2$。<br>这正是我们想要的。<br>让我们回顾一下 线性回归中的线性回归例子。<br>我们的损失由下式给出：</p>
+<p>$$L(\mathbf{w}, b) = \frac{1}{n}\sum_{i=1}^n \frac{1}{2}\left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right)^2.$$</p>
+<p>回想一下，$\mathbf{x}^{(i)}$是样本$i$的特征，<br>$y^{(i)}$是样本$i$的标签，<br>$(\mathbf{w}, b)$是权重和偏置参数。<br>为了惩罚权重向量的大小，<br>我们必须以某种方式在损失函数中添加$| \mathbf{w} |^2$，<br>但是模型应该如何平衡这个新的额外惩罚的损失？<br>实际上，我们通过<em>正则化常数</em>$\lambda$来描述这种权衡，<br>这是一个非负超参数，我们使用验证数据拟合：</p>
+<p>$$L(\mathbf{w}, b) + \frac{\lambda}{2} |\mathbf{w}|^2,$$</p>
+<p>对于$\lambda = 0$，我们恢复了原来的损失函数。<br>对于$\lambda &gt; 0$，我们限制$| \mathbf{w} |$的大小。<br>这里我们仍然除以$2$：当我们取一个二次函数的导数时，<br>$2$和$1/2$会抵消，以确保更新表达式看起来既漂亮又简单。<br>为什么在这里我们使用平方范数而不是标准范数（即欧几里得距离）？<br>我们这样做是为了便于计算。<br>通过平方$L_2$范数，我们去掉平方根，留下权重向量每个分量的平方和。<br>这使得惩罚的导数很容易计算：导数的和等于和的导数。</p>
+<p>此外，为什么我们首先使用$L_2$范数，而不是$L_1$范数。<br>事实上，这个选择在整个统计领域中都是有效的和受欢迎的。<br>$L_2$正则化线性模型构成经典的<em>岭回归</em>（ridge regression）算法，<br>$L_1$正则化线性回归是统计学中类似的基本模型，<br>通常被称为<em>套索回归</em>（lasso regression）。<br>使用$L_2$范数的一个原因是它对权重向量的大分量施加了巨大的惩罚。<br>这使得我们的学习算法偏向于在大量特征上均匀分布权重的模型。<br>在实践中，这可能使它们对单个变量中的观测误差更为稳定。<br>相比之下，$L_1$惩罚会导致模型将权重集中在一小部分特征上，<br>而将其他权重清除为零。<br>这称为<em>特征选择</em>（feature selection），这可能是其他场景下需要的。</p>
+<p>使用与 上式中的相同符号，<br>$L_2$正则化回归的小批量随机梯度下降更新如下式：</p>
+<p>$$<br>\begin{aligned}<br>\mathbf{w} &amp; \leftarrow \left(1- \eta\lambda \right) \mathbf{w} - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \mathbf{x}^{(i)} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right).<br>\end{aligned}<br>$$</p>
+<p>根据之前章节所讲的，我们根据估计值与观测值之间的差异来更新$\mathbf{w}$。<br>然而，我们同时也在试图将$\mathbf{w}$的大小缩小到零。<br>这就是为什么这种方法有时被称为<em>权重衰减</em>。<br>我们仅考虑惩罚项，优化算法在训练的每一步<em>衰减</em>权重。<br>与特征选择相比，权重衰减为我们提供了一种连续的机制来调整函数的复杂度。<br>较小的$\lambda$值对应较少约束的$\mathbf{w}$，<br>而较大的$\lambda$值对$\mathbf{w}$的约束更大。</p>
+<p>是否对相应的偏置$b^2$进行惩罚在不同的实践中会有所不同，<br>在神经网络的不同层中也会有所不同。<br>通常，网络输出层的偏置项不会被正则化。</p>
+<h2 id="高维线性回归"><a href="#高维线性回归" class="headerlink" title="高维线性回归"></a>高维线性回归</h2><p>我们通过一个简单的例子来演示权重衰减。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br></pre></td></tr></table></figure>
+
+<p>首先，我们像以前一样生成一些数据，生成公式如下：</p>
+<p>$$y = 0.05 + \sum_{i = 1}^d 0.01 x_i + \epsilon \text{ where }<br>\epsilon \sim \mathcal{N}(0, 0.01^2).$$</p>
+<p>我们选择标签是关于输入的线性函数。<br>标签同时被均值为0，标准差为0.01高斯噪声破坏。<br>为了使过拟合的效果更加明显，我们可以将问题的维数增加到$d = 200$，<br>并使用一个只包含20个样本的小训练集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">n_train, n_test, num_inputs, batch_size = <span class="number">20</span>, <span class="number">100</span>, <span class="number">200</span>, <span class="number">5</span></span><br><span class="line">true_w, true_b = d2l.ones((num_inputs, <span class="number">1</span>)) * <span class="number">0.01</span>, <span class="number">0.05</span></span><br><span class="line">train_data = d2l.synthetic_data(true_w, true_b, n_train)</span><br><span class="line">train_iter = d2l.load_array(train_data, batch_size)</span><br><span class="line">test_data = d2l.synthetic_data(true_w, true_b, n_test)</span><br><span class="line">test_iter = d2l.load_array(test_data, batch_size, is_train=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="从零开始实现"><a href="#从零开始实现" class="headerlink" title="从零开始实现"></a>从零开始实现</h2><p>下面我们将从头开始实现权重衰减，只需将$L_2$的平方惩罚添加到原始目标函数中。</p>
+<h3 id="初始化模型参数"><a href="#初始化模型参数" class="headerlink" title="初始化模型参数"></a>初始化模型参数</h3><p>首先，我们将定义一个函数来随机初始化模型参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_params</span>():</span></span><br><span class="line">    w = torch.normal(<span class="number">0</span>, <span class="number">1</span>, size=(num_inputs, <span class="number">1</span>), requires_grad=<span class="literal">True</span>)</span><br><span class="line">    b = torch.zeros(<span class="number">1</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">return</span> [w, b]</span><br></pre></td></tr></table></figure>
+
+<h3 id="定义-L-2-范数惩罚"><a href="#定义-L-2-范数惩罚" class="headerlink" title="定义$L_2$范数惩罚"></a>定义$L_2$范数惩罚</h3><p>实现这一惩罚最方便的方法是对所有项求平方后并将它们求和。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">l2_penalty</span>(<span class="params">w</span>):</span></span><br><span class="line">    <span class="keyword">return</span> (w**<span class="number">2</span>).<span class="built_in">sum</span>() / <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">l2_penalty</span>(<span class="params">w</span>):</span></span><br><span class="line">    <span class="keyword">return</span> torch.<span class="built_in">sum</span>(w.<span class="built_in">pow</span>(<span class="number">2</span>)) / <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="定义训练代码实现"><a href="#定义训练代码实现" class="headerlink" title="定义训练代码实现"></a>定义训练代码实现</h3><p>下面的代码将模型拟合训练数据集，并在测试数据集上进行评估。<br>从 线性神经网络以来，线性网络和平方损失没有变化，<br>所以我们通过<code>d2l.linreg</code>和<code>d2l.squared_loss</code>导入它们。<br>唯一的变化是损失现在包括了惩罚项。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">lambd</span>):</span></span><br><span class="line">    w, b = init_params()</span><br><span class="line">    net, loss = <span class="keyword">lambda</span> X: d2l.linreg(X, w, b), d2l.squared_loss</span><br><span class="line">    num_epochs, lr = <span class="number">100</span>, <span class="number">0.003</span></span><br><span class="line">    animator = d2l.Animator(xlabel=<span class="string">&#x27;epochs&#x27;</span>, ylabel=<span class="string">&#x27;loss&#x27;</span>, yscale=<span class="string">&#x27;log&#x27;</span>,</span><br><span class="line">                            xlim=[<span class="number">5</span>, num_epochs], legend=[<span class="string">&#x27;train&#x27;</span>, <span class="string">&#x27;test&#x27;</span>])</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        <span class="keyword">for</span> X, y <span class="keyword">in</span> train_iter:</span><br><span class="line">            <span class="comment"># 增加了L2范数惩罚项，</span></span><br><span class="line">            <span class="comment"># 广播机制使l2_penalty(w)成为一个长度为batch_size的向量</span></span><br><span class="line">            l = loss(net(X), y) + lambd * l2_penalty(w)</span><br><span class="line">            l.<span class="built_in">sum</span>().backward()</span><br><span class="line">            d2l.sgd([w, b], lr, batch_size)</span><br><span class="line">        <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">5</span> == <span class="number">0</span>:</span><br><span class="line">            animator.add(epoch + <span class="number">1</span>, (d2l.evaluate_loss(net, train_iter, loss),</span><br><span class="line">                                     d2l.evaluate_loss(net, test_iter, loss)))</span><br><span class="line">    print(<span class="string">&#x27;w的L2范数是：&#x27;</span>, torch.norm(w).item())</span><br></pre></td></tr></table></figure>
+
+<h3 id="忽略正则化直接训练"><a href="#忽略正则化直接训练" class="headerlink" title="忽略正则化直接训练"></a>忽略正则化直接训练</h3><p>我们现在用<code>lambd = 0</code>禁用权重衰减后运行这个代码。<br>注意，这里训练误差有了减少，但测试误差没有减少，<br>这意味着出现了严重的过拟合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用权重衰减"><a href="#使用权重衰减" class="headerlink" title="使用权重衰减"></a>使用权重衰减</h3><p>下面，我们使用权重衰减来运行代码。<br>注意，在这里训练误差增大，但测试误差减小。<br>这正是我们期望从正则化中得到的效果。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="简洁实现"><a href="#简洁实现" class="headerlink" title="简洁实现"></a>简洁实现</h2><p>由于权重衰减在神经网络优化中很常用，<br>深度学习框架为了便于我们使用权重衰减，<br>将权重衰减集成到优化算法中，以便与任何损失函数结合使用。<br>此外，这种集成还有计算上的好处，<br>允许在不增加任何额外的计算开销的情况下向算法中添加权重衰减。<br>由于更新的权重衰减部分仅依赖于每个参数的当前值，<br>因此优化器必须至少接触每个参数一次。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_concise</span>(<span class="params">wd</span>):</span></span><br><span class="line">    net = nn.Sequential(nn.Linear(num_inputs, <span class="number">1</span>))</span><br><span class="line">    <span class="keyword">for</span> param <span class="keyword">in</span> net.parameters():</span><br><span class="line">        param.data.normal_()</span><br><span class="line">    loss = nn.MSELoss(reduction=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">    num_epochs, lr = <span class="number">100</span>, <span class="number">0.003</span></span><br><span class="line">    <span class="comment"># 偏置参数没有衰减</span></span><br><span class="line">    trainer = torch.optim.SGD([</span><br><span class="line">        &#123;<span class="string">&quot;params&quot;</span>:net[<span class="number">0</span>].weight,<span class="string">&#x27;weight_decay&#x27;</span>: wd&#125;,</span><br><span class="line">        &#123;<span class="string">&quot;params&quot;</span>:net[<span class="number">0</span>].bias&#125;], lr=lr)</span><br><span class="line">    animator = d2l.Animator(xlabel=<span class="string">&#x27;epochs&#x27;</span>, ylabel=<span class="string">&#x27;loss&#x27;</span>, yscale=<span class="string">&#x27;log&#x27;</span>,</span><br><span class="line">                            xlim=[<span class="number">5</span>, num_epochs], legend=[<span class="string">&#x27;train&#x27;</span>, <span class="string">&#x27;test&#x27;</span>])</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        <span class="keyword">for</span> X, y <span class="keyword">in</span> train_iter:</span><br><span class="line">            trainer.zero_grad()</span><br><span class="line">            l = loss(net(X), y)</span><br><span class="line">            l.mean().backward()</span><br><span class="line">            trainer.step()</span><br><span class="line">        <span class="keyword">if</span> (epoch + <span class="number">1</span>) % <span class="number">5</span> == <span class="number">0</span>:</span><br><span class="line">            animator.add(epoch + <span class="number">1</span>,</span><br><span class="line">                         (d2l.evaluate_loss(net, train_iter, loss),</span><br><span class="line">                          d2l.evaluate_loss(net, test_iter, loss)))</span><br><span class="line">    print(<span class="string">&#x27;w的L2范数：&#x27;</span>, net[<span class="number">0</span>].weight.norm().item())</span><br></pre></td></tr></table></figure>
+
+<p>这些图看起来和我们从零开始实现权重衰减时的图相同。<br>然而，它们运行得更快，更容易实现。<br>对于更复杂的问题，这一好处将变得更加明显。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_concise(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_concise(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<p>到目前为止，我们只接触到一个简单线性函数的概念。<br>此外，由什么构成一个简单的非线性函数可能是一个更复杂的问题。<br>例如，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Reproducing_kernel_Hilbert_space">再生核希尔伯特空间（RKHS）</a><br>允许在非线性环境中应用为线性函数引入的工具。<br>不幸的是，基于RKHS的算法往往难以应用到大型、高维的数据。<br>在这本书中，我们将默认使用简单的启发式方法，即在深层网络的所有层上应用权重衰减。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>正则化是处理过拟合的常用方法：在训练集的损失函数中加入惩罚项，以降低学习到的模型的复杂度。</li>
+<li>保持模型简单的一个特别的选择是使用$L_2$惩罚的权重衰减。这会导致学习算法更新步骤中的权重衰减。</li>
+<li>权重衰减功能在深度学习框架的优化器中提供。</li>
+<li>在同一训练代码实现中，不同的参数集可以有不同的更新行为。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.</span> <span class="toc-text">权重衰减</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8C%83%E6%95%B0%E4%B8%8E%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.1.</span> <span class="toc-text">范数与权重衰减</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AB%98%E7%BB%B4%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="toc-number">1.2.</span> <span class="toc-text">高维线性回归</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">从零开始实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">初始化模型参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89-L-2-%E8%8C%83%E6%95%B0%E6%83%A9%E7%BD%9A"><span class="toc-number">1.3.2.</span> <span class="toc-text">定义$L_2$范数惩罚</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.3.</span> <span class="toc-text">定义训练代码实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%BD%E7%95%A5%E6%AD%A3%E5%88%99%E5%8C%96%E7%9B%B4%E6%8E%A5%E8%AE%AD%E7%BB%83"><span class="toc-number">1.3.4.</span> <span class="toc-text">忽略正则化直接训练</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F"><span class="toc-number">1.3.5.</span> <span class="toc-text">使用权重衰减</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.4.</span> <span class="toc-text">简洁实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&text=权重衰减"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&is_video=false&description=权重衰减"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=权重衰减&body=Check out this article: https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&title=权重衰减"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/&name=权重衰减&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="自动微分正如微积分一节中所说，求导是几乎所有深度学习优化算法的关键步骤。虽然求导的计算很简单，只需要一些基本的微积分。但对于复杂的模型，手工进行更新是一件很痛苦的事情（而且经常容易出错）。 深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习自动微分">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="自动微分正如微积分一节中所说，求导是几乎所有深度学习优化算法的关键步骤。虽然求导的计算很简单，只需要一些基本的微积分。但对于复杂的模型，手工进行更新是一件很痛苦的事情（而且经常容易出错）。 深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-06T11:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:02:33.142Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>深度学习自动微分</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B1%82%E5%92%8C%E5%9D%97/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/04/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&text=深度学习自动微分"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&is_video=false&description=深度学习自动微分"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=深度学习自动微分&body=Check out this article: https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&name=深度学习自动微分&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86"><span class="toc-number">1.</span> <span class="toc-text">自动微分</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-number">1.1.</span> <span class="toc-text">一个简单的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%9E%E6%A0%87%E9%87%8F%E5%8F%98%E9%87%8F%E7%9A%84%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.2.</span> <span class="toc-text">非标量变量的反向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E7%A6%BB%E8%AE%A1%E7%AE%97"><span class="toc-number">1.3.</span> <span class="toc-text">分离计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-%E6%8E%A7%E5%88%B6%E6%B5%81%E7%9A%84%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97"><span class="toc-number">1.4.</span> <span class="toc-text">Python 控制流的梯度计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">2.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        深度学习自动微分
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-06T11:00:00.000Z" itemprop="datePublished">2025-03-06</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/" class="leancloud-visitors" data-flag-title="深度学习自动微分" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="自动微分"><a href="#自动微分" class="headerlink" title="自动微分"></a>自动微分</h1><p>正如微积分一节中所说，求导是几乎所有深度学习优化算法的关键步骤。虽然求导的计算很简单，只需要一些基本的微积分。但对于复杂的模型，手工进行更新是一件很痛苦的事情（而且经常容易出错）。</p>
+<p>深度学习框架通过自动计算导数，即<strong>自动微分</strong>（automatic differentiation）来加快求导。实际中，根据设计好的模型，系统会构建一个<strong>计算图</strong>（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。自动微分使系统能够随后反向传播梯度。这里，<strong>反向传播</strong>（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。</p>
+<h2 id="一个简单的例子"><a href="#一个简单的例子" class="headerlink" title="一个简单的例子"></a>一个简单的例子</h2><p>作为一个演示例子，假设我们想对函数 (y=2\mathbf{x}^{\top}\mathbf{x}) 关于列向量 (\mathbf{x}) 求导。首先，我们创建变量 <code>x</code> 并为其分配一个初始值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x = torch.arange(<span class="number">4.0</span>)</span><br><span class="line">x</span><br><span class="line"><span class="comment"># tensor([0., 1., 2., 3.])</span></span><br></pre></td></tr></table></figure>
+
+<p>在我们计算 (y) 关于 (\mathbf{x}) 的梯度之前，需要一个地方来存储梯度。重要的是，我们不会在每次对一个参数求导时都分配新的内存。因为我们经常会成千上万次地更新相同的参数，每次都分配新的内存可能很快就会将内存耗尽。注意，一个标量函数关于向量 (\mathbf{x}) 的梯度是向量，并且与 (\mathbf{x}) 具有相同的形状。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x.requires_grad_(<span class="literal">True</span>)  <span class="comment"># 等价于 x=torch.arange(4.0, requires_grad=True)</span></span><br><span class="line">x.grad  <span class="comment"># 默认值是 None</span></span><br></pre></td></tr></table></figure>
+
+<p>现在计算 (y)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">y = <span class="number">2</span> * torch.dot(x, x)</span><br><span class="line">y</span><br><span class="line"><span class="comment"># tensor(28., grad_fn=&lt;MulBackward0&gt;)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>x</code> 是一个长度为 4 的向量，计算 <code>x</code> 和 <code>x</code> 的点积，得到了我们赋值给 <code>y</code> 的标量输出。接下来，通过调用反向传播函数来自动计算 <code>y</code> 关于 <code>x</code> 每个分量的梯度，并打印这些梯度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">y.backward()</span><br><span class="line">x.grad</span><br><span class="line"><span class="comment"># tensor([ 0.,  4.,  8., 12.])</span></span><br></pre></td></tr></table></figure>
+
+<p>函数 (y=2\mathbf{x}^{\top}\mathbf{x}) 关于 (\mathbf{x}) 的梯度应为 (4\mathbf{x})。让我们快速验证这个梯度是否计算正确。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x.grad == <span class="number">4</span> * x</span><br><span class="line"><span class="comment"># tensor([True, True, True, True])</span></span><br></pre></td></tr></table></figure>
+
+<p>现在计算 <code>x</code> 的另一个函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在默认情况下，PyTorch 会累积梯度，我们需要清除之前的值</span></span><br><span class="line">x.grad.zero_()</span><br><span class="line">y = x.<span class="built_in">sum</span>()</span><br><span class="line">y.backward()</span><br><span class="line">x.grad</span><br><span class="line"><span class="comment"># tensor([1., 1., 1., 1.])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="非标量变量的反向传播"><a href="#非标量变量的反向传播" class="headerlink" title="非标量变量的反向传播"></a>非标量变量的反向传播</h2><p>当 <code>y</code> 不是标量时，向量 <code>y</code> 关于向量 <code>x</code> 的导数的最自然解释是一个矩阵。对于高阶和高维的 <code>y</code> 和 <code>x</code>，求导的结果可以是一个高阶张量。</p>
+<p>然而，虽然这些更奇特的对象确实出现在高级机器学习中（包括深度学习中），但当调用向量的反向计算时，我们通常会试图计算一批训练样本中每个组成部分的损失函数的导数。这里，我们的目的不是计算微分矩阵，而是单独计算批量中每个样本的偏导数之和。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对非标量调用 backward 需要传入一个 gradient 参数，该参数指定微分函数关于 self 的梯度。</span></span><br><span class="line"><span class="comment"># 本例只想求偏导数的和，所以传递一个 1 的梯度是合适的</span></span><br><span class="line">x.grad.zero_()</span><br><span class="line">y = x * x</span><br><span class="line"><span class="comment"># 等价于 y.backward(torch.ones(len(x)))</span></span><br><span class="line">y.<span class="built_in">sum</span>().backward()</span><br><span class="line">x.grad</span><br><span class="line"><span class="comment"># tensor([0., 2., 4., 6.])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="分离计算"><a href="#分离计算" class="headerlink" title="分离计算"></a>分离计算</h2><p>有时，我们希望将某些计算移动到记录的计算图之外。例如，假设 <code>y</code> 是作为 <code>x</code> 的函数计算的，而 <code>z</code> 则是作为 <code>y</code> 和 <code>x</code> 的函数计算的。想象一下，我们想计算 <code>z</code> 关于 <code>x</code> 的梯度，但由于某种原因，希望将 <code>y</code> 视为一个常数，并且只考虑到 <code>x</code> 在 <code>y</code> 被计算后发挥的作用。</p>
+<p>这里可以分离 <code>y</code> 来返回一个新变量 <code>u</code>，该变量与 <code>y</code> 具有相同的值，但丢弃计算图中如何计算 <code>y</code> 的任何信息。换句话说，梯度不会向后流经 <code>u</code> 到 <code>x</code>。因此，下面的反向传播函数计算 <code>z=u*x</code> 关于 <code>x</code> 的偏导数，同时将 <code>u</code> 作为常数处理，而不是 <code>z=x*x*x</code> 关于 <code>x</code> 的偏导数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x.grad.zero_()</span><br><span class="line">y = x * x</span><br><span class="line">u = y.detach()</span><br><span class="line">z = u * x</span><br><span class="line"></span><br><span class="line">z.<span class="built_in">sum</span>().backward()</span><br><span class="line">x.grad == u</span><br><span class="line"><span class="comment"># tensor([True, True, True, True])</span></span><br></pre></td></tr></table></figure>
+
+<p>由于记录了 <code>y</code> 的计算结果，我们可以随后在 <code>y</code> 上调用反向传播，得到 <code>y=x*x</code> 关于的 <code>x</code> 的导数，即 <code>2*x</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x.grad.zero_()</span><br><span class="line">y.<span class="built_in">sum</span>().backward()</span><br><span class="line">x.grad == <span class="number">2</span> * x</span><br><span class="line"><span class="comment"># tensor([True, True, True, True])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Python-控制流的梯度计算"><a href="#Python-控制流的梯度计算" class="headerlink" title="Python 控制流的梯度计算"></a>Python 控制流的梯度计算</h2><p>使用自动微分的一个好处是：即使构建函数的计算图需要通过 Python 控制流（例如，条件、循环或任意函数调用），我们仍然可以计算得到的变量的梯度。在下面的代码中，<code>while</code> 循环的迭代次数和 <code>if</code> 语句的结果都取决于输入 <code>a</code> 的值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span>(<span class="params">a</span>):</span></span><br><span class="line">    b = a * <span class="number">2</span></span><br><span class="line">    <span class="keyword">while</span> b.norm() &lt; <span class="number">1000</span>:</span><br><span class="line">        b = b * <span class="number">2</span></span><br><span class="line">    <span class="keyword">if</span> b.<span class="built_in">sum</span>() &gt; <span class="number">0</span>:</span><br><span class="line">        c = b</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        c = <span class="number">100</span> * b</span><br><span class="line">    <span class="keyword">return</span> c</span><br></pre></td></tr></table></figure>
+
+<p>让我们计算梯度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a = torch.randn(size=(), requires_grad=<span class="literal">True</span>)</span><br><span class="line">d = f(a)</span><br><span class="line">d.backward()</span><br></pre></td></tr></table></figure>
+
+<p>我们现在可以分析上面定义的 <code>f</code> 函数。请注意，它在其输入 <code>a</code> 中是分段线性的。换言之，对于任何 <code>a</code>，存在某个常量标量 <code>k</code>，使得 <code>f(a)=k*a</code>，其中 <code>k</code> 的值取决于输入 <code>a</code>，因此可以用 <code>d/a</code> 验证梯度是否正确。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a.grad == d / a</span><br><span class="line"><span class="comment"># tensor(True)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>深度学习框架可以自动计算导数：我们首先将梯度附加到想要对其计算偏导数的变量上，然后记录目标值的计算，执行它的反向传播函数，并访问得到的梯度。</li>
+</ul>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.d2l.ai/chapter_preliminaries/autograd.html">动手学深度学习 - 2.5 自动微分</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.d2l.ai/chapter_preliminaries/calculus.html">2.4 微积分</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.d2l.ai/chapter_preliminaries/ndarray.html">2.1 数据操作</a></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86"><span class="toc-number">1.</span> <span class="toc-text">自动微分</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-number">1.1.</span> <span class="toc-text">一个简单的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%9E%E6%A0%87%E9%87%8F%E5%8F%98%E9%87%8F%E7%9A%84%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">1.2.</span> <span class="toc-text">非标量变量的反向传播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E7%A6%BB%E8%AE%A1%E7%AE%97"><span class="toc-number">1.3.</span> <span class="toc-text">分离计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-%E6%8E%A7%E5%88%B6%E6%B5%81%E7%9A%84%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97"><span class="toc-number">1.4.</span> <span class="toc-text">Python 控制流的梯度计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">2.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&text=深度学习自动微分"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&is_video=false&description=深度学习自动微分"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=深度学习自动微分&body=Check out this article: https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&title=深度学习自动微分"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/&name=深度学习自动微分&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

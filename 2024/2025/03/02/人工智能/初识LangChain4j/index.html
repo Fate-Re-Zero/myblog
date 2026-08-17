@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="https:&#x2F;&#x2F;docs.langchain4j.dev&#x2F;  LangChain4j旨在简化大型语言模型（LLM）与Java应用程序的集成。以下是我们的实现方法：● 统一API： 不同的LLM提供商（如OpenAI或Google Vertex AI）和向量数据库（如Pinecone或Milvus）各自采用专有API。LangChain4j提供了一套通用API，使得开发者无需为每个服务单独学习或实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初识LangChain4j">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="https:&#x2F;&#x2F;docs.langchain4j.dev&#x2F;  LangChain4j旨在简化大型语言模型（LLM）与Java应用程序的集成。以下是我们的实现方法：● 统一API： 不同的LLM提供商（如OpenAI或Google Vertex AI）和向量数据库（如Pinecone或Milvus）各自采用专有API。LangChain4j提供了一套通用API，使得开发者无需为每个服务单独学习或实现">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j/2025-03-02-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j/2025-03-02-2.png">
+<meta property="article:published_time" content="2025-03-02T01:23:38.000Z">
+<meta property="article:modified_time" content="2025-07-06T15:20:32.243Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="人工智能">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j/2025-03-02-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>初识LangChain4j</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/03/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j%E9%9B%86%E6%88%90LLM/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/01/10/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/BitMap%E7%99%BE%E4%BA%BF%E7%BA%A7%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&text=初识LangChain4j"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&is_video=false&description=初识LangChain4j"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=初识LangChain4j&body=Check out this article: https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&name=初识LangChain4j&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        初识LangChain4j
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-02T01:23:38.000Z" itemprop="datePublished">2025-03-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/" class="leancloud-visitors" data-flag-title="初识LangChain4j" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag">人工智能</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><a target="_blank" rel="noopener" href="https://docs.langchain4j.dev/">https://docs.langchain4j.dev/</a></p>
+<p><img src="/images/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j/2025-03-02-1.png" alt="image-2025-03-02-1"></p>
+<p>LangChain4j旨在简化大型语言模型（LLM）与Java应用程序的集成。以下是我们的实现方法：<br>● 统一API： 不同的LLM提供商（如OpenAI或Google Vertex AI）和向量数据库（如Pinecone或Milvus）各自采用专有API。LangChain4j提供了一套通用API，使得开发者无需为每个服务单独学习或实现特定接口。您可以轻松地在不同的LLM或向量数据库之间切换，而无需重写现有代码。截至目前，LangChain4j已经支持超过15种主流LLM提供商及20多种向量数据库。<br>Amazon Bedrock    Anthropic    Azure OpenAI<br>ChatGLM    DashScope (Qwen)    GitHub Models<br>Google AI Gemini    Google Vertex AI Gemini    Google Vertex AI PaLM 2<br>Hugging Face    Jlama    LocalAI<br>MistralAI    Ollama    OpenAI<br>OpenAI Official SDK    Qianfan    Cloudflare Workers AI<br>ZhiPu AI    Xinference<br>● 全面工具箱： 自2023年初以来，社区围绕构建LLM应用积累了丰富的抽象概念、模式和技术实践。LangChain4j将这些知识精华提炼成一系列开箱即用的工具集，覆盖从低层次的提示模板设计、对话历史管理、函数调用支持到高层次智能体（Agent）创建以及检索增强生成（RAG）等应用场景。每项功能均通过定义清晰的接口及其多样化的现成实现来体现，无论是开发简单的聊天机器人还是构建复杂的包含数据导入、分割、向量化处理及信息检索在内的RAG系统，LangChain4j都能为您提供广泛的选择空间。<br>● 丰富示例： 我们提供了大量实例，展示了如何高效快速地搭建各种类型的LLM应用程序，旨在激发您的创意并加速项目进展。<br>LangChain4j起源于2023年ChatGPT热潮期间。鉴于当时Java生态系统中缺乏相应的LLM库，相较于Python和JavaScript领域内已有的丰富资源，我们决定填补这一空白地带。尽管项目名称中带有”LangChain”字样，但其设计理念融合了来自LangChain、Haystack、LlamaIndex等多个开源项目的灵感，并结合了自身独创性成果。<br>我们密切关注技术社区的发展趋势，迅速采纳新兴技术和整合方案，确保用户能够始终享受到最前沿的功能特性。目前，该项目正处于积极开发阶段，部分功能尚待完善，但核心组件已经稳定可用，您可以立即着手构建自己的LLM应用。<br>为了进一步促进与现有架构的兼容性，LangChain4j还特别针对Quarkus和Spring Boot两大流行框架进行了优化支持。</p>
+<p>LangChain4j核心功能<br>● 集成支持：<br>  ○ 15+ LLM提供商<br>  ○ 20+ 向量数据库<br>  ○ 15+ 嵌入模型<br>  ○ 5 图像生成模型<br>  ○ 2 评分（重排序）模型<br>  ○ 1 内容审核模型（OpenAI）<br>● 多模态：支持文本和图像输入<br>● AI服务：高层级LLM API<br>● 提示模板<br>● 对话记忆管理：支持持久化与内存式实现，包括消息窗口和令牌窗口算法<br>● LLM响应流式传输<br>● 输出解析：支持常见Java类型及自定义POJO<br>● 工具（函数调用）<br>● 动态工具：执行LLM动态生成的代码<br>● RAG（检索增强生成）：<br>  ○ 数据导入：<br>    ■ 支持多种文档格式（TXT、PDF、DOC、PPT、XLS等）及来源（文件系统、URL、GitHub、Azure Blob Storage、Amazon S3等）<br>    ■ 多种分块算法<br>    ■ 文档与分块后处理<br>    ■ 嵌入模型向量化<br>    ■ 向量存储<br>  ○ 检索（基础与高级）：<br>    ■ 查询转换（扩展、压缩）<br>    ■ 查询路由<br>    ■ 从向量库或自定义源检索<br>    ■ 重排序<br>    ■ Reciprocal Rank Fusion<br>    ■ 支持RAG全流程定制<br>● 文本分类<br>● 分词与令牌计数工具<br>● Kotlin扩展：利用协程实现异步非阻塞的对话交互</p>
+<p>两级抽象层级<br>LangChain4j提供两种抽象层级： </p>
+<p><img src="/images/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/LangChain4j/2025-03-02-2.png" alt="image-2025-03-02-2"></p>
+<ol>
+<li>底层：<br>○ 提供最大自由度，可直接操作ChatLanguageModel、UserMessage、AiMessage、EmbeddingStore、Embedding等基础组件。<br>○ 这些是构建LLM应用的”原语”，您需自行编排它们，但需编写更多胶水代码。</li>
+<li>高层：<br>○ 通过如AI Services等高阶API与LLM交互，隐藏复杂性与样板代码。<br>○ 仍支持通过声明式配置调整行为。</li>
+</ol>
+<p>模块化架构<br>LangChain4j采用模块化设计：<br>● langchain4j-core：定义核心抽象（如ChatLanguageModel、EmbeddingStore）及其API。<br>● 主模块langchain4j：包含文档加载器、对话记忆实现及AI服务等高阶功能。<br>● langchain4j-{integration}模块：为各类LLM提供商和向量数据库提供独立集成。您可单独使用这些模块，如需更多功能，只需引入主依赖。</p>
+<p>应用场景<br>定制AI聊天机器人：<br>● 客服机器人：<br>  ○ 礼貌回答客户问题<br>  ○ 处理订单创建/修改/取消<br>● 教育助手：<br>  ○ 教授多学科知识<br>  ○ 解释难点<br>  ○ 评估用户理解程度<br>非结构化数据处理：<br>● 从客户评价和支持聊天记录中提取洞察<br>● 抓取竞品网站关键信息<br>● 分析求职者简历<br>内容生成：<br>● 为每位客户定制邮件<br>● 为应用/网站生成内容：<br>  ○ 博客文章<br>  ○ 故事<br>信息转换：<br>● 摘要生成<br>● 校对与改写<br>● 翻译</p>
+<p>社区集成<br>LangChain4j将部分集成维护在社区仓库中。这些集成与主仓库功能相同，仅artifactId和包名不同（带有community前缀）。社区仓库旨在分离部分集成的维护工作，减轻主仓库压力。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&text=初识LangChain4j"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&is_video=false&description=初识LangChain4j"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=初识LangChain4j&body=Check out this article: https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&title=初识LangChain4j"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/02/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/%E5%88%9D%E8%AF%86LangChain4j/&name=初识LangChain4j&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

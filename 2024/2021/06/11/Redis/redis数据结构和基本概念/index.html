@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="redis的数据结构常见的5种：String：字符串，最基础的数据类型。List：列表。Hash：哈希对象。Set：集合。Sorted Set：有序集合，Set 的基础上加了个分值。高级的4种：HyperLogLog：通常用于基数统计。使用少量固定大小的内存，来统计集合中唯一元素的数量。统计结果不是精确值，而是一个带有0.81%标准差（standard error）的近似值。所以，HyperLog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis数据结构">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="redis的数据结构常见的5种：String：字符串，最基础的数据类型。List：列表。Hash：哈希对象。Set：集合。Sorted Set：有序集合，Set 的基础上加了个分值。高级的4种：HyperLogLog：通常用于基数统计。使用少量固定大小的内存，来统计集合中唯一元素的数量。统计结果不是精确值，而是一个带有0.81%标准差（standard error）的近似值。所以，HyperLog">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-06-11T12:00:38.000Z">
+<meta property="article:modified_time" content="2025-04-20T14:18:25.142Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>redis数据结构</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/06/12/Redis/redis%E5%92%8CMemcached/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/06/11/Redis/Redis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&text=redis数据结构"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&is_video=false&description=redis数据结构"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis数据结构&body=Check out this article: https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&name=redis数据结构&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#redis%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">redis的数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">Sorted Set底层数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E4%B8%BA%E4%BB%80%E4%B9%88%E5%90%8C%E6%97%B6%E4%BD%BF%E7%94%A8%E5%AD%97%E5%85%B8%E5%92%8C%E8%B7%B3%E8%B7%83%E8%A1%A8"><span class="toc-number">3.</span> <span class="toc-text">Sorted Set为什么同时使用字典和跳跃表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E8%B7%B3%E8%B7%83%E8%A1%A8%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-number">4.</span> <span class="toc-text">Sorted Set为什么使用跳跃表，而不是红黑树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hash-%E5%AF%B9%E8%B1%A1%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84"><span class="toc-number">5.</span> <span class="toc-text">Hash 对象底层结构</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        redis数据结构
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-06-11T12:00:38.000Z" itemprop="datePublished">2021-06-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="leancloud-visitors" data-flag-title="redis数据结构" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="redis的数据结构"><a href="#redis的数据结构" class="headerlink" title="redis的数据结构"></a>redis的数据结构</h3><p>常见的5种：<br>String：字符串，最基础的数据类型。<br>List：列表。<br>Hash：哈希对象。<br>Set：集合。<br>Sorted Set：有序集合，Set 的基础上加了个分值。<br>高级的4种：<br>HyperLogLog：通常用于基数统计。使用少量固定大小的内存，来统计集合中唯一元素的数量。统计结果不是精确值，而是一个带有0.81%标准差（standard error）的近似值。所以，HyperLogLog适用于一些对于统计结果精确度要求不是特别高的场景，例如网站的UV统计。<br>Geo：redis 3.2 版本的新特性。可以将用户给定的地理位置信息储存起来， 并对这些信息进行操作：获取2个位置的距离、根据给定地理位置坐标获取指定范围内的地理位置集合。<br>Bitmap：位图。<br>Stream：主要用于消息队列，类似于 kafka，可以认为是 pub/sub 的改进版。提供了消息的持久化和主备复制功能，可以让任何客户端访问任何时刻的数据，并且能记住每一个客户端的访问位置，还能保证消息不丢失。</p>
+<h3 id="Sorted-Set底层数据结构"><a href="#Sorted-Set底层数据结构" class="headerlink" title="Sorted Set底层数据结构"></a>Sorted Set底层数据结构</h3><p>Sorted Set（有序集合）当前有两种编码实现：ziplist、skiplist</p>
+<p>ziplist：使用压缩列表实现，当保存的元素长度都小于64字节，同时数量小于128时，使用该编码方式，否则会使用 skiplist。这两个参数可以通过 zset-max-ziplist-entries、zset-max-ziplist-value 来自定义修改。</p>
+<p>ziplist数据结构：<br>    (1).zlbytes：记录了压缩列表占用的内存字节数，在对压缩列表进行内存重分配，或者计算zlend的位置时使用。它本身占了4个字节；<br>    (2).zltail：记录了尾节点（entry）至起始节点（entry）的偏移量。通过这个偏移量，可以快速确定最后一个entry节点的地址;<br>    (3).zllen：记录了entry节点的数量。当zllen的值小于65535时，这个值就表示节点的数量。当zllen的值大于65535时，节点的真实数量需要遍历整个压缩列表才能得出;<br>    (4).entry：压缩列表中所包含的每个节点。每个节点的长度根据该节点的内容来决定;<br>    (5).zlend：特殊值0XFF(255)，标记了压缩列表的末端。表示该压缩列表到此为止;<br>ziplist的entry节点的结构：<br>    (1).prev_entry_len：记录前驱节点的长度;<br>    (2).encoding：记录当前节点的value成员的数据类型以及长度;<br>    (3).value：根据encoding来保存字节数组或整数<br>ziplist的特点：<br>    (1).压缩列表ziplist结构本身就是一个连续的内存块，由表头（记录了压缩列表的一些信息，比如zlbytes压缩列表占用的内存字节<br>    数，zltail起始节点到尾结点的偏移量，zllen记录了entry节点的个数）、若干个entry节点和压缩列表尾部标识符zlend组成，通过(8种)一系列编码规则，提高内存的利用率，使用于存储整数和短字符串；<br>    (2).压缩列表ziplist结构的缺点是：每次插入或删除一个元素时，都需要进行频繁的进行内存的扩展或减小，然后还需要进行内存的<br>    整理，造成严重效率的损失，所以redis默认情况下在元素个数小于128时才使用ziplist,在元素大于128时使用skiplist;</p>
+<p>skiplist：zset实现，一个zset同时包含一个字典（dict）和一个跳跃表（zskiplist）</p>
+<p>skiplist数据结构：<br>    (1).是一个多层链表的数据结构，每个节点的level是通过一定的概率随机产生的（使用抛硬币的方式）;<br>    (2).每一层都是一个有序的链表，默认是升序;<br>    (3).最底层(Level 1)的链表包含所有元素;<br>    (4).跳跃表的空间复杂度为 O(n);<br>    (5).跳跃表支持平均O(logN)、最坏O(N)复杂度的节点查找;<br>    在大部分情况下，跳跃表的效率可以和平衡树相媲美，并且因为跳跃表的实现比平衡树要来得更为简单，所以有不少程序都使用跳跃表来代替平衡树;<br>    跳跃表 vs 红黑树<br>    红黑可以说是二叉查找树的一种变形，红黑在查找，插入，删除也是近似O(logn)的时间复杂度，但学过红黑树的都知道，<br>    红黑树比跳跃表复杂多了。<br>    但红黑树插入，删除结点时，是通过调整结构来保持红黑树的平衡，比起跳跃表直接通过一个随机数来决定跨越几层，在时间复杂度的花销上是要高于跳跃表的。<br>    当然，红黑树并不是一定比跳跃表差，在有些场合红黑树会是更好的选择，所以选择一种数据结构，关键还得看场合。<br>    总上所述，维护一组有序的集合，并且希望在查找、插入、删除等操作上尽可能快，那么跳跃表会是不错的选择。</p>
+<h3 id="Sorted-Set为什么同时使用字典和跳跃表"><a href="#Sorted-Set为什么同时使用字典和跳跃表" class="headerlink" title="Sorted Set为什么同时使用字典和跳跃表"></a>Sorted Set为什么同时使用字典和跳跃表</h3><pre><code>主要是为了性能。
+单独使用字典：在执行范围型操作，比如zrank、zrange，字典需要进行排序，至少需要O(NlogN)的时间复杂度及额外O(N)的内存空间。
+单独使用跳跃表：根据成员查找分值操作的复杂度从O(1)上升为O(logN)。
+</code></pre>
+<h3 id="Sorted-Set为什么使用跳跃表，而不是红黑树"><a href="#Sorted-Set为什么使用跳跃表，而不是红黑树" class="headerlink" title="Sorted Set为什么使用跳跃表，而不是红黑树"></a>Sorted Set为什么使用跳跃表，而不是红黑树</h3><pre><code>1）跳表的性能和红黑树差不多;
+2）跳表更容易实现和调试;
+3）红黑树插入，删除结点时，是通过调整结构来保持红黑树的平衡，比起跳跃表直接通过一个随机数来决定跨越几层，在时间复杂度的花销上是要高于跳跃表的；
+</code></pre>
+<h3 id="Hash-对象底层结构"><a href="#Hash-对象底层结构" class="headerlink" title="Hash 对象底层结构"></a>Hash 对象底层结构</h3><pre><code>Hash对象当前有两种编码：ziplist、hashtable
+ziplist：使用压缩列表实现，每当有新的键值对要加入到哈希对象时，程序会先将保存了键的节点推入到压缩列表的表尾，然后再将保存了值的节点推入到压缩列表表尾。
+因此：
+1）保存了同一键值对的两个节点总是紧挨在一起，保存键的节点在前，保存值的节点在后；
+2）先添加到哈希对象中的键值对会被放在压缩列表的表头方向，而后来添加的会被放在表尾方向。
+hashtable：使用字典作为底层实现，哈希对象中的每个键值对都使用一个字典键值来保存，跟 java 中的 HashMap 类似。
+</code></pre>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#redis%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">redis的数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">Sorted Set底层数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E4%B8%BA%E4%BB%80%E4%B9%88%E5%90%8C%E6%97%B6%E4%BD%BF%E7%94%A8%E5%AD%97%E5%85%B8%E5%92%8C%E8%B7%B3%E8%B7%83%E8%A1%A8"><span class="toc-number">3.</span> <span class="toc-text">Sorted Set为什么同时使用字典和跳跃表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sorted-Set%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E8%B7%B3%E8%B7%83%E8%A1%A8%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-number">4.</span> <span class="toc-text">Sorted Set为什么使用跳跃表，而不是红黑树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hash-%E5%AF%B9%E8%B1%A1%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84"><span class="toc-number">5.</span> <span class="toc-text">Hash 对象底层结构</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&text=redis数据结构"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&is_video=false&description=redis数据结构"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis数据结构&body=Check out this article: https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&title=redis数据结构"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/06/11/Redis/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/&name=redis数据结构&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

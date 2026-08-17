@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="数值稳定性和模型初始化到目前为止，我们实现的每个模型都是根据某个预先指定的分布来初始化模型的参数。有人会认为初始化方案是理所当然的，忽略了如何做出这些选择的细节。甚至有人可能会觉得，初始化方案的选择并不是特别重要。相反，初始化方案的选择在神经网络学习中起着举足轻重的作用，它对保持数值稳定性至关重要。此外，这些初始化方案的选择可以与非线性激活函数的选择有趣的结合在一起。我们选择哪个函数以及如何初始化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数值稳定性和模型初始化">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="数值稳定性和模型初始化到目前为止，我们实现的每个模型都是根据某个预先指定的分布来初始化模型的参数。有人会认为初始化方案是理所当然的，忽略了如何做出这些选择的细节。甚至有人可能会觉得，初始化方案的选择并不是特别重要。相反，初始化方案的选择在神经网络学习中起着举足轻重的作用，它对保持数值稳定性至关重要。此外，这些初始化方案的选择可以与非线性激活函数的选择有趣的结合在一起。我们选择哪个函数以及如何初始化">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-21T08:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:07:04.693Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>数值稳定性和模型初始化</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/20/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%83%E9%87%8D%E8%A1%B0%E5%87%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&text=数值稳定性和模型初始化"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&is_video=false&description=数值稳定性和模型初始化"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=数值稳定性和模型初始化&body=Check out this article: https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&name=数值稳定性和模型初始化&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">数值稳定性和模型初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E5%92%8C%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="toc-number">1.1.</span> <span class="toc-text">梯度消失和梯度爆炸</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1"><span class="toc-number">1.1.1.</span> <span class="toc-text">梯度消失</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="toc-number">1.1.2.</span> <span class="toc-text">梯度爆炸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E7%A0%B4%E5%AF%B9%E7%A7%B0%E6%80%A7"><span class="toc-number">1.1.3.</span> <span class="toc-text">打破对称性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">参数初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.</span> <span class="toc-text">默认初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xavier%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.2.</span> <span class="toc-text">Xavier初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%9D%E5%A4%96%E9%98%85%E8%AF%BB"><span class="toc-number">1.2.3.</span> <span class="toc-text">额外阅读</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        数值稳定性和模型初始化
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-21T08:00:00.000Z" itemprop="datePublished">2025-03-21</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/" class="leancloud-visitors" data-flag-title="数值稳定性和模型初始化" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="数值稳定性和模型初始化"><a href="#数值稳定性和模型初始化" class="headerlink" title="数值稳定性和模型初始化"></a>数值稳定性和模型初始化</h1><p>到目前为止，我们实现的每个模型都是根据某个预先指定的分布来初始化模型的参数。<br>有人会认为初始化方案是理所当然的，忽略了如何做出这些选择的细节。甚至有人可能会觉得，初始化方案的选择并不是特别重要。<br>相反，初始化方案的选择在神经网络学习中起着举足轻重的作用，<br>它对保持数值稳定性至关重要。<br>此外，这些初始化方案的选择可以与非线性激活函数的选择有趣的结合在一起。<br>我们选择哪个函数以及如何初始化参数可以决定优化算法收敛的速度有多快。<br>糟糕选择可能会导致我们在训练时遇到梯度爆炸或梯度消失。<br>本节将更详细地探讨这些主题，并讨论一些有用的启发式方法。<br>这些启发式方法在整个深度学习生涯中都很有用。</p>
+<h2 id="梯度消失和梯度爆炸"><a href="#梯度消失和梯度爆炸" class="headerlink" title="梯度消失和梯度爆炸"></a>梯度消失和梯度爆炸</h2><p>考虑一个具有$L$层、输入$\mathbf{x}$和输出$\mathbf{o}$的深层网络。<br>每一层$l$由变换$f_l$定义，<br>该变换的参数为权重$\mathbf{W}^{(l)}$，<br>其隐藏变量是$\mathbf{h}^{(l)}$（令 $\mathbf{h}^{(0)} = \mathbf{x}$）。<br>我们的网络可以表示为：</p>
+<p>$$\mathbf{h}^{(l)} = f_l (\mathbf{h}^{(l-1)}) \text{ 因此 } \mathbf{o} = f_L \circ \ldots \circ f_1(\mathbf{x}).$$</p>
+<p>如果所有隐藏变量和输入都是向量，<br>我们可以将$\mathbf{o}$关于任何一组参数$\mathbf{W}^{(l)}$的梯度写为下式：</p>
+<p>$$\partial_{\mathbf{W}^{(l)}} \mathbf{o} = \underbrace{\partial_{\mathbf{h}^{(L-1)}} \mathbf{h}^{(L)}}<em>{ \mathbf{M}^{(L)} \stackrel{\mathrm{def}}{=}} \cdot \ldots \cdot \underbrace{\partial</em>{\mathbf{h}^{(l)}} \mathbf{h}^{(l+1)}}<em>{ \mathbf{M}^{(l+1)} \stackrel{\mathrm{def}}{=}} \underbrace{\partial</em>{\mathbf{W}^{(l)}} \mathbf{h}^{(l)}}_{ \mathbf{v}^{(l)} \stackrel{\mathrm{def}}{=}}.$$</p>
+<p>换言之，该梯度是$L-l$个矩阵<br>$\mathbf{M}^{(L)} \cdot \ldots \cdot \mathbf{M}^{(l+1)}$<br>与梯度向量 $\mathbf{v}^{(l)}$的乘积。<br>因此，我们容易受到数值下溢问题的影响.<br>当将太多的概率乘在一起时，这些问题经常会出现。<br>在处理概率时，一个常见的技巧是切换到对数空间，<br>即将数值表示的压力从尾数转移到指数。<br>不幸的是，上面的问题更为严重：<br>最初，矩阵 $\mathbf{M}^{(l)}$ 可能具有各种各样的特征值。<br>他们可能很小，也可能很大；<br>他们的乘积可能非常大，也可能非常小。</p>
+<p>不稳定梯度带来的风险不止在于数值表示；<br>不稳定梯度也威胁到我们优化算法的稳定性。<br>我们可能面临一些问题。<br>要么是<em>梯度爆炸</em>（gradient exploding）问题：<br>参数更新过大，破坏了模型的稳定收敛；<br>要么是<em>梯度消失</em>（gradient vanishing）问题：<br>参数更新过小，在每次更新时几乎不会移动，导致模型无法学习。</p>
+<h3 id="梯度消失"><a href="#梯度消失" class="headerlink" title="梯度消失"></a>梯度消失</h3><p>曾经sigmoid函数$1/(1 + \exp(-x))$（ 多层感知机提到过）很流行，<br>因为它类似于阈值函数。<br>由于早期的人工神经网络受到生物神经网络的启发，<br>神经元要么完全激活要么完全不激活（就像生物神经元）的想法很有吸引力。<br>然而，它却是导致梯度消失问题的一个常见的原因，<br>让我们仔细看看sigmoid函数为什么会导致梯度消失。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x = torch.arange(-<span class="number">8.0</span>, <span class="number">8.0</span>, <span class="number">0.1</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">y = torch.sigmoid(x)</span><br><span class="line">y.backward(torch.ones_like(x))</span><br><span class="line"></span><br><span class="line">d2l.plot(x.detach().numpy(), [y.detach().numpy(), x.grad.numpy()],</span><br><span class="line">         legend=[<span class="string">&#x27;sigmoid&#x27;</span>, <span class="string">&#x27;gradient&#x27;</span>], figsize=(<span class="number">4.5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>正如上图，当sigmoid函数的输入很大或是很小时，它的梯度都会消失。<br>此外，当反向传播通过许多层时，除非我们在刚刚好的地方，<br>这些地方sigmoid函数的输入接近于零，否则整个乘积的梯度可能会消失。<br>当我们的网络有很多层时，除非我们很小心，否则在某一层可能会切断梯度。<br>事实上，这个问题曾经困扰着深度网络的训练。<br>因此，更稳定的ReLU系列函数已经成为从业者的默认选择（虽然在神经科学的角度看起来不太合理）。</p>
+<h3 id="梯度爆炸"><a href="#梯度爆炸" class="headerlink" title="梯度爆炸"></a>梯度爆炸</h3><p>相反，梯度爆炸可能同样令人烦恼。<br>为了更好地说明这一点，我们生成100个高斯随机矩阵，并将它们与某个初始矩阵相乘。<br>对于我们选择的尺度（方差$\sigma^2=1$），矩阵乘积发生爆炸。<br>当这种情况是由于深度网络的初始化所导致时，我们没有机会让梯度下降优化器收敛。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">M = np.random.normal(size=(<span class="number">4</span>, <span class="number">4</span>))</span><br><span class="line">print(<span class="string">&#x27;一个矩阵 \n&#x27;</span>, M)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    M = np.dot(M, np.random.normal(size=(<span class="number">4</span>, <span class="number">4</span>)))</span><br><span class="line"></span><br><span class="line">print(<span class="string">&#x27;乘以100个矩阵后\n&#x27;</span>, M)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">M = torch.normal(<span class="number">0</span>, <span class="number">1</span>, size=(<span class="number">4</span>,<span class="number">4</span>))</span><br><span class="line">print(<span class="string">&#x27;一个矩阵 \n&#x27;</span>,M)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    M = torch.mm(M,torch.normal(<span class="number">0</span>, <span class="number">1</span>, size=(<span class="number">4</span>, <span class="number">4</span>)))</span><br><span class="line"></span><br><span class="line">print(<span class="string">&#x27;乘以100个矩阵后\n&#x27;</span>, M)</span><br></pre></td></tr></table></figure>
+
+<h3 id="打破对称性"><a href="#打破对称性" class="headerlink" title="打破对称性"></a>打破对称性</h3><p>神经网络设计中的另一个问题是其参数化所固有的对称性。<br>假设我们有一个简单的多层感知机，它有一个隐藏层和两个隐藏单元。<br>在这种情况下，我们可以对第一层的权重$\mathbf{W}^{(1)}$进行重排列，<br>并且同样对输出层的权重进行重排列，可以获得相同的函数。<br>第一个隐藏单元与第二个隐藏单元没有什么特别的区别。<br>换句话说，我们在每一层的隐藏单元之间具有排列对称性。</p>
+<p>假设输出层将上述两个隐藏单元的多层感知机转换为仅一个输出单元。<br>想象一下，如果我们将隐藏层的所有参数初始化为$\mathbf{W}^{(1)} = c$，<br>$c$为常量，会发生什么？<br>在这种情况下，在前向传播期间，两个隐藏单元采用相同的输入和参数，<br>产生相同的激活，该激活被送到输出单元。<br>在反向传播期间，根据参数$\mathbf{W}^{(1)}$对输出单元进行微分，<br>得到一个梯度，其元素都取相同的值。<br>因此，在基于梯度的迭代（例如，小批量随机梯度下降）之后，<br>$\mathbf{W}^{(1)}$的所有元素仍然采用相同的值。<br>这样的迭代永远不会打破对称性，我们可能永远也无法实现网络的表达能力。<br>隐藏层的行为就好像只有一个单元。<br>请注意，虽然小批量随机梯度下降不会打破这种对称性，但暂退法正则化可以。</p>
+<h2 id="参数初始化"><a href="#参数初始化" class="headerlink" title="参数初始化"></a>参数初始化</h2><p>解决（或至少减轻）上述问题的一种方法是进行参数初始化，<br>优化期间的注意和适当的正则化也可以进一步提高稳定性。</p>
+<h3 id="默认初始化"><a href="#默认初始化" class="headerlink" title="默认初始化"></a>默认初始化</h3><p>在前面的部分中，例如在 线性回归的简洁实现中，<br>我们使用正态分布来初始化权重值。如果我们不指定初始化方法，<br>框架将使用默认的随机初始化方法，对于中等难度的问题，这种方法通常很有效。</p>
+<h3 id="Xavier初始化"><a href="#Xavier初始化" class="headerlink" title="Xavier初始化"></a>Xavier初始化</h3><p>让我们看看某些<em>没有非线性</em>的全连接层输出（例如，隐藏变量）$o_{i}$的尺度分布。<br>对于该层$n_\mathrm{in}$输入$x_j$及其相关权重$w_{ij}$，输出由下式给出</p>
+<p>$$o_{i} = \sum_{j=1}^{n_\mathrm{in}} w_{ij} x_j.$$</p>
+<p>权重$w_{ij}$都是从同一分布中独立抽取的。<br>此外，让我们假设该分布具有零均值和方差$\sigma^2$。<br>请注意，这并不意味着分布必须是高斯的，只是均值和方差需要存在。<br>现在，让我们假设层$x_j$的输入也具有零均值和方差$\gamma^2$，<br>并且它们独立于$w_{ij}$并且彼此独立。<br>在这种情况下，我们可以按如下方式计算$o_i$的平均值和方差：</p>
+<p>$$<br>\begin{aligned}<br> E[o_i] &amp; = \sum_{j=1}^{n_\mathrm{in}} E[w_{ij} x_j] \&amp;= \sum_{j=1}^{n_\mathrm{in}} E[w_{ij}] E[x_j] \&amp;= 0, \<br> \mathrm{Var}[o_i] &amp; = E[o_i^2] - (E[o_i])^2 \<br> &amp; = \sum_{j=1}^{n_\mathrm{in}} E[w^2_{ij} x^2_j] - 0 \<br> &amp; = \sum_{j=1}^{n_\mathrm{in}} E[w^2_{ij}] E[x^2_j] \<br> &amp; = n_\mathrm{in} \sigma^2 \gamma^2.<br>\end{aligned}<br>$$</p>
+<p>保持方差不变的一种方法是设置$n_\mathrm{in} \sigma^2 = 1$。<br>现在考虑反向传播过程，我们面临着类似的问题，尽管梯度是从更靠近输出的层传播的。<br>使用与前向传播相同的推断，我们可以看到，除非$n_\mathrm{out} \sigma^2 = 1$，<br>否则梯度的方差可能会增大，其中$n_\mathrm{out}$是该层的输出的数量。<br>这使得我们进退两难：我们不可能同时满足这两个条件。<br>相反，我们只需满足：</p>
+<p>$$<br>\begin{aligned}<br>\frac{1}{2} (n_\mathrm{in} + n_\mathrm{out}) \sigma^2 = 1 \text{ 或等价于 }<br>\sigma = \sqrt{\frac{2}{n_\mathrm{in} + n_\mathrm{out}}}.<br>\end{aligned}<br>$$</p>
+<p>这就是现在标准且实用的<em>Xavier初始化</em>的基础，<br>它以其提出者 第一作者的名字命名。<br>通常，Xavier初始化从均值为零，方差<br>$\sigma^2 = \frac{2}{n_\mathrm{in} + n_\mathrm{out}}$<br>的高斯分布中采样权重。<br>我们也可以将其改为选择从均匀分布中抽取权重时的方差。<br>注意均匀分布$U(-a, a)$的方差为$\frac{a^2}{3}$。<br>将$\frac{a^2}{3}$代入到$\sigma^2$的条件中，将得到初始化值域：</p>
+<p>$$U\left(-\sqrt{\frac{6}{n_\mathrm{in} + n_\mathrm{out}}}, \sqrt{\frac{6}{n_\mathrm{in} + n_\mathrm{out}}}\right).$$</p>
+<p>尽管在上述数学推理中，“不存在非线性”的假设在神经网络中很容易被违反，<br>但Xavier初始化方法在实践中被证明是有效的。</p>
+<h3 id="额外阅读"><a href="#额外阅读" class="headerlink" title="额外阅读"></a>额外阅读</h3><p>上面的推理仅仅触及了现代参数初始化方法的皮毛。<br>深度学习框架通常实现十几种不同的启发式方法。<br>此外，参数初始化一直是深度学习基础研究的热点领域。<br>其中包括专门用于参数绑定（共享）、超分辨率、序列模型和其他情况的启发式算法。<br>例如，Xiao等人演示了通过使用精心设计的初始化方法<br> ，<br>可以无须架构上的技巧而训练10000层神经网络的可能性。</p>
+<p>如果有读者对该主题感兴趣，我们建议深入研究本模块的内容，<br>阅读提出并分析每种启发式方法的论文，然后探索有关该主题的最新出版物。<br>也许会偶然发现甚至发明一个聪明的想法，并为深度学习框架提供一个实现。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>梯度消失和梯度爆炸是深度网络中常见的问题。在参数初始化时需要非常小心，以确保梯度和参数可以得到很好的控制。</li>
+<li>需要用启发式的初始化方法来确保初始梯度既不太大也不太小。</li>
+<li>ReLU激活函数缓解了梯度消失问题，这样可以加速收敛。</li>
+<li>随机初始化是保证在进行优化前打破对称性的关键。</li>
+<li>Xavier初始化表明，对于每一层，输出的方差不受输入数量的影响，任何梯度的方差不受输出数量的影响。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">数值稳定性和模型初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E5%92%8C%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="toc-number">1.1.</span> <span class="toc-text">梯度消失和梯度爆炸</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1"><span class="toc-number">1.1.1.</span> <span class="toc-text">梯度消失</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="toc-number">1.1.2.</span> <span class="toc-text">梯度爆炸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E7%A0%B4%E5%AF%B9%E7%A7%B0%E6%80%A7"><span class="toc-number">1.1.3.</span> <span class="toc-text">打破对称性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">参数初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.</span> <span class="toc-text">默认初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xavier%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.2.</span> <span class="toc-text">Xavier初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%9D%E5%A4%96%E9%98%85%E8%AF%BB"><span class="toc-number">1.2.3.</span> <span class="toc-text">额外阅读</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&text=数值稳定性和模型初始化"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&is_video=false&description=数值稳定性和模型初始化"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=数值稳定性和模型初始化&body=Check out this article: https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&title=数值稳定性和模型初始化"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/21/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96/&name=数值稳定性和模型初始化&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

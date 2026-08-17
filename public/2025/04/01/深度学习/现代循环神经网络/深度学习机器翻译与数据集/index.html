@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="机器翻译与数据集语言模型是自然语言处理的关键，而机器翻译是语言模型最成功的基准测试。因为机器翻译正是将输入序列转换成输出序列的序列转换模型（sequence transduction）的核心问题。序列转换模型在各类现代人工智能应用中发挥着至关重要的作用，因此我们将其做为本章剩余部分和 chap_attention的重点。为此，本节将介绍机器翻译问题及其后文需要使用的数据集。 机器翻译（machin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器翻译与数据集">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="机器翻译与数据集语言模型是自然语言处理的关键，而机器翻译是语言模型最成功的基准测试。因为机器翻译正是将输入序列转换成输出序列的序列转换模型（sequence transduction）的核心问题。序列转换模型在各类现代人工智能应用中发挥着至关重要的作用，因此我们将其做为本章剩余部分和 chap_attention的重点。为此，本节将介绍机器翻译问题及其后文需要使用的数据集。 机器翻译（machin">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-01T05:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:15:49.876Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>机器翻译与数据集</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A0%81%E5%99%A8-%E8%A7%A3%E7%A0%81%E5%99%A8%E6%9E%B6%E6%9E%84/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&text=机器翻译与数据集"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=机器翻译与数据集"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=机器翻译与数据集&body=Check out this article: https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&name=机器翻译与数据集&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">机器翻译与数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%92%8C%E9%A2%84%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.</span> <span class="toc-text">下载和预处理数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E5%85%83%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">词元化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E8%A1%A8"><span class="toc-number">1.3.</span> <span class="toc-text">词表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.4.</span> <span class="toc-text">加载数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.5.</span> <span class="toc-text">训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        机器翻译与数据集
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-01T05:00:00.000Z" itemprop="datePublished">2025-04-01</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/" class="leancloud-visitors" data-flag-title="机器翻译与数据集" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="机器翻译与数据集"><a href="#机器翻译与数据集" class="headerlink" title="机器翻译与数据集"></a>机器翻译与数据集</h1><p>语言模型是自然语言处理的关键，<br>而<em>机器翻译</em>是语言模型最成功的基准测试。<br>因为机器翻译正是将输入序列转换成输出序列的<br><em>序列转换模型</em>（sequence transduction）的核心问题。<br>序列转换模型在各类现代人工智能应用中发挥着至关重要的作用，<br>因此我们将其做为本章剩余部分和 chap_attention的重点。<br>为此，本节将介绍机器翻译问题及其后文需要使用的数据集。</p>
+<p><em>机器翻译</em>（machine translation）指的是<br>将序列从一种语言自动翻译成另一种语言。<br>事实上，这个研究领域可以追溯到数字计算机发明后不久的20世纪40年代，<br>特别是在第二次世界大战中使用计算机破解语言编码。<br>几十年来，在使用神经网络进行端到端学习的兴起之前，<br>统计学方法在这一领域一直占据主导地位<br> 。<br>因为<em>统计机器翻译</em>（statistical machine translation）涉及了<br>翻译模型和语言模型等组成部分的统计分析，<br>因此基于神经网络的方法通常被称为<br><em>神经机器翻译</em>（neural machine translation），<br>用于将两种翻译模型区分开来。</p>
+<p>本书的关注点是神经网络机器翻译方法，强调的是端到端的学习。<br>与 语言模型和数据集中的语料库<br>是单一语言的语言模型问题存在不同，<br>机器翻译的数据集是由源语言和目标语言的文本序列对组成的。<br>因此，我们需要一种完全不同的方法来预处理机器翻译数据集，<br>而不是复用语言模型的预处理程序。<br>下面，我们看一下如何将预处理后的数据加载到小批量中用于训练。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> os</span><br></pre></td></tr></table></figure>
+
+<h2 id="下载和预处理数据集"><a href="#下载和预处理数据集" class="headerlink" title="下载和预处理数据集"></a>下载和预处理数据集</h2><p>首先，下载一个由<a target="_blank" rel="noopener" href="http://www.manythings.org/anki/">Tatoeba项目的双语句子对</a><br>组成的“英－法”数据集，数据集中的每一行都是制表符分隔的文本序列对，<br>序列对由英文文本序列和翻译后的法语文本序列组成。<br>请注意，每个文本序列可以是一个句子，<br>也可以是包含多个句子的一个段落。<br>在这个将英语翻译成法语的机器翻译问题中，<br>英语是<em>源语言</em>（source language），<br>法语是<em>目标语言</em>（target language）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line">d2l.DATA_HUB[<span class="string">&#x27;fra-eng&#x27;</span>] = (d2l.DATA_URL + <span class="string">&#x27;fra-eng.zip&#x27;</span>,</span><br><span class="line">                           <span class="string">&#x27;94646ad1522d915e7b0f9296181140edcf86a4f5&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_data_nmt</span>():</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;载入“英语－法语”数据集&quot;&quot;&quot;</span></span><br><span class="line">    data_dir = d2l.download_extract(<span class="string">&#x27;fra-eng&#x27;</span>)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(os.path.join(data_dir, <span class="string">&#x27;fra.txt&#x27;</span>), <span class="string">&#x27;r&#x27;</span>,</span><br><span class="line">             encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> f.read()</span><br><span class="line"></span><br><span class="line">raw_text = read_data_nmt()</span><br><span class="line">print(raw_text[:<span class="number">75</span>])</span><br></pre></td></tr></table></figure>
+
+<p>下载数据集后，原始文本数据需要经过几个预处理步骤。<br>例如，我们用空格代替<em>不间断空格</em>（non-breaking space），<br>使用小写字母替换大写字母，并在单词和标点符号之间插入空格。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">preprocess_nmt</span>(<span class="params">text</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;预处理“英语－法语”数据集&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">no_space</span>(<span class="params">char, prev_char</span>):</span></span><br><span class="line">        <span class="keyword">return</span> char <span class="keyword">in</span> <span class="built_in">set</span>(<span class="string">&#x27;,.!?&#x27;</span>) <span class="keyword">and</span> prev_char != <span class="string">&#x27; &#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 使用空格替换不间断空格</span></span><br><span class="line">    <span class="comment"># 使用小写字母替换大写字母</span></span><br><span class="line">    text = text.replace(<span class="string">&#x27;\u202f&#x27;</span>, <span class="string">&#x27; &#x27;</span>).replace(<span class="string">&#x27;\xa0&#x27;</span>, <span class="string">&#x27; &#x27;</span>).lower()</span><br><span class="line">    <span class="comment"># 在单词和标点符号之间插入空格</span></span><br><span class="line">    out = [<span class="string">&#x27; &#x27;</span> + char <span class="keyword">if</span> i &gt; <span class="number">0</span> <span class="keyword">and</span> no_space(char, text[i - <span class="number">1</span>]) <span class="keyword">else</span> char</span><br><span class="line">           <span class="keyword">for</span> i, char <span class="keyword">in</span> <span class="built_in">enumerate</span>(text)]</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;&#x27;</span>.join(out)</span><br><span class="line"></span><br><span class="line">text = preprocess_nmt(raw_text)</span><br><span class="line">print(text[:<span class="number">80</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="词元化"><a href="#词元化" class="headerlink" title="词元化"></a>词元化</h2><p>与 语言模型和数据集中的字符级词元化不同，<br>在机器翻译中，我们更喜欢单词级词元化<br>（最先进的模型可能使用更高级的词元化技术）。<br>下面的<code>tokenize_nmt</code>函数对前<code>num_examples</code>个文本序列对进行词元，<br>其中每个词元要么是一个词，要么是一个标点符号。<br>此函数返回两个词元列表：<code>source</code>和<code>target</code>：<br><code>source[i]</code>是源语言（这里是英语）第$i$个文本序列的词元列表，<br><code>target[i]</code>是目标语言（这里是法语）第$i$个文本序列的词元列表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_nmt</span>(<span class="params">text, num_examples=<span class="literal">None</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;词元化“英语－法语”数据数据集&quot;&quot;&quot;</span></span><br><span class="line">    source, target = [], []</span><br><span class="line">    <span class="keyword">for</span> i, line <span class="keyword">in</span> <span class="built_in">enumerate</span>(text.split(<span class="string">&#x27;\n&#x27;</span>)):</span><br><span class="line">        <span class="keyword">if</span> num_examples <span class="keyword">and</span> i &gt; num_examples:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        parts = line.split(<span class="string">&#x27;\t&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(parts) == <span class="number">2</span>:</span><br><span class="line">            source.append(parts[<span class="number">0</span>].split(<span class="string">&#x27; &#x27;</span>))</span><br><span class="line">            target.append(parts[<span class="number">1</span>].split(<span class="string">&#x27; &#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> source, target</span><br><span class="line"></span><br><span class="line">source, target = tokenize_nmt(text)</span><br><span class="line">source[:<span class="number">6</span>], target[:<span class="number">6</span>]</span><br></pre></td></tr></table></figure>
+
+<p>让我们绘制每个文本序列所包含的词元数量的直方图。<br>在这个简单的“英－法”数据集中，大多数文本序列的词元数量少于$20$个。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show_list_len_pair_hist</span>(<span class="params">legend, xlabel, ylabel, xlist, ylist</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;绘制列表长度对的直方图&quot;&quot;&quot;</span></span><br><span class="line">    d2l.set_figsize()</span><br><span class="line">    _, _, patches = d2l.plt.hist(</span><br><span class="line">        [[<span class="built_in">len</span>(l) <span class="keyword">for</span> l <span class="keyword">in</span> xlist], [<span class="built_in">len</span>(l) <span class="keyword">for</span> l <span class="keyword">in</span> ylist]])</span><br><span class="line">    d2l.plt.xlabel(xlabel)</span><br><span class="line">    d2l.plt.ylabel(ylabel)</span><br><span class="line">    <span class="keyword">for</span> patch <span class="keyword">in</span> patches[<span class="number">1</span>].patches:</span><br><span class="line">        patch.set_hatch(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">    d2l.plt.legend(legend)</span><br><span class="line"></span><br><span class="line">show_list_len_pair_hist([<span class="string">&#x27;source&#x27;</span>, <span class="string">&#x27;target&#x27;</span>], <span class="string">&#x27;# tokens per sequence&#x27;</span>,</span><br><span class="line">                        <span class="string">&#x27;count&#x27;</span>, source, target);</span><br></pre></td></tr></table></figure>
+
+<h2 id="词表"><a href="#词表" class="headerlink" title="词表"></a>词表</h2><p>由于机器翻译数据集由语言对组成，<br>因此我们可以分别为源语言和目标语言构建两个词表。<br>使用单词级词元化时，词表大小将明显大于使用字符级词元化时的词表大小。<br>为了缓解这一问题，这里我们将出现次数少于2次的低频率词元<br>视为相同的未知（“&lt;unk&gt;”）词元。<br>除此之外，我们还指定了额外的特定词元，<br>例如在小批量时用于将序列填充到相同长度的填充词元（“&lt;pad&gt;”），<br>以及序列的开始词元（“&lt;bos&gt;”）和结束词元（“&lt;eos&gt;”）。<br>这些特殊词元在自然语言处理任务中比较常用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">src_vocab = d2l.Vocab(source, min_freq=<span class="number">2</span>,</span><br><span class="line">                      reserved_tokens=[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>, <span class="string">&#x27;&lt;bos&gt;&#x27;</span>, <span class="string">&#x27;&lt;eos&gt;&#x27;</span>])</span><br><span class="line"><span class="built_in">len</span>(src_vocab)</span><br></pre></td></tr></table></figure>
+
+<h2 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h2><p>回想一下，语言模型中的序列样本都有一个固定的长度，<br>无论这个样本是一个句子的一部分还是跨越了多个句子的一个片断。<br>这个固定长度是由 语言模型和数据集中的<br><code>num_steps</code>（时间步数或词元数量）参数指定的。<br>在机器翻译中，每个样本都是由源和目标组成的文本序列对，<br>其中的每个文本序列可能具有不同的长度。</p>
+<p>为了提高计算效率，我们仍然可以通过<em>截断</em>（truncation）和<br><em>填充</em>（padding）方式实现一次只处理一个小批量的文本序列。<br>假设同一个小批量中的每个序列都应该具有相同的长度<code>num_steps</code>，<br>那么如果文本序列的词元数目少于<code>num_steps</code>时，<br>我们将继续在其末尾添加特定的“&lt;pad&gt;”词元，<br>直到其长度达到<code>num_steps</code>；<br>反之，我们将截断文本序列时，只取其前<code>num_steps</code> 个词元，<br>并且丢弃剩余的词元。这样，每个文本序列将具有相同的长度，<br>以便以相同形状的小批量进行加载。</p>
+<p>如前所述，下面的<code>truncate_pad</code>函数将截断或填充文本序列。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">truncate_pad</span>(<span class="params">line, num_steps, padding_token</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;截断或填充文本序列&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(line) &gt; num_steps:</span><br><span class="line">        <span class="keyword">return</span> line[:num_steps]  <span class="comment"># 截断</span></span><br><span class="line">    <span class="keyword">return</span> line + [padding_token] * (num_steps - <span class="built_in">len</span>(line))  <span class="comment"># 填充</span></span><br><span class="line"></span><br><span class="line">truncate_pad(src_vocab[source[<span class="number">0</span>]], <span class="number">10</span>, src_vocab[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>现在我们定义一个函数，可以将文本序列<br>转换成小批量数据集用于训练。<br>我们将特定的“&lt;eos&gt;”词元添加到所有序列的末尾，<br>用于表示序列的结束。<br>当模型通过一个词元接一个词元地生成序列进行预测时，<br>生成的“&lt;eos&gt;”词元说明完成了序列输出工作。<br>此外，我们还记录了每个文本序列的长度，<br>统计长度时排除了填充词元，<br>在稍后将要介绍的一些模型会需要这个长度信息。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_array_nmt</span>(<span class="params">lines, vocab, num_steps</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;将机器翻译的文本序列转换成小批量&quot;&quot;&quot;</span></span><br><span class="line">    lines = [vocab[l] <span class="keyword">for</span> l <span class="keyword">in</span> lines]</span><br><span class="line">    lines = [l + [vocab[<span class="string">&#x27;&lt;eos&gt;&#x27;</span>]] <span class="keyword">for</span> l <span class="keyword">in</span> lines]</span><br><span class="line">    array = d2l.tensor([truncate_pad(</span><br><span class="line">        l, num_steps, vocab[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>]) <span class="keyword">for</span> l <span class="keyword">in</span> lines])</span><br><span class="line">    valid_len = d2l.reduce_sum(</span><br><span class="line">        d2l.astype(array != vocab[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>], d2l.int32), <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> array, valid_len</span><br></pre></td></tr></table></figure>
+
+<h2 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h2><p>最后，我们定义<code>load_data_nmt</code>函数来返回数据迭代器，<br>以及源语言和目标语言的两种词表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_data_nmt</span>(<span class="params">batch_size, num_steps, num_examples=<span class="number">600</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;返回翻译数据集的迭代器和词表&quot;&quot;&quot;</span></span><br><span class="line">    text = preprocess_nmt(read_data_nmt())</span><br><span class="line">    source, target = tokenize_nmt(text, num_examples)</span><br><span class="line">    src_vocab = d2l.Vocab(source, min_freq=<span class="number">2</span>,</span><br><span class="line">                          reserved_tokens=[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>, <span class="string">&#x27;&lt;bos&gt;&#x27;</span>, <span class="string">&#x27;&lt;eos&gt;&#x27;</span>])</span><br><span class="line">    tgt_vocab = d2l.Vocab(target, min_freq=<span class="number">2</span>,</span><br><span class="line">                          reserved_tokens=[<span class="string">&#x27;&lt;pad&gt;&#x27;</span>, <span class="string">&#x27;&lt;bos&gt;&#x27;</span>, <span class="string">&#x27;&lt;eos&gt;&#x27;</span>])</span><br><span class="line">    src_array, src_valid_len = build_array_nmt(source, src_vocab, num_steps)</span><br><span class="line">    tgt_array, tgt_valid_len = build_array_nmt(target, tgt_vocab, num_steps)</span><br><span class="line">    data_arrays = (src_array, src_valid_len, tgt_array, tgt_valid_len)</span><br><span class="line">    data_iter = d2l.load_array(data_arrays, batch_size)</span><br><span class="line">    <span class="keyword">return</span> data_iter, src_vocab, tgt_vocab</span><br></pre></td></tr></table></figure>
+
+<p>下面我们读出“英语－法语”数据集中的第一个小批量数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">train_iter, src_vocab, tgt_vocab = load_data_nmt(batch_size=<span class="number">2</span>, num_steps=<span class="number">8</span>)</span><br><span class="line"><span class="keyword">for</span> X, X_valid_len, Y, Y_valid_len <span class="keyword">in</span> train_iter:</span><br><span class="line">    print(<span class="string">&#x27;X:&#x27;</span>, d2l.astype(X, d2l.int32))</span><br><span class="line">    print(<span class="string">&#x27;X的有效长度:&#x27;</span>, X_valid_len)</span><br><span class="line">    print(<span class="string">&#x27;Y:&#x27;</span>, d2l.astype(Y, d2l.int32))</span><br><span class="line">    print(<span class="string">&#x27;Y的有效长度:&#x27;</span>, Y_valid_len)</span><br><span class="line">    <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>机器翻译指的是将文本序列从一种语言自动翻译成另一种语言。</li>
+<li>使用单词级词元化时的词表大小，将明显大于使用字符级词元化时的词表大小。为了缓解这一问题，我们可以将低频词元视为相同的未知词元。</li>
+<li>通过截断和填充文本序列，可以保证所有的文本序列都具有相同的长度，以便以小批量的方式加载。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">机器翻译与数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%92%8C%E9%A2%84%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.</span> <span class="toc-text">下载和预处理数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E5%85%83%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">词元化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E8%A1%A8"><span class="toc-number">1.3.</span> <span class="toc-text">词表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.4.</span> <span class="toc-text">加载数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.5.</span> <span class="toc-text">训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&text=机器翻译与数据集"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=机器翻译与数据集"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=机器翻译与数据集&body=Check out this article: https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&title=机器翻译与数据集"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/01/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86/&name=机器翻译与数据集&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

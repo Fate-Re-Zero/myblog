@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="业务Agent设计本文是 业务Agent介绍 之前做的一些设计，聚焦「智询」的方案设计：业务能力如何划分、应用与数据如何分层设计、技术栈如何落地、Agent 运行时如何闭环。  一、落地主线业务 Agent 不宜一上来做成「万能助手」。智询的落地路径是：先选高频可标准化场景 → 沉淀技能与工具 → 打通编排与人机兜底 → 再横向复制到相邻业务域。   实践上可按三条线并行推进：    主线 做什么">
+<meta property="og:type" content="article">
+<meta property="og:title" content="业务Agent设计">
+<meta property="og:url" content="https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="业务Agent设计本文是 业务Agent介绍 之前做的一些设计，聚焦「智询」的方案设计：业务能力如何划分、应用与数据如何分层设计、技术栈如何落地、Agent 运行时如何闭环。  一、落地主线业务 Agent 不宜一上来做成「万能助手」。智询的落地路径是：先选高频可标准化场景 → 沉淀技能与工具 → 打通编排与人机兜底 → 再横向复制到相邻业务域。   实践上可按三条线并行推进：    主线 做什么">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/落地主线.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/Agent业务架构图.svg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/Agent应用架构图.svg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/Agent数据分层架构图.svg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/Agent技术架构图.svg">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/Agent/Agent运行时设计.svg">
+<meta property="article:published_time" content="2026-02-02T08:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T07:46:17.956Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/Agent/落地主线.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>业务Agent设计</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2026/03/05/Agent/%E4%B8%9A%E5%8A%A1Agent%E4%BB%8B%E7%BB%8D/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0RMSProp%E7%AE%97%E6%B3%95/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&text=业务Agent设计"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&is_video=false&description=业务Agent设计"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=业务Agent设计&body=Check out this article: https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&name=业务Agent设计&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">业务Agent设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%90%BD%E5%9C%B0%E4%B8%BB%E7%BA%BF"><span class="toc-number">1.1.</span> <span class="toc-text">一、落地主线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%B8%9A%E5%8A%A1%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.2.</span> <span class="toc-text">二、业务架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%BA%94%E7%94%A8%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.3.</span> <span class="toc-text">三、应用架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%95%B0%E6%8D%AE%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.4.</span> <span class="toc-text">四、数据架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.5.</span> <span class="toc-text">五、技术架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Agent%E8%BF%90%E8%A1%8C%E6%97%B6%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.6.</span> <span class="toc-text">六、Agent运行时设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">七、小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        业务Agent设计
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-02-02T08:00:00.000Z" itemprop="datePublished">2026-02-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/" class="leancloud-visitors" data-flag-title="业务Agent设计" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Agent/" rel="tag">Agent</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="业务Agent设计"><a href="#业务Agent设计" class="headerlink" title="业务Agent设计"></a>业务Agent设计</h1><p>本文是 <a href="/2026/03/05/Agent/%E4%B8%9A%E5%8A%A1Agent%E4%BB%8B%E7%BB%8D/">业务Agent介绍</a> 之前做的一些设计，聚焦「智询」的方案设计：业务能力如何划分、应用与数据如何分层设计、技术栈如何落地、Agent 运行时如何闭环。</p>
+<hr>
+<h2 id="一、落地主线"><a href="#一、落地主线" class="headerlink" title="一、落地主线"></a>一、落地主线</h2><p>业务 Agent 不宜一上来做成「万能助手」。智询的落地路径是：<strong>先选高频可标准化场景 → 沉淀技能与工具 → 打通编排与人机兜底 → 再横向复制到相邻业务域</strong>。</p>
+<img src="/images/Agent/落地主线.png" alt="落地主线" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>实践上可按三条线并行推进：</p>
+<table>
+<thead>
+<tr>
+<th>主线</th>
+<th>做什么</th>
+<th>验收信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>场景线</td>
+<td>登录 / 支付 / 风控等高频事件先跑通</td>
+<td>自动完结率、转人工率、平均响应时长</td>
+</tr>
+<tr>
+<td>能力线</td>
+<td>意图、检索、工具、权限、审计可复用</td>
+<td>新场景接入以「技能包」方式交付，不推翻主链路</td>
+</tr>
+<tr>
+<td>治理线</td>
+<td>脱敏、权限、观测、评测</td>
+<td>每次调用可回溯；无工具支撑时能明确降级</td>
+</tr>
+</tbody></table>
+<p>设计原则可以压缩成一句话：<strong>能查的先查清，能办的带确认，不能办的说清楚并转人</strong>。</p>
+<hr>
+<h2 id="二、业务架构设计"><a href="#二、业务架构设计" class="headerlink" title="二、业务架构设计"></a>二、业务架构设计</h2><p>业务架构回答的是：服务谁、解决什么问题、能力落在哪些 Agent 上，以及底层依赖哪些企业数据与保障体系。</p>
+<img src="/images/Agent/Agent业务架构图.svg" alt="智询 Agent 业务架构" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>自上而下可以读成四层：</p>
+<p><strong>1. 价值层</strong><br>对齐业务结果，而不是对齐「调了多少次模型」。降本增效、交付提速、质量与稳定性、决策智能化，都是后续评测与迭代的尺子。</p>
+<p><strong>2. 应用层（智能体阵列）</strong><br>按业务域拆 Agent，而不是做一个超级 Bot：</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>典型能力</th>
+<th>对应真实场景（介绍文）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>登录认证 Agent</td>
+<td>认证知识查询、日志分析、业务问题处理</td>
+<td>改密仍失败、登录锁关不了、扫码登录异常</td>
+</tr>
+<tr>
+<td>支付业务 Agent</td>
+<td>支付知识、日志分析、补单、退款问题</td>
+<td>充错区/充错号、退款、开票</td>
+</tr>
+<tr>
+<td>部门业务对接 Agent</td>
+<td>能力查询、对接指导、异常排查</td>
+<td>跨部门口径对齐、接入方联调</td>
+</tr>
+<tr>
+<td>风控 / 财务 / 前端等</td>
+<td>按需扩展</td>
+<td>风控次数、短信受限、客户端自检</td>
+</tr>
+</tbody></table>
+<p>同一条用户话术，先路由到业务域 Agent，再在域内做工具编排，比「一个大 Prompt 包打天下」更容易控权限、做评测、做演进。</p>
+<p><strong>3. 能力层（AI Agent 核心引擎）</strong><br>意图理解 → 知识检索 → 推理决策 → 工具调用 → 工作流编排 → 学习优化。上层各业务 Agent 共用这套引擎，差异主要在技能包、工具集与权限策略。</p>
+<p><strong>4. 数据层 + 保障体系</strong><br>认证 / 支付 / 风控 / 社区 / 计费等业务数据经治理与集成后，才进入 Agent 可用范围；右侧的安全、权限、监控、持续优化，保证「能用」之外还能「敢用、可运营」。</p>
+<hr>
+<h2 id="三、应用架构设计"><a href="#三、应用架构设计" class="headerlink" title="三、应用架构设计"></a>三、应用架构设计</h2><p>应用架构把业务能力落成可部署的模块：入口在哪、请求怎么进、任务怎么调度、运行时做什么、状态落哪里。</p>
+<img src="/images/Agent/Agent应用架构图.svg" alt="Agent 应用架构" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>建议按「自上而下读请求、自下而上看依赖」的方式理解：</p>
+<p><strong>渠道入口</strong><br>Vue 工作台、飞书 / 内部聊天、商城、工单系统——同一套编排能力，多入口接入，避免每个渠道各写一套机器人。</p>
+<p><strong>网关层</strong><br>负载均衡、FastAPI 接入、SSE 流式回写、LLM Gateway（模型路由）。流式回写很关键：排查类任务往往多步调用，用户需要看到「正在查锁状态 / 正在检索规则」而不是长时间白屏。</p>
+<p><strong>编排调度层</strong><br>服务治理（限流、会话锁、幂等）+ Agent Run Queue + Worker + 事件流。长任务进队列，避免同步接口被工具调用拖死；会话锁与幂等则防止「同工单连点两次 → 重复写操作」。</p>
+<p><strong>Agent 运行时</strong><br>意图理解 / 规划路由、Memory、能力与工具（沙箱执行）、权限控制。这是业务差异最大的一层，也是下一章「运行时设计」展开的重点。</p>
+<p><strong>数据访问与持久化</strong><br>RAG 检索、Checkpoint、会话 / 长期记忆、评测投递；底层 PostgreSQL、Redis、向量索引、Langfuse。左右两侧的配置中心与注册中心，支撑 Prompt / Skill / Worker / Tool 的动态发布与发现。</p>
+<p>一句话概括：<strong>网关管入口形态，队列管吞吐与可靠，运行时管智能，存储与观测管可运营。</strong></p>
+<hr>
+<h2 id="四、数据架构设计"><a href="#四、数据架构设计" class="headerlink" title="四、数据架构设计"></a>四、数据架构设计</h2><p>Agent 再聪明，没有干净、可授权、可追溯的数据，也只能「猜」。数据架构解决的是：数据从哪来、怎么清洗、怎么流转、怎么被 Agent 安全消费。</p>
+<img src="/images/Agent/Agent数据分层架构图.svg" alt="Agent 数据架构" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>六层分工可以记成：</p>
+<table>
+<thead>
+<tr>
+<th>分层</th>
+<th>职责</th>
+<th>对 Agent 的意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据应用层</td>
+<td>AI Agent、风控、BI、运营等消费方</td>
+<td>Agent 是应用之一，不是旁路脚本</td>
+</tr>
+<tr>
+<td>数据服务层</td>
+<td>API 网关、数据 / 标签 / 指标服务</td>
+<td>工具调用走服务，而不是直连生产库</td>
+</tr>
+<tr>
+<td>数据开发层</td>
+<td>ETL、建模、调度、质量、血缘</td>
+<td>保证口径一致、可追溯</td>
+</tr>
+<tr>
+<td>数据资产层</td>
+<td>ODS → DWD → DWS → ADS + 标准 / 元数据</td>
+<td>查类问题优先打 ADS / 指标，少扫明细</td>
+</tr>
+<tr>
+<td>数据集成层</td>
+<td>批 / 流 / API / 文件 / MQ</td>
+<td>覆盖日志、工单、文档、业务库等多源</td>
+</tr>
+<tr>
+<td>数据存储层</td>
+<td>湖仓、缓存、向量库、图库</td>
+<td>RAG、会话、图谱能力的底座</td>
+</tr>
+</tbody></table>
+<p>和智询场景强相关的几条落地约定：</p>
+<ul>
+<li><strong>知识类问题</strong>（开票、退款政策、接入规范）走向量检索 + 权威文档，回答需可引用。</li>
+<li><strong>状态类问题</strong>（登录锁、风控次数、短信是否受限）走业务 API / 指标服务，禁止用过期文档「猜状态」。</li>
+<li><strong>写操作</strong>（加风控次数、关锁）必须鉴权、审计，并默认「建议 + 确认」或转人工。</li>
+<li><strong>脱敏与最小权限</strong>：日志、手机号、账号等进入 Prompt / Trace 前先脱敏；工具按角色开放。</li>
+</ul>
+<hr>
+<h2 id="五、技术架构设计"><a href="#五、技术架构设计" class="headerlink" title="五、技术架构设计"></a>五、技术架构设计</h2><p>技术架构把应用分层映射到具体技术选型与部署边界，方便研发落地与横向扩展。</p>
+<img src="/images/Agent/Agent技术架构图.svg" alt="Agent 技术架构" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>分层要点：</p>
+<p><strong>展示层</strong><br>Web 工作台、IM、工单、Open API（含 SSE 客户端），覆盖「图形化界面」和「系统对接」两类入口。</p>
+<p><strong>通讯层</strong><br>ALB / Nginx、HTTPS、SSE、可选 WebSocket。Agent 对话与工具执行进度优先 SSE，兼容现有 HTTP 体系。</p>
+<p><strong>服务层（核心）</strong>  </p>
+<ul>
+<li>接入：FastAPI / SSE Gateway  </li>
+<li>业务集群：Agent Worker、业务 Service、MCP Server、RAG 服务  </li>
+<li>保护：链路追踪、队列监控、安全沙箱  </li>
+<li>治理：注册中心、限流降级与幂等、Prompt / Skill 配置  </li>
+<li>异步：Run Queue、Redis 会话锁、评测队列、模型服务（如 DeepSeek / Qwen）</li>
+</ul>
+<p><strong>数据层</strong><br>PostgreSQL（主数据与 Checkpoint）、Redis（会话）、向量索引（RAG）、Langfuse（Trace / Score）。</p>
+<p>选型上刻意保持「薄接入、厚编排」：渠道只负责收发；智能集中在 Worker + 工具网关；观测与评测从第一天就进主链路，而不是事后补日志。</p>
+<hr>
+<h2 id="六、Agent运行时设计"><a href="#六、Agent运行时设计" class="headerlink" title="六、Agent运行时设计"></a>六、Agent运行时设计</h2><p>运行时回答一次请求在进程内如何被「理解 → 规划 → 行动 → 反思」地跑完，以及技能、工具、记忆、环境如何协作。</p>
+<img src="/images/Agent/Agent运行时设计.svg" alt="Agent 运行时设计" style="width:100%; display:block; margin:0 0 1.5em;">
+
+<p>可以按「外层输入 / 中环决策 / 下挂能力 / 底座支撑」来读：</p>
+<p><strong>输入理解（感知）</strong><br>意图、实体、上下文、视觉 / OCR、历史、外部事件。客服话术往往口语化且夹账号、手机号、区服，槽位抽取质量直接决定后面工具能不能点对。</p>
+<p><strong>核心运行（ReAct 循环）</strong><br>Observe → Think → Plan → Act → Observe → Reflect，直到任务完成或触发降级。配套状态、上下文、记忆、自检、错误处理、成本与日志，避免「调了工具却不校验结果」或「死循环烧 Token」。</p>
+<p><strong>智能大脑（LLM）</strong><br>模型路由（按任务 / 成本 / 性能）、推理引擎（理解 / 推理 / 规划 / 决策 / 生成 / 反思）、提示词工程（系统提示、场景模板、Few-shot、动态优化）。查类与办类可以走不同模型或不同温度策略。</p>
+<p><strong>技能 · 工具 · 环境</strong>  </p>
+<ul>
+<li>Skills：业务技能包（登录排查、支付补单、风控查询等）  </li>
+<li>Tools：工具网关（鉴权、限流、日志、重试）+ MCP / 函数调用 + 执行沙箱  </li>
+<li>Environment：文件系统、Shell、数据库、浏览器、外部服务  </li>
+</ul>
+<p>工具一律经网关，写操作进沙箱与权限闸门——这是业务 Agent 与「Demo 聊天机器人」的本质差别。</p>
+<p><strong>记忆与基础设施</strong><br>短期 / 长期 / 向量 / 结构化 / 企业知识库 / 工作记忆，配合模型、向量库、关系库、对象存储、缓存、MQ、监控与日志，支撑可恢复、可审计、可扩展。</p>
+<hr>
+<h2 id="七、小结"><a href="#七、小结" class="headerlink" title="七、小结"></a>七、小结</h2><p>智询的设计可以收束为四句话：</p>
+<ol>
+<li><strong>业务上</strong>按域拆 Agent，价值对齐可量化结果。  </li>
+<li><strong>应用上</strong>多入口统一编排，队列化执行，配置与注册可动态演进。  </li>
+<li><strong>数据上</strong>湖仓分层 + 服务化供给，知识走检索、状态走 API、写操作强审计。  </li>
+<li><strong>运行时上</strong>ReAct 闭环 + 工具网关 + 人机降级，保证「提效」与「可控」同时成立。</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">业务Agent设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%90%BD%E5%9C%B0%E4%B8%BB%E7%BA%BF"><span class="toc-number">1.1.</span> <span class="toc-text">一、落地主线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%B8%9A%E5%8A%A1%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.2.</span> <span class="toc-text">二、业务架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%BA%94%E7%94%A8%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.3.</span> <span class="toc-text">三、应用架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%95%B0%E6%8D%AE%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.4.</span> <span class="toc-text">四、数据架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.5.</span> <span class="toc-text">五、技术架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Agent%E8%BF%90%E8%A1%8C%E6%97%B6%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.6.</span> <span class="toc-text">六、Agent运行时设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">七、小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&text=业务Agent设计"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&is_video=false&description=业务Agent设计"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=业务Agent设计&body=Check out this article: https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&title=业务Agent设计"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/&name=业务Agent设计&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

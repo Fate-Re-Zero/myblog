@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>祥祥要起飞</title>
+  
+  <subtitle>Stay Hungry . Stay Foolish</subtitle>
+  <link href="https://fate-re-zero.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://fate-re-zero.github.io/"/>
+  <updated>2026-08-17T07:45:31.219Z</updated>
+  <id>https://fate-re-zero.github.io/</id>
+  
+  <author>
+    <name>祥祥要起飞</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>业务Agent介绍</title>
+    <link href="https://fate-re-zero.github.io/2026/03/05/Agent/%E4%B8%9A%E5%8A%A1Agent%E4%BB%8B%E7%BB%8D/"/>
+    <id>https://fate-re-zero.github.io/2026/03/05/Agent/%E4%B8%9A%E5%8A%A1Agent%E4%BB%8B%E7%BB%8D/</id>
+    <published>2026-03-05T07:50:00.000Z</published>
+    <updated>2026-08-17T07:45:31.219Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;业务Agent介绍&quot;&gt;&lt;a href=&quot;#业务Agent介绍&quot; class=&quot;headerlink&quot; title=&quot;业务Agent介绍&quot;&gt;&lt;/a&gt;业务Agent介绍&lt;/h1&gt;&lt;p&gt;本文介绍业务场景下 Agent</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Agent" scheme="https://fate-re-zero.github.io/tags/Agent/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>业务Agent设计</title>
+    <link href="https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/"/>
+    <id>https://fate-re-zero.github.io/2026/02/02/Agent/%E4%B8%9A%E5%8A%A1Agent%E8%AE%BE%E8%AE%A1/</id>
+    <published>2026-02-02T08:00:00.000Z</published>
+    <updated>2026-08-17T07:46:17.956Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;业务Agent设计&quot;&gt;&lt;a href=&quot;#业务Agent设计&quot; class=&quot;headerlink&quot; title=&quot;业务Agent设计&quot;&gt;&lt;/a&gt;业务Agent设计&lt;/h1&gt;&lt;p&gt;本文是 &lt;a</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Agent" scheme="https://fate-re-zero.github.io/tags/Agent/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>RMSProp算法</title>
+    <link href="https://fate-re-zero.github.io/2025/04/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0RMSProp%E7%AE%97%E6%B3%95/"/>
+    <id>https://fate-re-zero.github.io/2025/04/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0RMSProp%E7%AE%97%E6%B3%95/</id>
+    <published>2025-04-19T08:00:00.000Z</published>
+    <updated>2026-08-17T09:23:21.245Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;RMSProp算法&quot;&gt;&lt;a href=&quot;#RMSProp算法&quot; class=&quot;headerlink&quot; title=&quot;RMSProp算法&quot;&gt;&lt;/a&gt;RMSProp算法&lt;/h1&gt;&lt;p&gt;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AdaDelta算法</title>
+    <link href="https://fate-re-zero.github.io/2025/04/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaDelta%E7%AE%97%E6%B3%95/"/>
+    <id>https://fate-re-zero.github.io/2025/04/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaDelta%E7%AE%97%E6%B3%95/</id>
+    <published>2025-04-18T09:00:00.000Z</published>
+    <updated>2026-08-17T09:28:17.732Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;Adadelta&quot;&gt;&lt;a href=&quot;#Adadelta&quot; class=&quot;headerlink&quot; title=&quot;Adadelta&quot;&gt;&lt;/a&gt;Adadelta&lt;/h1&gt;&lt;p&gt;Adadelta是AdaGrad的另一种变体（</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AdaGrad算法</title>
+    <link href="https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/"/>
+    <id>https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/</id>
+    <published>2025-04-17T07:00:00.000Z</published>
+    <updated>2026-08-17T09:23:08.286Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;AdaGrad算法&quot;&gt;&lt;a href=&quot;#AdaGrad算法&quot; class=&quot;headerlink&quot; title=&quot;AdaGrad算法&quot;&gt;&lt;/a&gt;AdaGrad算法&lt;/h1&gt;&lt;p&gt;我们从有关特征学习中并不常见的问题入手。&lt;/p&gt;
+&lt;h2</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Adam算法</title>
+    <link href="https://fate-re-zero.github.io/2025/04/16/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0Adam%E7%AE%97%E6%B3%95/"/>
+    <id>https://fate-re-zero.github.io/2025/04/16/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0Adam%E7%AE%97%E6%B3%95/</id>
+    <published>2025-04-16T10:00:00.000Z</published>
+    <updated>2026-08-17T09:23:10.004Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;Adam算法&quot;&gt;&lt;a href=&quot;#Adam算法&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>动量法</title>
+    <link href="https://fate-re-zero.github.io/2025/04/15/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8A%A8%E9%87%8F%E6%B3%95/"/>
+    <id>https://fate-re-zero.github.io/2025/04/15/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8A%A8%E9%87%8F%E6%B3%95/</id>
+    <published>2025-04-15T06:00:00.000Z</published>
+    <updated>2026-08-17T09:21:03.805Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;动量法&quot;&gt;&lt;a href=&quot;#动量法&quot; class=&quot;headerlink&quot; title=&quot;动量法&quot;&gt;&lt;/a&gt;动量法&lt;/h1&gt;&lt;p&gt;在</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>优化和深度学习</title>
+    <link href="https://fate-re-zero.github.io/2025/04/15/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%BC%98%E5%8C%96%E5%92%8C%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    <id>https://fate-re-zero.github.io/2025/04/15/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%BC%98%E5%8C%96%E5%92%8C%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</id>
+    <published>2025-04-15T01:00:00.000Z</published>
+    <updated>2026-08-17T09:22:16.825Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;优化和深度学习&quot;&gt;&lt;a href=&quot;#优化和深度学习&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>学习率调度器</title>
+    <link href="https://fate-re-zero.github.io/2025/04/14/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E5%BA%A6%E5%99%A8/"/>
+    <id>https://fate-re-zero.github.io/2025/04/14/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E5%BA%A6%E5%99%A8/</id>
+    <published>2025-04-14T11:00:00.000Z</published>
+    <updated>2026-08-17T09:21:54.024Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;学习率调度器&quot;&gt;&lt;a href=&quot;#学习率调度器&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>小批量随机梯度下降</title>
+    <link href="https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B0%8F%E6%89%B9%E9%87%8F%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"/>
+    <id>https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B0%8F%E6%89%B9%E9%87%8F%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</id>
+    <published>2025-04-13T05:00:00.000Z</published>
+    <updated>2026-08-17T09:21:57.461Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;小批量随机梯度下降&quot;&gt;&lt;a href=&quot;#小批量随机梯度下降&quot; class=&quot;headerlink&quot; title=&quot;小批量随机梯度下降&quot;&gt;&lt;/a&gt;小批量随机梯度下降&lt;/h1&gt;&lt;p&gt;到目前为止，我们在基于梯度的学习方法中遇到了两个极端情况：&lt;br&gt;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>随机梯度下降</title>
+    <link href="https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"/>
+    <id>https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</id>
+    <published>2025-04-13T04:00:00.000Z</published>
+    <updated>2026-08-17T09:21:15.988Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;随机梯度下降&quot;&gt;&lt;a href=&quot;#随机梯度下降&quot; class=&quot;headerlink&quot; title=&quot;随机梯度下降&quot;&gt;&lt;/a&gt;随机梯度下降&lt;/h1&gt;&lt;p&gt;在前面的章节中，我们一直在训练过程中使用随机梯度下降，但没有解释它为什么起作用。为了澄清这一点，我们刚在</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>梯度下降</title>
+    <link href="https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"/>
+    <id>https://fate-re-zero.github.io/2025/04/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</id>
+    <published>2025-04-13T03:00:00.000Z</published>
+    <updated>2026-08-17T09:22:05.454Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;梯度下降&quot;&gt;&lt;a href=&quot;#梯度下降&quot; class=&quot;headerlink&quot; title=&quot;梯度下降&quot;&gt;&lt;/a&gt;梯度下降&lt;/h1&gt;&lt;p&gt;尽管&lt;em&gt;梯度下降&lt;/em&gt;（gradient</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>转置卷积</title>
+    <link href="https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%BD%AC%E7%BD%AE%E5%8D%B7%E7%A7%AF/"/>
+    <id>https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%BD%AC%E7%BD%AE%E5%8D%B7%E7%A7%AF/</id>
+    <published>2025-04-12T10:00:00.000Z</published>
+    <updated>2026-08-17T09:20:37.012Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;转置卷积&quot;&gt;&lt;a href=&quot;#转置卷积&quot; class=&quot;headerlink&quot; title=&quot;转置卷积&quot;&gt;&lt;/a&gt;转置卷积&lt;/h1&gt;&lt;p&gt;到目前为止，我们所见到的卷积神经网络层，例如卷积层（ sec_conv_layer）和汇聚层（</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>语义分割和数据集</title>
+    <link href="https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"/>
+    <id>https://fate-re-zero.github.io/2025/04/12/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/</id>
+    <published>2025-04-12T09:00:00.000Z</published>
+    <updated>2026-08-17T09:20:31.420Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;语义分割和数据集&quot;&gt;&lt;a href=&quot;#语义分割和数据集&quot; class=&quot;headerlink&quot; title=&quot;语义分割和数据集&quot;&gt;&lt;/a&gt;语义分割和数据集&lt;/h1&gt;&lt;p&gt;在 边界框—</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>样式迁移</title>
+    <link href="https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A0%B7%E5%BC%8F%E8%BF%81%E7%A7%BB/"/>
+    <id>https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A0%B7%E5%BC%8F%E8%BF%81%E7%A7%BB/</id>
+    <published>2025-04-11T12:00:00.000Z</published>
+    <updated>2026-08-17T09:20:16.893Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;风格迁移&quot;&gt;&lt;a href=&quot;#风格迁移&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>微调</title>
+    <link href="https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BE%AE%E8%B0%83/"/>
+    <id>https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BE%AE%E8%B0%83/</id>
+    <published>2025-04-11T02:00:00.000Z</published>
+    <updated>2026-08-17T09:20:05.971Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;微调&quot;&gt;&lt;a href=&quot;#微调&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>图像增广</title>
+    <link href="https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%B9%BF/"/>
+    <id>https://fate-re-zero.github.io/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%B9%BF/</id>
+    <published>2025-04-11T01:00:00.000Z</published>
+    <updated>2026-08-17T09:19:51.698Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;图像增广&quot;&gt;&lt;a href=&quot;#图像增广&quot; class=&quot;headerlink&quot; title=&quot;图像增广&quot;&gt;&lt;/a&gt;图像增广&lt;/h1&gt;&lt;p&gt;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>实战Kaggle比赛：狗品种识别</title>
+    <link href="https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/"/>
+    <id>https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/</id>
+    <published>2025-04-10T14:00:00.000Z</published>
+    <updated>2026-08-17T09:19:28.356Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;实战Kaggle比赛：狗的品种识别（ImageNet-Dogs）&quot;&gt;&lt;a href=&quot;#实战Kaggle比赛：狗的品种识别（ImageNet-Dogs）&quot; class=&quot;headerlink&quot; title=&quot;实战Kaggle比赛：狗的品种识别（ImageNet</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>实战Kaggle比赛：CIFAR-10</title>
+    <link href="https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9ACIFAR-10/"/>
+    <id>https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9ACIFAR-10/</id>
+    <published>2025-04-10T13:00:00.000Z</published>
+    <updated>2026-08-17T09:19:39.998Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;实战-Kaggle-比赛：图像分类-CIFAR-10&quot;&gt;&lt;a href=&quot;#实战-Kaggle-比赛：图像分类-CIFAR-10&quot; class=&quot;headerlink&quot; title=&quot;实战 Kaggle 比赛：图像分类 (CIFAR-10)&quot;&gt;&lt;/a&gt;实战</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>全卷积网络</title>
+    <link href="https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"/>
+    <id>https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/</id>
+    <published>2025-04-09T11:00:00.000Z</published>
+    <updated>2026-08-17T09:19:15.310Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;全卷积网络&quot;&gt;&lt;a href=&quot;#全卷积网络&quot; class=&quot;headerlink&quot; title=&quot;全卷积网络&quot;&gt;&lt;/a&gt;全卷积网络&lt;/h1&gt;&lt;p&gt;如</summary>
+        
+      
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+</feed>

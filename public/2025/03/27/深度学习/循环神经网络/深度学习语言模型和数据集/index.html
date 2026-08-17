@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="语言模型和数据集在 文本预处理中，我们了解了如何将文本数据映射为词元，以及将这些词元可以视为一系列离散的观测，例如单词或字符。假设长度为$T$的文本序列中的词元依次为$x_1, x_2, \ldots, x_T$。于是，$x_t$（$1 \leq t \leq T$）可以被认为是文本序列在时间步$t$处的观测或标签。在给定这样的文本序列时，语言模型（language model）的目标是估计序列的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="语言模型和数据集">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="语言模型和数据集在 文本预处理中，我们了解了如何将文本数据映射为词元，以及将这些词元可以视为一系列离散的观测，例如单词或字符。假设长度为$T$的文本序列中的词元依次为$x_1, x_2, \ldots, x_T$。于是，$x_t$（$1 \leq t \leq T$）可以被认为是文本序列在时间步$t$处的观测或标签。在给定这样的文本序列时，语言模型（language model）的目标是估计序列的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-27T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:09:00.253Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>语言模型和数据集</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/29/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%BA%BF%E6%80%A7%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/26/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&text=语言模型和数据集"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=语言模型和数据集"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=语言模型和数据集&body=Check out this article: https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&name=语言模型和数据集&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">语言模型和数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">学习语言模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B%E4%B8%8E-n-%E5%85%83%E8%AF%AD%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">马尔可夫模型与$n$元语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1"><span class="toc-number">1.3.</span> <span class="toc-text">自然语言统计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E9%95%BF%E5%BA%8F%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-number">1.4.</span> <span class="toc-text">读取长序列数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E9%87%87%E6%A0%B7"><span class="toc-number">1.4.1.</span> <span class="toc-text">随机采样</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%BA%8F%E5%88%86%E5%8C%BA"><span class="toc-number">1.4.2.</span> <span class="toc-text">顺序分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        语言模型和数据集
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-27T03:00:00.000Z" itemprop="datePublished">2025-03-27</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/" class="leancloud-visitors" data-flag-title="语言模型和数据集" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="语言模型和数据集"><a href="#语言模型和数据集" class="headerlink" title="语言模型和数据集"></a>语言模型和数据集</h1><p>在 文本预处理中，<br>我们了解了如何将文本数据映射为词元，<br>以及将这些词元可以视为一系列离散的观测，例如单词或字符。<br>假设长度为$T$的文本序列中的词元依次为$x_1, x_2, \ldots, x_T$。<br>于是，$x_t$（$1 \leq t \leq T$）<br>可以被认为是文本序列在时间步$t$处的观测或标签。<br>在给定这样的文本序列时，<em>语言模型</em>（language model）的目标是估计序列的联合概率</p>
+<p>$$P(x_1, x_2, \ldots, x_T).$$</p>
+<p>例如，只需要一次抽取一个词元$x_t \sim P(x_t \mid x_{t-1}, \ldots, x_1)$，<br>一个理想的语言模型就能够基于模型本身生成自然文本。<br>与猴子使用打字机完全不同的是，从这样的模型中提取的文本<br>都将作为自然语言（例如，英语文本）来传递。<br>只需要基于前面的对话片断中的文本，<br>就足以生成一个有意义的对话。<br>显然，我们离设计出这样的系统还很遥远，<br>因为它需要“理解”文本，而不仅仅是生成语法合理的内容。</p>
+<p>尽管如此，语言模型依然是非常有用的。<br>例如，短语“to recognize speech”和“to wreck a nice beach”读音上听起来非常相似。<br>这种相似性会导致语音识别中的歧义，但是这很容易通过语言模型来解决，<br>因为第二句的语义很奇怪。<br>同样，在文档摘要生成算法中，<br>“狗咬人”比“人咬狗”出现的频率要高得多，<br>或者“我想吃奶奶”是一个相当匪夷所思的语句，<br>而“我想吃，奶奶”则要正常得多。</p>
+<h2 id="学习语言模型"><a href="#学习语言模型" class="headerlink" title="学习语言模型"></a>学习语言模型</h2><p>显而易见，我们面对的问题是如何对一个文档，<br>甚至是一个词元序列进行建模。<br>假设在单词级别对文本数据进行词元化，<br>我们可以依靠在 序列模型中对序列模型的分析。<br>让我们从基本概率规则开始：</p>
+<p>$$P(x_1, x_2, \ldots, x_T) = \prod_{t=1}^T P(x_t \mid x_1, \ldots, x_{t-1}).$$</p>
+<p>例如，包含了四个单词的一个文本序列的概率是：</p>
+<p>$$P(\text{deep}, \text{learning}, \text{is}, \text{fun}) = P(\text{deep}) P(\text{learning} \mid \text{deep}) P(\text{is} \mid \text{deep}, \text{learning}) P(\text{fun} \mid \text{deep}, \text{learning}, \text{is}).$$</p>
+<p>为了训练语言模型，我们需要计算单词的概率，<br>以及给定前面几个单词后出现某个单词的条件概率。<br>这些概率本质上就是语言模型的参数。</p>
+<p>这里，我们假设训练数据集是一个大型的文本语料库。<br>比如，维基百科的所有条目、<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Project_Gutenberg">古登堡计划</a>，<br>或者所有发布在网络上的文本。<br>训练数据集中词的概率可以根据给定词的相对词频来计算。<br>例如，可以将估计值$\hat{P}(\text{deep})$<br>计算为任何以单词“deep”开头的句子的概率。<br>一种（稍稍不太精确的）方法是统计单词“deep”在数据集中的出现次数，<br>然后将其除以整个语料库中的单词总数。<br>这种方法效果不错，特别是对于频繁出现的单词。<br>接下来，我们可以尝试估计</p>
+<p>$$\hat{P}(\text{learning} \mid \text{deep}) = \frac{n(\text{deep, learning})}{n(\text{deep})},$$</p>
+<p>其中$n(x)$和$n(x, x’)$分别是单个单词和连续单词对的出现次数。<br>不幸的是，由于连续单词对“deep learning”的出现频率要低得多，<br>所以估计这类单词正确的概率要困难得多。<br>特别是对于一些不常见的单词组合，要想找到足够的出现次数来获得准确的估计可能都不容易。<br>而对于三个或者更多的单词组合，情况会变得更糟。<br>许多合理的三个单词组合可能是存在的，但是在数据集中却找不到。<br>除非我们提供某种解决方案，来将这些单词组合指定为非零计数，<br>否则将无法在语言模型中使用它们。<br>如果数据集很小，或者单词非常罕见，那么这类单词出现一次的机会可能都找不到。</p>
+<p>一种常见的策略是执行某种形式的<em>拉普拉斯平滑</em>（Laplace smoothing），<br>具体方法是在所有计数中添加一个小常量。<br>用$n$表示训练集中的单词总数，用$m$表示唯一单词的数量。<br>此解决方案有助于处理单元素问题，例如通过：</p>
+<p>$$<br>\begin{aligned}<br> \hat{P}(x) &amp; = \frac{n(x) + \epsilon_1/m}{n + \epsilon_1}, \<br> \hat{P}(x’ \mid x) &amp; = \frac{n(x, x’) + \epsilon_2 \hat{P}(x’)}{n(x) + \epsilon_2}, \<br> \hat{P}(x’’ \mid x,x’) &amp; = \frac{n(x, x’,x’’) + \epsilon_3 \hat{P}(x’’)}{n(x, x’) + \epsilon_3}.<br>\end{aligned}<br>$$</p>
+<p>其中，$\epsilon_1,\epsilon_2$和$\epsilon_3$是超参数。<br>以$\epsilon_1$为例：当$\epsilon_1 = 0$时，不应用平滑；<br>当$\epsilon_1$接近正无穷大时，$\hat{P}(x)$接近均匀概率分布$1/m$。<br>上面的公式是<br>的一个相当原始的变形。</p>
+<p>然而，这样的模型很容易变得无效，原因如下：<br>首先，我们需要存储所有的计数；<br>其次，这完全忽略了单词的意思。<br>例如，“猫”（cat）和“猫科动物”（feline）可能出现在相关的上下文中，<br>但是想根据上下文调整这类模型其实是相当困难的。<br>最后，长单词序列大部分是没出现过的，<br>因此一个模型如果只是简单地统计先前“看到”的单词序列频率，<br>那么模型面对这种问题肯定是表现不佳的。</p>
+<h2 id="马尔可夫模型与-n-元语法"><a href="#马尔可夫模型与-n-元语法" class="headerlink" title="马尔可夫模型与$n$元语法"></a>马尔可夫模型与$n$元语法</h2><p>在讨论包含深度学习的解决方案之前，我们需要了解更多的概念和术语。<br>回想一下我们在 序列模型中对马尔可夫模型的讨论，<br>并且将其应用于语言建模。<br>如果$P(x_{t+1} \mid x_t, \ldots, x_1) = P(x_{t+1} \mid x_t)$，<br>则序列上的分布满足一阶马尔可夫性质。<br>阶数越高，对应的依赖关系就越长。<br>这种性质推导出了许多可以应用于序列建模的近似公式：</p>
+<p>$$<br>\begin{aligned}<br>P(x_1, x_2, x_3, x_4) &amp;= P(x_1) P(x_2) P(x_3) P(x_4),\<br>P(x_1, x_2, x_3, x_4) &amp;= P(x_1) P(x_2 \mid x_1) P(x_3 \mid x_2) P(x_4 \mid x_3),\<br>P(x_1, x_2, x_3, x_4) &amp;= P(x_1) P(x_2 \mid x_1) P(x_3 \mid x_1, x_2) P(x_4 \mid x_2, x_3).<br>\end{aligned}<br>$$</p>
+<p>通常，涉及一个、两个和三个变量的概率公式分别被称为<br><em>一元语法</em>（unigram）、<em>二元语法</em>（bigram）和<em>三元语法</em>（trigram）模型。<br>下面，我们将学习如何去设计更好的模型。</p>
+<h2 id="自然语言统计"><a href="#自然语言统计" class="headerlink" title="自然语言统计"></a>自然语言统计</h2><p>我们看看在真实数据上如果进行自然语言统计。<br>根据 文本预处理中介绍的时光机器数据集构建词表，<br>并打印前$10$个最常用的（频率最高的）单词。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> random</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tokens = d2l.tokenize(d2l.read_time_machine())</span><br><span class="line"><span class="comment"># 因为每个文本行不一定是一个句子或一个段落，因此我们把所有文本行拼接到一起</span></span><br><span class="line">corpus = [token <span class="keyword">for</span> line <span class="keyword">in</span> tokens <span class="keyword">for</span> token <span class="keyword">in</span> line]</span><br><span class="line">vocab = d2l.Vocab(corpus)</span><br><span class="line">vocab.token_freqs[:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
+
+<p>正如我们所看到的，最流行的词看起来很无聊，<br>这些词通常被称为<em>停用词</em>（stop words），因此可以被过滤掉。<br>尽管如此，它们本身仍然是有意义的，我们仍然会在模型中使用它们。<br>此外，还有个明显的问题是词频衰减的速度相当地快。<br>例如，最常用单词的词频对比，第$10$个还不到第$1$个的$1/5$。<br>为了更好地理解，我们可以画出的词频图：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">freqs = [freq <span class="keyword">for</span> token, freq <span class="keyword">in</span> vocab.token_freqs]</span><br><span class="line">d2l.plot(freqs, xlabel=<span class="string">&#x27;token: x&#x27;</span>, ylabel=<span class="string">&#x27;frequency: n(x)&#x27;</span>,</span><br><span class="line">         xscale=<span class="string">&#x27;log&#x27;</span>, yscale=<span class="string">&#x27;log&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>通过此图我们可以发现：词频以一种明确的方式迅速衰减。<br>将前几个单词作为例外消除后，剩余的所有单词大致遵循双对数坐标图上的一条直线。<br>这意味着单词的频率满足<em>齐普夫定律</em>（Zipf’s law），<br>即第$i$个最常用单词的频率$n_i$为：</p>
+<p>$$n_i \propto \frac{1}{i^\alpha},$$</p>
+<p>等价于</p>
+<p>$$\log n_i = -\alpha \log i + c,$$</p>
+<p>其中$\alpha$是刻画分布的指数，$c$是常数。<br>这告诉我们想要通过计数统计和平滑来建模单词是不可行的，<br>因为这样建模的结果会大大高估尾部单词的频率，也就是所谓的不常用单词。<br>那么其他的词元组合，比如二元语法、三元语法等等，又会如何呢？<br>我们来看看二元语法的频率是否与一元语法的频率表现出相同的行为方式。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bigram_tokens = [pair <span class="keyword">for</span> pair <span class="keyword">in</span> <span class="built_in">zip</span>(corpus[:-<span class="number">1</span>], corpus[<span class="number">1</span>:])]</span><br><span class="line">bigram_vocab = d2l.Vocab(bigram_tokens)</span><br><span class="line">bigram_vocab.token_freqs[:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
+
+<p>这里值得注意：在十个最频繁的词对中，有九个是由两个停用词组成的，<br>只有一个与“the time”有关。<br>我们再进一步看看三元语法的频率是否表现出相同的行为方式。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">trigram_tokens = [triple <span class="keyword">for</span> triple <span class="keyword">in</span> <span class="built_in">zip</span>(</span><br><span class="line">    corpus[:-<span class="number">2</span>], corpus[<span class="number">1</span>:-<span class="number">1</span>], corpus[<span class="number">2</span>:])]</span><br><span class="line">trigram_vocab = d2l.Vocab(trigram_tokens)</span><br><span class="line">trigram_vocab.token_freqs[:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们直观地对比三种模型中的词元频率：一元语法、二元语法和三元语法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bigram_freqs = [freq <span class="keyword">for</span> token, freq <span class="keyword">in</span> bigram_vocab.token_freqs]</span><br><span class="line">trigram_freqs = [freq <span class="keyword">for</span> token, freq <span class="keyword">in</span> trigram_vocab.token_freqs]</span><br><span class="line">d2l.plot([freqs, bigram_freqs, trigram_freqs], xlabel=<span class="string">&#x27;token: x&#x27;</span>,</span><br><span class="line">         ylabel=<span class="string">&#x27;frequency: n(x)&#x27;</span>, xscale=<span class="string">&#x27;log&#x27;</span>, yscale=<span class="string">&#x27;log&#x27;</span>,</span><br><span class="line">         legend=[<span class="string">&#x27;unigram&#x27;</span>, <span class="string">&#x27;bigram&#x27;</span>, <span class="string">&#x27;trigram&#x27;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>这张图非常令人振奋！原因有很多：</p>
+<ol>
+<li>除了一元语法词，单词序列似乎也遵循齐普夫定律，<br>尽管公式 上式中的指数$\alpha$更小<br>（指数的大小受序列长度的影响）；</li>
+<li>词表中$n$元组的数量并没有那么大，这说明语言中存在相当多的结构，<br>这些结构给了我们应用模型的希望；</li>
+<li>很多$n$元组很少出现，这使得拉普拉斯平滑非常不适合语言建模。<br>作为代替，我们将使用基于深度学习的模型。</li>
+</ol>
+<h2 id="读取长序列数据"><a href="#读取长序列数据" class="headerlink" title="读取长序列数据"></a>读取长序列数据</h2><p>由于序列数据本质上是连续的，因此我们在处理数据时需要解决这个问题。<br>在 序列模型中我们以一种相当特别的方式做到了这一点：<br>当序列变得太长而不能被模型一次性全部处理时，<br>我们可能希望拆分这样的序列方便模型读取。</p>
+<p>在介绍该模型之前，我们看一下总体策略。<br>假设我们将使用神经网络来训练语言模型，<br>模型中的网络一次处理具有预定义长度<br>（例如$n$个时间步）的一个小批量序列。<br>现在的问题是如何随机生成一个小批量数据的特征和标签以供读取。</p>
+<p>首先，由于文本序列可以是任意长的，<br>例如整本《时光机器》（<em>The Time Machine</em>），<br>于是任意长的序列可以被我们划分为具有相同时间步数的子序列。<br>当训练我们的神经网络时，这样的小批量子序列将被输入到模型中。<br>假设网络一次只处理具有$n$个时间步的子序列。<br> fig_timemachine_5gram画出了<br>从原始文本序列获得子序列的所有不同的方式，<br>其中$n=5$，并且每个时间步的词元对应于一个字符。<br>请注意，因为我们可以选择任意偏移量来指示初始位置，所以我们有相当大的自由度。</p>
+<p>（图：分割文本时，不同的偏移量会导致不同的子序列）</p>
+<p>因此，我们应该从 fig_timemachine_5gram中选择哪一个呢？<br>事实上，他们都一样的好。<br>然而，如果我们只选择一个偏移量，<br>那么用于训练网络的、所有可能的子序列的覆盖范围将是有限的。<br>因此，我们可以从随机偏移量开始划分序列，<br>以同时获得<em>覆盖性</em>（coverage）和<em>随机性</em>（randomness）。<br>下面，我们将描述如何实现<em>随机采样</em>（random sampling）和<br><em>顺序分区</em>（sequential partitioning）策略。</p>
+<h3 id="随机采样"><a href="#随机采样" class="headerlink" title="随机采样"></a>随机采样</h3><p>在随机采样中，每个样本都是在原始的长序列上任意捕获的子序列。<br>在迭代过程中，来自两个相邻的、随机的、小批量中的子序列不一定在原始序列上相邻。<br>对于语言建模，目标是基于到目前为止我们看到的词元来预测下一个词元，<br>因此标签是移位了一个词元的原始序列。</p>
+<p>下面的代码每次可以从数据中随机生成一个小批量。<br>在这里，参数<code>batch_size</code>指定了每个小批量中子序列样本的数目，<br>参数<code>num_steps</code>是每个子序列中预定义的时间步数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">seq_data_iter_random</span>(<span class="params">corpus, batch_size, num_steps</span>):</span>  <span class="comment">#@save</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;使用随机抽样生成一个小批量子序列&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 从随机偏移量开始对序列进行分区，随机范围包括num_steps-1</span></span><br><span class="line">    corpus = corpus[random.randint(<span class="number">0</span>, num_steps - <span class="number">1</span>):]</span><br><span class="line">    <span class="comment"># 减去1，是因为我们需要考虑标签</span></span><br><span class="line">    num_subseqs = (<span class="built_in">len</span>(corpus) - <span class="number">1</span>) // num_steps</span><br><span class="line">    <span class="comment"># 长度为num_steps的子序列的起始索引</span></span><br><span class="line">    initial_indices = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">0</span>, num_subseqs * num_steps, num_steps))</span><br><span class="line">    <span class="comment"># 在随机抽样的迭代过程中，</span></span><br><span class="line">    <span class="comment"># 来自两个相邻的、随机的、小批量中的子序列不一定在原始序列上相邻</span></span><br><span class="line">    random.shuffle(initial_indices)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">data</span>(<span class="params">pos</span>):</span></span><br><span class="line">        <span class="comment"># 返回从pos位置开始的长度为num_steps的序列</span></span><br><span class="line">        <span class="keyword">return</span> corpus[pos: pos + num_steps]</span><br><span class="line"></span><br><span class="line">    num_batches = num_subseqs // batch_size</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, batch_size * num_batches, batch_size):</span><br><span class="line">        <span class="comment"># 在这里，initial_indices包含子序列的随机起始索引</span></span><br><span class="line">        initial_indices_per_batch = initial_indices[i: i + batch_size]</span><br><span class="line">        X = [data(j) <span class="keyword">for</span> j <span class="keyword">in</span> initial_indices_per_batch]</span><br><span class="line">        Y = [data(j + <span class="number">1</span>) <span class="keyword">for</span> j <span class="keyword">in</span> initial_indices_per_batch]</span><br><span class="line">        <span class="keyword">yield</span> d2l.tensor(X), d2l.tensor(Y)</span><br></pre></td></tr></table></figure>
+
+<p>下面我们生成一个从$0$到$34$的序列。<br>假设批量大小为$2$，时间步数为$5$，这意味着可以生成<br>$\lfloor (35 - 1) / 5 \rfloor= 6$个“特征－标签”子序列对。<br>如果设置小批量大小为$2$，我们只能得到$3$个小批量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">my_seq = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">35</span>))</span><br><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> seq_data_iter_random(my_seq, batch_size=<span class="number">2</span>, num_steps=<span class="number">5</span>):</span><br><span class="line">    print(<span class="string">&#x27;X: &#x27;</span>, X, <span class="string">&#x27;\nY:&#x27;</span>, Y)</span><br></pre></td></tr></table></figure>
+
+<h3 id="顺序分区"><a href="#顺序分区" class="headerlink" title="顺序分区"></a>顺序分区</h3><p>在迭代过程中，除了对原始序列可以随机抽样外，<br>我们还可以保证两个相邻的小批量中的子序列在原始序列上也是相邻的。<br>这种策略在基于小批量的迭代过程中保留了拆分的子序列的顺序，因此称为顺序分区。</p>
+<p>基于相同的设置，通过顺序分区读取每个小批量的子序列的特征<code>X</code>和标签<code>Y</code>。<br>通过将它们打印出来可以发现：<br>迭代期间来自两个相邻的小批量中的子序列在原始序列中确实是相邻的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> X, Y <span class="keyword">in</span> seq_data_iter_sequential(my_seq, batch_size=<span class="number">2</span>, num_steps=<span class="number">5</span>):</span><br><span class="line">    print(<span class="string">&#x27;X: &#x27;</span>, X, <span class="string">&#x27;\nY:&#x27;</span>, Y)</span><br></pre></td></tr></table></figure>
+
+<p>现在，我们将上面的两个采样函数包装到一个类中，<br>以便稍后可以将其用作数据迭代器。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SeqDataLoader</span>:</span>  <span class="comment">#@save</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;加载序列数据的迭代器&quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, batch_size, num_steps, use_random_iter, max_tokens</span>):</span></span><br><span class="line">        <span class="keyword">if</span> use_random_iter:</span><br><span class="line">            self.data_iter_fn = d2l.seq_data_iter_random</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.data_iter_fn = d2l.seq_data_iter_sequential</span><br><span class="line">        self.corpus, self.vocab = d2l.load_corpus_time_machine(max_tokens)</span><br><span class="line">        self.batch_size, self.num_steps = batch_size, num_steps</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> self.data_iter_fn(self.corpus, self.batch_size, self.num_steps)</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们定义了一个函数<code>load_data_time_machine</code>，<br>它同时返回数据迭代器和词表，<br>因此可以与其他带有<code>load_data</code>前缀的函数<br>（如 图像分类数据集中定义的<br><code>d2l.load_data_fashion_mnist</code>）类似地使用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_data_time_machine</span>(<span class="params">batch_size, num_steps,  <span class="comment">#@save</span></span></span></span><br><span class="line"><span class="function"><span class="params">                           use_random_iter=<span class="literal">False</span>, max_tokens=<span class="number">10000</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;返回时光机器数据集的迭代器和词表&quot;&quot;&quot;</span></span><br><span class="line">    data_iter = SeqDataLoader(</span><br><span class="line">        batch_size, num_steps, use_random_iter, max_tokens)</span><br><span class="line">    <span class="keyword">return</span> data_iter, data_iter.vocab</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>语言模型是自然语言处理的关键。</li>
+<li>$n$元语法通过截断相关性，为处理长序列提供了一种实用的模型。</li>
+<li>长序列存在一个问题：它们很少出现或者从不出现。</li>
+<li>齐普夫定律支配着单词的分布，这个分布不仅适用于一元语法，还适用于其他$n$元语法。</li>
+<li>通过拉普拉斯平滑法可以有效地处理结构丰富而频率不足的低频词词组。</li>
+<li>读取长序列的主要方式是随机采样和顺序分区。在迭代过程中，后者可以保证来自两个相邻的小批量中的子序列在原始序列上也是相邻的。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.</span> <span class="toc-text">语言模型和数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">学习语言模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B%E4%B8%8E-n-%E5%85%83%E8%AF%AD%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">马尔可夫模型与$n$元语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E7%BB%9F%E8%AE%A1"><span class="toc-number">1.3.</span> <span class="toc-text">自然语言统计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E9%95%BF%E5%BA%8F%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-number">1.4.</span> <span class="toc-text">读取长序列数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E9%87%87%E6%A0%B7"><span class="toc-number">1.4.1.</span> <span class="toc-text">随机采样</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%BA%8F%E5%88%86%E5%8C%BA"><span class="toc-number">1.4.2.</span> <span class="toc-text">顺序分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&text=语言模型和数据集"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&is_video=false&description=语言模型和数据集"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=语言模型和数据集&body=Check out this article: https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&title=语言模型和数据集"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/27/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%92%8C%E6%95%B0%E6%8D%AE%E9%9B%86/&name=语言模型和数据集&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

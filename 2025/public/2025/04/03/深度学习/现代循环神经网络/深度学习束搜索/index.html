@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="束搜索在 序列到序列学习（seq2seq）中，我们逐个预测输出序列，直到预测序列中出现特定的序列结束词元“&lt;eos&gt;”。本节将首先介绍贪心搜索（greedy search）策略，并探讨其存在的问题，然后对比其他替代策略：穷举搜索（exhaustive search）和束搜索（beam search）。 在正式介绍贪心搜索之前，我们使用与 序列到序列学习（seq2seq）中相同的数学符号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="束搜索">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="束搜索在 序列到序列学习（seq2seq）中，我们逐个预测输出序列，直到预测序列中出现特定的序列结束词元“&lt;eos&gt;”。本节将首先介绍贪心搜索（greedy search）策略，并探讨其存在的问题，然后对比其他替代策略：穷举搜索（exhaustive search）和束搜索（beam search）。 在正式介绍贪心搜索之前，我们使用与 序列到序列学习（seq2seq）中相同的数学符号">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-03T08:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:15:56.998Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>束搜索</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/04/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%95%BF%E7%9F%AD%E6%9C%9F%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C%EF%BC%88LSTM%EF%BC%89/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8C%E5%90%91%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&text=束搜索"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&is_video=false&description=束搜索"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=束搜索&body=Check out this article: https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&name=束搜索&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%9F%E6%90%9C%E7%B4%A2"><span class="toc-number">1.</span> <span class="toc-text">束搜索</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B4%AA%E5%BF%83%E6%90%9C%E7%B4%A2"><span class="toc-number">1.1.</span> <span class="toc-text">贪心搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A9%B7%E4%B8%BE%E6%90%9C%E7%B4%A2"><span class="toc-number">1.2.</span> <span class="toc-text">穷举搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%9F%E6%90%9C%E7%B4%A2-1"><span class="toc-number">1.3.</span> <span class="toc-text">束搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        束搜索
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-03T08:00:00.000Z" itemprop="datePublished">2025-04-03</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/" class="leancloud-visitors" data-flag-title="束搜索" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="束搜索"><a href="#束搜索" class="headerlink" title="束搜索"></a>束搜索</h1><p>在 序列到序列学习（seq2seq）中，我们逐个预测输出序列，<br>直到预测序列中出现特定的序列结束词元“&lt;eos&gt;”。<br>本节将首先介绍<em>贪心搜索</em>（greedy search）策略，<br>并探讨其存在的问题，然后对比其他替代策略：<br><em>穷举搜索</em>（exhaustive search）和<em>束搜索</em>（beam search）。</p>
+<p>在正式介绍贪心搜索之前，我们使用与 序列到序列学习（seq2seq）中<br>相同的数学符号定义搜索问题。<br>在任意时间步$t’$，解码器输出$y_{t’}$的概率取决于<br>时间步$t’$之前的输出子序列$y_1, \ldots, y_{t’-1}$<br>和对输入序列的信息进行编码得到的上下文变量$\mathbf{c}$。<br>为了量化计算代价，用$\mathcal{Y}$表示输出词表，<br>其中包含“&lt;eos&gt;”，<br>所以这个词汇集合的基数$\left|\mathcal{Y}\right|$就是词表的大小。<br>我们还将输出序列的最大词元数指定为$T’$。<br>因此，我们的目标是从所有$\mathcal{O}(\left|\mathcal{Y}\right|^{T’})$个<br>可能的输出序列中寻找理想的输出。<br>当然，对于所有输出序列，在“&lt;eos&gt;”之后的部分（非本句）<br>将在实际输出中丢弃。</p>
+<h2 id="贪心搜索"><a href="#贪心搜索" class="headerlink" title="贪心搜索"></a>贪心搜索</h2><p>首先，让我们看看一个简单的策略：<em>贪心搜索</em>，<br>该策略已用于 序列到序列学习（seq2seq）的序列预测。<br>对于输出序列的每一时间步$t’$，<br>我们都将基于贪心搜索从$\mathcal{Y}$中找到具有最高条件概率的词元，即：</p>
+<p>$$y_{t’} = \operatorname*{argmax}_{y \in \mathcal{Y}} P(y \mid y_1, \ldots, y_{t’-1}, \mathbf{c})$$</p>
+<p>一旦输出序列包含了“&lt;eos&gt;”或者达到其最大长度$T’$，则输出完成。</p>
+<p>（图：在每个时间步，贪心搜索选择具有最高条件概率的词元）</p>
+<p>如 fig_s2s-prob1中，<br>假设输出中有四个词元“A”“B”“C”和“&lt;eos&gt;”。<br>每个时间步下的四个数字分别表示在该时间步<br>生成“A”“B”“C”和“&lt;eos&gt;”的条件概率。<br>在每个时间步，贪心搜索选择具有最高条件概率的词元。<br>因此，将在 fig_s2s-prob1中<br>预测输出序列“A”“B”“C”和“&lt;eos&gt;”。<br>这个输出序列的条件概率是<br>$0.5\times0.4\times0.4\times0.6 = 0.048$。</p>
+<p>那么贪心搜索存在的问题是什么呢？<br>现实中，<em>最优序列</em>（optimal sequence）应该是最大化<br>$\prod_{t’=1}^{T’} P(y_{t’} \mid y_1, \ldots, y_{t’-1}, \mathbf{c})$<br>值的输出序列，这是基于输入序列生成输出序列的条件概率。<br>然而，贪心搜索无法保证得到最优序列。</p>
+<p>（图：在时间步2，选择具有第二高条件概率的词元“C”（而非最高条件概率的词元））</p>
+<p> fig_s2s-prob2中的另一个例子阐述了这个问题。<br>与 fig_s2s-prob1不同，在时间步$2$中，<br>我们选择 fig_s2s-prob2中的词元“C”，<br>它具有<em>第二</em>高的条件概率。<br>由于时间步$3$所基于的时间步$1$和$2$处的输出子序列已从<br> fig_s2s-prob1中的“A”和“B”改变为<br> fig_s2s-prob2中的“A”和“C”，<br>因此时间步$3$处的每个词元的条件概率也在 fig_s2s-prob2中改变。<br>假设我们在时间步$3$选择词元“B”，<br>于是当前的时间步$4$基于前三个时间步的输出子序列“A”“C”和“B”为条件，<br>这与 fig_s2s-prob1中的“A”“B”和“C”不同。<br>因此，在 fig_s2s-prob2中的时间步$4$生成<br>每个词元的条件概率也不同于 fig_s2s-prob1中的条件概率。<br>结果， fig_s2s-prob2中的输出序列<br>“A”“C”“B”和“&lt;eos&gt;”的条件概率为<br>$0.5\times0.3 \times0.6\times0.6=0.054$，<br>这大于 fig_s2s-prob1中的贪心搜索的条件概率。<br>这个例子说明：贪心搜索获得的输出序列<br>“A”“B”“C”和“&lt;eos&gt;”<br>不一定是最佳序列。</p>
+<h2 id="穷举搜索"><a href="#穷举搜索" class="headerlink" title="穷举搜索"></a>穷举搜索</h2><p>如果目标是获得最优序列，<br>我们可以考虑使用<em>穷举搜索</em>（exhaustive search）：<br>穷举地列举所有可能的输出序列及其条件概率，<br>然后计算输出条件概率最高的一个。</p>
+<p>虽然我们可以使用穷举搜索来获得最优序列，<br>但其计算量$\mathcal{O}(\left|\mathcal{Y}\right|^{T’})$可能高的惊人。<br>例如，当$|\mathcal{Y}|=10000$和$T’=10$时，<br>我们需要评估$10000^{10} = 10^{40}$序列，<br>这是一个极大的数，现有的计算机几乎不可能计算它。<br>然而，贪心搜索的计算量<br>$\mathcal{O}(\left|\mathcal{Y}\right|T’)$<br>通它要显著地小于穷举搜索。<br>例如，当$|\mathcal{Y}|=10000$和$T’=10$时，<br>我们只需要评估$10000\times10=10^5$个序列。</p>
+<h2 id="束搜索-1"><a href="#束搜索-1" class="headerlink" title="束搜索"></a>束搜索</h2><p>那么该选取哪种序列搜索策略呢？<br>如果精度最重要，则显然是穷举搜索。<br>如果计算成本最重要，则显然是贪心搜索。<br>而束搜索的实际应用则介于这两个极端之间。</p>
+<p><em>束搜索</em>（beam search）是贪心搜索的一个改进版本。<br>它有一个超参数，名为<em>束宽</em>（beam size）$k$。<br>在时间步$1$，我们选择具有最高条件概率的$k$个词元。<br>这$k$个词元将分别是$k$个候选输出序列的第一个词元。<br>在随后的每个时间步，基于上一时间步的$k$个候选输出序列，<br>我们将继续从$k\left|\mathcal{Y}\right|$个可能的选择中<br>挑出具有最高条件概率的$k$个候选输出序列。</p>
+<p>（图：束搜索过程（束宽：2，输出序列的最大长度：3）。候选输出序列是$A$、$C$、$AB$、$CE$、$ABD$和$CED$）</p>
+<p> fig_beam-search演示了束搜索的过程。<br>假设输出的词表只包含五个元素：<br>$\mathcal{Y} = {A, B, C, D, E}$，<br>其中有一个是“&lt;eos&gt;”。<br>设置束宽为$2$，输出序列的最大长度为$3$。<br>在时间步$1$，假设具有最高条件概率<br>$P(y_1 \mid \mathbf{c})$的词元是$A$和$C$。<br>在时间步$2$，我们计算所有$y_2 \in \mathcal{Y}$为：</p>
+<p>$$\begin{aligned}P(A, y_2 \mid \mathbf{c}) = P(A \mid \mathbf{c})P(y_2 \mid A, \mathbf{c}),\ P(C, y_2 \mid \mathbf{c}) = P(C \mid \mathbf{c})P(y_2 \mid C, \mathbf{c}),\end{aligned}$$</p>
+<p>从这十个值中选择最大的两个，<br>比如$P(A, B \mid \mathbf{c})$和$P(C, E \mid \mathbf{c})$。<br>然后在时间步$3$，我们计算所有$y_3 \in \mathcal{Y}$为：</p>
+<p>$$\begin{aligned}P(A, B, y_3 \mid \mathbf{c}) = P(A, B \mid \mathbf{c})P(y_3 \mid A, B, \mathbf{c}),\P(C, E, y_3 \mid \mathbf{c}) = P(C, E \mid \mathbf{c})P(y_3 \mid C, E, \mathbf{c}),\end{aligned}$$</p>
+<p>从这十个值中选择最大的两个，<br>即$P(A, B, D \mid \mathbf{c})$和$P(C, E, D \mid \mathbf{c})$，<br>我们会得到六个候选输出序列：<br>（1）$A$；（2）$C$；（3）$A,B$；（4）$C,E$；（5）$A,B,D$；（6）$C,E,D$。</p>
+<p>最后，基于这六个序列（例如，丢弃包括“&lt;eos&gt;”和之后的部分），<br>我们获得最终候选输出序列集合。<br>然后我们选择其中条件概率乘积最高的序列作为输出序列：</p>
+<p>$$ \frac{1}{L^\alpha} \log P(y_1, \ldots, y_{L}\mid \mathbf{c}) = \frac{1}{L^\alpha} \sum_{t’=1}^L \log P(y_{t’} \mid y_1, \ldots, y_{t’-1}, \mathbf{c}),$$</p>
+<p>其中$L$是最终候选序列的长度，<br>$\alpha$通常设置为$0.75$。<br>因为一个较长的序列在 上式<br>的求和中会有更多的对数项，<br>因此分母中的$L^\alpha$用于惩罚长序列。</p>
+<p>束搜索的计算量为$\mathcal{O}(k\left|\mathcal{Y}\right|T’)$，<br>这个结果介于贪心搜索和穷举搜索之间。<br>实际上，贪心搜索可以看作一种束宽为$1$的特殊类型的束搜索。<br>通过灵活地选择束宽，束搜索可以在正确率和计算代价之间进行权衡。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>序列搜索策略包括贪心搜索、穷举搜索和束搜索。</li>
+<li>贪心搜索所选取序列的计算量最小，但精度相对较低。</li>
+<li>穷举搜索所选取序列的精度最高，但计算量最大。</li>
+<li>束搜索通过灵活选择束宽，在正确率和计算代价之间进行权衡。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%9F%E6%90%9C%E7%B4%A2"><span class="toc-number">1.</span> <span class="toc-text">束搜索</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B4%AA%E5%BF%83%E6%90%9C%E7%B4%A2"><span class="toc-number">1.1.</span> <span class="toc-text">贪心搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A9%B7%E4%B8%BE%E6%90%9C%E7%B4%A2"><span class="toc-number">1.2.</span> <span class="toc-text">穷举搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%9F%E6%90%9C%E7%B4%A2-1"><span class="toc-number">1.3.</span> <span class="toc-text">束搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&text=束搜索"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&is_video=false&description=束搜索"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=束搜索&body=Check out this article: https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&title=束搜索"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/03/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%9D%9F%E6%90%9C%E7%B4%A2/&name=束搜索&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

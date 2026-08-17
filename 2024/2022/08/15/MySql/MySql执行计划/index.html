@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1、执行计划中包含的信息   Column Meaning    id 表示查询中执行select子句或者操作表的顺序,值越大越先执行   select_type 主要用来分辨查询的类型，是普通查询还是联合查询还是子查询   table 对应行正在访问哪一个表，表名或者别名，可能是临时表或者union合并结果集   partitions The matching partitions   type">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySql执行计划">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="1、执行计划中包含的信息   Column Meaning    id 表示查询中执行select子句或者操作表的顺序,值越大越先执行   select_type 主要用来分辨查询的类型，是普通查询还是联合查询还是子查询   table 对应行正在访问哪一个表，表名或者别名，可能是临时表或者union合并结果集   partitions The matching partitions   type">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-15T12:40:38.000Z">
+<meta property="article:modified_time" content="2022-08-15T13:30:30.091Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="MySql">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>MySql执行计划</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/08/15/MySql/MySql%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/08/14/JVM/JVM%E5%B8%B8%E7%94%A8%E5%8F%82%E6%95%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&text=MySql执行计划"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&is_video=false&description=MySql执行计划"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySql执行计划&body=Check out this article: https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&name=MySql执行计划&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E4%B8%AD%E5%8C%85%E5%90%AB%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">1、执行计划中包含的信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#id"><span class="toc-number">2.</span> <span class="toc-text">id</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select-type"><span class="toc-number">3.</span> <span class="toc-text">select_type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#table"><span class="toc-number">4.</span> <span class="toc-text">table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#type"><span class="toc-number">5.</span> <span class="toc-text">type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#possible-keys"><span class="toc-number">6.</span> <span class="toc-text">possible_keys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#key"><span class="toc-number">7.</span> <span class="toc-text">key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#key-len"><span class="toc-number">8.</span> <span class="toc-text">key_len</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ref"><span class="toc-number">9.</span> <span class="toc-text">ref</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rows"><span class="toc-number">10.</span> <span class="toc-text">rows</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#extra"><span class="toc-number">11.</span> <span class="toc-text">extra</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        MySql执行计划
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-15T12:40:38.000Z" itemprop="datePublished">2022-08-15</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/" class="leancloud-visitors" data-flag-title="MySql执行计划" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/MySql/" rel="tag">MySql</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="1、执行计划中包含的信息"><a href="#1、执行计划中包含的信息" class="headerlink" title="1、执行计划中包含的信息"></a>1、执行计划中包含的信息</h3><table>
+<thead>
+<tr>
+<th align="center">Column</th>
+<th align="center">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">id</td>
+<td align="center">表示查询中执行select子句或者操作表的顺序,值越大越先执行</td>
+</tr>
+<tr>
+<td align="center">select_type</td>
+<td align="center">主要用来分辨查询的类型，是普通查询还是联合查询还是子查询</td>
+</tr>
+<tr>
+<td align="center">table</td>
+<td align="center">对应行正在访问哪一个表，表名或者别名，可能是临时表或者union合并结果集</td>
+</tr>
+<tr>
+<td align="center">partitions</td>
+<td align="center">The matching partitions</td>
+</tr>
+<tr>
+<td align="center">type</td>
+<td align="center">type显示的是访问类型,一般情况下，得保证查询至少达到range级别，最好能达到ref</td>
+</tr>
+<tr>
+<td align="center">possible_keys</td>
+<td align="center">显示可能应用在这张表中的索引，一个或多个</td>
+</tr>
+<tr>
+<td align="center">key</td>
+<td align="center">实际使用的索引，如果为null，则没有使用索引</td>
+</tr>
+<tr>
+<td align="center">key_len</td>
+<td align="center">表示索引中使用的字节数，可以通过key_len计算查询中使用的索引长度</td>
+</tr>
+<tr>
+<td align="center">ref</td>
+<td align="center">显示索引的哪一列被使用了，如果可能的话，是一个常数</td>
+</tr>
+<tr>
+<td align="center">rows</td>
+<td align="center">根据表的统计信息及索引使用情况，大致估算出找出所需记录需要读取的行数</td>
+</tr>
+<tr>
+<td align="center">filtered</td>
+<td align="center">Percentage of rows filtered by table condition</td>
+</tr>
+<tr>
+<td align="center">extra</td>
+<td align="center">包含额外的信息</td>
+</tr>
+</tbody></table>
+<h3 id="id"><a href="#id" class="headerlink" title="id"></a>id</h3><p>select查询的序列号，包含一组数字，表示查询中执行select子句或者操作表的顺序<br>id号分为三种情况：<br>​1、如果id相同，那么执行顺序从上到下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">join</span> dept d <span class="keyword">on</span> e.deptno <span class="operator">=</span> d.deptno <span class="keyword">join</span> salgrade sg <span class="keyword">on</span> e.sal </span><br><span class="line"><span class="keyword">between</span> sg.losal <span class="keyword">and</span> sg.hisal;</span><br></pre></td></tr></table></figure>
+<p>​2、如果id不同，如果是子查询，id的序号会递增，id值越大优先级越高，越先被执行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">where</span> e.deptno <span class="keyword">in</span> (<span class="keyword">select</span> d.deptno <span class="keyword">from</span> dept d <span class="keyword">where</span> d.dname <span class="operator">=</span> <span class="string">&#x27;SALES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>​3、id相同和不同的，同时存在：相同的可以认为是一组，从上往下顺序执行，在所有组中，id值越大，优先级越高，越先执行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">join</span> dept d <span class="keyword">on</span> e.deptno <span class="operator">=</span> d.deptno <span class="keyword">join</span> salgrade sg <span class="keyword">on</span> e.sal </span><br><span class="line"><span class="keyword">between</span> sg.losal <span class="keyword">and</span> sg.hisal <span class="keyword">where</span> e.deptno <span class="keyword">in</span> (<span class="keyword">select</span> d.deptno <span class="keyword">from</span> dept d <span class="keyword">where</span> d.dname <span class="operator">=</span> <span class="string">&#x27;SALES&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="select-type"><a href="#select-type" class="headerlink" title="select_type"></a>select_type</h3><p>主要用来分辨查询的类型，是普通查询还是联合查询还是子查询</p>
+<table>
+<thead>
+<tr>
+<th align="center">select_type Value</th>
+<th align="center">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SIMPLE</td>
+<td align="center">Simple SELECT (not using UNION or subqueries)</td>
+</tr>
+<tr>
+<td align="center">PRIMARY</td>
+<td align="center">Outermost SELECT</td>
+</tr>
+<tr>
+<td align="center">UNION</td>
+<td align="center">Second or later SELECT statement in a UNION</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT UNION</td>
+<td align="center">Second or later SELECT statement in a UNION, dependent on outer query</td>
+</tr>
+<tr>
+<td align="center">UNION RESULT</td>
+<td align="center">Result of a UNION.</td>
+</tr>
+<tr>
+<td align="center">SUBQUERY</td>
+<td align="center">First SELECT in subquery</td>
+</tr>
+<tr>
+<td align="center">DEPENDENT SUBQUERY</td>
+<td align="center">First SELECT in subquery, dependent on outer query</td>
+</tr>
+<tr>
+<td align="center">DERIVED</td>
+<td align="center">Derived table</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE SUBQUERY</td>
+<td align="center">A subquery for which the result cannot be cached and must be re-evaluated for each row of the outer query</td>
+</tr>
+<tr>
+<td align="center">UNCACHEABLE UNION</td>
+<td align="center">The second or later select in a UNION that belongs to an uncacheable subquery (see UNCACHEABLE SUBQUERY)</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--sample:简单的查询，不包含子查询和union</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp;</span><br><span class="line"></span><br><span class="line"><span class="comment">--primary:查询中若包含任何复杂的子查询，最外层查询则被标记为Primary</span></span><br><span class="line">explain <span class="keyword">select</span> staname,ename supname <span class="keyword">from</span> (<span class="keyword">select</span> ename staname,mgr <span class="keyword">from</span> emp) t </span><br><span class="line"><span class="keyword">join</span> emp <span class="keyword">on</span> t.mgr<span class="operator">=</span>emp.empno ;</span><br><span class="line"></span><br><span class="line"><span class="comment">--union:若第二个select出现在union之后，则被标记为union</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> deptno <span class="operator">=</span> <span class="number">10</span> <span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> sal <span class="operator">&gt;</span><span class="number">2000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--dependent union:跟union类似，此处的depentent表示union或union all联合而成的结果会受外部表影响</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">where</span> e.empno  <span class="keyword">in</span> ( <span class="keyword">select</span> empno <span class="keyword">from</span> emp <span class="keyword">where</span> deptno <span class="operator">=</span> <span class="number">10</span> </span><br><span class="line"><span class="keyword">union</span> <span class="keyword">select</span> empno <span class="keyword">from</span> emp <span class="keyword">where</span> sal <span class="operator">&gt;</span><span class="number">2000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">--union result:从union表获取结果的select</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> deptno <span class="operator">=</span> <span class="number">10</span> <span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> sal <span class="operator">&gt;</span><span class="number">2000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--subquery:在select或者where列表中包含子查询</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> sal <span class="operator">&gt;</span> (<span class="keyword">select</span> <span class="built_in">avg</span>(sal) <span class="keyword">from</span> emp) ;</span><br><span class="line"></span><br><span class="line"><span class="comment">--dependent subquery:subquery的子查询要受到外部表查询的影响</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">where</span> e.deptno <span class="keyword">in</span> (<span class="keyword">select</span> <span class="keyword">distinct</span> deptno <span class="keyword">from</span> dept);</span><br><span class="line"></span><br><span class="line"><span class="comment">--DERIVED: from子句中出现的子查询，也叫做派生类，</span></span><br><span class="line">explain <span class="keyword">select</span> staname,ename supname <span class="keyword">from</span> (<span class="keyword">select</span> ename staname,mgr <span class="keyword">from</span> emp) t </span><br><span class="line"><span class="keyword">join</span> emp <span class="keyword">on</span> t.mgr<span class="operator">=</span>emp.empno ;</span><br><span class="line"></span><br><span class="line"><span class="comment">--UNCACHEABLE SUBQUERY：表示使用子查询的结果不能被缓存</span></span><br><span class="line"> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> empno <span class="operator">=</span> (<span class="keyword">select</span> empno <span class="keyword">from</span> emp <span class="keyword">where</span> deptno<span class="operator">=</span>@<span class="variable">@sort</span>_buffer_size);</span><br><span class="line"> </span><br><span class="line"><span class="comment">--uncacheable union:表示union的查询结果不能被缓存：sql语句未验证</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="table"><a href="#table" class="headerlink" title="table"></a>table</h3><p>对应行正在访问哪一个表，表名或者别名，可能是临时表或者union合并结果集<br>1、如果是具体的表名，则表明从实际的物理表中获取数据，当然也可以是表的别名</p>
+<p>​2、表名是derivedN的形式，表示使用了id为N的查询产生的衍生表</p>
+<p>3、当有union result的时候，表名是union n1,n2等的形式，n1,n2表示参与union的id</p>
+<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><p>type显示的是访问类型，访问类型表示我是以何种方式去访问我们的数据，最容易想的是全表扫描，直接暴力的遍历一张表去寻找需要的数据，效率非常低下，访问的类型有很多，效率从最好到最坏依次是：</p>
+<p>system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL </p>
+<p>一般情况下，得保证查询至少达到range级别，最好能达到ref</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--all:全表扫描，一般情况下出现这样的sql语句而且数据量比较大的话那么就需要进行优化。</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp;</span><br><span class="line"></span><br><span class="line"><span class="comment">--index：全索引扫描这个比all的效率要好，主要有两种情况，一种是当前的查询时覆盖索引，即我们需要的数据在索引中就可以索取,</span></span><br><span class="line">或者是使用了索引进行排序，这样就避免数据的重排序</span><br><span class="line">explain  <span class="keyword">select</span> empno <span class="keyword">from</span> emp;</span><br><span class="line"></span><br><span class="line"><span class="comment">--range：表示利用索引查询的时候限制了范围，在指定范围内进行查询，这样避免了index的全索引扫描，</span></span><br><span class="line">适用的操作符： <span class="operator">=</span>, <span class="operator">&lt;&gt;</span>, <span class="operator">&gt;</span>, <span class="operator">&gt;=</span>, <span class="operator">&lt;</span>, <span class="operator">&lt;=</span>, <span class="keyword">IS</span> <span class="keyword">NULL</span>, <span class="keyword">BETWEEN</span>, <span class="keyword">LIKE</span>, <span class="keyword">or</span> <span class="keyword">IN</span>() </span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> empno <span class="keyword">between</span> <span class="number">7000</span> <span class="keyword">and</span> <span class="number">7500</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--index_subquery：利用索引来关联子查询，不再扫描全表</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> emp.job <span class="keyword">in</span> (<span class="keyword">select</span> job <span class="keyword">from</span> t_job);</span><br><span class="line"></span><br><span class="line"><span class="comment">--unique_subquery:该连接类型类似与index_subquery,使用的是唯一索引</span></span><br><span class="line"> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">where</span> e.deptno <span class="keyword">in</span> (<span class="keyword">select</span> <span class="keyword">distinct</span> deptno <span class="keyword">from</span> dept);</span><br><span class="line"> </span><br><span class="line"><span class="comment">--index_merge：在查询过程中需要多个索引组合使用，没有模拟出来</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--ref_or_null：对于某个字段即需要关联条件，也需要null值的情况下，查询优化器会选择这种访问方式</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e <span class="keyword">where</span>  e.mgr <span class="keyword">is</span> <span class="keyword">null</span> <span class="keyword">or</span> e.mgr<span class="operator">=</span><span class="number">7369</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--ref：使用了非唯一性索引进行数据的查找</span></span><br><span class="line"> <span class="keyword">create</span> index idx_3 <span class="keyword">on</span> emp(deptno);</span><br><span class="line"> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp e,dept d <span class="keyword">where</span> e.deptno <span class="operator">=</span>d.deptno;</span><br><span class="line"></span><br><span class="line"><span class="comment">--eq_ref ：使用唯一性索引进行数据查找</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp,emp2 <span class="keyword">where</span> emp.empno <span class="operator">=</span> emp2.empno;</span><br><span class="line"></span><br><span class="line"><span class="comment">--const：这个表至多有一个匹配行，</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> empno <span class="operator">=</span> <span class="number">7369</span>;</span><br><span class="line"> </span><br><span class="line"><span class="comment">--system：表只有一行记录（等于系统表），这是const类型的特例，平时不会出现</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="possible-keys"><a href="#possible-keys" class="headerlink" title="possible_keys"></a>possible_keys</h3><p>显示可能应用在这张表中的索引，一个或多个，查询涉及到的字段上若存在索引，则该索引将被列出，但不一定被查询实际使用</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp,dept <span class="keyword">where</span> emp.deptno <span class="operator">=</span> dept.deptno <span class="keyword">and</span> emp.deptno <span class="operator">=</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="key"><a href="#key" class="headerlink" title="key"></a>key</h3><p>实际使用的索引，如果为null，则没有使用索引，查询中若使用了覆盖索引，则该索引和查询的select字段重叠。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp,dept <span class="keyword">where</span> emp.deptno <span class="operator">=</span> dept.deptno <span class="keyword">and</span> emp.deptno <span class="operator">=</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="key-len"><a href="#key-len" class="headerlink" title="key_len"></a>key_len</h3><p>表示索引中使用的字节数，可以通过key_len计算查询中使用的索引长度，在不损失精度的情况下长度越短越好。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp,dept <span class="keyword">where</span> emp.deptno <span class="operator">=</span> dept.deptno <span class="keyword">and</span> emp.deptno <span class="operator">=</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ref"><a href="#ref" class="headerlink" title="ref"></a>ref</h3><p>显示索引的哪一列被使用了，如果可能的话，是一个常数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp,dept <span class="keyword">where</span> emp.deptno <span class="operator">=</span> dept.deptno <span class="keyword">and</span> emp.deptno <span class="operator">=</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="rows"><a href="#rows" class="headerlink" title="rows"></a>rows</h3><p>根据表的统计信息及索引使用情况，大致估算出找出所需记录需要读取的行数，此参数很重要，直接反应的sql找了多少数据，在完成目的的情况下越少越好</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp;</span><br></pre></td></tr></table></figure>
+
+<h3 id="extra"><a href="#extra" class="headerlink" title="extra"></a>extra</h3><p>包含额外的信息。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--using filesort:说明mysql无法利用索引进行排序，只能利用排序算法进行排序，会消耗额外的位置</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">order</span> <span class="keyword">by</span> sal;</span><br><span class="line"></span><br><span class="line"><span class="comment">--using temporary:建立临时表来保存中间结果，查询完成之后把临时表删除</span></span><br><span class="line">explain <span class="keyword">select</span> ename,<span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> emp <span class="keyword">where</span> deptno <span class="operator">=</span> <span class="number">10</span> <span class="keyword">group</span> <span class="keyword">by</span> ename;</span><br><span class="line"></span><br><span class="line"><span class="comment">--using index:这个表示当前的查询时覆盖索引的，直接从索引中读取数据，而不用访问数据表。如果同时出现using where 表名索引被用来执行索引键值的查找，如果没有，表面索引被用来读取数据，而不是真的查找</span></span><br><span class="line">explain <span class="keyword">select</span> deptno,<span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">from</span> emp <span class="keyword">group</span> <span class="keyword">by</span> deptno limit <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--using where:使用where进行条件过滤</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t_user <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--using join buffer:使用连接缓存，情况没有模拟出来</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--impossible where：where语句的结果总是false</span></span><br><span class="line">explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> emp <span class="keyword">where</span> empno <span class="operator">=</span> <span class="number">7469</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E4%B8%AD%E5%8C%85%E5%90%AB%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">1.</span> <span class="toc-text">1、执行计划中包含的信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#id"><span class="toc-number">2.</span> <span class="toc-text">id</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select-type"><span class="toc-number">3.</span> <span class="toc-text">select_type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#table"><span class="toc-number">4.</span> <span class="toc-text">table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#type"><span class="toc-number">5.</span> <span class="toc-text">type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#possible-keys"><span class="toc-number">6.</span> <span class="toc-text">possible_keys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#key"><span class="toc-number">7.</span> <span class="toc-text">key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#key-len"><span class="toc-number">8.</span> <span class="toc-text">key_len</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ref"><span class="toc-number">9.</span> <span class="toc-text">ref</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rows"><span class="toc-number">10.</span> <span class="toc-text">rows</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#extra"><span class="toc-number">11.</span> <span class="toc-text">extra</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&text=MySql执行计划"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&is_video=false&description=MySql执行计划"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySql执行计划&body=Check out this article: https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&title=MySql执行计划"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/08/15/MySql/MySql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/&name=MySql执行计划&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

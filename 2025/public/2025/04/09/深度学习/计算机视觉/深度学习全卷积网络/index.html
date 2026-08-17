@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="全卷积网络如 语义分割和数据集中所介绍的那样，语义分割是对图像中的每个像素分类。全卷积网络（fully convolutional network，FCN）采用卷积神经网络实现了从图像像素到像素类别的变换 。与我们之前在图像分类或目标检测部分介绍的卷积神经网络不同，全卷积网络将中间层特征图的高和宽变换回输入图像的尺寸：这是通过在 转置卷积中引入的转置卷积（transposed convolutio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全卷积网络">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="全卷积网络如 语义分割和数据集中所介绍的那样，语义分割是对图像中的每个像素分类。全卷积网络（fully convolutional network，FCN）采用卷积神经网络实现了从图像像素到像素类别的变换 。与我们之前在图像分类或目标检测部分介绍的卷积神经网络不同，全卷积网络将中间层特征图的高和宽变换回输入图像的尺寸：这是通过在 转置卷积中引入的转置卷积（transposed convolutio">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-09T11:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:19:15.310Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>全卷积网络</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9ACIFAR-10/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8C%BA%E5%9F%9F%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88R-CNN%EF%BC%89/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&text=全卷积网络"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&is_video=false&description=全卷积网络"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=全卷积网络&body=Check out this article: https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&name=全卷积网络&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C"><span class="toc-number">1.</span> <span class="toc-text">全卷积网络</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">构造模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BD%AC%E7%BD%AE%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="toc-number">1.2.</span> <span class="toc-text">初始化转置卷积层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-number">1.4.</span> <span class="toc-text">训练</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B"><span class="toc-number">1.5.</span> <span class="toc-text">预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        全卷积网络
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-09T11:00:00.000Z" itemprop="datePublished">2025-04-09</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/" class="leancloud-visitors" data-flag-title="全卷积网络" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="全卷积网络"><a href="#全卷积网络" class="headerlink" title="全卷积网络"></a>全卷积网络</h1><p>如 语义分割和数据集中所介绍的那样，语义分割是对图像中的每个像素分类。<br><em>全卷积网络</em>（fully convolutional network，FCN）采用卷积神经网络实现了从图像像素到像素类别的变换 。<br>与我们之前在图像分类或目标检测部分介绍的卷积神经网络不同，全卷积网络将中间层特征图的高和宽变换回输入图像的尺寸：这是通过在 转置卷积中引入的<em>转置卷积</em>（transposed convolution）实现的。<br>因此，输出的类别预测与输入图像在像素级别上具有一一对应关系：通道维的输出即该位置对应像素的类别预测。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> functional <span class="keyword">as</span> F</span><br></pre></td></tr></table></figure>
+
+<h2 id="构造模型"><a href="#构造模型" class="headerlink" title="构造模型"></a>构造模型</h2><p>下面我们了解一下全卷积网络模型最基本的设计。<br>如 fig_fcn所示，全卷积网络先使用卷积神经网络抽取图像特征，然后通过$1\times 1$卷积层将通道数变换为类别个数，最后在 转置卷积中通过转置卷积层将特征图的高和宽变换为输入图像的尺寸。<br>因此，模型输出与输入图像的高和宽相同，且最终输出通道包含了该空间位置像素的类别预测。</p>
+<p>（图：全卷积网络）</p>
+<p>下面，我们使用在ImageNet数据集上预训练的ResNet-18模型来提取图像特征，并将该网络记为<code>pretrained_net</code>。<br>ResNet-18模型的最后几层包括全局平均汇聚层和全连接层，然而全卷积网络中不需要它们。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pretrained_net = torchvision.models.resnet18(pretrained=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">list</span>(pretrained_net.children())[-<span class="number">3</span>:]</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们创建一个全卷积网络<code>net</code>。<br>它复制了ResNet-18中大部分的预训练层，除了最后的全局平均汇聚层和最接近输出的全连接层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net = nn.HybridSequential()</span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> pretrained_net.features[:-<span class="number">2</span>]:</span><br><span class="line">    net.add(layer)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net = nn.Sequential(*<span class="built_in">list</span>(pretrained_net.children())[:-<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
+
+<p>给定高度为320和宽度为480的输入，<code>net</code>的前向传播将输入的高和宽减小至原来的$1/32$，即10和15。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X = np.random.uniform(size=(<span class="number">1</span>, <span class="number">3</span>, <span class="number">320</span>, <span class="number">480</span>))</span><br><span class="line">net(X).shape</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X = torch.rand(size=(<span class="number">1</span>, <span class="number">3</span>, <span class="number">320</span>, <span class="number">480</span>))</span><br><span class="line">net(X).shape</span><br></pre></td></tr></table></figure>
+
+<p>接下来使用$1\times1$卷积层将输出通道数转换为Pascal VOC2012数据集的类数（21类）。<br>最后需要将特征图的高度和宽度增加32倍，从而将其变回输入图像的高和宽。<br>回想一下 sec_padding中卷积层输出形状的计算方法：<br>由于$(320-64+16\times2+32)/32=10$且$(480-64+16\times2+32)/32=15$，我们构造一个步幅为$32$的转置卷积层，并将卷积核的高和宽设为$64$，填充为$16$。<br>我们可以看到如果步幅为$s$，填充为$s/2$（假设$s/2$是整数）且卷积核的高和宽为$2s$，转置卷积核会将输入的高和宽分别放大$s$倍。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">num_classes = <span class="number">21</span></span><br><span class="line">net.add(nn.Conv2D(num_classes, kernel_size=<span class="number">1</span>),</span><br><span class="line">        nn.Conv2DTranspose(</span><br><span class="line">            num_classes, kernel_size=<span class="number">64</span>, padding=<span class="number">16</span>, strides=<span class="number">32</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">num_classes = <span class="number">21</span></span><br><span class="line">net.add_module(<span class="string">&#x27;final_conv&#x27;</span>, nn.Conv2d(<span class="number">512</span>, num_classes, kernel_size=<span class="number">1</span>))</span><br><span class="line">net.add_module(<span class="string">&#x27;transpose_conv&#x27;</span>, nn.ConvTranspose2d(num_classes, num_classes,</span><br><span class="line">                                    kernel_size=<span class="number">64</span>, padding=<span class="number">16</span>, stride=<span class="number">32</span>))</span><br></pre></td></tr></table></figure>
+
+<h2 id="初始化转置卷积层"><a href="#初始化转置卷积层" class="headerlink" title="初始化转置卷积层"></a>初始化转置卷积层</h2><p>在图像处理中，我们有时需要将图像放大，即<em>上采样</em>（upsampling）。<br><em>双线性插值</em>（bilinear interpolation）<br>是常用的上采样方法之一，它也经常用于初始化转置卷积层。</p>
+<p>为了解释双线性插值，假设给定输入图像，我们想要计算上采样输出图像上的每个像素。</p>
+<ol>
+<li>将输出图像的坐标$(x,y)$映射到输入图像的坐标$(x’,y’)$上。<br>例如，根据输入与输出的尺寸之比来映射。<br>请注意，映射后的$x′$和$y′$是实数。</li>
+<li>在输入图像上找到离坐标$(x’,y’)$最近的4个像素。</li>
+<li>输出图像在坐标$(x,y)$上的像素依据输入图像上这4个像素及其与$(x’,y’)$的相对距离来计算。</li>
+</ol>
+<p>双线性插值的上采样可以通过转置卷积层实现，内核由以下<code>bilinear_kernel</code>函数构造。<br>限于篇幅，我们只给出<code>bilinear_kernel</code>函数的实现，不讨论算法的原理。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bilinear_kernel</span>(<span class="params">in_channels, out_channels, kernel_size</span>):</span></span><br><span class="line">    factor = (kernel_size + <span class="number">1</span>) // <span class="number">2</span></span><br><span class="line">    <span class="keyword">if</span> kernel_size % <span class="number">2</span> == <span class="number">1</span>:</span><br><span class="line">        center = factor - <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        center = factor - <span class="number">0.5</span></span><br><span class="line">    og = (np.arange(kernel_size).reshape(-<span class="number">1</span>, <span class="number">1</span>),</span><br><span class="line">          np.arange(kernel_size).reshape(<span class="number">1</span>, -<span class="number">1</span>))</span><br><span class="line">    filt = (<span class="number">1</span> - np.<span class="built_in">abs</span>(og[<span class="number">0</span>] - center) / factor) * \</span><br><span class="line">           (<span class="number">1</span> - np.<span class="built_in">abs</span>(og[<span class="number">1</span>] - center) / factor)</span><br><span class="line">    weight = np.zeros((in_channels, out_channels, kernel_size, kernel_size))</span><br><span class="line">    weight[<span class="built_in">range</span>(in_channels), <span class="built_in">range</span>(out_channels), :, :] = filt</span><br><span class="line">    <span class="keyword">return</span> np.array(weight)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bilinear_kernel</span>(<span class="params">in_channels, out_channels, kernel_size</span>):</span></span><br><span class="line">    factor = (kernel_size + <span class="number">1</span>) // <span class="number">2</span></span><br><span class="line">    <span class="keyword">if</span> kernel_size % <span class="number">2</span> == <span class="number">1</span>:</span><br><span class="line">        center = factor - <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        center = factor - <span class="number">0.5</span></span><br><span class="line">    og = (torch.arange(kernel_size).reshape(-<span class="number">1</span>, <span class="number">1</span>),</span><br><span class="line">          torch.arange(kernel_size).reshape(<span class="number">1</span>, -<span class="number">1</span>))</span><br><span class="line">    filt = (<span class="number">1</span> - torch.<span class="built_in">abs</span>(og[<span class="number">0</span>] - center) / factor) * \</span><br><span class="line">           (<span class="number">1</span> - torch.<span class="built_in">abs</span>(og[<span class="number">1</span>] - center) / factor)</span><br><span class="line">    weight = torch.zeros((in_channels, out_channels,</span><br><span class="line">                          kernel_size, kernel_size))</span><br><span class="line">    weight[<span class="built_in">range</span>(in_channels), <span class="built_in">range</span>(out_channels), :, :] = filt</span><br><span class="line">    <span class="keyword">return</span> weight</span><br></pre></td></tr></table></figure>
+
+<p>让我们用双线性插值的上采样实验它由转置卷积层实现。<br>我们构造一个将输入的高和宽放大2倍的转置卷积层，并将其卷积核用<code>bilinear_kernel</code>函数初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conv_trans = nn.Conv2DTranspose(<span class="number">3</span>, kernel_size=<span class="number">4</span>, padding=<span class="number">1</span>, strides=<span class="number">2</span>)</span><br><span class="line">conv_trans.initialize(init.Constant(bilinear_kernel(<span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>)))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">conv_trans = nn.ConvTranspose2d(<span class="number">3</span>, <span class="number">3</span>, kernel_size=<span class="number">4</span>, padding=<span class="number">1</span>, stride=<span class="number">2</span>,</span><br><span class="line">                                bias=<span class="literal">False</span>)</span><br><span class="line">conv_trans.weight.data.copy_(bilinear_kernel(<span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>));</span><br></pre></td></tr></table></figure>
+
+<p>读取图像<code>X</code>，将上采样的结果记作<code>Y</code>。为了打印图像，我们需要调整通道维的位置。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">img = image.imread(<span class="string">&#x27;../img/catdog.jpg&#x27;</span>)</span><br><span class="line">X = np.expand_dims(img.astype(<span class="string">&#x27;float32&#x27;</span>).transpose(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>), axis=<span class="number">0</span>) / <span class="number">255</span></span><br><span class="line">Y = conv_trans(X)</span><br><span class="line">out_img = Y[<span class="number">0</span>].transpose(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">img = torchvision.transforms.ToTensor()(d2l.Image.<span class="built_in">open</span>(<span class="string">&#x27;../img/catdog.jpg&#x27;</span>))</span><br><span class="line">X = img.unsqueeze(<span class="number">0</span>)</span><br><span class="line">Y = conv_trans(X)</span><br><span class="line">out_img = Y[<span class="number">0</span>].permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>).detach()</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，转置卷积层将图像的高和宽分别放大了2倍。<br>除了坐标刻度不同，双线性插值放大的图像和在 边界框中打印出的原图看上去没什么两样。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d2l.set_figsize()</span><br><span class="line">print(<span class="string">&#x27;input image shape:&#x27;</span>, img.shape)</span><br><span class="line">d2l.plt.imshow(img.asnumpy());</span><br><span class="line">print(<span class="string">&#x27;output image shape:&#x27;</span>, out_img.shape)</span><br><span class="line">d2l.plt.imshow(out_img.asnumpy());</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d2l.set_figsize()</span><br><span class="line">print(<span class="string">&#x27;input image shape:&#x27;</span>, img.permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>).shape)</span><br><span class="line">d2l.plt.imshow(img.permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">print(<span class="string">&#x27;output image shape:&#x27;</span>, out_img.shape)</span><br><span class="line">d2l.plt.imshow(out_img);</span><br></pre></td></tr></table></figure>
+
+<p>全卷积网络用双线性插值的上采样初始化转置卷积层。对于$1\times 1$卷积层，我们使用Xavier初始化参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">W = bilinear_kernel(num_classes, num_classes, <span class="number">64</span>)</span><br><span class="line">net[-<span class="number">1</span>].initialize(init.Constant(W))</span><br><span class="line">net[-<span class="number">2</span>].initialize(init=init.Xavier())</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W = bilinear_kernel(num_classes, num_classes, <span class="number">64</span>)</span><br><span class="line">net.transpose_conv.weight.data.copy_(W);</span><br></pre></td></tr></table></figure>
+
+<h2 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h2><p>我们用 语义分割和数据集中介绍的语义分割读取数据集。<br>指定随机裁剪的输出图像的形状为$320\times 480$：高和宽都可以被$32$整除。</p>
+<h2 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h2><p>现在我们可以训练全卷积网络了。<br>这里的损失函数和准确率计算与图像分类中的并没有本质上的不同，因为我们使用转置卷积层的通道来预测像素的类别，所以需要在损失计算中指定通道维。<br>此外，模型基于每个像素的预测类别是否正确来计算准确率。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loss</span>(<span class="params">inputs, targets</span>):</span></span><br><span class="line">    <span class="keyword">return</span> F.cross_entropy(inputs, targets, reduction=<span class="string">&#x27;none&#x27;</span>).mean(<span class="number">1</span>).mean(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">num_epochs, lr, wd, devices = <span class="number">5</span>, <span class="number">0.001</span>, <span class="number">1e-3</span>, d2l.try_all_gpus()</span><br><span class="line">trainer = torch.optim.SGD(net.parameters(), lr=lr, weight_decay=wd)</span><br><span class="line">d2l.train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices)</span><br></pre></td></tr></table></figure>
+
+<h2 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h2><p>在预测时，我们需要将输入图像在各个通道做标准化，并转成卷积神经网络所需要的四维输入格式。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span>(<span class="params">img</span>):</span></span><br><span class="line">    X = test_iter._dataset.normalize_image(img)</span><br><span class="line">    X = np.expand_dims(X.transpose(<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>), axis=<span class="number">0</span>)</span><br><span class="line">    pred = net(X.as_in_ctx(devices[<span class="number">0</span>])).argmax(axis=<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> pred.reshape(pred.shape[<span class="number">1</span>], pred.shape[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">predict</span>(<span class="params">img</span>):</span></span><br><span class="line">    X = test_iter.dataset.normalize_image(img).unsqueeze(<span class="number">0</span>)</span><br><span class="line">    pred = net(X.to(devices[<span class="number">0</span>])).argmax(dim=<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> pred.reshape(pred.shape[<span class="number">1</span>], pred.shape[<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
+
+<p>为了可视化预测的类别给每个像素，我们将预测类别映射回它们在数据集中的标注颜色。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">label2image</span>(<span class="params">pred</span>):</span></span><br><span class="line">    colormap = np.array(d2l.VOC_COLORMAP, ctx=devices[<span class="number">0</span>], dtype=<span class="string">&#x27;uint8&#x27;</span>)</span><br><span class="line">    X = pred.astype(<span class="string">&#x27;int32&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> colormap[X, :]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">label2image</span>(<span class="params">pred</span>):</span></span><br><span class="line">    colormap = torch.tensor(d2l.VOC_COLORMAP, device=devices[<span class="number">0</span>])</span><br><span class="line">    X = pred.long()</span><br><span class="line">    <span class="keyword">return</span> colormap[X, :]</span><br></pre></td></tr></table></figure>
+
+<p>测试数据集中的图像大小和形状各异。<br>由于模型使用了步幅为32的转置卷积层，因此当输入图像的高或宽无法被32整除时，转置卷积层输出的高或宽会与输入图像的尺寸有偏差。<br>为了解决这个问题，我们可以在图像中截取多块高和宽为32的整数倍的矩形区域，并分别对这些区域中的像素做前向传播。<br>请注意，这些区域的并集需要完整覆盖输入图像。<br>当一个像素被多个区域所覆盖时，它在不同区域前向传播中转置卷积层输出的平均值可以作为<code>softmax</code>运算的输入，从而预测类别。</p>
+<p>为简单起见，我们只读取几张较大的测试图像，并从图像的左上角开始截取形状为$320\times480$的区域用于预测。<br>对于这些测试图像，我们逐一打印它们截取的区域，再打印预测结果，最后打印标注的类别。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">voc_dir = d2l.download_extract(<span class="string">&#x27;voc2012&#x27;</span>, <span class="string">&#x27;VOCdevkit/VOC2012&#x27;</span>)</span><br><span class="line">test_images, test_labels = d2l.read_voc_images(voc_dir, <span class="literal">False</span>)</span><br><span class="line">n, imgs = <span class="number">4</span>, []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    crop_rect = (<span class="number">0</span>, <span class="number">0</span>, <span class="number">480</span>, <span class="number">320</span>)</span><br><span class="line">    X = image.fixed_crop(test_images[i], *crop_rect)</span><br><span class="line">    pred = label2image(predict(X))</span><br><span class="line">    imgs += [X, pred, image.fixed_crop(test_labels[i], *crop_rect)]</span><br><span class="line">d2l.show_images(imgs[::<span class="number">3</span>] + imgs[<span class="number">1</span>::<span class="number">3</span>] + imgs[<span class="number">2</span>::<span class="number">3</span>], <span class="number">3</span>, n, scale=<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">voc_dir = d2l.download_extract(<span class="string">&#x27;voc2012&#x27;</span>, <span class="string">&#x27;VOCdevkit/VOC2012&#x27;</span>)</span><br><span class="line">test_images, test_labels = d2l.read_voc_images(voc_dir, <span class="literal">False</span>)</span><br><span class="line">n, imgs = <span class="number">4</span>, []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    crop_rect = (<span class="number">0</span>, <span class="number">0</span>, <span class="number">320</span>, <span class="number">480</span>)</span><br><span class="line">    X = torchvision.transforms.functional.crop(test_images[i], *crop_rect)</span><br><span class="line">    pred = label2image(predict(X))</span><br><span class="line">    imgs += [X.permute(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>), pred.cpu(),</span><br><span class="line">             torchvision.transforms.functional.crop(</span><br><span class="line">                 test_labels[i], *crop_rect).permute(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>)]</span><br><span class="line">d2l.show_images(imgs[::<span class="number">3</span>] + imgs[<span class="number">1</span>::<span class="number">3</span>] + imgs[<span class="number">2</span>::<span class="number">3</span>], <span class="number">3</span>, n, scale=<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>全卷积网络先使用卷积神经网络抽取图像特征，然后通过$1\times 1$卷积层将通道数变换为类别个数，最后通过转置卷积层将特征图的高和宽变换为输入图像的尺寸。</li>
+<li>在全卷积网络中，我们可以将转置卷积层初始化为双线性插值的上采样。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C"><span class="toc-number">1.</span> <span class="toc-text">全卷积网络</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">构造模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BD%AC%E7%BD%AE%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="toc-number">1.2.</span> <span class="toc-text">初始化转置卷积层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-number">1.4.</span> <span class="toc-text">训练</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B"><span class="toc-number">1.5.</span> <span class="toc-text">预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&text=全卷积网络"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&is_video=false&description=全卷积网络"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=全卷积网络&body=Check out this article: https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&title=全卷积网络"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/&name=全卷积网络&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

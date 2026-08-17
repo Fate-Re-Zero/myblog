@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="实战Kaggle比赛：狗的品种识别（ImageNet Dogs）本节我们将在Kaggle上实战狗品种识别问题。本次比赛网址是https:&#x2F;&#x2F;www.kaggle.com&#x2F;c&#x2F;dog-breed-identification。 fig_kaggle_dog显示了鉴定比赛网页上的信息。需要一个Kaggle账户才能提交结果。 在这场比赛中，我们将识别120类不同品种的狗。这个数据集实际上是著名的Imag">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实战Kaggle比赛：狗品种识别">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="实战Kaggle比赛：狗的品种识别（ImageNet Dogs）本节我们将在Kaggle上实战狗品种识别问题。本次比赛网址是https:&#x2F;&#x2F;www.kaggle.com&#x2F;c&#x2F;dog-breed-identification。 fig_kaggle_dog显示了鉴定比赛网页上的信息。需要一个Kaggle账户才能提交结果。 在这场比赛中，我们将识别120类不同品种的狗。这个数据集实际上是著名的Imag">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-10T14:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:19:28.356Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>实战Kaggle比赛：狗品种识别</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/11/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%B9%BF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9ACIFAR-10/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&text=实战Kaggle比赛：狗品种识别"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&is_video=false&description=实战Kaggle比赛：狗品种识别"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实战Kaggle比赛：狗品种识别&body=Check out this article: https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&name=实战Kaggle比赛：狗品种识别&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E7%9A%84%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB%EF%BC%88ImageNet-Dogs%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">实战Kaggle比赛：狗的品种识别（ImageNet Dogs）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%92%8C%E6%95%B4%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.</span> <span class="toc-text">获取和整理数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.1.</span> <span class="toc-text">下载数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">整理数据集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%B9%BF"><span class="toc-number">1.2.</span> <span class="toc-text">图像增广</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%B0%83%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.4.</span> <span class="toc-text">微调预训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0"><span class="toc-number">1.5.</span> <span class="toc-text">定义训练函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E9%AA%8C%E8%AF%81%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.6.</span> <span class="toc-text">训练和验证模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%B5%8B%E8%AF%95%E9%9B%86%E5%88%86%E7%B1%BB%E5%B9%B6%E5%9C%A8Kaggle%E6%8F%90%E4%BA%A4%E7%BB%93%E6%9E%9C"><span class="toc-number">1.7.</span> <span class="toc-text">对测试集分类并在Kaggle提交结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        实战Kaggle比赛：狗品种识别
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-10T14:00:00.000Z" itemprop="datePublished">2025-04-10</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/" class="leancloud-visitors" data-flag-title="实战Kaggle比赛：狗品种识别" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="实战Kaggle比赛：狗的品种识别（ImageNet-Dogs）"><a href="#实战Kaggle比赛：狗的品种识别（ImageNet-Dogs）" class="headerlink" title="实战Kaggle比赛：狗的品种识别（ImageNet Dogs）"></a>实战Kaggle比赛：狗的品种识别（ImageNet Dogs）</h1><p>本节我们将在Kaggle上实战狗品种识别问题。<br>本次比赛网址是<a target="_blank" rel="noopener" href="https://www.kaggle.com/c/dog-breed-identification%E3%80%82">https://www.kaggle.com/c/dog-breed-identification。</a><br> fig_kaggle_dog显示了鉴定比赛网页上的信息。<br>需要一个Kaggle账户才能提交结果。</p>
+<p>在这场比赛中，我们将识别120类不同品种的狗。<br>这个数据集实际上是著名的ImageNet的数据集子集。与 实战Kaggle比赛：CIFAR-10中CIFAR-10数据集中的图像不同，<br>ImageNet数据集中的图像更高更宽，且尺寸不一。</p>
+<p>（图：狗的品种鉴定比赛网站，可以通过单击“数据”选项卡来获得比赛数据集。）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">import</span> os</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取和整理数据集"><a href="#获取和整理数据集" class="headerlink" title="获取和整理数据集"></a>获取和整理数据集</h2><p>比赛数据集分为训练集和测试集，分别包含RGB（彩色）通道的10222张、10357张JPEG图像。<br>在训练数据集中，有120种犬类，如拉布拉多、贵宾、腊肠、萨摩耶、哈士奇、吉娃娃和约克夏等。</p>
+<h3 id="下载数据集"><a href="#下载数据集" class="headerlink" title="下载数据集"></a>下载数据集</h3><p>登录Kaggle后，可以点击 fig_kaggle_dog中显示的竞争网页上的“数据”选项卡，然后点击“全部下载”按钮下载数据集。在<code>../data</code>中解压下载的文件后，将在以下路径中找到整个数据集：</p>
+<ul>
+<li>../data/dog-breed-identification/labels.csv</li>
+<li>../data/dog-breed-identification/sample_submission.csv</li>
+<li>../data/dog-breed-identification/train</li>
+<li>../data/dog-breed-identification/test</li>
+</ul>
+<p>上述结构与 实战Kaggle比赛：CIFAR-10的CIFAR-10类似，其中文件夹<code>train/</code>和<code>test/</code>分别包含训练和测试狗图像，<code>labels.csv</code>包含训练图像的标签。</p>
+<p>同样，为了便于入门，我们提供完整数据集的小规模样本：<code>train_valid_test_tiny.zip</code>。<br>如果要在Kaggle比赛中使用完整的数据集，则需要将下面的<code>demo</code>变量更改为<code>False</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#@save</span></span><br><span class="line">d2l.DATA_HUB[<span class="string">&#x27;dog_tiny&#x27;</span>] = (d2l.DATA_URL + <span class="string">&#x27;kaggle_dog_tiny.zip&#x27;</span>,</span><br><span class="line">                            <span class="string">&#x27;0cb91d09b814ecdc07b50f31f8dcad3e81d6a86d&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果使用Kaggle比赛的完整数据集，请将下面的变量更改为False</span></span><br><span class="line">demo = <span class="literal">True</span></span><br><span class="line"><span class="keyword">if</span> demo:</span><br><span class="line">    data_dir = d2l.download_extract(<span class="string">&#x27;dog_tiny&#x27;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    data_dir = os.path.join(<span class="string">&#x27;..&#x27;</span>, <span class="string">&#x27;data&#x27;</span>, <span class="string">&#x27;dog-breed-identification&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="整理数据集"><a href="#整理数据集" class="headerlink" title="整理数据集"></a>整理数据集</h3><p>我们可以像 实战Kaggle比赛：CIFAR-10中所做的那样整理数据集，即从原始训练集中拆分验证集，然后将图像移动到按标签分组的子文件夹中。</p>
+<p>下面的<code>reorg_dog_data</code>函数读取训练数据标签、拆分验证集并整理训练集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">reorg_dog_data</span>(<span class="params">data_dir, valid_ratio</span>):</span></span><br><span class="line">    labels = d2l.read_csv_labels(os.path.join(data_dir, <span class="string">&#x27;labels.csv&#x27;</span>))</span><br><span class="line">    d2l.reorg_train_valid(data_dir, labels, valid_ratio)</span><br><span class="line">    d2l.reorg_test(data_dir)</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">32</span> <span class="keyword">if</span> demo <span class="keyword">else</span> <span class="number">128</span></span><br><span class="line">valid_ratio = <span class="number">0.1</span></span><br><span class="line">reorg_dog_data(data_dir, valid_ratio)</span><br></pre></td></tr></table></figure>
+
+<h2 id="图像增广"><a href="#图像增广" class="headerlink" title="图像增广"></a>图像增广</h2><p>回想一下，这个狗品种数据集是ImageNet数据集的子集，其图像大于 实战Kaggle比赛：CIFAR-10中CIFAR-10数据集的图像。<br>下面我们看一下如何在相对较大的图像上使用图像增广。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">transform_train = torchvision.transforms.Compose([</span><br><span class="line">    <span class="comment"># 随机裁剪图像，所得图像为原始面积的0.08～1之间，高宽比在3/4和4/3之间。</span></span><br><span class="line">    <span class="comment"># 然后，缩放图像以创建224x224的新图像</span></span><br><span class="line">    torchvision.transforms.RandomResizedCrop(<span class="number">224</span>, scale=(<span class="number">0.08</span>, <span class="number">1.0</span>),</span><br><span class="line">                                             ratio=(<span class="number">3.0</span>/<span class="number">4.0</span>, <span class="number">4.0</span>/<span class="number">3.0</span>)),</span><br><span class="line">    torchvision.transforms.RandomHorizontalFlip(),</span><br><span class="line">    <span class="comment"># 随机更改亮度，对比度和饱和度</span></span><br><span class="line">    torchvision.transforms.ColorJitter(brightness=<span class="number">0.4</span>,</span><br><span class="line">                                       contrast=<span class="number">0.4</span>,</span><br><span class="line">                                       saturation=<span class="number">0.4</span>),</span><br><span class="line">    <span class="comment"># 添加随机噪声</span></span><br><span class="line">    torchvision.transforms.ToTensor(),</span><br><span class="line">    <span class="comment"># 标准化图像的每个通道</span></span><br><span class="line">    torchvision.transforms.Normalize([<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>],</span><br><span class="line">                                     [<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>])])</span><br></pre></td></tr></table></figure>
+
+<p>测试时，我们只使用确定性的图像预处理操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">transform_test = torchvision.transforms.Compose([</span><br><span class="line">    torchvision.transforms.Resize(<span class="number">256</span>),</span><br><span class="line">    <span class="comment"># 从图像中心裁切224x224大小的图片</span></span><br><span class="line">    torchvision.transforms.CenterCrop(<span class="number">224</span>),</span><br><span class="line">    torchvision.transforms.ToTensor(),</span><br><span class="line">    torchvision.transforms.Normalize([<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>],</span><br><span class="line">                                     [<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>])])</span><br></pre></td></tr></table></figure>
+
+<h2 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h2><p>与 实战Kaggle比赛：CIFAR-10一样，我们可以读取整理后的含原始图像文件的数据集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">train_ds, train_valid_ds = [torchvision.datasets.ImageFolder(</span><br><span class="line">    os.path.join(data_dir, <span class="string">&#x27;train_valid_test&#x27;</span>, folder),</span><br><span class="line">    transform=transform_train) <span class="keyword">for</span> folder <span class="keyword">in</span> [<span class="string">&#x27;train&#x27;</span>, <span class="string">&#x27;train_valid&#x27;</span>]]</span><br><span class="line"></span><br><span class="line">valid_ds, test_ds = [torchvision.datasets.ImageFolder(</span><br><span class="line">    os.path.join(data_dir, <span class="string">&#x27;train_valid_test&#x27;</span>, folder),</span><br><span class="line">    transform=transform_test) <span class="keyword">for</span> folder <span class="keyword">in</span> [<span class="string">&#x27;valid&#x27;</span>, <span class="string">&#x27;test&#x27;</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>下面我们创建数据加载器实例的方式与 实战Kaggle比赛：CIFAR-10相同。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">train_iter, train_valid_iter = [torch.utils.data.DataLoader(</span><br><span class="line">    dataset, batch_size, shuffle=<span class="literal">True</span>, drop_last=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">for</span> dataset <span class="keyword">in</span> (train_ds, train_valid_ds)]</span><br><span class="line"></span><br><span class="line">valid_iter = torch.utils.data.DataLoader(valid_ds, batch_size, shuffle=<span class="literal">False</span>,</span><br><span class="line">                                         drop_last=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">test_iter = torch.utils.data.DataLoader(test_ds, batch_size, shuffle=<span class="literal">False</span>,</span><br><span class="line">                                        drop_last=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="微调预训练模型"><a href="#微调预训练模型" class="headerlink" title="微调预训练模型"></a>微调预训练模型</h2><p>同样，本次比赛的数据集是ImageNet数据集的子集。<br>因此，我们可以使用 微调中讨论的方法在完整ImageNet数据集上选择预训练的模型，然后使用该模型提取图像特征，以便将其输入到定制的小规模输出网络中。<br>深度学习框架的高级API提供了在ImageNet数据集上预训练的各种模型。<br>在这里，我们选择预训练的ResNet-34模型，我们只需重复使用此模型的输出层（即提取的特征）的输入。<br>然后，我们可以用一个可以训练的小型自定义输出网络替换原始输出层，例如堆叠两个完全连接的图层。<br>与 微调中的实验不同，以下内容不重新训练用于特征提取的预训练模型，这节省了梯度下降的时间和内存空间。</p>
+<p>回想一下，我们使用三个RGB通道的均值和标准差来对完整的ImageNet数据集进行图像标准化。<br>事实上，这也符合ImageNet上预训练模型的标准化操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_net</span>(<span class="params">devices</span>):</span></span><br><span class="line">    finetune_net = nn.Sequential()</span><br><span class="line">    finetune_net.features = torchvision.models.resnet34(pretrained=<span class="literal">True</span>)</span><br><span class="line">    <span class="comment"># 定义一个新的输出网络，共有120个输出类别</span></span><br><span class="line">    finetune_net.output_new = nn.Sequential(nn.Linear(<span class="number">1000</span>, <span class="number">256</span>),</span><br><span class="line">                                            nn.ReLU(),</span><br><span class="line">                                            nn.Linear(<span class="number">256</span>, <span class="number">120</span>))</span><br><span class="line">    <span class="comment"># 将模型参数分配给用于计算的CPU或GPU</span></span><br><span class="line">    finetune_net = finetune_net.to(devices[<span class="number">0</span>])</span><br><span class="line">    <span class="comment"># 冻结参数</span></span><br><span class="line">    <span class="keyword">for</span> param <span class="keyword">in</span> finetune_net.features.parameters():</span><br><span class="line">        param.requires_grad = <span class="literal">False</span></span><br><span class="line">    <span class="keyword">return</span> finetune_net</span><br></pre></td></tr></table></figure>
+
+<p>在计算损失之前，我们首先获取预训练模型的输出层的输入，即提取的特征。<br>然后我们使用此特征作为我们小型自定义输出网络的输入来计算损失。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">loss = nn.CrossEntropyLoss(reduction=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">evaluate_loss</span>(<span class="params">data_iter, net, devices</span>):</span></span><br><span class="line">    l_sum, n = <span class="number">0.0</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> features, labels <span class="keyword">in</span> data_iter:</span><br><span class="line">        features, labels = features.to(devices[<span class="number">0</span>]), labels.to(devices[<span class="number">0</span>])</span><br><span class="line">        outputs = net(features)</span><br><span class="line">        l = loss(outputs, labels)</span><br><span class="line">        l_sum += l.<span class="built_in">sum</span>()</span><br><span class="line">        n += labels.numel()</span><br><span class="line">    <span class="keyword">return</span> (l_sum / n).to(<span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="定义训练函数"><a href="#定义训练函数" class="headerlink" title="定义训练函数"></a>定义训练函数</h2><p>我们将根据模型在验证集上的表现选择模型并调整超参数。<br>模型训练函数<code>train</code>只迭代小型自定义输出网络的参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">net, train_iter, valid_iter, num_epochs, lr, wd, devices, lr_period,</span></span></span><br><span class="line"><span class="function"><span class="params">          lr_decay</span>):</span></span><br><span class="line">    <span class="comment"># 只训练小型自定义输出网络</span></span><br><span class="line">    net = nn.DataParallel(net, device_ids=devices).to(devices[<span class="number">0</span>])</span><br><span class="line">    trainer = torch.optim.SGD((param <span class="keyword">for</span> param <span class="keyword">in</span> net.parameters()</span><br><span class="line">                               <span class="keyword">if</span> param.requires_grad), lr=lr,</span><br><span class="line">                              momentum=<span class="number">0.9</span>, weight_decay=wd)</span><br><span class="line">    scheduler = torch.optim.lr_scheduler.StepLR(trainer, lr_period, lr_decay)</span><br><span class="line">    num_batches, timer = <span class="built_in">len</span>(train_iter), d2l.Timer()</span><br><span class="line">    legend = [<span class="string">&#x27;train loss&#x27;</span>]</span><br><span class="line">    <span class="keyword">if</span> valid_iter <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        legend.append(<span class="string">&#x27;valid loss&#x27;</span>)</span><br><span class="line">    animator = d2l.Animator(xlabel=<span class="string">&#x27;epoch&#x27;</span>, xlim=[<span class="number">1</span>, num_epochs],</span><br><span class="line">                            legend=legend)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        metric = d2l.Accumulator(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">for</span> i, (features, labels) <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_iter):</span><br><span class="line">            timer.start()</span><br><span class="line">            features, labels = features.to(devices[<span class="number">0</span>]), labels.to(devices[<span class="number">0</span>])</span><br><span class="line">            trainer.zero_grad()</span><br><span class="line">            output = net(features)</span><br><span class="line">            l = loss(output, labels).<span class="built_in">sum</span>()</span><br><span class="line">            l.backward()</span><br><span class="line">            trainer.step()</span><br><span class="line">            metric.add(l, labels.shape[<span class="number">0</span>])</span><br><span class="line">            timer.stop()</span><br><span class="line">            <span class="keyword">if</span> (i + <span class="number">1</span>) % (num_batches // <span class="number">5</span>) == <span class="number">0</span> <span class="keyword">or</span> i == num_batches - <span class="number">1</span>:</span><br><span class="line">                animator.add(epoch + (i + <span class="number">1</span>) / num_batches,</span><br><span class="line">                             (metric[<span class="number">0</span>] / metric[<span class="number">1</span>], <span class="literal">None</span>))</span><br><span class="line">        measures = <span class="string">f&#x27;train loss <span class="subst">&#123;metric[<span class="number">0</span>] / metric[<span class="number">1</span>]:<span class="number">.3</span>f&#125;</span>&#x27;</span></span><br><span class="line">        <span class="keyword">if</span> valid_iter <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            valid_loss = evaluate_loss(valid_iter, net, devices)</span><br><span class="line">            animator.add(epoch + <span class="number">1</span>, (<span class="literal">None</span>, valid_loss.detach().cpu()))</span><br><span class="line">        scheduler.step()</span><br><span class="line">    <span class="keyword">if</span> valid_iter <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        measures += <span class="string">f&#x27;, valid loss <span class="subst">&#123;valid_loss:<span class="number">.3</span>f&#125;</span>&#x27;</span></span><br><span class="line">    print(measures + <span class="string">f&#x27;\n<span class="subst">&#123;metric[<span class="number">1</span>] * num_epochs / timer.<span class="built_in">sum</span>():<span class="number">.1</span>f&#125;</span>&#x27;</span></span><br><span class="line">          <span class="string">f&#x27; examples/sec on <span class="subst">&#123;<span class="built_in">str</span>(devices)&#125;</span>&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="训练和验证模型"><a href="#训练和验证模型" class="headerlink" title="训练和验证模型"></a>训练和验证模型</h2><p>现在我们可以训练和验证模型了，以下超参数都是可调的。<br>例如，我们可以增加迭代轮数。<br>另外，由于<code>lr_period</code>和<code>lr_decay</code>分别设置为2和0.9，<br>因此优化算法的学习速率将在每2个迭代后乘以0.9。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">devices, num_epochs, lr, wd = d2l.try_all_gpus(), <span class="number">10</span>, <span class="number">5e-3</span>, <span class="number">1e-4</span></span><br><span class="line">lr_period, lr_decay, net = <span class="number">2</span>, <span class="number">0.9</span>, get_net(devices)</span><br><span class="line">net.hybridize()</span><br><span class="line">train(net, train_iter, valid_iter, num_epochs, lr, wd, devices, lr_period,</span><br><span class="line">      lr_decay)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">devices, num_epochs, lr, wd = d2l.try_all_gpus(), <span class="number">10</span>, <span class="number">1e-4</span>, <span class="number">1e-4</span></span><br><span class="line">lr_period, lr_decay, net = <span class="number">2</span>, <span class="number">0.9</span>, get_net(devices)</span><br><span class="line">train(net, train_iter, valid_iter, num_epochs, lr, wd, devices, lr_period,</span><br><span class="line">      lr_decay)</span><br></pre></td></tr></table></figure>
+
+<h2 id="对测试集分类并在Kaggle提交结果"><a href="#对测试集分类并在Kaggle提交结果" class="headerlink" title="对测试集分类并在Kaggle提交结果"></a>对测试集分类并在Kaggle提交结果</h2><p>与 实战Kaggle比赛：CIFAR-10中的最后一步类似，最终所有标记的数据（包括验证集）都用于训练模型和对测试集进行分类。<br>我们将使用训练好的自定义输出网络进行分类。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">net = get_net(devices)</span><br><span class="line">train(net, train_valid_iter, <span class="literal">None</span>, num_epochs, lr, wd, devices, lr_period,</span><br><span class="line">      lr_decay)</span><br><span class="line"></span><br><span class="line">preds = []</span><br><span class="line"><span class="keyword">for</span> data, label <span class="keyword">in</span> test_iter:</span><br><span class="line">    output = torch.nn.functional.softmax(net(data.to(devices[<span class="number">0</span>])), dim=<span class="number">1</span>)</span><br><span class="line">    preds.extend(output.cpu().detach().numpy())</span><br><span class="line">ids = <span class="built_in">sorted</span>(os.listdir(</span><br><span class="line">    os.path.join(data_dir, <span class="string">&#x27;train_valid_test&#x27;</span>, <span class="string">&#x27;test&#x27;</span>, <span class="string">&#x27;unknown&#x27;</span>)))</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;submission.csv&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(<span class="string">&#x27;id,&#x27;</span> + <span class="string">&#x27;,&#x27;</span>.join(train_valid_ds.classes) + <span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">    <span class="keyword">for</span> i, output <span class="keyword">in</span> <span class="built_in">zip</span>(ids, preds):</span><br><span class="line">        f.write(i.split(<span class="string">&#x27;.&#x27;</span>)[<span class="number">0</span>] + <span class="string">&#x27;,&#x27;</span> + <span class="string">&#x27;,&#x27;</span>.join(</span><br><span class="line">            [<span class="built_in">str</span>(num) <span class="keyword">for</span> num <span class="keyword">in</span> output]) + <span class="string">&#x27;\n&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码将生成一个<code>submission.csv</code>文件，以 sec_kaggle_house中描述的方式提在Kaggle上提交。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>ImageNet数据集中的图像比CIFAR-10图像尺寸大，我们可能会修改不同数据集上任务的图像增广操作。</li>
+<li>要对ImageNet数据集的子集进行分类，我们可以利用完整ImageNet数据集上的预训练模型来提取特征并仅训练小型自定义输出网络，这将减少计算时间和节省内存空间。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E7%9A%84%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB%EF%BC%88ImageNet-Dogs%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">实战Kaggle比赛：狗的品种识别（ImageNet Dogs）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%92%8C%E6%95%B4%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.</span> <span class="toc-text">获取和整理数据集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.1.</span> <span class="toc-text">下载数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">整理数据集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%B9%BF"><span class="toc-number">1.2.</span> <span class="toc-text">图像增广</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.3.</span> <span class="toc-text">读取数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%B0%83%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.4.</span> <span class="toc-text">微调预训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0"><span class="toc-number">1.5.</span> <span class="toc-text">定义训练函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E9%AA%8C%E8%AF%81%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.6.</span> <span class="toc-text">训练和验证模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%B5%8B%E8%AF%95%E9%9B%86%E5%88%86%E7%B1%BB%E5%B9%B6%E5%9C%A8Kaggle%E6%8F%90%E4%BA%A4%E7%BB%93%E6%9E%9C"><span class="toc-number">1.7.</span> <span class="toc-text">对测试集分类并在Kaggle提交结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.8.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&text=实战Kaggle比赛：狗品种识别"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&is_video=false&description=实战Kaggle比赛：狗品种识别"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实战Kaggle比赛：狗品种识别&body=Check out this article: https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&title=实战Kaggle比赛：狗品种识别"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98Kaggle%E6%AF%94%E8%B5%9B%EF%BC%9A%E7%8B%97%E5%93%81%E7%A7%8D%E8%AF%86%E5%88%AB/&name=实战Kaggle比赛：狗品种识别&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="死信交换机（Dead Letter Exchange, DLX）死信交换机是RabbitMQ中用于管理那些因各种原因未能成功消费的消息的一种机制。当消息无法被消费者正常处理时，这些消息可被标记为“死信”（Dead Letter），随后将被转发至一个预设的交换机——即所谓的死信交换机，而非直接丢弃或无限制地重试。死信交换机本质上是一个标准的交换机，可以配置为直连型（direct）、主题型（topic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ死信队列DLX">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="死信交换机（Dead Letter Exchange, DLX）死信交换机是RabbitMQ中用于管理那些因各种原因未能成功消费的消息的一种机制。当消息无法被消费者正常处理时，这些消息可被标记为“死信”（Dead Letter），随后将被转发至一个预设的交换机——即所谓的死信交换机，而非直接丢弃或无限制地重试。死信交换机本质上是一个标准的交换机，可以配置为直连型（direct）、主题型（topic">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-16T00:41:39.000Z">
+<meta property="article:modified_time" content="2025-04-19T08:27:16.739Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RabbitMQ死信队列DLX</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/17/RabbitMQ/RabbitMQ%20Streams%E6%B5%81%E5%A4%84%E7%90%86/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/11/RabbitMQ/RabbitMQ%E9%98%9F%E5%88%97%E4%B8%8E%E6%B6%88%E6%81%AFTTL/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&text=RabbitMQ死信队列DLX"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&is_video=false&description=RabbitMQ死信队列DLX"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ死信队列DLX&body=Check out this article: https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&name=RabbitMQ死信队列DLX&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E4%BA%A4%E6%8D%A2%E6%9C%BA%EF%BC%88Dead-Letter-Exchange-DLX%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">死信交换机（Dead Letter Exchange, DLX）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%BB%E4%BF%A1%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="toc-number">2.</span> <span class="toc-text">配置死信交换机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">3.</span> <span class="toc-text">注意事项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E6%B6%88%E6%81%AF%E7%9A%84%E8%B7%AF%E7%94%B1%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">死信消息的路由机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E5%BE%AA%E7%8E%AF%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">死信循环问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E8%80%83%E9%87%8F"><span class="toc-number">6.</span> <span class="toc-text">安全考量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%A4%B4%E5%AD%97%E6%AE%B5%E6%9B%B4%E6%96%B0"><span class="toc-number">7.</span> <span class="toc-text">消息头字段更新</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RabbitMQ死信队列DLX
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-16T00:41:39.000Z" itemprop="datePublished">2021-07-16</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/" class="leancloud-visitors" data-flag-title="RabbitMQ死信队列DLX" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="死信交换机（Dead-Letter-Exchange-DLX）"><a href="#死信交换机（Dead-Letter-Exchange-DLX）" class="headerlink" title="死信交换机（Dead Letter Exchange, DLX）"></a>死信交换机（Dead Letter Exchange, DLX）</h3><p>死信交换机是RabbitMQ中用于管理那些因各种原因未能成功消费的消息的一种机制。当消息无法被消费者正常处理时，这些消息可被标记为“死信”（Dead Letter），随后将被转发至一个预设的交换机——即所谓的死信交换机，而非直接丢弃或无限制地重试。死信交换机本质上是一个标准的交换机，可以配置为直连型（direct）、主题型（topic）、扇出型（fanout）或头部匹配型（headers），其运作方式与普通交换机相同。<br>消息被视为死信并被路由到死信交换机的情形包括但不限于以下几种情况：</p>
+<ol>
+<li>显式拒绝：若消费者通过basic.reject、basic.nack（针对AMQP 0-9-1协议版本）或是rejected outcome（对于AMQP 1.0协议版本）明确表示不接受某条消息，并且在调用上述方法时设置了requeue参数为false，则该消息将被视作死信。</li>
+<li>消息存活时间超出：一旦消息设置了特定的生存期（TTL, Time-To-Live），并且在其所在队列中的停留时间超过了这个设定值，那么这条消息就会自动转变为死信状态。</li>
+<li>队列容量溢出：如果某个队列定义了最大长度（x-max-length）或最大字节数量（x-max-length-bytes），而实际承载的消息数量或总大小超过了这些阈值，最早进入队列的消息可能会根据具体配置被移除或者转换成死信。</li>
+<li>超过最大投递尝试次数：特别地，在仲裁队列（Quorum Queue）里，每当一条消息重新投送的次数达到了预先设定的最大尝试次数（delivery-limit），它同样会被认定为死信。<br>值得注意的是，如果整个队列因为所有消息均超过其TTL而被系统自动清除，则其中包含的所有消息都不会经历成为死信的过程。</li>
+</ol>
+<h3 id="配置死信交换机"><a href="#配置死信交换机" class="headerlink" title="配置死信交换机"></a>配置死信交换机</h3><p>死信交换机的配置可以通过队列参数（Queue Arguments）或服务器策略（Policy）来实现。如果同时采用这两种方法进行配置，队列参数的优先级高于服务器策略。<br>使用队列参数（Queue Arguments）进行配置时，在Java客户端中声明队列的过程中，可以通过设置x-dead-letter-exchange参数来指定死信交换机。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">channel.exchangeDeclare(<span class="string">&quot;dlx.exchange&quot;</span>, <span class="string">&quot;direct&quot;</span>); <span class="comment">// 声明死信交换机</span></span><br><span class="line"></span><br><span class="line">Map&lt;String, Object&gt; args = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">args.put(<span class="string">&quot;x-dead-letter-exchange&quot;</span>, <span class="string">&quot;dlx.exchange&quot;</span>); <span class="comment">// 设置死信交换机</span></span><br><span class="line">args.put(<span class="string">&quot;x-dead-letter-routing-key&quot;</span>, <span class="string">&quot;error.key&quot;</span>); <span class="comment">// 可选：设置死信路由键</span></span><br><span class="line"></span><br><span class="line">channel.queueDeclare(<span class="string">&quot;my.queue&quot;</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, args); <span class="comment">// 创建队列并绑定死信交换机</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>为了确保消息能够正确进入死信处理流程，死信交换机必须在任何消息被标记为死信前预先创建。若此条件未满足，相关消息将被系统自动且无声地丢弃。</p>
+<h3 id="死信消息的路由机制"><a href="#死信消息的路由机制" class="headerlink" title="死信消息的路由机制"></a>死信消息的路由机制</h3><p>死信消息的具体路由方式由其所属队列的配置决定：<br>● 当队列已定义x-dead-letter-routing-key属性时，该消息将依据此键值被导向至指定的死信交换机。<br>● 若上述属性未设定，则采用消息初始发送时使用的路由键进行传递（尽管原始消息可能包含CC和BCC头部信息，但在转变为死信状态的过程中，BCC部分会被移除）。<br>示例说明:<br>● 假设一条消息最初通过foo作为路由键发布，并且所在队列没有特别设置死信路由键，则当它成为死信后，依旧会沿用foo作为路由键。<br>● 反之，如果队列中设置了x-dead-letter-routing-key: bar，则所有从该队列出站的死信都将使用bar作为新的路由键。</p>
+<h3 id="死信循环问题"><a href="#死信循环问题" class="headerlink" title="死信循环问题"></a>死信循环问题</h3><p>当一个死信消息再次被分发回原队列时（例如因死信交换机缺乏明确的路由指示而导致消息经由默认交换机返回），RabbitMQ具备识别此类循环的能力，并采取措施终止循环，直接丢弃涉及的消息以避免无限重复的情况发生。</p>
+<h3 id="安全考量"><a href="#安全考量" class="headerlink" title="安全考量"></a>安全考量</h3><p>鉴于死信处理本质上属于一种特殊形式的消息重发操作，因此存在一定的失败风险：<br>● 如果目标接收队列不可达（如由于仲裁队列未能达成必要的共识），那么尝试转发的死信将会被放弃，并生成相应的错误日志条目。<br>● 通常情况下，针对死信消息的重新投递过程并不激活发布者确认功能，这意味着在分布式环境中可能会出现数据丢失现象。然而，借助于仲裁队列的支持，可以实现至少一次交付保证，从而增强整个系统的可靠性。</p>
+<h3 id="消息头字段更新"><a href="#消息头字段更新" class="headerlink" title="消息头字段更新"></a>消息头字段更新</h3><p>一旦某条消息转换成死信状态，其携带的信息头会发生如下变更：<br>● exchange字段值更新为代表当前所使用的死信交换机名称。<br>● 根据队列配置情况，routing-key有可能变更为预设的死信路由键。<br>● CC与BCC相关的元数据不再保留。<br>● 此外，每经历一次死信事件，都会在消息头中追加x-death (适用于AMQP 0.9.1协议) 或 x-opt-deaths (适用于AMQP 1.0协议) 字段，记录下包括但不限于触发死信的原因、次数以及涉及到的队列等详细信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 检查死信历史（AMQP 0.9.1）</span></span><br><span class="line">List&lt;Map&lt;String, Object&gt;&gt; deaths = (List&lt;Map&lt;String, Object&gt;&gt;) headers.get(<span class="string">&quot;x-death&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (deaths != <span class="keyword">null</span>) &#123;</span><br><span class="line">    Map&lt;String, Object&gt; lastDeath = deaths.get(<span class="number">0</span>);</span><br><span class="line">    String reason = (String) lastDeath.get(<span class="string">&quot;reason&quot;</span>); <span class="comment">// &quot;rejected&quot;, &quot;expired&quot;, etc.</span></span><br><span class="line">    String queue = (String) lastDeath.get(<span class="string">&quot;queue&quot;</span>);   <span class="comment">// 来源队列</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitConstant</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_SMS_DLX = <span class="string">&quot;sms.dlx&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String EXCHANGE_DLX = <span class="string">&quot;exchange.dlx&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_DLX = <span class="string">&quot;queue.dlx&quot;</span>; </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ROUTING_KEY_DLX = <span class="string">&quot;routing.key.dlx&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq.utils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.ConnectionFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitUtils</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ConnectionFactory connectionFactory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        connectionFactory.setHost(<span class="string">&quot;192.168.31.230&quot;</span>);</span><br><span class="line">        connectionFactory.setPort(<span class="number">5672</span>);</span><br><span class="line">        connectionFactory.setUsername(<span class="string">&quot;admin&quot;</span>);</span><br><span class="line">        connectionFactory.setPassword(<span class="string">&quot;admin&quot;</span>);</span><br><span class="line">        connectionFactory.setVirtualHost(<span class="string">&quot;my_vhost&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">getConnection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Connection conn = connectionFactory.newConnection();</span><br><span class="line">        <span class="keyword">return</span> conn;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Channel channel)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 声明死信交换机，类型为direct，持久化</span></span><br><span class="line">        channel.exchangeDeclare(RabbitConstant.EXCHANGE_DLX, <span class="string">&quot;direct&quot;</span>, <span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">// 声明死信队列，持久化，非独占，不自动删除</span></span><br><span class="line">        channel.queueDeclare(RabbitConstant.QUEUE_DLX, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">        <span class="comment">// 将死信队列绑定到死信交换机，使用指定的路由键</span></span><br><span class="line">        channel.queueBind(RabbitConstant.QUEUE_DLX, RabbitConstant.EXCHANGE_DLX, RabbitConstant.ROUTING_KEY_DLX);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 创建队列参数Map</span></span><br><span class="line">        Map&lt;String, Object&gt; quArgs = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="comment">// 设置消息TTL(存活时间)为10秒(10000毫秒)</span></span><br><span class="line">        quArgs.put(<span class="string">&quot;x-message-ttl&quot;</span>, <span class="number">10000</span>);</span><br><span class="line">        <span class="comment">// 设置死信交换机</span></span><br><span class="line">        quArgs.put(<span class="string">&quot;x-dead-letter-exchange&quot;</span>, RabbitConstant.EXCHANGE_DLX);</span><br><span class="line">        <span class="comment">// 设置死信路由键</span></span><br><span class="line">        quArgs.put(<span class="string">&quot;x-dead-letter-routing-key&quot;</span>, RabbitConstant.ROUTING_KEY_DLX);</span><br><span class="line">        <span class="comment">// 声明短信队列，使用上面设置的参数</span></span><br><span class="line">        channel.queueDeclare(RabbitConstant.QUEUE_SMS_DLX, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, quArgs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.google.gson.Gson;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.entity.SMS;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderSystem</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, TimeoutException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                Channel channel = connection.createChannel();) &#123;</span><br><span class="line">            </span><br><span class="line">            RabbitUtils.init(channel);  <span class="comment">// 使用工具类初始交换机、队列和绑定关系</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">100</span>; i &lt; <span class="number">200</span>; i++) &#123;</span><br><span class="line">                SMS sms = <span class="keyword">new</span> SMS(<span class="string">&quot;乘客&quot;</span> + i, <span class="string">&quot;13900000&quot;</span> + i, <span class="string">&quot;您的车票已预订成功&quot;</span>);</span><br><span class="line">                String jsonSMS = <span class="keyword">new</span> Gson().toJson(sms);</span><br><span class="line">                channel.basicPublish(<span class="string">&quot;&quot;</span>, RabbitConstant.QUEUE_SMS_DLX, <span class="keyword">null</span>, jsonSMS.getBytes());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">&quot;订单信息已投递至Broker&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.AMQP;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.DefaultConsumer;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Envelope;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DlxConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        Channel channel = connection.createChannel();</span><br><span class="line">        </span><br><span class="line">        RabbitUtils.init(channel);  <span class="comment">// 使用工具类初始交换机、队列和绑定关系</span></span><br><span class="line"></span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_DLX, <span class="keyword">true</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, </span></span></span><br><span class="line"><span class="function"><span class="params">                    AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                String deadLetterMsg = <span class="keyword">new</span> String(body);</span><br><span class="line">                log.info(<span class="string">&quot;[死信消费者] 收到死信消息，使用其他渠道发送短信: &#123;&#125;&quot;</span>, deadLetterMsg);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.AMQP;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.DefaultConsumer;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Envelope;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SmsSender</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        </span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        RabbitUtils.init(channel);  <span class="comment">// 使用工具类初始交换机、队列和绑定关系</span></span><br><span class="line">        </span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_SMS_DLX, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                String jsonSMS = <span class="keyword">new</span> String(body);</span><br><span class="line">                log.info(<span class="string">&quot;SMSSender-短信发送成功:&#123;&#125;&quot;</span>, jsonSMS);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E4%BA%A4%E6%8D%A2%E6%9C%BA%EF%BC%88Dead-Letter-Exchange-DLX%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">死信交换机（Dead Letter Exchange, DLX）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%BB%E4%BF%A1%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="toc-number">2.</span> <span class="toc-text">配置死信交换机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">3.</span> <span class="toc-text">注意事项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E6%B6%88%E6%81%AF%E7%9A%84%E8%B7%AF%E7%94%B1%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">死信消息的路由机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%BB%E4%BF%A1%E5%BE%AA%E7%8E%AF%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">死信循环问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E8%80%83%E9%87%8F"><span class="toc-number">6.</span> <span class="toc-text">安全考量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%A4%B4%E5%AD%97%E6%AE%B5%E6%9B%B4%E6%96%B0"><span class="toc-number">7.</span> <span class="toc-text">消息头字段更新</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&text=RabbitMQ死信队列DLX"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&is_video=false&description=RabbitMQ死信队列DLX"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ死信队列DLX&body=Check out this article: https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&title=RabbitMQ死信队列DLX"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/16/RabbitMQ/RabbitMQ%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97DLX/&name=RabbitMQ死信队列DLX&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

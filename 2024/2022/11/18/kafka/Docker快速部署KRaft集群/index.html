@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001011021">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker快速部署KRaft集群">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001011021">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221118-5.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221118-6.png">
+<meta property="article:published_time" content="2022-11-18T05:34:51.000Z">
+<meta property="article:modified_time" content="2025-04-19T15:25:20.157Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221118-5.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Docker快速部署KRaft集群</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/19/kafka/Kafka%E5%89%AF%E6%9C%AC%E7%AE%A1%E7%90%86%E4%B8%8EISR%E6%9C%BA%E5%88%B6%E8%A7%A3%E6%9E%90/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/18/kafka/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E4%B8%8E%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&text=Docker快速部署KRaft集群"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&is_video=false&description=Docker快速部署KRaft集群"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker快速部署KRaft集群&body=Check out this article: https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&name=Docker快速部署KRaft集群&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Docker快速部署KRaft集群
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-18T05:34:51.000Z" itemprop="datePublished">2022-11-18</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/" class="leancloud-visitors" data-flag-title="Docker快速部署KRaft集群" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><img src="/images/kafka/20221118-5.png" alt="image-20221118-5"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line">mkdir /home/kafka</span><br><span class="line">cd /home/kafka</span><br><span class="line">cat &gt; docker-compose.yaml &lt;&lt;-<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line"># 定义一组服务，这些服务将在 Docker 中运行，用于搭建 Kafka 集群</span><br><span class="line">services:</span><br><span class="line">  # 定义第一个控制器服务，名为 controller-1</span><br><span class="line">  controller-<span class="number">1</span>:</span><br><span class="line">    # 指定使用的 Docker 镜像，这里使用 Apache Kafka 的最新版本</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    # 为该容器指定一个名称，方便后续管理和识别</span><br><span class="line">    container_name: controller-<span class="number">1</span></span><br><span class="line">    # 配置容器的环境变量，这些变量将影响 Kafka 实例的行为</span><br><span class="line">    environment:</span><br><span class="line">      # 为该 Kafka 节点分配一个唯一的 ID，用于在集群中标识该节点</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">1</span></span><br><span class="line">      # 指定该节点的角色为控制器，负责集群的元数据管理和协调</span><br><span class="line">      KAFKA_PROCESS_ROLES: controller</span><br><span class="line">      # 定义该节点监听的地址和端口，这里使用 CONTROLLER 协议监听 9093 端口</span><br><span class="line">      KAFKA_LISTENERS: CONTROLLER:<span class="comment">//:9093</span></span><br><span class="line">      # 指定用于内部 broker 之间通信的监听器名称</span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      # 指定用于控制器通信的监听器名称</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      # 列出控制器集群中的所有投票节点及其地址和端口，用于选举和协调</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      # 设置消费者组初始重平衡的延迟时间为 0 毫秒，减少重平衡等待时间</span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  # 定义第二个控制器服务，名为 controller-2</span><br><span class="line">  controller-<span class="number">2</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: controller-<span class="number">2</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">2</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: controller</span><br><span class="line">      KAFKA_LISTENERS: CONTROLLER:<span class="comment">//:9093</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  # 定义第三个控制器服务，名为 controller-3</span><br><span class="line">  controller-<span class="number">3</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: controller-<span class="number">3</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">3</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: controller</span><br><span class="line">      KAFKA_LISTENERS: CONTROLLER:<span class="comment">//:9093</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  # 定义第一个 broker 服务，名为 broker-1</span><br><span class="line">  broker-<span class="number">1</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: broker-<span class="number">1</span></span><br><span class="line">    # 将容器内部的 9092 端口映射到宿主机的 29092 端口，方便外部访问</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">29092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">4</span></span><br><span class="line">      # 指定该节点的角色为 broker，负责存储和处理消息</span><br><span class="line">      KAFKA_PROCESS_ROLES: broker</span><br><span class="line">      # 定义该节点监听的地址和端口，支持两种协议，分别用于内部和外部通信</span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092&#x27;</span></span><br><span class="line">      # 向外部客户端和其他 broker 广告该节点的地址和端口</span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://broker-1:19092,PLAINTEXT_HOST://192.168.31.230:29092&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      # 定义不同监听器使用的安全协议</span><br><span class="line">      # `CONTROLLER:PLAINTEXT`: 指定控制器监听器使用明文传输（无加密）。</span><br><span class="line">      # `PLAINTEXT:PLAINTEXT`: 指定普通监听器也使用明文传输。</span><br><span class="line">      # `PLAINTEXT_HOST:PLAINTEXT`: 指定特定主机的监听器同样使用明文传输。</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line">    # 指定该服务依赖于 controller-1、controller-2 和 controller-3 服务，确保在启动前这些服务已启动</span><br><span class="line">    depends_on:</span><br><span class="line">      - controller-<span class="number">1</span></span><br><span class="line">      - controller-<span class="number">2</span></span><br><span class="line">      - controller-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">  # 定义第二个 broker 服务，名为 broker-2</span><br><span class="line">  broker-<span class="number">2</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: broker-<span class="number">2</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">39092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">5</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: broker</span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092&#x27;</span></span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://broker-2:19092,PLAINTEXT_HOST://192.168.31.230:39092&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line">    depends_on:</span><br><span class="line">      - controller-<span class="number">1</span></span><br><span class="line">      - controller-<span class="number">2</span></span><br><span class="line">      - controller-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">  # 定义第三个 broker 服务，名为 broker-3</span><br><span class="line">  broker-<span class="number">3</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: broker-<span class="number">3</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">49092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">6</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: broker</span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092&#x27;</span></span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://broker-3:19092,PLAINTEXT_HOST://192.168.31.230:49092&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="number">1</span><span class="meta">@controller</span>-<span class="number">1</span>:<span class="number">9093</span>,<span class="number">2</span><span class="meta">@controller</span>-<span class="number">2</span>:<span class="number">9093</span>,<span class="number">3</span><span class="meta">@controller</span>-<span class="number">3</span>:<span class="number">9093</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line">    depends_on:</span><br><span class="line">      - controller-<span class="number">1</span></span><br><span class="line">      - controller-<span class="number">2</span></span><br><span class="line">      - controller-<span class="number">3</span></span><br><span class="line"></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/kafka/20221118-6.png" alt="image-20221118-6"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; docker-compose.yaml &lt;&lt;-<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">services:</span><br><span class="line">  kafka-<span class="number">1</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: kafka-<span class="number">1</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">29092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">1</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: <span class="string">&quot;broker,controller&quot;</span></span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092,CONTROLLER://:9093&#x27;</span></span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://kafka-1:19092,PLAINTEXT_HOST://192.168.31.230:29092,CONTROLLER://kafka-1:9093&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="string">&#x27;1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093&#x27;</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  kafka-<span class="number">2</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: kafka-<span class="number">2</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">39092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">2</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: <span class="string">&quot;broker,controller&quot;</span></span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092,CONTROLLER://:9093&#x27;</span></span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://kafka-2:19092,PLAINTEXT_HOST://192.168.31.230:39092,CONTROLLER://kafka-2:9093&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="string">&#x27;1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093&#x27;</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  kafka-<span class="number">3</span>:</span><br><span class="line">    image: apache/kafka:<span class="number">3.9</span><span class="number">.0</span></span><br><span class="line">    container_name: kafka-<span class="number">3</span></span><br><span class="line">    ports:</span><br><span class="line">      - <span class="number">49092</span>:<span class="number">9092</span></span><br><span class="line">    environment:</span><br><span class="line">      KAFKA_NODE_ID: <span class="number">3</span></span><br><span class="line">      KAFKA_PROCESS_ROLES: <span class="string">&quot;broker,controller&quot;</span></span><br><span class="line">      KAFKA_LISTENERS: <span class="string">&#x27;PLAINTEXT://:19092,PLAINTEXT_HOST://:9092,CONTROLLER://:9093&#x27;</span></span><br><span class="line">      KAFKA_ADVERTISED_LISTENERS: <span class="string">&#x27;PLAINTEXT://kafka-3:19092,PLAINTEXT_HOST://192.168.31.230:49092,CONTROLLER://kafka-3:9093&#x27;</span></span><br><span class="line">      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</span><br><span class="line">      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT</span><br><span class="line">      KAFKA_CONTROLLER_QUORUM_VOTERS: <span class="string">&#x27;1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093&#x27;</span></span><br><span class="line">      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: <span class="number">0</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.producer.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringSerializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IoTEventProducer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:29092,192.168.31.230:39092,192.168.31.230:49092&quot;</span>);</span><br><span class="line">        kaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());</span><br><span class="line">        kaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IoTEventSerializer.class.getName());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (Producer&lt;String, IoTEvent&gt; producer = <span class="keyword">new</span> KafkaProducer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            Random random = <span class="keyword">new</span> Random();</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                IoTEvent event = IoTEvent.builder()</span><br><span class="line">                        .deviceId(random.nextInt(<span class="number">10</span>))</span><br><span class="line">                        .eventTimestamp(System.currentTimeMillis())</span><br><span class="line">                        .deviceType(<span class="string">&quot;BOT&quot;</span>)</span><br><span class="line">                        .eventValue(random.nextInt(<span class="number">101</span>))</span><br><span class="line">                        .build();</span><br><span class="line">                ProducerRecord&lt;String, IoTEvent&gt; producerRecord = <span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;iot-events&quot;</span>, event.getDeviceId().toString(), event);</span><br><span class="line">                RecordMetadata result = producer.send(producerRecord).get();</span><br><span class="line">                log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset = &#123;&#125;, timestamp = &#123;&#125;&quot;</span>, result.topic(), result.partition(), result.offset(), result.timestamp());</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>); <span class="comment">// Sleep for 1 second</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error sending message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&text=Docker快速部署KRaft集群"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&is_video=false&description=Docker快速部署KRaft集群"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker快速部署KRaft集群&body=Check out this article: https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&title=Docker快速部署KRaft集群"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/18/kafka/Docker%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2KRaft%E9%9B%86%E7%BE%A4/&name=Docker快速部署KRaft集群&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

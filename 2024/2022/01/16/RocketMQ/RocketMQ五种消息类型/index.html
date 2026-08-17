@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="RocketMQ支持五种消息类型● 普通消息：普通消息也称为并发消息，和传统的队列相比，并发消息没有顺序，但是生产消费都是并行进行的，单机性能可达十万级别的TPS。● 分区有序消息：与Kafka中的分区类似，把一个Topic消息分为多个分区“保存”和消费，在一个分区内的消息就是传统的队列，遵循FIFO（先进先出）原则。● 全局有序消息：如果把一个Topic的分区数设置为1，那么该Topic中的消息">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ五种消息类型">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="RocketMQ支持五种消息类型● 普通消息：普通消息也称为并发消息，和传统的队列相比，并发消息没有顺序，但是生产消费都是并行进行的，单机性能可达十万级别的TPS。● 分区有序消息：与Kafka中的分区类似，把一个Topic消息分为多个分区“保存”和消费，在一个分区内的消息就是传统的队列，遵循FIFO（先进先出）原则。● 全局有序消息：如果把一个Topic的分区数设置为1，那么该Topic中的消息">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220116-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220116-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220116-3.png">
+<meta property="article:published_time" content="2022-01-16T02:26:38.000Z">
+<meta property="article:modified_time" content="2025-04-20T15:44:19.386Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RocketMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RocketMQ/20220116-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RocketMQ五种消息类型</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/01/16/RocketMQ/RocketMQ%E6%9C%89%E5%BA%8F%E6%B6%88%E6%81%AF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/01/15/RocketMQ/RocketMQ%E7%94%9F%E4%BA%A7%E8%80%85%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B8%8E%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E6%B5%81%E7%A8%8B/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&text=RocketMQ五种消息类型"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&is_video=false&description=RocketMQ五种消息类型"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ五种消息类型&body=Check out this article: https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&name=RocketMQ五种消息类型&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E6%94%AF%E6%8C%81%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">RocketMQ支持五种消息类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Broker%E3%80%81%E5%88%86%E5%8C%BA%E3%80%81%E9%98%9F%E5%88%97%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">2.</span> <span class="toc-text">Broker、分区、队列的关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E5%8F%91%E9%80%81%E4%B9%8B%E6%99%AE%E9%80%9A%E6%B6%88%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">RocketMQ发送之普通消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">代码案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">运行结果</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RocketMQ五种消息类型
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-01-16T02:26:38.000Z" itemprop="datePublished">2022-01-16</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/" class="leancloud-visitors" data-flag-title="RocketMQ五种消息类型" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RocketMQ/" rel="tag">RocketMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="RocketMQ支持五种消息类型"><a href="#RocketMQ支持五种消息类型" class="headerlink" title="RocketMQ支持五种消息类型"></a>RocketMQ支持五种消息类型</h3><p>● 普通消息：普通消息也称为并发消息，和传统的队列相比，并发消息没有顺序，但是生产消费都是并行进行的，单机性能可达十万级别的TPS。<br>● 分区有序消息：与Kafka中的分区类似，把一个Topic消息分为多个分区“保存”和消费，在一个分区内的消息就是传统的队列，遵循FIFO（先进先出）原则。<br>● 全局有序消息：如果把一个Topic的分区数设置为1，那么该Topic中的消息就是单分区，所有消息都遵循FIFO（先进先出）的原则。<br>● 延迟消息：消息发送后，消费者要在一定时间后，或者指定某个时间点才可以消费。在没有延迟消息时，基本的做法是基于定时计划任务调度，定时发送消息。在 RocketMQ中只需要在发送消息时设置延迟级别即可实现。<br>● 事务消息：主要涉及分布式事务，即需要保证在多个操作同时成功或者同时失败时，消费者才能消费消息。RocketMQ通过发送Half消息、处理本地事务、提交（Commit）消息或者回滚（Rollback）消息优雅地实现分布式事务。</p>
+<p><img src="/images/RocketMQ/20220116-1.png" alt="image-20220116-1"></p>
+<h3 id="Broker、分区、队列的关系"><a href="#Broker、分区、队列的关系" class="headerlink" title="Broker、分区、队列的关系"></a>Broker、分区、队列的关系</h3><p><img src="/images/RocketMQ/20220116-2.png" alt="image-20220116-2"></p>
+<h3 id="RocketMQ发送之普通消息"><a href="#RocketMQ发送之普通消息" class="headerlink" title="RocketMQ发送之普通消息"></a>RocketMQ发送之普通消息</h3><p><img src="/images/RocketMQ/20220116-3.png" alt="image-20220116-3"></p>
+<p>● NameServer：192.168.31.103<br>● Master：192.168.31.105<br>● Slave：192.168.31.111</p>
+<h3 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h3><p>1. Master与Slave启动向NameServer注册<br>2. 生产者Producer发送数据前从NameServer获取Master的IP、端口等通信参数<br>3. 生产者Producer向Master发送消息<br>4. Master向Slave进行消息同步</p>
+<h3 id="代码案例"><a href="#代码案例" class="headerlink" title="代码案例"></a>代码案例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//普通消息类型 </span></span><br><span class="line"><span class="meta">@Slf4j</span> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageType1</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123; </span><br><span class="line">        <span class="comment">//DefaultMQProducer用于发送非事务消息 </span></span><br><span class="line">        DefaultMQProducer producer = <span class="keyword">new</span> DefaultMQProducer(<span class="string">&quot;ProducerGroupName&quot;</span>); </span><br><span class="line">        <span class="comment">//注册NameServer地址 </span></span><br><span class="line">        producer.setNamesrvAddr(<span class="string">&quot;192.168.31.103:9876&quot;</span>); </span><br><span class="line">        <span class="comment">//异步发送失败后Producer自动重试2次 </span></span><br><span class="line">        producer.setRetryTimesWhenSendAsyncFailed(<span class="number">2</span>); </span><br><span class="line">        <span class="keyword">try</span> &#123; </span><br><span class="line">            <span class="comment">//启动生产者实例 </span></span><br><span class="line">            producer.start(); </span><br><span class="line">            <span class="comment">//消息数据 </span></span><br><span class="line">            String data = <span class="string">&quot;&#123;\&quot;title\&quot;:\&quot;汇总数据\&quot;&#125;&quot;</span>; </span><br><span class="line">            <span class="comment">//消息主题             </span></span><br><span class="line">			Message message = <span class="keyword">new</span> Message(<span class="string">&quot;tax-data&quot;</span>, <span class="string">&quot;2021S4&quot;</span>, data.getBytes()); </span><br><span class="line">            <span class="comment">//发送结果 </span></span><br><span class="line">            SendResult result = producer.send(message); </span><br><span class="line">            log.info(<span class="string">&quot;Broker响应：&quot;</span> + result); </span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">            e.printStackTrace(); </span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123; </span><br><span class="line">            <span class="keyword">try</span> &#123; </span><br><span class="line">                <span class="comment">//关闭连接 </span></span><br><span class="line">                producer.shutdown(); </span><br><span class="line">                log.info(<span class="string">&quot;连接已关闭&quot;</span>); </span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123; </span><br><span class="line">                e.printStackTrace(); </span><br><span class="line">            &#125; </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">23</span>:<span class="number">00</span>:<span class="number">48.741</span> [main] INFO com.lixiang.rocketmq.mtype.MessageType1 - Broker响应：</span><br><span class="line">SendResult [ </span><br><span class="line">    sendStatus=SEND_OK,  </span><br><span class="line">    msgId=7F000001347018B4AAC20A1687DC0000,  </span><br><span class="line">    offsetMsgId=C0A81F6900002A9F00000000000A21CB,  </span><br><span class="line">    messageQueue=MessageQueue [topic=tax-data, brokerName=broker-a, queueId=<span class="number">3</span>],  </span><br><span class="line">    queueOffset=<span class="number">2</span> </span><br><span class="line">] </span><br></pre></td></tr></table></figure>
+<p>● sendStatus：发送状态，SEND_OK代表成功<br>● msgId：消息由RocketMQ分配的全局唯一Id，由producer客户端生成，调用方法MessageClientIDSetter.createUniqID()生成全局唯一的Id<br>● offsetMsgId：Broker服务端将消息追加到内存后会返回其物理偏移量，即在commitlog文件中的偏移量，然后会生成一个Id<br>● messageQueue：消息队列内容<br>● topic：主题名称<br>● brokerName：broker服务器名字，在RocketMQ xxx.propertites配置文件中brokerName项定义<br>● queueId：queueId队列Id，默认会初始化4个（0-3）<br>● queueOffset：queueId对应队列逻辑上的位置（偏移量）</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E6%94%AF%E6%8C%81%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">RocketMQ支持五种消息类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Broker%E3%80%81%E5%88%86%E5%8C%BA%E3%80%81%E9%98%9F%E5%88%97%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">2.</span> <span class="toc-text">Broker、分区、队列的关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RocketMQ%E5%8F%91%E9%80%81%E4%B9%8B%E6%99%AE%E9%80%9A%E6%B6%88%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">RocketMQ发送之普通消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">代码案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">运行结果</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&text=RocketMQ五种消息类型"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&is_video=false&description=RocketMQ五种消息类型"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RocketMQ五种消息类型&body=Check out this article: https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&title=RocketMQ五种消息类型"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/01/16/RocketMQ/RocketMQ%E4%BA%94%E7%A7%8D%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B/&name=RocketMQ五种消息类型&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

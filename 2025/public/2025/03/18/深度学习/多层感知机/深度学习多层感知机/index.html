@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="多层感知机在 线性神经网络中，我们介绍了softmax回归（ softmax回归），然后我们从零开始实现了softmax回归（ softmax回归的从零开始实现），接着使用高级API实现了算法（ softmax回归的简洁实现），并训练分类器从低分辨率图像中识别10类服装。在这个过程中，我们学习了如何处理数据，如何将输出转换为有效的概率分布，并应用适当的损失函数，根据模型参数最小化损失。我们已经在简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多层感知机">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="多层感知机在 线性神经网络中，我们介绍了softmax回归（ softmax回归），然后我们从零开始实现了softmax回归（ softmax回归的从零开始实现），接着使用高级API实现了算法（ softmax回归的简洁实现），并训练分类器从低分辨率图像中识别10类服装。在这个过程中，我们学习了如何处理数据，如何将输出转换为有效的概率分布，并应用适当的损失函数，根据模型参数最小化损失。我们已经在简">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-18T01:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:56:37.626Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>多层感知机</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA%E7%9A%84%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0GPU/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&text=多层感知机"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&is_video=false&description=多层感知机"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=多层感知机&body=Check out this article: https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&name=多层感知机&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA"><span class="toc-number">1.</span> <span class="toc-text">多层感知机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E8%97%8F%E5%B1%82"><span class="toc-number">1.1.</span> <span class="toc-text">隐藏层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%87%BA%E9%94%99"><span class="toc-number">1.1.1.</span> <span class="toc-text">线性模型可能会出错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E7%BD%91%E7%BB%9C%E4%B8%AD%E5%8A%A0%E5%85%A5%E9%9A%90%E8%97%8F%E5%B1%82"><span class="toc-number">1.1.2.</span> <span class="toc-text">在网络中加入隐藏层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%88%B0%E9%9D%9E%E7%BA%BF%E6%80%A7"><span class="toc-number">1.1.3.</span> <span class="toc-text">从线性到非线性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E8%BF%91%E4%BC%BC%E5%AE%9A%E7%90%86"><span class="toc-number">1.1.4.</span> <span class="toc-text">通用近似定理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.</span> <span class="toc-text">激活函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ReLU%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">ReLU函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sigmoid%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.2.</span> <span class="toc-text">sigmoid函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#tanh%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.3.</span> <span class="toc-text">tanh函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        多层感知机
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-18T01:00:00.000Z" itemprop="datePublished">2025-03-18</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="leancloud-visitors" data-flag-title="多层感知机" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="多层感知机"><a href="#多层感知机" class="headerlink" title="多层感知机"></a>多层感知机</h1><p>在 线性神经网络中，<br>我们介绍了softmax回归（ softmax回归），<br>然后我们从零开始实现了softmax回归（ softmax回归的从零开始实现），<br>接着使用高级API实现了算法（ softmax回归的简洁实现），<br>并训练分类器从低分辨率图像中识别10类服装。<br>在这个过程中，我们学习了如何处理数据，如何将输出转换为有效的概率分布，<br>并应用适当的损失函数，根据模型参数最小化损失。<br>我们已经在简单的线性模型背景下掌握了这些知识，<br>现在我们可以开始对深度神经网络的探索，这也是本书主要涉及的一类模型。</p>
+<h2 id="隐藏层"><a href="#隐藏层" class="headerlink" title="隐藏层"></a>隐藏层</h2><p>我们在 线性模型中描述了仿射变换，<br>它是一种带有偏置项的线性变换。<br>首先，回想一下如 softmax回归网络图中所示的softmax回归的模型架构。<br>该模型通过单个仿射变换将我们的输入直接映射到输出，然后进行softmax操作。<br>如果我们的标签通过仿射变换后确实与我们的输入数据相关，那么这种方法确实足够了。<br>但是，仿射变换中的<em>线性</em>是一个很强的假设。</p>
+<h3 id="线性模型可能会出错"><a href="#线性模型可能会出错" class="headerlink" title="线性模型可能会出错"></a>线性模型可能会出错</h3><p>例如，线性意味着<em>单调</em>假设：<br>任何特征的增大都会导致模型输出的增大（如果对应的权重为正），<br>或者导致模型输出的减小（如果对应的权重为负）。<br>有时这是有道理的。<br>例如，如果我们试图预测一个人是否会偿还贷款。<br>我们可以认为，在其他条件不变的情况下，<br>收入较高的申请人比收入较低的申请人更有可能偿还贷款。<br>但是，虽然收入与还款概率存在单调性，但它们不是线性相关的。<br>收入从0增加到5万，可能比从100万增加到105万带来更大的还款可能性。<br>处理这一问题的一种方法是对我们的数据进行预处理，<br>使线性变得更合理，如使用收入的对数作为我们的特征。</p>
+<p>然而我们可以很容易找出违反单调性的例子。<br>例如，我们想要根据体温预测死亡率。<br>对体温高于37摄氏度的人来说，温度越高风险越大。<br>然而，对体温低于37摄氏度的人来说，温度越高风险就越低。<br>在这种情况下，我们也可以通过一些巧妙的预处理来解决问题。<br>例如，我们可以使用与37摄氏度的距离作为特征。</p>
+<p>但是，如何对猫和狗的图像进行分类呢？<br>增加位置$(13, 17)$处像素的强度是否总是增加（或降低）图像描绘狗的似然？<br>对线性模型的依赖对应于一个隐含的假设，<br>即区分猫和狗的唯一要求是评估单个像素的强度。<br>在一个倒置图像后依然保留类别的世界里，这种方法注定会失败。</p>
+<p>与我们前面的例子相比，这里的线性很荒谬，<br>而且我们难以通过简单的预处理来解决这个问题。<br>这是因为任何像素的重要性都以复杂的方式取决于该像素的上下文（周围像素的值）。<br>我们的数据可能会有一种表示，这种表示会考虑到我们在特征之间的相关交互作用。<br>在此表示的基础上建立一个线性模型可能会是合适的，<br>但我们不知道如何手动计算这么一种表示。<br>对于深度神经网络，我们使用观测数据来联合学习隐藏层表示和应用于该表示的线性预测器。</p>
+<h3 id="在网络中加入隐藏层"><a href="#在网络中加入隐藏层" class="headerlink" title="在网络中加入隐藏层"></a>在网络中加入隐藏层</h3><p>我们可以通过在网络中加入一个或多个隐藏层来克服线性模型的限制，<br>使其能处理更普遍的函数关系类型。<br>要做到这一点，最简单的方法是将许多全连接层堆叠在一起。<br>每一层都输出到上面的层，直到生成最后的输出。<br>我们可以把前$L-1$层看作表示，把最后一层看作线性预测器。<br>这种架构通常称为<em>多层感知机</em>（multilayer perceptron），通常缩写为<em>MLP</em>。<br>下面，我们以图的方式描述了多层感知机（ 多层感知机网络图）。</p>
+<p>（图：一个单隐藏层的多层感知机，具有5个隐藏单元）</p>
+<p>这个多层感知机有4个输入，3个输出，其隐藏层包含5个隐藏单元。<br>输入层不涉及任何计算，因此使用此网络产生输出只需要实现隐藏层和输出层的计算。<br>因此，这个多层感知机中的层数为2。<br>注意，这两个层都是全连接的。<br>每个输入都会影响隐藏层中的每个神经元，<br>而隐藏层中的每个神经元又会影响输出层中的每个神经元。</p>
+<p>然而，正如 全连接层的参数开销所说，<br>具有全连接层的多层感知机的参数开销可能会高得令人望而却步。<br>即使在不改变输入或输出大小的情况下，<br>可能在参数节约和模型有效性之间进行权衡 。</p>
+<h3 id="从线性到非线性"><a href="#从线性到非线性" class="headerlink" title="从线性到非线性"></a>从线性到非线性</h3><p>同之前的章节一样，<br>我们通过矩阵$\mathbf{X} \in \mathbb{R}^{n \times d}$<br>来表示$n$个样本的小批量，<br>其中每个样本具有$d$个输入特征。<br>对于具有$h$个隐藏单元的单隐藏层多层感知机，<br>用$\mathbf{H} \in \mathbb{R}^{n \times h}$表示隐藏层的输出，<br>称为<em>隐藏表示</em>（hidden representations）。<br>在数学或代码中，$\mathbf{H}$也被称为<em>隐藏层变量</em>（hidden-layer variable）<br>或<em>隐藏变量</em>（hidden variable）。<br>因为隐藏层和输出层都是全连接的，<br>所以我们有隐藏层权重$\mathbf{W}^{(1)} \in \mathbb{R}^{d \times h}$<br>和隐藏层偏置$\mathbf{b}^{(1)} \in \mathbb{R}^{1 \times h}$<br>以及输出层权重$\mathbf{W}^{(2)} \in \mathbb{R}^{h \times q}$<br>和输出层偏置$\mathbf{b}^{(2)} \in \mathbb{R}^{1 \times q}$。<br>形式上，我们按如下方式计算单隐藏层多层感知机的输出<br>$\mathbf{O} \in \mathbb{R}^{n \times q}$：</p>
+<p>$$<br>\begin{aligned}<br> \mathbf{H} &amp; = \mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)}, \<br> \mathbf{O} &amp; = \mathbf{H}\mathbf{W}^{(2)} + \mathbf{b}^{(2)}.<br>\end{aligned}<br>$$</p>
+<p>注意在添加隐藏层之后，模型现在需要跟踪和更新额外的参数。<br>可我们能从中得到什么好处呢？在上面定义的模型里，我们没有好处！<br>原因很简单：上面的隐藏单元由输入的仿射函数给出，<br>而输出（softmax操作前）只是隐藏单元的仿射函数。<br>仿射函数的仿射函数本身就是仿射函数，<br>但是我们之前的线性模型已经能够表示任何仿射函数。</p>
+<p>我们可以证明这一等价性，即对于任意权重值，<br>我们只需合并隐藏层，便可产生具有参数<br>$\mathbf{W} = \mathbf{W}^{(1)}\mathbf{W}^{(2)}$<br>和$\mathbf{b} = \mathbf{b}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)}$<br>的等价单层模型：</p>
+<p>$$<br>\mathbf{O} = (\mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)})\mathbf{W}^{(2)} + \mathbf{b}^{(2)} = \mathbf{X} \mathbf{W}^{(1)}\mathbf{W}^{(2)} + \mathbf{b}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)} = \mathbf{X} \mathbf{W} + \mathbf{b}.<br>$$</p>
+<p>为了发挥多层架构的潜力，<br>我们还需要一个额外的关键要素：<br>在仿射变换之后对每个隐藏单元应用非线性的<em>激活函数</em>（activation function）$\sigma$。<br>激活函数的输出（例如，$\sigma(\cdot)$）被称为<em>活性值</em>（activations）。<br>一般来说，有了激活函数，就不可能再将我们的多层感知机退化成线性模型：</p>
+<p>$$<br>\begin{aligned}<br> \mathbf{H} &amp; = \sigma(\mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)}), \<br> \mathbf{O} &amp; = \mathbf{H}\mathbf{W}^{(2)} + \mathbf{b}^{(2)}.\<br>\end{aligned}<br>$$</p>
+<p>由于$\mathbf{X}$中的每一行对应于小批量中的一个样本，<br>出于记号习惯的考量，<br>我们定义非线性函数$\sigma$也以按行的方式作用于其输入，<br>即一次计算一个样本。<br>我们在 小批量样本的矢量化中<br>以相同的方式使用了softmax符号来表示按行操作。<br>但是本节应用于隐藏层的激活函数通常不仅按行操作，也按元素操作。<br>这意味着在计算每一层的线性部分之后，我们可以计算每个活性值，<br>而不需要查看其他隐藏单元所取的值。对于大多数激活函数都是这样。</p>
+<p>为了构建更通用的多层感知机，<br>我们可以继续堆叠这样的隐藏层，<br>例如$\mathbf{H}^{(1)} = \sigma_1(\mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)})$和$\mathbf{H}^{(2)} = \sigma_2(\mathbf{H}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)})$，<br>一层叠一层，从而产生更有表达能力的模型。</p>
+<h3 id="通用近似定理"><a href="#通用近似定理" class="headerlink" title="通用近似定理"></a>通用近似定理</h3><p>多层感知机可以通过隐藏神经元，捕捉到输入之间复杂的相互作用，<br>这些神经元依赖于每个输入的值。<br>我们可以很容易地设计隐藏节点来执行任意计算。<br>例如，在一对输入上进行基本逻辑操作，多层感知机是通用近似器。<br>即使是网络只有一个隐藏层，给定足够的神经元和正确的权重，<br>我们可以对任意函数建模，尽管实际中学习该函数是很困难的。<br>神经网络有点像C语言。<br>C语言和任何其他现代编程语言一样，能够表达任何可计算的程序。<br>但实际上，想出一个符合规范的程序才是最困难的部分。</p>
+<p>而且，虽然一个单隐层网络能学习任何函数，<br>但并不意味着我们应该尝试使用单隐藏层网络来解决所有问题。<br>事实上，通过使用更深（而不是更广）的网络，我们可以更容易地逼近许多函数。<br>我们将在后面的章节中进行更细致的讨论。</p>
+<h2 id="激活函数"><a href="#激活函数" class="headerlink" title="激活函数"></a>激活函数</h2><p><em>激活函数</em>（activation function）通过计算加权和并加上偏置来确定神经元是否应该被激活，<br>它们将输入信号转换为输出的可微运算。<br>大多数激活函数都是非线性的。<br>由于激活函数是深度学习的基础，下面简要介绍一些常见的激活函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+
+<h3 id="ReLU函数"><a href="#ReLU函数" class="headerlink" title="ReLU函数"></a>ReLU函数</h3><p>最受欢迎的激活函数是<em>修正线性单元</em>（Rectified linear unit，<em>ReLU</em>），<br>因为它实现简单，同时在各种预测任务中表现良好。<br>ReLU提供了一种非常简单的非线性变换。<br>给定元素$x$，ReLU函数被定义为该元素与$0$的最大值：</p>
+<p>$$\operatorname{ReLU}(x) = \max(x, 0).$$</p>
+<p>通俗地说，ReLU函数通过将相应的活性值设为0，仅保留正元素并丢弃所有负元素。<br>为了直观感受一下，我们可以画出函数的曲线图。<br>正如从图中所看到，激活函数是分段线性的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(-<span class="number">8.0</span>, <span class="number">8.0</span>, <span class="number">0.1</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">y = torch.relu(x)</span><br><span class="line">d2l.plot(x.detach(), y.detach(), <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;relu(x)&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>当输入为负时，ReLU函数的导数为0，而当输入为正时，ReLU函数的导数为1。<br>注意，当输入值精确等于0时，ReLU函数不可导。<br>在此时，我们默认使用左侧的导数，即当输入为0时导数为0。<br>我们可以忽略这种情况，因为输入可能永远都不会是0。<br>这里引用一句古老的谚语，“如果微妙的边界条件很重要，我们很可能是在研究数学而非工程”，<br>这个观点正好适用于这里。<br>下面我们绘制ReLU函数的导数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y.backward()</span><br><span class="line">d2l.plot(x, x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of relu&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y.backward(torch.ones_like(x), retain_graph=<span class="literal">True</span>)</span><br><span class="line">d2l.plot(x.detach(), x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of relu&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>使用ReLU的原因是，它求导表现得特别好：要么让参数消失，要么让参数通过。<br>这使得优化表现得更好，并且ReLU减轻了困扰以往神经网络的梯度消失问题（稍后将详细介绍）。</p>
+<p>注意，ReLU函数有许多变体，包括<em>参数化ReLU</em>（Parameterized ReLU，<em>pReLU</em>）<br>函数 。<br>该变体为ReLU添加了一个线性项，因此即使参数是负的，某些信息仍然可以通过：</p>
+<p>$$\operatorname{pReLU}(x) = \max(0, x) + \alpha \min(0, x).$$</p>
+<h3 id="sigmoid函数"><a href="#sigmoid函数" class="headerlink" title="sigmoid函数"></a>sigmoid函数</h3><p>对于一个定义域在$\mathbb{R}$中的输入，<br><em>sigmoid函数</em>将输入变换为区间(0, 1)上的输出。<br>因此，sigmoid通常称为<em>挤压函数</em>（squashing function）：<br>它将范围（-inf, inf）中的任意输入压缩到区间（0, 1）中的某个值：</p>
+<p>$$\operatorname{sigmoid}(x) = \frac{1}{1 + \exp(-x)}.$$</p>
+<p>在最早的神经网络中，科学家们感兴趣的是对“激发”或“不激发”的生物神经元进行建模。<br>因此，这一领域的先驱可以一直追溯到人工神经元的发明者麦卡洛克和皮茨，他们专注于阈值单元。<br>阈值单元在其输入低于某个阈值时取值0，当输入超过阈值时取值1。</p>
+<p>当人们逐渐关注到到基于梯度的学习时，<br>sigmoid函数是一个自然的选择，因为它是一个平滑的、可微的阈值单元近似。<br>当我们想要将输出视作二元分类问题的概率时，<br>sigmoid仍然被广泛用作输出单元上的激活函数<br>（sigmoid可以视为softmax的特例）。<br>然而，sigmoid在隐藏层中已经较少使用，<br>它在大部分时候被更简单、更容易训练的ReLU所取代。<br>在后面关于循环神经网络的章节中，我们将描述利用sigmoid单元来控制时序信息流的架构。</p>
+<p>下面，我们绘制sigmoid函数。<br>注意，当输入接近0时，sigmoid函数接近线性变换。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y = torch.sigmoid(x)</span><br><span class="line">d2l.plot(x.detach(), y.detach(), <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;sigmoid(x)&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>sigmoid函数的导数为下面的公式：</p>
+<p>$$\frac{d}{dx} \operatorname{sigmoid}(x) = \frac{\exp(-x)}{(1 + \exp(-x))^2} = \operatorname{sigmoid}(x)\left(1-\operatorname{sigmoid}(x)\right).$$</p>
+<p>sigmoid函数的导数图像如下所示。<br>注意，当输入为0时，sigmoid函数的导数达到最大值0.25；<br>而输入在任一方向上越远离0点时，导数越接近0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y.backward()</span><br><span class="line">d2l.plot(x, x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of sigmoid&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 清除以前的梯度</span></span><br><span class="line">x.grad.data.zero_()</span><br><span class="line">y.backward(torch.ones_like(x),retain_graph=<span class="literal">True</span>)</span><br><span class="line">d2l.plot(x.detach(), x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of sigmoid&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="tanh函数"><a href="#tanh函数" class="headerlink" title="tanh函数"></a>tanh函数</h3><p>与sigmoid函数类似，<br>tanh(双曲正切)函数也能将其输入压缩转换到区间(-1, 1)上。<br>tanh函数的公式如下：</p>
+<p>$$\operatorname{tanh}(x) = \frac{1 - \exp(-2x)}{1 + \exp(-2x)}.$$</p>
+<p>下面我们绘制tanh函数。<br>注意，当输入在0附近时，tanh函数接近线性变换。<br>函数的形状类似于sigmoid函数，<br>不同的是tanh函数关于坐标系原点中心对称。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y = torch.tanh(x)</span><br><span class="line">d2l.plot(x.detach(), y.detach(), <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;tanh(x)&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>tanh函数的导数是：</p>
+<p>$$\frac{d}{dx} \operatorname{tanh}(x) = 1 - \operatorname{tanh}^2(x).$$</p>
+<p>tanh函数的导数图像如下所示。<br>当输入接近0时，tanh函数的导数接近最大值1。<br>与我们在sigmoid函数图像中看到的类似，<br>输入在任一方向上越远离0点，导数越接近0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y.backward()</span><br><span class="line">d2l.plot(x, x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of tanh&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 清除以前的梯度</span></span><br><span class="line">x.grad.data.zero_()</span><br><span class="line">y.backward(torch.ones_like(x),retain_graph=<span class="literal">True</span>)</span><br><span class="line">d2l.plot(x.detach(), x.grad, <span class="string">&#x27;x&#x27;</span>, <span class="string">&#x27;grad of tanh&#x27;</span>, figsize=(<span class="number">5</span>, <span class="number">2.5</span>))</span><br></pre></td></tr></table></figure>
+
+<p>总结一下，我们现在了解了如何结合非线性函数来构建具有更强表达能力的多层神经网络架构。<br>顺便说一句，这些知识已经让你掌握了一个类似于1990年左右深度学习从业者的工具。<br>在某些方面，你比在20世纪90年代工作的任何人都有优势，<br>因为你可以利用功能强大的开源深度学习框架，只需几行代码就可以快速构建模型，<br>而以前训练这些网络需要研究人员编写数千行的C或Fortran代码。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。</li>
+<li>常用的激活函数包括ReLU函数、sigmoid函数和tanh函数。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA"><span class="toc-number">1.</span> <span class="toc-text">多层感知机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E8%97%8F%E5%B1%82"><span class="toc-number">1.1.</span> <span class="toc-text">隐藏层</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%87%BA%E9%94%99"><span class="toc-number">1.1.1.</span> <span class="toc-text">线性模型可能会出错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8%E7%BD%91%E7%BB%9C%E4%B8%AD%E5%8A%A0%E5%85%A5%E9%9A%90%E8%97%8F%E5%B1%82"><span class="toc-number">1.1.2.</span> <span class="toc-text">在网络中加入隐藏层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%88%B0%E9%9D%9E%E7%BA%BF%E6%80%A7"><span class="toc-number">1.1.3.</span> <span class="toc-text">从线性到非线性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E8%BF%91%E4%BC%BC%E5%AE%9A%E7%90%86"><span class="toc-number">1.1.4.</span> <span class="toc-text">通用近似定理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.</span> <span class="toc-text">激活函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ReLU%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">ReLU函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sigmoid%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.2.</span> <span class="toc-text">sigmoid函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#tanh%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.3.</span> <span class="toc-text">tanh函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&text=多层感知机"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&is_video=false&description=多层感知机"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=多层感知机&body=Check out this article: https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&title=多层感知机"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/&name=多层感知机&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

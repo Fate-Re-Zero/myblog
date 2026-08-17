@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="一、概述要学习深度学习，首先需要掌握一些基本技能。所有机器学习方法都涉及从数据中提取信息，先学习数据的存储、操作和预处理。 二、数据操作为了能够完成各种数据操作，我们需要某种方法来存储和操作数据。通常，我们需要做两件重要的事：（1）获取数据；（2）将数据读入计算机后对其进行处理。如果没有某种方法来存储数据，那么获取数据是没有意义的。 先学习 n 维数组，也称为张量（tensor）。无论使用哪个深度">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习的预备知识">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="一、概述要学习深度学习，首先需要掌握一些基本技能。所有机器学习方法都涉及从数据中提取信息，先学习数据的存储、操作和预处理。 二、数据操作为了能够完成各种数据操作，我们需要某种方法来存储和操作数据。通常，我们需要做两件重要的事：（1）获取数据；（2）将数据读入计算机后对其进行处理。如果没有某种方法来存储数据，那么获取数据是没有意义的。 先学习 n 维数组，也称为张量（tensor）。无论使用哪个深度">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-02T08:10:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:01:51.166Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>深度学习的预备知识</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&text=深度学习的预备知识"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&is_video=false&description=深度学习的预备知识"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=深度学习的预备知识&body=Check out this article: https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&name=深度学习的预备知识&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">一、概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">二、数据操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%A0%E9%87%8F%E5%85%A5%E9%97%A8"><span class="toc-number">2.1.</span> <span class="toc-text">张量入门</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%BC%A0%E9%87%8F"><span class="toc-number">2.1.1.</span> <span class="toc-text">创建张量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%B9%E5%8F%98%E5%BD%A2%E7%8A%B6"><span class="toc-number">2.1.2.</span> <span class="toc-text">改变形状</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.1.3.</span> <span class="toc-text">特殊初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E7%BB%93%E5%BC%A0%E9%87%8F"><span class="toc-number">2.2.1.</span> <span class="toc-text">连结张量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.2.</span> <span class="toc-text">逻辑运算符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%BF%E6%92%AD%E6%9C%BA%E5%88%B6"><span class="toc-number">2.3.</span> <span class="toc-text">广播机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%92%8C%E5%88%87%E7%89%87"><span class="toc-number">2.4.</span> <span class="toc-text">索引和切片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%82%E7%9C%81%E5%86%85%E5%AD%98"><span class="toc-number">2.5.</span> <span class="toc-text">节省内存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%85%B6%E4%BB%96-Python-%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.6.</span> <span class="toc-text">转换为其他 Python 对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">2.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        深度学习的预备知识
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-02T08:10:00.000Z" itemprop="datePublished">2025-03-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/" class="leancloud-visitors" data-flag-title="深度学习的预备知识" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h1><p>要学习深度学习，首先需要掌握一些基本技能。所有机器学习方法都涉及从数据中提取信息，先学习数据的存储、操作和预处理。</p>
+<h1 id="二、数据操作"><a href="#二、数据操作" class="headerlink" title="二、数据操作"></a>二、数据操作</h1><p>为了能够完成各种数据操作，我们需要某种方法来存储和操作数据。通常，我们需要做两件重要的事：（1）获取数据；（2）将数据读入计算机后对其进行处理。如果没有某种方法来存储数据，那么获取数据是没有意义的。</p>
+<p>先学习 <strong>n 维数组</strong>，也称为<strong>张量</strong>（tensor）。无论使用哪个深度学习框架，它的张量类（在 PyTorch 和 TensorFlow 中为 <code>Tensor</code>）都与 NumPy 的 <code>ndarray</code> 类似。但深度学习框架又比 NumPy 的 <code>ndarray</code> 多一些重要功能：</p>
+<ol>
+<li><strong>GPU 加速</strong>：GPU 很好地支持加速计算，而 NumPy 仅支持 CPU 计算；</li>
+<li><strong>自动微分</strong>：张量类支持自动微分。</li>
+</ol>
+<p>这些功能使得张量类更适合深度学习。</p>
+<h2 id="张量入门"><a href="#张量入门" class="headerlink" title="张量入门"></a>张量入门</h2><p>首先，导入 <code>torch</code>。请注意，虽然它被称为 PyTorch，但是代码中使用 <code>torch</code> 而不是 <code>pytorch</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+
+<p><strong>张量表示一个由数值组成的数组，这个数组可能有多个维度。</strong> 具有一个轴的张量对应数学上的<strong>向量</strong>（vector）；具有两个轴的张量对应数学上的<strong>矩阵</strong>（matrix）；具有两个轴以上的张量没有特殊的数学名称。</p>
+<h3 id="创建张量"><a href="#创建张量" class="headerlink" title="创建张量"></a>创建张量</h3><p>首先，可以使用 <code>arange</code> 创建一个行向量 <code>x</code>。这个行向量包含以 0 开始的前 12 个整数，它们默认创建为整数。也可指定创建类型为浮点数。张量中的每个值都称为张量的<strong>元素</strong>（element）。例如，张量 <code>x</code> 中有 12 个元素。除非额外指定，新的张量将存储在内存中，并采用基于 CPU 的计算。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = torch.arange(<span class="number">12</span>)</span><br><span class="line">x</span><br><span class="line"><span class="comment"># tensor([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])</span></span><br></pre></td></tr></table></figure>
+
+<p>可以通过张量的 <code>shape</code> 属性来访问张量（沿每个轴的长度）的形状。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x.shape</span><br><span class="line"><span class="comment"># torch.Size([12])</span></span><br></pre></td></tr></table></figure>
+
+<p>如果只想知道张量中元素的总数，即形状的所有元素乘积，可以检查它的大小（size）。因为这里在处理的是一个向量，所以它的 <code>shape</code> 与它的 <code>numel()</code> 相同。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x.numel()</span><br><span class="line"><span class="comment"># 12</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="改变形状"><a href="#改变形状" class="headerlink" title="改变形状"></a>改变形状</h3><p>要想改变一个张量的形状而<strong>不改变元素数量和元素值</strong>，可以调用 <code>reshape</code> 函数。例如，可以把张量 <code>x</code> 从形状为 (12,) 的行向量转换为形状为 (3, 4) 的矩阵。这个新的张量包含与转换前相同的值，但是它被看成一个 3 行 4 列的矩阵。</p>
+<p>要重点说明一下，虽然张量的形状发生了改变，但其<strong>元素值并没有变</strong>。注意，通过改变张量的形状，张量的大小不会改变。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X = x.reshape(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">X</span><br><span class="line"><span class="comment"># tensor([[ 0,  1,  2,  3],</span></span><br><span class="line"><span class="comment">#         [ 4,  5,  6,  7],</span></span><br><span class="line"><span class="comment">#         [ 8,  9, 10, 11]])</span></span><br></pre></td></tr></table></figure>
+
+<p>不需要通过手动指定每个维度来改变形状。也就是说，如果我们的目标形状是（高度, 宽度），那么在知道宽度后，高度会被自动计算得出，不必我们自己做除法。在上面的例子中，为了获得一个 3 行的矩阵，我们手动指定了它有 3 行和 4 列。幸运的是，我们可以通过 <code>-1</code> 来调用此自动计算出维度的功能。即我们可以用 <code>x.reshape(-1, 4)</code> 或 <code>x.reshape(3, -1)</code> 来取代 <code>x.reshape(3, 4)</code>。</p>
+<h3 id="特殊初始化"><a href="#特殊初始化" class="headerlink" title="特殊初始化"></a>特殊初始化</h3><p>有时，我们希望使用全 0、全 1、其他常量，或者从特定分布中随机采样的数字来初始化矩阵。我们可以创建一个形状为 (2, 3, 4) 的张量，其中所有元素都设置为 0：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">torch.zeros((<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line"><span class="comment"># tensor([[[0., 0., 0., 0.],</span></span><br><span class="line"><span class="comment">#          [0., 0., 0., 0.],</span></span><br><span class="line"><span class="comment">#          [0., 0., 0., 0.]],</span></span><br><span class="line"><span class="comment">#         [[0., 0., 0., 0.],</span></span><br><span class="line"><span class="comment">#          [0., 0., 0., 0.],</span></span><br><span class="line"><span class="comment">#          [0., 0., 0., 0.]]])</span></span><br></pre></td></tr></table></figure>
+
+<p>同样，我们可以创建一个形状为 (2, 3, 4) 的张量，其中所有元素都设置为 1：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">torch.ones((<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line"><span class="comment"># tensor([[[1., 1., 1., 1.],</span></span><br><span class="line"><span class="comment">#          [1., 1., 1., 1.],</span></span><br><span class="line"><span class="comment">#          [1., 1., 1., 1.]],</span></span><br><span class="line"><span class="comment">#         [[1., 1., 1., 1.],</span></span><br><span class="line"><span class="comment">#          [1., 1., 1., 1.],</span></span><br><span class="line"><span class="comment">#          [1., 1., 1., 1.]]])</span></span><br></pre></td></tr></table></figure>
+
+<p>有时我们想通过从某个特定的概率分布中随机采样来得到张量中每个元素的值。例如，当我们构造数组来作为神经网络中的参数时，我们通常会随机初始化参数的值。以下代码创建一个形状为 (3, 4) 的张量，其中的每个元素都从均值为 0、标准差为 1 的标准高斯分布（正态分布）中随机采样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">torch.randn(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"><span class="comment"># tensor([[-0.0135,  0.0665,  0.0912,  0.3212],</span></span><br><span class="line"><span class="comment">#         [ 1.4653,  0.1843, -1.6995, -0.3036],</span></span><br><span class="line"><span class="comment">#         [ 1.7646,  1.0450,  0.2457, -0.7732]])</span></span><br></pre></td></tr></table></figure>
+
+<p>我们还可以通过提供包含数值的 Python 列表（或嵌套列表），来为所需张量中的每个元素赋予确定值。在这里，<strong>最外层的列表对应于轴 0，内层的列表对应于轴 1</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">torch.tensor([[<span class="number">2</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>], [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]])</span><br><span class="line"><span class="comment"># tensor([[2, 1, 4, 3],</span></span><br><span class="line"><span class="comment">#         [1, 2, 3, 4],</span></span><br><span class="line"><span class="comment">#         [4, 3, 2, 1]])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><p>想在这些数据上执行数学运算，其中最简单且最有用的操作是<strong>按元素</strong>（elementwise）运算。它们将标准标量运算符应用于数组的每个元素。对于将两个数组作为输入的函数，按元素运算将二元运算符应用于两个数组中的每对位置对应的元素。可以基于任何从标量到标量的函数来创建按元素函数。</p>
+<p>在数学表示法中，我们将通过符号 (f: \mathbb{R} \rightarrow \mathbb{R}) 来表示一元标量运算符（只接收一个输入）。这意味着该函数从任何实数（(\mathbb{R})）映射到另一个实数。同样，我们通过符号 (f: \mathbb{R}, \mathbb{R} \rightarrow \mathbb{R}) 表示二元标量运算符，这意味着该函数接收两个输入，并产生一个输出。给定同一形状的任意两个向量 (\mathbf{u}) 和 (\mathbf{v}) 和二元运算符 (f)，我们可以得到向量 (\mathbf{c} = F(\mathbf{u},\mathbf{v}))。具体计算方法是 (c_i \gets f(u_i, v_i))，其中 (c_i)、(u_i) 和 (v_i) 分别是向量 (\mathbf{c})、(\mathbf{u}) 和 (\mathbf{v}) 中的元素。在这里，我们通过将标量函数升级为按元素向量运算来生成向量值 (F: \mathbb{R}^d, \mathbb{R}^d \rightarrow \mathbb{R}^d)。</p>
+<p>对于任意具有相同形状的张量，常见的标准算术运算符（<code>+</code>、<code>-</code>、<code>*</code>、<code>/</code> 和 <code>**</code>）都可以被升级为按元素运算。我们可以在同一形状的任意两个张量上调用按元素操作。在下面的例子中，我们使用逗号来表示一个具有 5 个元素的元组，其中每个元素都是按元素操作的结果。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x = torch.tensor([<span class="number">1.0</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>])</span><br><span class="line">y = torch.tensor([<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">x + y, x - y, x * y, x / y, x ** y  <span class="comment"># ** 运算符是求幂运算</span></span><br><span class="line"><span class="comment"># (tensor([ 3.,  4.,  6., 10.]),</span></span><br><span class="line"><span class="comment">#  tensor([-1.,  0.,  2.,  6.]),</span></span><br><span class="line"><span class="comment">#  tensor([ 2.,  4.,  8., 16.]),</span></span><br><span class="line"><span class="comment">#  tensor([0.5000, 1.0000, 2.0000, 4.0000]),</span></span><br><span class="line"><span class="comment">#  tensor([ 1.,  4., 16., 64.]))</span></span><br></pre></td></tr></table></figure>
+
+<p>“按元素”方式可以应用更多的计算，包括像求幂这样的一元运算符：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">torch.exp(x)</span><br><span class="line"><span class="comment"># tensor([2.7183e+00, 7.3891e+00, 5.4598e+01, 2.9810e+03])</span></span><br></pre></td></tr></table></figure>
+
+<p>除了按元素计算外，我们还可以执行线性代数运算，包括向量点积和矩阵乘法。在 2.3 节中会补全解释线性代数的重点内容。</p>
+<h3 id="连结张量"><a href="#连结张量" class="headerlink" title="连结张量"></a>连结张量</h3><p>我们也可以把多个张量<strong>连结</strong>（concatenate）在一起，把它们端对端地叠起来形成一个更大的张量。我们只需要提供张量列表，并给出沿哪个轴连结。下面的例子分别演示了当我们沿行（轴-0，形状的第一个元素）和按列（轴-1，形状的第二个元素）连结两个矩阵时，会发生什么情况。我们可以看到，第一个输出张量的轴-0 长度（6）是两个输入张量轴-0 长度的总和（3 + 3）；第二个输出张量的轴-1 长度（8）是两个输入张量轴-1 长度的总和（4 + 4）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">X = torch.arange(<span class="number">12</span>, dtype=torch.float32).reshape((<span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line">Y = torch.tensor([[<span class="number">2.0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>], [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]])</span><br><span class="line">torch.cat((X, Y), dim=<span class="number">0</span>), torch.cat((X, Y), dim=<span class="number">1</span>)</span><br><span class="line"><span class="comment"># (tensor([[ 0.,  1.,  2.,  3.],</span></span><br><span class="line"><span class="comment">#          [ 4.,  5.,  6.,  7.],</span></span><br><span class="line"><span class="comment">#          [ 8.,  9., 10., 11.],</span></span><br><span class="line"><span class="comment">#          [ 2.,  1.,  4.,  3.],</span></span><br><span class="line"><span class="comment">#          [ 1.,  2.,  3.,  4.],</span></span><br><span class="line"><span class="comment">#          [ 4.,  3.,  2.,  1.]]),</span></span><br><span class="line"><span class="comment">#  tensor([[ 0.,  1.,  2.,  3.,  2.,  1.,  4.,  3.],</span></span><br><span class="line"><span class="comment">#          [ 4.,  5.,  6.,  7.,  1.,  2.,  3.,  4.],</span></span><br><span class="line"><span class="comment">#          [ 8.,  9., 10., 11.,  4.,  3.,  2.,  1.]]))</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h3><p>有时，我们想通过逻辑运算符构建二元张量。以 <code>X == Y</code> 为例：对于每个位置，如果 <code>X</code> 和 <code>Y</code> 在该位置相等，则新张量中相应项的值为 1。这意味着逻辑语句 <code>X == Y</code> 在该位置处为真，否则该位置为 0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">X == Y</span><br><span class="line"><span class="comment"># tensor([[False,  True, False,  True],</span></span><br><span class="line"><span class="comment">#         [False, False, False, False],</span></span><br><span class="line"><span class="comment">#         [False, False, False, False]])</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">X &gt; Y</span><br><span class="line"><span class="comment"># tensor([[False, False, False, False],</span></span><br><span class="line"><span class="comment">#         [True,  True,  True,  True],</span></span><br><span class="line"><span class="comment">#         [True,  True,  True,  True]])</span></span><br></pre></td></tr></table></figure>
+
+<p>对张量中的所有元素进行求和，会产生一个单元素张量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">X.<span class="built_in">sum</span>()</span><br><span class="line"><span class="comment"># tensor(66.)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="广播机制"><a href="#广播机制" class="headerlink" title="广播机制"></a>广播机制</h2><p>在上面的部分中，我们看到了如何在相同形状的两个张量上执行按元素操作。在某些情况下，即使形状不同，我们仍然可以通过调用<strong>广播机制</strong>（broadcasting mechanism）来执行按元素操作。这种机制的工作方式如下：</p>
+<ol>
+<li>通过适当复制元素来扩展一个或两个数组，以便在转换之后，两个张量具有相同的形状；</li>
+<li>对生成的数组执行按元素操作。</li>
+</ol>
+<p>在大多数情况下，我们将沿着数组中长度为 1 的轴进行广播，如下例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a = torch.arange(<span class="number">3</span>).reshape((<span class="number">3</span>, <span class="number">1</span>))</span><br><span class="line">b = torch.arange(<span class="number">2</span>).reshape((<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">a, b</span><br><span class="line"><span class="comment"># (tensor([[0],</span></span><br><span class="line"><span class="comment">#          [1],</span></span><br><span class="line"><span class="comment">#          [2]]),</span></span><br><span class="line"><span class="comment">#  tensor([[0, 1]]))</span></span><br></pre></td></tr></table></figure>
+
+<p>由于 <code>a</code> 和 <code>b</code> 分别是 (3 \times 1) 和 (1 \times 2) 矩阵，如果让它们相加，它们的形状不匹配。我们将两个矩阵<strong>广播</strong>为一个更大的 (3 \times 2) 矩阵，如下所示：矩阵 <code>a</code> 将复制列，矩阵 <code>b</code> 将复制行，然后再按元素相加。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a + b</span><br><span class="line"><span class="comment"># tensor([[0, 1],</span></span><br><span class="line"><span class="comment">#         [1, 2],</span></span><br><span class="line"><span class="comment">#         [2, 3]])</span></span><br></pre></td></tr></table></figure>
+
+<p>三维张量</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">m = torch.arange(<span class="number">6</span>).reshape((<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">n = torch.arange(<span class="number">4</span>).reshape((<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>))</span><br><span class="line">m, n</span><br><span class="line"><span class="comment">#(tensor([[[0, 1]],</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#         [[2, 3]],</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#         [[4, 5]]]),</span></span><br><span class="line"><span class="comment"># tensor([[[0, 1],</span></span><br><span class="line"><span class="comment">#          [2, 3]]]))</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">m + n</span><br><span class="line"><span class="comment"># tensor([[[0, 2],</span></span><br><span class="line"><span class="comment">#         [2, 4]],</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#        [[2, 4],</span></span><br><span class="line"><span class="comment">#         [4, 6]],</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#        [[4, 6],</span></span><br><span class="line"><span class="comment">#         [6, 8]]])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="索引和切片"><a href="#索引和切片" class="headerlink" title="索引和切片"></a>索引和切片</h2><p>就像在任何其他 Python 数组中一样，张量中的元素可以通过索引访问。与任何 Python 数组一样：第一个元素的索引是 0，最后一个元素索引是 -1；可以指定范围以包含第一个元素和最后一个之前的元素。</p>
+<p>如下所示，我们可以用 <code>[-1]</code> 选择最后一个元素，可以用 <code>[1:3]</code> 选择第二个和第三个元素：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X = torch.arange(<span class="number">12</span>, dtype=torch.float32).reshape((<span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line">X[-<span class="number">1</span>], X[<span class="number">1</span>:<span class="number">3</span>]</span><br><span class="line"><span class="comment"># (tensor([ 8.,  9., 10., 11.]),</span></span><br><span class="line"><span class="comment">#  tensor([[ 4.,  5.,  6.,  7.],</span></span><br><span class="line"><span class="comment">#          [ 8.,  9., 10., 11.]]))</span></span><br></pre></td></tr></table></figure>
+
+<p>除读取外，我们还可以通过指定索引来将元素写入矩阵：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X[<span class="number">1</span>, <span class="number">2</span>] = <span class="number">9</span></span><br><span class="line">X</span><br><span class="line"><span class="comment"># tensor([[ 0.,  1.,  2.,  3.],</span></span><br><span class="line"><span class="comment">#         [ 4.,  5.,  9.,  7.],</span></span><br><span class="line"><span class="comment">#         [ 8.,  9., 10., 11.]])</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们想为多个元素赋值相同的值，我们只需要索引所有元素，然后为它们赋值。例如，<code>[0:2, :]</code> 访问第 1 行和第 2 行，其中 <code>:</code> 代表沿轴 1（列）的所有元素。虽然我们讨论的是矩阵的索引，但这也适用于向量和超过 2 个维度的张量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X[<span class="number">0</span>:<span class="number">2</span>, :] = <span class="number">12</span></span><br><span class="line">X</span><br><span class="line"><span class="comment"># tensor([[12., 12., 12., 12.],</span></span><br><span class="line"><span class="comment">#         [12., 12., 12., 12.],</span></span><br><span class="line"><span class="comment">#         [ 8.,  9., 10., 11.]])</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="节省内存"><a href="#节省内存" class="headerlink" title="节省内存"></a>节省内存</h2><p>运行一些操作可能会导致为新结果分配内存。例如，如果我们用 <code>Y = X + Y</code>，我们将取消引用 <code>Y</code> 指向的张量，而是指向新分配的内存处的张量。</p>
+<p>在下面的例子中，我们用 Python 的 <code>id()</code> 函数演示了这一点，它给我们提供了内存中引用对象的确切地址。运行 <code>Y = Y + X</code> 后，我们会发现 <code>id(Y)</code> 指向另一个位置。这是因为 Python 首先计算 <code>Y + X</code>，为结果分配新的内存，然后使 <code>Y</code> 指向内存中的这个新位置。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">X = torch.arange(<span class="number">12</span>, dtype=torch.float32).reshape((<span class="number">3</span>, <span class="number">4</span>))</span><br><span class="line">Y = torch.tensor([[<span class="number">2.0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>], [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line">before = <span class="built_in">id</span>(Y)</span><br><span class="line">Y = Y + X</span><br><span class="line"><span class="built_in">id</span>(Y) == before</span><br><span class="line"><span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+
+<p>这可能是不可取的，原因有两个：</p>
+<ol>
+<li>首先，我们不想总是不必要地分配内存。在机器学习中，我们可能有数百兆的参数，并且在一秒内多次更新所有参数。通常情况下，我们希望<strong>原地</strong>执行这些更新；</li>
+<li>如果我们不原地更新，其他引用仍然会指向旧的内存位置，这样我们的某些代码可能会无意中引用旧的参数。</li>
+</ol>
+<p>幸运的是，执行原地操作非常简单。我们可以使用切片表示法将操作的结果分配给先前分配的数组，例如 <code>Y[:] = &lt;结果&gt;</code>。为了说明这一点，我们首先创建一个新的矩阵 <code>Z</code>，其形状与另一个 <code>Y</code> 相同，使用 <code>zeros_like</code> 来分配一个全 0 的块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Z = torch.zeros_like(Y)</span><br><span class="line">print(<span class="string">&#x27;id(Z):&#x27;</span>, <span class="built_in">id</span>(Z))</span><br><span class="line">Z[:] = X + Y</span><br><span class="line">print(<span class="string">&#x27;id(Z):&#x27;</span>, <span class="built_in">id</span>(Z))</span><br><span class="line"><span class="comment"># id(Z): 140327634811696</span></span><br><span class="line"><span class="comment"># id(Z): 140327634811696   ← 内存地址不变</span></span><br></pre></td></tr></table></figure>
+
+<p>如果在后续计算中没有重复使用 <code>X</code>，我们也可以使用 <code>X[:] = X + Y</code> 或 <code>X += Y</code> 来减少操作的内存开销。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">before = <span class="built_in">id</span>(X)</span><br><span class="line">X += Y</span><br><span class="line"><span class="built_in">id</span>(X) == before</span><br><span class="line"><span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="转换为其他-Python-对象"><a href="#转换为其他-Python-对象" class="headerlink" title="转换为其他 Python 对象"></a>转换为其他 Python 对象</h2><p>将深度学习框架定义的张量转换为 NumPy 张量（<code>ndarray</code>）很容易，反之也同样容易。<strong>torch 张量和 numpy 数组将共享它们的底层内存</strong>，就地操作更改一个张量也会同时更改另一个张量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">A = X.numpy()</span><br><span class="line">B = torch.tensor(A)</span><br><span class="line"><span class="built_in">type</span>(A), <span class="built_in">type</span>(B)</span><br><span class="line"><span class="comment"># (numpy.ndarray, torch.Tensor)</span></span><br></pre></td></tr></table></figure>
+
+<p>要将大小为 1 的张量转换为 Python 标量，我们可以调用 <code>item</code> 函数或 Python 的内置函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a = torch.tensor([<span class="number">3.5</span>])</span><br><span class="line">a, a.item(), <span class="built_in">float</span>(a), <span class="built_in">int</span>(a)</span><br><span class="line"><span class="comment"># (tensor([3.5000]), 3.5, 3.5, 3)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>深度学习存储和操作数据的主要接口是<strong>张量</strong>（n 维数组）。它提供了各种功能，包括基本数学运算、广播、索引、切片、内存节省和转换其他 Python 对象。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">一、概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">二、数据操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%A0%E9%87%8F%E5%85%A5%E9%97%A8"><span class="toc-number">2.1.</span> <span class="toc-text">张量入门</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%BC%A0%E9%87%8F"><span class="toc-number">2.1.1.</span> <span class="toc-text">创建张量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%B9%E5%8F%98%E5%BD%A2%E7%8A%B6"><span class="toc-number">2.1.2.</span> <span class="toc-text">改变形状</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.1.3.</span> <span class="toc-text">特殊初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E7%BB%93%E5%BC%A0%E9%87%8F"><span class="toc-number">2.2.1.</span> <span class="toc-text">连结张量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.2.</span> <span class="toc-text">逻辑运算符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%BF%E6%92%AD%E6%9C%BA%E5%88%B6"><span class="toc-number">2.3.</span> <span class="toc-text">广播机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E5%92%8C%E5%88%87%E7%89%87"><span class="toc-number">2.4.</span> <span class="toc-text">索引和切片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%82%E7%9C%81%E5%86%85%E5%AD%98"><span class="toc-number">2.5.</span> <span class="toc-text">节省内存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%85%B6%E4%BB%96-Python-%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.6.</span> <span class="toc-text">转换为其他 Python 对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">2.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&text=深度学习的预备知识"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&is_video=false&description=深度学习的预备知识"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=深度学习的预备知识&body=Check out this article: https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&title=深度学习的预备知识"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/02/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E9%A2%84%E5%A4%87%E7%9F%A5%E8%AF%86/&name=深度学习的预备知识&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

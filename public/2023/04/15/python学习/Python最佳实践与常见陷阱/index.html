@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="最佳实践与常见陷阱代码风格 PEP 8Python 官方风格指南，核心要点： 123456789101112# 好def calculate_total(items: list[float]) -&gt; float:    return sum(items)MAX_RETRIES &#x3D; 3user_name &#x3D; &quot;alice&quot;# 命名# 变量&#x2F;函数: snake_case# 类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python最佳实践与常见陷阱">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="最佳实践与常见陷阱代码风格 PEP 8Python 官方风格指南，核心要点： 123456789101112# 好def calculate_total(items: list[float]) -&gt; float:    return sum(items)MAX_RETRIES &#x3D; 3user_name &#x3D; &quot;alice&quot;# 命名# 变量&#x2F;函数: snake_case# 类">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-04-15T14:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:44:18.453Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Python最佳实践与常见陷阱</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/07/26/%E4%BA%91%E5%8E%9F%E7%94%9F/%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2%E7%9A%84%E6%BC%94%E5%8F%98%E4%B9%8B%E8%B7%AF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/04/14/python%E5%AD%A6%E4%B9%A0/Python%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8E%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&text=Python最佳实践与常见陷阱"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&is_video=false&description=Python最佳实践与常见陷阱"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python最佳实践与常见陷阱&body=Check out this article: https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&name=Python最佳实践与常见陷阱&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.</span> <span class="toc-text">最佳实践与常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC-PEP-8"><span class="toc-number">1.1.</span> <span class="toc-text">代码风格 PEP 8</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.2.</span> <span class="toc-text">常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E5%8F%98%E9%BB%98%E8%AE%A4%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">可变默认参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF%E4%B8%AD%E6%8D%95%E8%8E%B7%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.2.</span> <span class="toc-text">循环中捕获变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.2.3.</span> <span class="toc-text">浅拷贝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#is-vs"><span class="toc-number">1.2.4.</span> <span class="toc-text">is vs &#x3D;&#x3D;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E7%B2%BE%E5%BA%A6"><span class="toc-number">1.2.5.</span> <span class="toc-text">浮点精度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AD%E5%8C%85%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A"><span class="toc-number">1.2.6.</span> <span class="toc-text">闭包延迟绑定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pythonic-%E5%86%99%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">Pythonic 写法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.4.</span> <span class="toc-text">性能建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GIL-%E7%AE%80%E8%BF%B0"><span class="toc-number">1.5.</span> <span class="toc-text">GIL 简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%8F%82%E8%80%83"><span class="toc-number">1.6.</span> <span class="toc-text">项目结构参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.</span> <span class="toc-text">学习路线建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-number">1.8.</span> <span class="toc-text">系列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Python最佳实践与常见陷阱
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-04-15T14:00:00.000Z" itemprop="datePublished">2023-04-15</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/" class="leancloud-visitors" data-flag-title="Python最佳实践与常见陷阱" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/python/" rel="tag">python</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="最佳实践与常见陷阱"><a href="#最佳实践与常见陷阱" class="headerlink" title="最佳实践与常见陷阱"></a>最佳实践与常见陷阱</h1><h2 id="代码风格-PEP-8"><a href="#代码风格-PEP-8" class="headerlink" title="代码风格 PEP 8"></a>代码风格 PEP 8</h2><p>Python 官方风格指南，核心要点：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 好</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calculate_total</span>(<span class="params">items: <span class="built_in">list</span>[<span class="built_in">float</span>]</span>) -&gt; float:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sum</span>(items)</span><br><span class="line"></span><br><span class="line">MAX_RETRIES = <span class="number">3</span></span><br><span class="line">user_name = <span class="string">&quot;alice&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 命名</span></span><br><span class="line"><span class="comment"># 变量/函数: snake_case</span></span><br><span class="line"><span class="comment"># 类: PascalCase</span></span><br><span class="line"><span class="comment"># 常量: UPPER_SNAKE_CASE</span></span><br><span class="line"><span class="comment"># 私有: _leading_underscore</span></span><br></pre></td></tr></table></figure>
+
+<p>工具自动格式化：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ruff format .</span><br><span class="line">ruff check --fix .</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见陷阱"><a href="#常见陷阱" class="headerlink" title="常见陷阱"></a>常见陷阱</h2><h3 id="可变默认参数"><a href="#可变默认参数" class="headerlink" title="可变默认参数"></a>可变默认参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误：默认值只创建一次</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">append_item</span>(<span class="params">item, lst=[]</span>):</span></span><br><span class="line">    lst.append(item)</span><br><span class="line">    <span class="keyword">return</span> lst</span><br><span class="line"></span><br><span class="line">append_item(<span class="number">1</span>)   <span class="comment"># [1]</span></span><br><span class="line">append_item(<span class="number">2</span>)   <span class="comment"># [1, 2]  意外共享</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 正确</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">append_item</span>(<span class="params">item, lst=<span class="literal">None</span></span>):</span></span><br><span class="line">    <span class="keyword">if</span> lst <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        lst = []</span><br><span class="line">    lst.append(item)</span><br><span class="line">    <span class="keyword">return</span> lst</span><br></pre></td></tr></table></figure>
+
+<h3 id="循环中捕获变量"><a href="#循环中捕获变量" class="headerlink" title="循环中捕获变量"></a>循环中捕获变量</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误</span></span><br><span class="line">funcs = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    funcs.append(<span class="keyword">lambda</span>: i)</span><br><span class="line">[f() <span class="keyword">for</span> f <span class="keyword">in</span> funcs]   <span class="comment"># [2, 2, 2]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 正确</span></span><br><span class="line">funcs = [<span class="keyword">lambda</span> x=i: x <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>)]</span><br><span class="line">[f() <span class="keyword">for</span> f <span class="keyword">in</span> funcs]   <span class="comment"># [0, 1, 2]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="浅拷贝"><a href="#浅拷贝" class="headerlink" title="浅拷贝"></a>浅拷贝</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a = [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]]</span><br><span class="line">b = a.copy()           <span class="comment"># 或 list(a)、a[:]</span></span><br><span class="line">a[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">99</span></span><br><span class="line"><span class="comment"># b[0][0] 也是 99</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> copy</span><br><span class="line">c = copy.deepcopy(a)   <span class="comment"># 深拷贝</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="is-vs"><a href="#is-vs" class="headerlink" title="is vs =="></a><code>is</code> vs <code>==</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">b = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">a == b    <span class="comment"># True，值相等</span></span><br><span class="line">a <span class="keyword">is</span> b    <span class="comment"># False，不同对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 不要用 is 比较字符串、数字内容</span></span><br><span class="line"><span class="comment"># 例外：与 None 比较用 is None</span></span><br><span class="line"><span class="keyword">if</span> x <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="浮点精度"><a href="#浮点精度" class="headerlink" title="浮点精度"></a>浮点精度</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0.1</span> + <span class="number">0.2</span> == <span class="number">0.3</span>   <span class="comment"># False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal</span><br><span class="line">Decimal(<span class="string">&quot;0.1&quot;</span>) + Decimal(<span class="string">&quot;0.2&quot;</span>) == Decimal(<span class="string">&quot;0.3&quot;</span>)   <span class="comment"># True</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line">math.isclose(<span class="number">0.1</span> + <span class="number">0.2</span>, <span class="number">0.3</span>)   <span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="闭包延迟绑定"><a href="#闭包延迟绑定" class="headerlink" title="闭包延迟绑定"></a>闭包延迟绑定</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误</span></span><br><span class="line">buttons = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    buttons.append(<span class="keyword">lambda</span>: print(i))</span><br><span class="line"><span class="comment"># 全部打印 2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 正确：默认参数绑定</span></span><br><span class="line">buttons = [<span class="keyword">lambda</span> i=i: print(i) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>)]</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pythonic-写法"><a href="#Pythonic-写法" class="headerlink" title="Pythonic 写法"></a>Pythonic 写法</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 交换</span></span><br><span class="line">a, b = b, a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 遍历带索引</span></span><br><span class="line"><span class="keyword">for</span> i, val <span class="keyword">in</span> <span class="built_in">enumerate</span>(items):</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时遍历多个序列</span></span><br><span class="line"><span class="keyword">for</span> a, b <span class="keyword">in</span> <span class="built_in">zip</span>(list_a, list_b):</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 字典默认值</span></span><br><span class="line">d.get(key, default)</span><br><span class="line">collections.defaultdict(<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解包</span></span><br><span class="line">first, *middle, last = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 成员检测</span></span><br><span class="line"><span class="keyword">if</span> item <span class="keyword">in</span> collection:</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 真值测试</span></span><br><span class="line"><span class="keyword">if</span> items:          <span class="comment"># 非空</span></span><br><span class="line">    ...</span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> items:      <span class="comment"># 空</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<h2 id="性能建议"><a href="#性能建议" class="headerlink" title="性能建议"></a>性能建议</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>字符串拼接</td>
+<td><code>&quot;&quot;.join(parts)</code></td>
+</tr>
+<tr>
+<td>成员检测</td>
+<td>set 而非 list</td>
+</tr>
+<tr>
+<td>数值计算</td>
+<td>NumPy 向量化</td>
+</tr>
+<tr>
+<td>IO 密集</td>
+<td>异步 asyncio 或多线程</td>
+</tr>
+<tr>
+<td>CPU 密集</td>
+<td>multiprocessing（绕过 GIL）</td>
+</tr>
+</tbody></table>
+<h2 id="GIL-简述"><a href="#GIL-简述" class="headerlink" title="GIL 简述"></a>GIL 简述</h2><p>CPython 的全局解释器锁（GIL）使同一进程内多线程无法并行执行 Python 字节码。多线程适合 IO 密集；CPU 密集任务用 <code>multiprocessing</code> 或调用 C 扩展（NumPy 等）。</p>
+<h2 id="项目结构参考"><a href="#项目结构参考" class="headerlink" title="项目结构参考"></a>项目结构参考</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">myproject&#x2F;</span><br><span class="line">├── pyproject.toml</span><br><span class="line">├── README.md</span><br><span class="line">├── src&#x2F;</span><br><span class="line">│   └── myapp&#x2F;</span><br><span class="line">│       ├── __init__.py</span><br><span class="line">│       ├── main.py</span><br><span class="line">│       ├── models&#x2F;</span><br><span class="line">│       ├── services&#x2F;</span><br><span class="line">│       └── api&#x2F;</span><br><span class="line">├── tests&#x2F;</span><br><span class="line">│   ├── conftest.py</span><br><span class="line">│   └── test_*.py</span><br><span class="line">└── .venv&#x2F;</span><br></pre></td></tr></table></figure>
+
+<h2 id="学习路线建议"><a href="#学习路线建议" class="headerlink" title="学习路线建议"></a>学习路线建议</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">入门 → 语法 &#x2F; 数据类型 &#x2F; 流程控制</span><br><span class="line">     → 列表 &#x2F; 字典 &#x2F; 字符串</span><br><span class="line">     → 面向对象 &#x2F; 异常 &#x2F; 文件 IO</span><br><span class="line">     → 模块 &#x2F; 迭代器 &#x2F; 装饰器</span><br><span class="line">     → 标准库 &#x2F; 测试</span><br><span class="line">     → Web（Flask&#x2F;FastAPI）&#x2F; 数据分析（Pandas）&#x2F; 自动化</span><br><span class="line">     → 异步 asyncio &#x2F; 类型系统 &#x2F; 源码阅读</span><br></pre></td></tr></table></figure>
+
+<h2 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h2><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>主题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Python语言入门与环境搭建</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Python基础语法与数据类型</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Python流程控制与函数</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Python列表字典与集合</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Python字符串与正则表达式</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Python面向对象编程</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Python异常处理</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Python文件与IO</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Python模块与包管理</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Python迭代器与生成器</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Python装饰器与上下文管理器</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Python标准库实战</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Python测试与调试</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Python最佳实践与常见陷阱（本文）</td>
+</tr>
+</tbody></table>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Python 强调可读性与开发效率。避开可变默认值、浅拷贝、闭包绑定等经典陷阱，配合 pytest、ruff、mypy 等工具，即可写出健壮、易维护的代码。进阶方向包括 Web 框架、数据科学、自动化运维和 asyncio 异步编程。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.</span> <span class="toc-text">最佳实践与常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC-PEP-8"><span class="toc-number">1.1.</span> <span class="toc-text">代码风格 PEP 8</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.2.</span> <span class="toc-text">常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E5%8F%98%E9%BB%98%E8%AE%A4%E5%8F%82%E6%95%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">可变默认参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF%E4%B8%AD%E6%8D%95%E8%8E%B7%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.2.</span> <span class="toc-text">循环中捕获变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.2.3.</span> <span class="toc-text">浅拷贝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#is-vs"><span class="toc-number">1.2.4.</span> <span class="toc-text">is vs &#x3D;&#x3D;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E7%B2%BE%E5%BA%A6"><span class="toc-number">1.2.5.</span> <span class="toc-text">浮点精度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AD%E5%8C%85%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A"><span class="toc-number">1.2.6.</span> <span class="toc-text">闭包延迟绑定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pythonic-%E5%86%99%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">Pythonic 写法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.4.</span> <span class="toc-text">性能建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GIL-%E7%AE%80%E8%BF%B0"><span class="toc-number">1.5.</span> <span class="toc-text">GIL 简述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%8F%82%E8%80%83"><span class="toc-number">1.6.</span> <span class="toc-text">项目结构参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.</span> <span class="toc-text">学习路线建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-number">1.8.</span> <span class="toc-text">系列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&text=Python最佳实践与常见陷阱"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&is_video=false&description=Python最佳实践与常见陷阱"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python最佳实践与常见陷阱&body=Check out this article: https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Python最佳实践与常见陷阱"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/15/python%E5%AD%A6%E4%B9%A0/Python%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&name=Python最佳实践与常见陷阱&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

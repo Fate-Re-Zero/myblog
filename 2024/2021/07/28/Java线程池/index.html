@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="###Executors    理解：线程池的工厂，可以构建各种线程池SingleThreadPool，newFixedThreadPool等 ###线程池    理解：线程主要分为两种：    ThreadPoolExecutor    ForkJoinPool: 分解汇总任务; 用很少的线程执行很多的任务(子任务)TPE做不到先执行子任务; CPU密集型; ###自定义线程池    核心线程数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java线程池">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="###Executors    理解：线程池的工厂，可以构建各种线程池SingleThreadPool，newFixedThreadPool等 ###线程池    理解：线程主要分为两种：    ThreadPoolExecutor    ForkJoinPool: 分解汇总任务; 用很少的线程执行很多的任务(子任务)TPE做不到先执行子任务; CPU密集型; ###自定义线程池    核心线程数">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-07-28T13:00:38.000Z">
+<meta property="article:modified_time" content="2025-04-24T15:15:32.285Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Spring, Mybatis, Dubbo, Spring Cloud, redis, Elasticsearch, rabbitmq">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Java线程池</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/08/27/%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/19/RabbitMQ/RabbitMQ%20Khepri%E5%85%83%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&text=Java线程池"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&is_video=false&description=Java线程池"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java线程池&body=Check out this article: https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&name=Java线程池&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Java线程池
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-28T13:00:38.000Z" itemprop="datePublished">2021-07-28</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/" class="leancloud-visitors" data-flag-title="Java线程池" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>###Executors<br>    理解：线程池的工厂，可以构建各种线程池SingleThreadPool，newFixedThreadPool等</p>
+<p>###线程池<br>    理解：线程主要分为两种：<br>    ThreadPoolExecutor<br>    ForkJoinPool: 分解汇总任务; 用很少的线程执行很多的任务(子任务)TPE做不到先执行子任务; CPU密集型;</p>
+<p>###自定义线程池<br>    核心线程数：<br>    最大线程数：<br>    非核心线程最大空闲时间：<br>    时间单位：<br>    阻塞队列：<br>    自定义的ThreadFactory: 自定义创建线程的规范：指定线程组名称，指定线程名称，指定线程为非守护线程，<br>        指定线程的优先级，好处是为了排查问题更加方便，使用jstack命令可以很容易排查出问题；<br>    拒绝策略：JDK默认提供了四种，拒绝策略是可以自定义的<br>        Abort:抛异常<br>        Discard:扔掉，不抛异常<br>        DiscardOldest:扔掉排队时间最久的<br>        CallerRuns:调用者处理任务</p>
+<pre><code>线程池执行任务的过程：先到来的任务由核心线程执行，当核心线程都在执行任务，来的新任务进入阻塞队列，当阻塞队列满了，再来的新任务则启动新线程来执行，当线程数达到最大线程数时，执行拒绝策略；
+</code></pre>
+<p>###不使用JDK自己提供的线程池的原因<br>    1.无法自定义拒绝策略；<br>    2.核心线程数，最大线程数等参数需要根据机器本身配置和业务本身的需要来决定的，所以自定义线程池能够更加灵活满足我们的需求；<br>    3.自定义线程池可以自己指定线程组名称，线程名称，更加有利于排查问题；</p>
+<p>###SingleThreadPool<br>    理解：线程池里只有一个线程，能够保证任务顺序的执行；使用的默认线程工厂，默认拒绝策略；<br>    缺点：只有单个线程，使用的LinkedBlockingQueue作为阻塞队列<br>    为什么有单线程的线程池：相比较与自己创建线程，可以不用自己创建阻塞队列，池化思想有利线程资源的有效利用与生命周期管理；</p>
+<p>###CachedPool<br>    理解：核心线程数为0，最大线程数为Integer的最大值，线程的最大空闲等待时间为60S,使用SynchronousQueue作为阻塞队列，<br>    SynchronousQueue的特点是，容量为0，当任务进入阻塞队列，如果没有其他线程处理，线程会一直阻塞住；使用的默认线程工厂，默认拒绝策略；<br>    缺点：最大线程为Integer的最大值，如果任务很多，会创建非常多的线程，可能导致服务器资源耗尽产生OOM;<br>    使用场景：不推荐使用，要使用的话，会在任务数量的多少随着时间的变化不稳定的时候，但是还需要保证任务不会堆积的时候可以使用</p>
+<p>###FixedThreadPool<br>    理解：自己指定精确的线程数，核心线程数与最大线程数相等，也就是全是核心线程，使用的LinkedBlockingQueue作为阻塞队列，使用的默认线程工厂，默认拒绝策略；<br>    缺点：如果任务很多，任务队列的任务会堆积的非常多，最大为Integer的最大值，可能导致服务器占用大量内存而导致OOM;<br>    使用场景：不推荐使用，要使用的话，会在任务数量的多少随着时间的比较稳定的时候，但是还需要保证任务不会堆积的时候可以使用</p>
+<p>###到底该使用那种线程池<br>    不推荐使用JDK提供的线程池，一般情况下都是自定义线程池</p>
+<p>###线程池的线程该定义为多少<br>    线程池中线程过多：大量线程会竞争稀缺的处理器和内存资源，浪费大量的时间在上下文切换上；<br>    线程池中线程过少：会导致我们的服务器应用处理器的一些核可能无法充分利用到；<br>    线程数多少与处理器的利用率之比可以使用下面的公式进行估算：<br>    N(threads) = N(cpu) * U(cpu) * (1 + W/C)<br>    其中：<br>    N(cpu)是处理器的核的数目，可以通过Runtime.getRuntime().availableProcessors()得到<br>    U(cpu)是期望的CPU利用率(该值应该介于0和1之间)<br>    W/C是等待时间与计算时间的比率</p>
+<p>###ScheduledPool<br>    理解：一般用于定时任务的场景，实现定时任务的其他方式还有quartz，cron</p>
+<p>###并发与并行(concurrent与parallel)<br>    并发指任务的提交，并行指任务的执行<br>    并行是并发的子集<br>    理解：并发指非常多的任务线程同时提交任务到服务器程序，单个cpu核也可以去执行这些任务，但需要不断地做线程上下文切换，多核就可以并行的去执行这些任务；任务并行处理的时候才能真正的提高效率；</p>
+<p>###自定义线程池拒绝策略</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyRejectedHandler</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ExecutorService service = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">4</span>, <span class="number">4</span>,</span><br><span class="line">                <span class="number">0</span>, TimeUnit.SECONDS, <span class="keyword">new</span> ArrayBlockingQueue&lt;&gt;(<span class="number">6</span>),</span><br><span class="line">                Executors.defaultThreadFactory(),</span><br><span class="line">                <span class="keyword">new</span> MyHandler());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyHandler</span> <span class="keyword">implements</span> <span class="title">RejectedExecutionHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">rejectedExecution</span><span class="params">(Runnable r, ThreadPoolExecutor executor)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> count = <span class="number">3</span>;</span><br><span class="line">            <span class="comment">//try 3 times</span></span><br><span class="line">            <span class="keyword">while</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span>(executor.getQueue().size() &lt; <span class="number">6</span>) &#123;</span><br><span class="line">                    <span class="comment">//try put again();</span></span><br><span class="line">                &#125;</span><br><span class="line">                count--;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 打印日志</span></span><br><span class="line">            <span class="comment">// 将任务存到kafka 或者mysql，看具体的业务</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###自定义线程工厂<br>    1.利用Spring 框架提供的轮子 CustomizableThreadFactory</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ThreadFactory springFactory = <span class="keyword">new</span> CustomizableThreadFactory(<span class="string">&quot;spring-pool-&quot;</span>);</span><br><span class="line">ExecutorService exec = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">1</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">0L</span>, TimeUnit.MILLISECONDS,</span><br><span class="line">        <span class="keyword">new</span> ArrayBlockingQueue&lt;Runnable&gt;(<span class="number">100</span>), springFactory);</span><br></pre></td></tr></table></figure>
+
+<pre><code>2.使用Google 开源框架guava提供的 ThreadFactoryBuilder 可以快速给线程池里的线程设置有意义的名字
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ThreadFactory guavaFactory = <span class="keyword">new</span> ThreadFactoryBuilder().setNameFormat(<span class="string">&quot;guava-pool-&quot;</span>).build();</span><br><span class="line">ExecutorService exec = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">1</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">0L</span>, TimeUnit.MILLISECONDS,</span><br><span class="line">        <span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(<span class="number">100</span>),guavaFactory );</span><br></pre></td></tr></table></figure>
+
+<pre><code>3.Apache commons-lang3 提供的 BasicThreadFactory
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ThreadFactory basicFactory = <span class="keyword">new</span> BasicThreadFactory.Builder().namingPattern(<span class="string">&quot;basicFactory-pool-&quot;</span>).build();</span><br><span class="line">ExecutorService exec = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">1</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">0L</span>, TimeUnit.MILLISECONDS,</span><br><span class="line">        <span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(<span class="number">100</span>),basicFactory );</span><br></pre></td></tr></table></figure>
+
+<pre><code>4.自己定义TreadFactory, 实现ThreadFactory接口,定义自己的线程名称
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThreadFactory</span> <span class="keyword">implements</span> <span class="title">ThreadFactory</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicInteger poolNumber = <span class="keyword">new</span> AtomicInteger(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ThreadGroup group;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicInteger threadNumber = <span class="keyword">new</span> AtomicInteger(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String namePrefix;</span><br><span class="line"></span><br><span class="line">    MyThreadFactory() &#123;</span><br><span class="line">        SecurityManager s = System.getSecurityManager();</span><br><span class="line">        group = (s != <span class="keyword">null</span>) ? s.getThreadGroup() :</span><br><span class="line">                Thread.currentThread().getThreadGroup();</span><br><span class="line">        <span class="comment">//此处只修改了一下名字前缀</span></span><br><span class="line">        namePrefix = <span class="string">&quot;业务名称-&quot;</span> +</span><br><span class="line">                poolNumber.getAndIncrement() +</span><br><span class="line">                <span class="string">&quot;-thread-&quot;</span>;</span><br><span class="line">        System.out.println(<span class="string">&quot;---&gt;&quot;</span>+namePrefix);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">        Thread t = <span class="keyword">new</span> Thread(group, r,</span><br><span class="line">                namePrefix + threadNumber.getAndIncrement(),</span><br><span class="line">                <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (t.isDaemon())&#123;</span><br><span class="line">            t.setDaemon(<span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (t.getPriority() != Thread.NORM_PRIORITY)&#123;</span><br><span class="line">            t.setPriority(Thread.NORM_PRIORITY);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> t;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>###Disruptor<br>    核心：内部使用的环形buffer来存放还没来得及处理的任务，这个环形buffer使用数组来实现，让数组的尾内存地址指向头内存地址，<br>    使用数组的好处：<br>    1.数组的遍历速度是要高于链表的，所以这里作者没有选择ConcurrentLinkedQueue来作为任务队列<br>    2.不需要像阻塞队列一样需要去维护头指针和尾指针，环形只需要维护一个指针指向下一个可用的位置<br>    3.使用EventFactory提前为buffer中的每个位置创建好了Event对象，当向里面添加任务时，只要去修改Event的属性，只需要覆盖，不需要清除旧的数据，大大的减少了GC的频率；</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&text=Java线程池"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&is_video=false&description=Java线程池"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Java线程池&body=Check out this article: https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&title=Java线程池"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/28/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/&name=Java线程池&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

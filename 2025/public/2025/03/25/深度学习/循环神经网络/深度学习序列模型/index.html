@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="序列模型想象一下有人正在看网飞（Netflix，一个国外的视频网站）上的电影。一名忠实的用户会对每一部电影都给出评价，毕竟一部好电影需要更多的支持和认可。然而事实证明，事情并不那么简单。随着时间的推移，人们对电影的看法会发生很大的变化。事实上，心理学家甚至对这些现象起了名字：  锚定（anchoring）效应：基于其他人的意见做出评价。例如，奥斯卡颁奖后，受到关注的电影的评分会上升，尽管它还是原来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="序列模型">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="序列模型想象一下有人正在看网飞（Netflix，一个国外的视频网站）上的电影。一名忠实的用户会对每一部电影都给出评价，毕竟一部好电影需要更多的支持和认可。然而事实证明，事情并不那么简单。随着时间的推移，人们对电影的看法会发生很大的变化。事实上，心理学家甚至对这些现象起了名字：  锚定（anchoring）效应：基于其他人的意见做出评价。例如，奥斯卡颁奖后，受到关注的电影的评分会上升，尽管它还是原来">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-25T01:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:08:15.997Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>序列模型</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/24/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E9%80%9A%E8%BF%87%E6%97%B6%E9%97%B4%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&text=序列模型"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&is_video=false&description=序列模型"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=序列模型&body=Check out this article: https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&name=序列模型&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">序列模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E5%B7%A5%E5%85%B7"><span class="toc-number">1.1.</span> <span class="toc-text">统计工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">自回归模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">马尔可夫模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%A0%E6%9E%9C%E5%85%B3%E7%B3%BB"><span class="toc-number">1.1.3.</span> <span class="toc-text">因果关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-number">1.2.</span> <span class="toc-text">训练</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B"><span class="toc-number">1.3.</span> <span class="toc-text">预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        序列模型
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-25T01:00:00.000Z" itemprop="datePublished">2025-03-25</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/" class="leancloud-visitors" data-flag-title="序列模型" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="序列模型"><a href="#序列模型" class="headerlink" title="序列模型"></a>序列模型</h1><p>想象一下有人正在看网飞（Netflix，一个国外的视频网站）上的电影。<br>一名忠实的用户会对每一部电影都给出评价，<br>毕竟一部好电影需要更多的支持和认可。<br>然而事实证明，事情并不那么简单。<br>随着时间的推移，人们对电影的看法会发生很大的变化。<br>事实上，心理学家甚至对这些现象起了名字：</p>
+<ul>
+<li><em>锚定</em>（anchoring）效应：基于其他人的意见做出评价。<br>例如，奥斯卡颁奖后，受到关注的电影的评分会上升，尽管它还是原来那部电影。<br>这种影响将持续几个月，直到人们忘记了这部电影曾经获得的奖项。<br>结果表明（ ），这种效应会使评分提高半个百分点以上。</li>
+<li><em>享乐适应</em>（hedonic adaption）：人们迅速接受并且适应一种更好或者更坏的情况<br>作为新的常态。<br>例如，在看了很多好电影之后，人们会强烈期望下部电影会更好。<br>因此，在许多精彩的电影被看过之后，即使是一部普通的也可能被认为是糟糕的。</li>
+<li><em>季节性</em>（seasonality）：少有观众喜欢在八月看圣诞老人的电影。</li>
+<li>有时，电影会由于导演或演员在制作中的不当行为变得不受欢迎。</li>
+<li>有些电影因为其极度糟糕只能成为小众电影。<em>Plan9from Outer Space</em>和<em>Troll2</em>就因为这个原因而臭名昭著的。</li>
+</ul>
+<p>简而言之，电影评分决不是固定不变的。<br>因此，使用时间动力学可以得到更准确的电影推荐 。<br>当然，序列数据不仅仅是关于电影评分的。<br>下面给出了更多的场景。</p>
+<ul>
+<li>在使用程序时，许多用户都有很强的特定习惯。<br>例如，在学生放学后社交媒体应用更受欢迎。在市场开放时股市交易软件更常用。</li>
+<li>预测明天的股价要比过去的股价更困难，尽管两者都只是估计一个数字。<br>毕竟，先见之明比事后诸葛亮难得多。<br>在统计学中，前者（对超出已知观测范围进行预测）称为<em>外推法</em>（extrapolation），<br>而后者（在现有观测值之间进行估计）称为<em>内插法</em>（interpolation）。</li>
+<li>在本质上，音乐、语音、文本和视频都是连续的。<br>如果它们的序列被我们重排，那么就会失去原有的意义。<br>比如，一个文本标题“狗咬人”远没有“人咬狗”那么令人惊讶，尽管组成两句话的字完全相同。</li>
+<li>地震具有很强的相关性，即大地震发生后，很可能会有几次小余震，<br>这些余震的强度比非大地震后的余震要大得多。<br>事实上，地震是时空相关的，即余震通常发生在很短的时间跨度和很近的距离内。</li>
+<li>人类之间的互动也是连续的，这可以从微博上的争吵和辩论中看出。</li>
+</ul>
+<h2 id="统计工具"><a href="#统计工具" class="headerlink" title="统计工具"></a>统计工具</h2><p>处理序列数据需要统计工具和新的深度神经网络架构。<br>为了简单起见，我们以 fig_ftse100所示的股票价格（富时100指数）为例。</p>
+<p>（图：近30年的富时100指数）</p>
+<p>其中，用$x_t$表示价格，即在<em>时间步</em>（time step）<br>$t \in \mathbb{Z}^+$时，观察到的价格$x_t$。<br>请注意，$t$对于本文中的序列通常是离散的，并在整数或其子集上变化。<br>假设一个交易员想在$t$日的股市中表现良好，于是通过以下途径预测$x_t$：</p>
+<p>$$x_t \sim P(x_t \mid x_{t-1}, \ldots, x_1).$$</p>
+<h3 id="自回归模型"><a href="#自回归模型" class="headerlink" title="自回归模型"></a>自回归模型</h3><p>为了实现这个预测，交易员可以使用回归模型，<br>例如在 sec_linear_concise中训练的模型。<br>仅有一个主要问题：输入数据的数量，<br>输入$x_{t-1}, \ldots, x_1$本身因$t$而异。<br>也就是说，输入数据的数量这个数字将会随着我们遇到的数据量的增加而增加，<br>因此需要一个近似方法来使这个计算变得容易处理。<br>本章后面的大部分内容将围绕着如何有效估计<br>$P(x_t \mid x_{t-1}, \ldots, x_1)$展开。<br>简单地说，它归结为以下两种策略。</p>
+<p>第一种策略，假设在现实情况下相当长的序列<br>$x_{t-1}, \ldots, x_1$可能是不必要的，<br>因此我们只需要满足某个长度为$\tau$的时间跨度，<br>即使用观测序列$x_{t-1}, \ldots, x_{t-\tau}$。<br>当下获得的最直接的好处就是参数的数量总是不变的，<br>至少在$t &gt; \tau$时如此，这就使我们能够训练一个上面提及的深度网络。<br>这种模型被称为<em>自回归模型</em>（autoregressive models），<br>因为它们是对自己执行回归。</p>
+<p>第二种策略，如 fig_sequence-model所示，<br>是保留一些对过去观测的总结$h_t$，<br>并且同时更新预测$\hat{x}<em>t$和总结$h_t$。<br>这就产生了基于$\hat{x}_t = P(x_t \mid h_{t})$估计$x_t$，<br>以及公式$h_t = g(h</em>{t-1}, x_{t-1})$更新的模型。<br>由于$h_t$从未被观测到，这类模型也被称为<br><em>隐变量自回归模型</em>（latent autoregressive models）。</p>
+<p>（图：隐变量自回归模型）</p>
+<p>这两种情况都有一个显而易见的问题：如何生成训练数据？<br>一个经典方法是使用历史观测来预测下一个未来观测。<br>显然，我们并不指望时间会停滞不前。<br>然而，一个常见的假设是虽然特定值$x_t$可能会改变，<br>但是序列本身的动力学不会改变。<br>这样的假设是合理的，因为新的动力学一定受新的数据影响，<br>而我们不可能用目前所掌握的数据来预测新的动力学。<br>统计学家称不变的动力学为<em>静止的</em>（stationary）。<br>因此，整个序列的估计值都将通过以下的方式获得：</p>
+<p>$$P(x_1, \ldots, x_T) = \prod_{t=1}^T P(x_t \mid x_{t-1}, \ldots, x_1).$$</p>
+<p>注意，如果我们处理的是离散的对象（如单词），<br>而不是连续的数字，则上述的考虑仍然有效。<br>唯一的差别是，对于离散的对象，<br>我们需要使用分类器而不是回归模型来估计$P(x_t \mid x_{t-1}, \ldots, x_1)$。</p>
+<h3 id="马尔可夫模型"><a href="#马尔可夫模型" class="headerlink" title="马尔可夫模型"></a>马尔可夫模型</h3><p>回想一下，在自回归模型的近似法中，<br>我们使用$x_{t-1}, \ldots, x_{t-\tau}$<br>而不是$x_{t-1}, \ldots, x_1$来估计$x_t$。<br>只要这种是近似精确的，我们就说序列满足<em>马尔可夫条件</em>（Markov condition）。<br>特别是，如果$\tau = 1$，得到一个<br><em>一阶马尔可夫模型</em>（first-order Markov model），<br>$P(x)$由下式给出：</p>
+<p>$$P(x_1, \ldots, x_T) = \prod_{t=1}^T P(x_t \mid x_{t-1}) \text{ 当 } P(x_1 \mid x_0) = P(x_1).$$</p>
+<p>当假设$x_t$仅是离散值时，这样的模型特别棒，<br>因为在这种情况下，使用动态规划可以沿着马尔可夫链精确地计算结果。<br>例如，我们可以高效地计算$P(x_{t+1} \mid x_{t-1})$：</p>
+<p>$$<br>\begin{aligned}<br>P(x_{t+1} \mid x_{t-1})<br>&amp;= \frac{\sum_{x_t} P(x_{t+1}, x_t, x_{t-1})}{P(x_{t-1})}\<br>&amp;= \frac{\sum_{x_t} P(x_{t+1} \mid x_t, x_{t-1}) P(x_t, x_{t-1})}{P(x_{t-1})}\<br>&amp;= \sum_{x_t} P(x_{t+1} \mid x_t) P(x_t \mid x_{t-1})<br>\end{aligned}<br>$$</p>
+<p>利用这一事实，我们只需要考虑过去观察中的一个非常短的历史：<br>$P(x_{t+1} \mid x_t, x_{t-1}) = P(x_{t+1} \mid x_t)$。<br>隐马尔可夫模型中的动态规划超出了本节的范围<br>（我们将在 sec_bi_rnn再次遇到），<br>而动态规划这些计算工具已经在控制算法和强化学习算法广泛使用。</p>
+<h3 id="因果关系"><a href="#因果关系" class="headerlink" title="因果关系"></a>因果关系</h3><p>原则上，将$P(x_1, \ldots, x_T)$倒序展开也没什么问题。<br>毕竟，基于条件概率公式，我们总是可以写出：</p>
+<p>$$P(x_1, \ldots, x_T) = \prod_{t=T}^1 P(x_t \mid x_{t+1}, \ldots, x_T).$$</p>
+<p>事实上，如果基于一个马尔可夫模型，<br>我们还可以得到一个反向的条件概率分布。<br>然而，在许多情况下，数据存在一个自然的方向，即在时间上是前进的。<br>很明显，未来的事件不能影响过去。<br>因此，如果我们改变$x_t$，可能会影响未来发生的事情$x_{t+1}$，但不能反过来。<br>也就是说，如果我们改变$x_t$，基于过去事件得到的分布不会改变。<br>因此，解释$P(x_{t+1} \mid x_t)$应该比解释$P(x_t \mid x_{t+1})$更容易。<br>例如，在某些情况下，对于某些可加性噪声$\epsilon$，<br>显然我们可以找到$x_{t+1} = f(x_t) + \epsilon$，<br>而反之则不行 。<br>而这个向前推进的方向恰好也是我们通常感兴趣的方向。<br>彼得斯等人<br>对该主题的更多内容做了详尽的解释，而我们的上述讨论只是其中的冰山一角。</p>
+<h2 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h2><p>在了解了上述统计工具后，让我们在实践中尝试一下！<br>首先，我们生成一些数据：使用正弦函数和一些可加性噪声来生成序列数据，<br>时间步为$1, 2, \ldots, 1000$。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">T = <span class="number">1000</span>  <span class="comment"># 总共产生1000个点</span></span><br><span class="line">time = d2l.arange(<span class="number">1</span>, T + <span class="number">1</span>, dtype=d2l.float32)</span><br><span class="line">x = d2l.sin(<span class="number">0.01</span> * time) + d2l.normal(<span class="number">0</span>, <span class="number">0.2</span>, (T,))</span><br><span class="line">d2l.plot(time, [x], <span class="string">&#x27;time&#x27;</span>, <span class="string">&#x27;x&#x27;</span>, xlim=[<span class="number">1</span>, <span class="number">1000</span>], figsize=(<span class="number">6</span>, <span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们将这个序列转换为模型的<em>特征－标签</em>（feature-label）对。<br>基于嵌入维度$\tau$，我们将数据映射为数据对$y_t = x_t$<br>和$\mathbf{x}<em>t = [x</em>{t-\tau}, \ldots, x_{t-1}]$。<br>这比我们提供的数据样本少了$\tau$个，<br>因为我们没有足够的历史记录来描述前$\tau$个数据样本。<br>一个简单的解决办法是：如果拥有足够长的序列就丢弃这几项；<br>另一个方法是用零填充序列。<br>在这里，我们仅使用前600个“特征－标签”对进行训练。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tau = <span class="number">4</span></span><br><span class="line">features = d2l.zeros((T - tau, tau))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(tau):</span><br><span class="line">    features[:, i] = x[i: T - tau + i]</span><br><span class="line">labels = d2l.reshape(x[tau:], (-<span class="number">1</span>, <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">batch_size, n_train = <span class="number">16</span>, <span class="number">600</span></span><br><span class="line"><span class="comment"># 只有前n_train个样本用于训练</span></span><br><span class="line">train_iter = d2l.load_array((features[:n_train], labels[:n_train]),</span><br><span class="line">                            batch_size, is_train=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这里，我们使用一个相当简单的架构训练模型：<br>一个拥有两个全连接层的多层感知机，ReLU激活函数和平方损失。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化网络权重的函数</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_weights</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.xavier_uniform_(m.weight)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一个简单的多层感知机</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_net</span>():</span></span><br><span class="line">    net = nn.Sequential(nn.Linear(<span class="number">4</span>, <span class="number">10</span>),</span><br><span class="line">                        nn.ReLU(),</span><br><span class="line">                        nn.Linear(<span class="number">10</span>, <span class="number">1</span>))</span><br><span class="line">    net.apply(init_weights)</span><br><span class="line">    <span class="keyword">return</span> net</span><br><span class="line"></span><br><span class="line"><span class="comment"># 平方损失。注意：MSELoss计算平方误差时不带系数1/2</span></span><br><span class="line">loss = nn.MSELoss(reduction=<span class="string">&#x27;none&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>现在，准备训练模型了。实现下面的训练代码的方式与前面几节（如 sec_linear_concise）中的循环训练基本相同。因此，我们不会深入探讨太多细节。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">net, train_iter, loss, epochs, lr</span>):</span></span><br><span class="line">    trainer = torch.optim.Adam(net.parameters(), lr)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">        <span class="keyword">for</span> X, y <span class="keyword">in</span> train_iter:</span><br><span class="line">            trainer.zero_grad()</span><br><span class="line">            l = loss(net(X), y)</span><br><span class="line">            l.<span class="built_in">sum</span>().backward()</span><br><span class="line">            trainer.step()</span><br><span class="line">        print(<span class="string">f&#x27;epoch <span class="subst">&#123;epoch + <span class="number">1</span>&#125;</span>, &#x27;</span></span><br><span class="line">              <span class="string">f&#x27;loss: <span class="subst">&#123;d2l.evaluate_loss(net, train_iter, loss):f&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line">net = get_net()</span><br><span class="line">train(net, train_iter, loss, <span class="number">5</span>, <span class="number">0.01</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h2><p>由于训练损失很小，因此我们期望模型能有很好的工作效果。<br>让我们看看这在实践中意味着什么。<br>首先是检查模型预测下一个时间步的能力，<br>也就是<em>单步预测</em>（one-step-ahead prediction）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">onestep_preds = net(features)</span><br><span class="line">d2l.plot([time, time[tau:]],</span><br><span class="line">         [d2l.numpy(x), d2l.numpy(onestep_preds)], <span class="string">&#x27;time&#x27;</span>,</span><br><span class="line">         <span class="string">&#x27;x&#x27;</span>, legend=[<span class="string">&#x27;data&#x27;</span>, <span class="string">&#x27;1-step preds&#x27;</span>], xlim=[<span class="number">1</span>, <span class="number">1000</span>],</span><br><span class="line">         figsize=(<span class="number">6</span>, <span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+
+<p>正如我们所料，单步预测效果不错。<br>即使这些预测的时间步超过了$600+4$（<code>n_train + tau</code>），<br>其结果看起来仍然是可信的。<br>然而有一个小问题：如果数据观察序列的时间步只到$604$，<br>我们需要一步一步地向前迈进：<br>$$<br>\hat{x}<em>{605} = f(x</em>{601}, x_{602}, x_{603}, x_{604}), \<br>\hat{x}<em>{606} = f(x</em>{602}, x_{603}, x_{604}, \hat{x}<em>{605}), \<br>\hat{x}</em>{607} = f(x_{603}, x_{604}, \hat{x}<em>{605}, \hat{x}</em>{606}),\<br>\hat{x}<em>{608} = f(x</em>{604}, \hat{x}<em>{605}, \hat{x}</em>{606}, \hat{x}<em>{607}),\<br>\hat{x}</em>{609} = f(\hat{x}<em>{605}, \hat{x}</em>{606}, \hat{x}<em>{607}, \hat{x}</em>{608}),\<br>\ldots<br>$$</p>
+<p>通常，对于直到$x_t$的观测序列，其在时间步$t+k$处的预测输出$\hat{x}<em>{t+k}$<br>称为$k$<em>步预测</em>（$k$-step-ahead-prediction）。<br>由于我们的观察已经到了$x</em>{604}$，它的$k$步预测是$\hat{x}_{604+k}$。<br>换句话说，我们必须使用我们自己的预测（而不是原始数据）来进行多步预测。<br>让我们看看效果如何。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">d2l.plot([time, time[tau:], time[n_train + tau:]],</span><br><span class="line">         [d2l.numpy(x), d2l.numpy(onestep_preds),</span><br><span class="line">          d2l.numpy(multistep_preds[n_train + tau:])], <span class="string">&#x27;time&#x27;</span>,</span><br><span class="line">         <span class="string">&#x27;x&#x27;</span>, legend=[<span class="string">&#x27;data&#x27;</span>, <span class="string">&#x27;1-step preds&#x27;</span>, <span class="string">&#x27;multistep preds&#x27;</span>],</span><br><span class="line">         xlim=[<span class="number">1</span>, <span class="number">1000</span>], figsize=(<span class="number">6</span>, <span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+
+<p>如上面的例子所示，绿线的预测显然并不理想。<br>经过几个预测步骤之后，预测的结果很快就会衰减到一个常数。<br>为什么这个算法效果这么差呢？事实是由于错误的累积：<br>假设在步骤$1$之后，我们积累了一些错误$\epsilon_1 = \bar\epsilon$。<br>于是，步骤$2$的输入被扰动了$\epsilon_1$，<br>结果积累的误差是依照次序的$\epsilon_2 = \bar\epsilon + c \epsilon_1$，<br>其中$c$为某个常数，后面的预测误差依此类推。<br>因此误差可能会相当快地偏离真实的观测结果。<br>例如，未来$24$小时的天气预报往往相当准确，<br>但超过这一点，精度就会迅速下降。<br>我们将在本章及后续章节中讨论如何改进这一点。</p>
+<p>基于$k = 1, 4, 16, 64$，通过对整个序列预测的计算，<br>让我们更仔细地看一下$k$步预测的困难。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max_steps = <span class="number">64</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">steps = (<span class="number">1</span>, <span class="number">4</span>, <span class="number">16</span>, <span class="number">64</span>)</span><br><span class="line">d2l.plot([time[tau + i - <span class="number">1</span>: T - max_steps + i] <span class="keyword">for</span> i <span class="keyword">in</span> steps],</span><br><span class="line">         [d2l.numpy(features[:, tau + i - <span class="number">1</span>]) <span class="keyword">for</span> i <span class="keyword">in</span> steps], <span class="string">&#x27;time&#x27;</span>, <span class="string">&#x27;x&#x27;</span>,</span><br><span class="line">         legend=[<span class="string">f&#x27;<span class="subst">&#123;i&#125;</span>-step preds&#x27;</span> <span class="keyword">for</span> i <span class="keyword">in</span> steps], xlim=[<span class="number">5</span>, <span class="number">1000</span>],</span><br><span class="line">         figsize=(<span class="number">6</span>, <span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+
+<p>以上例子清楚地说明了当我们试图预测更远的未来时，预测的质量是如何变化的。<br>虽然“$4$步预测”看起来仍然不错，但超过这个跨度的任何预测几乎都是无用的。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>内插法（在现有观测值之间进行估计）和外推法（对超出已知观测范围进行预测）在实践的难度上差别很大。因此，对于所拥有的序列数据，在训练时始终要尊重其时间顺序，即最好不要基于未来的数据进行训练。</li>
+<li>序列模型的估计需要专门的统计工具，两种较流行的选择是自回归模型和隐变量自回归模型。</li>
+<li>对于时间是向前推进的因果模型，正向估计通常比反向估计更容易。</li>
+<li>对于直到时间步$t$的观测序列，其在时间步$t+k$的预测输出是“$k$步预测”。随着我们对预测时间$k$值的增加，会造成误差的快速累积和预测质量的极速下降。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">序列模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E5%B7%A5%E5%85%B7"><span class="toc-number">1.1.</span> <span class="toc-text">统计工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">自回归模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">马尔可夫模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%A0%E6%9E%9C%E5%85%B3%E7%B3%BB"><span class="toc-number">1.1.3.</span> <span class="toc-text">因果关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-number">1.2.</span> <span class="toc-text">训练</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B"><span class="toc-number">1.3.</span> <span class="toc-text">预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&text=序列模型"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&is_video=false&description=序列模型"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=序列模型&body=Check out this article: https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&title=序列模型"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/25/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E6%A8%A1%E5%9E%8B/&name=序列模型&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

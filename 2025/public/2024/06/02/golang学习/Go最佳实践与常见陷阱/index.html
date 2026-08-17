@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="最佳实践与常见陷阱本章汇总 Go 工程实践中的经验与常见坑，帮助写出更健壮、可维护的代码。 代码风格go fmt &#x2F; go vet提交前必跑： 12go fmt .&#x2F;...go vet .&#x2F;...  Go 只有一种官方格式，团队无需争论缩进风格。 命名规范   类型 规范 示例    包名 小写、简短、单数 user、httputil   导出 大写开头 UserService   接口 单方法接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go最佳实践与常见陷阱">
+<meta property="og:url" content="https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="最佳实践与常见陷阱本章汇总 Go 工程实践中的经验与常见坑，帮助写出更健壮、可维护的代码。 代码风格go fmt &#x2F; go vet提交前必跑： 12go fmt .&#x2F;...go vet .&#x2F;...  Go 只有一种官方格式，团队无需争论缩进风格。 命名规范   类型 规范 示例    包名 小写、简短、单数 user、httputil   导出 大写开头 UserService   接口 单方法接">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-06-02T14:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:39:21.912Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Go最佳实践与常见陷阱</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2024/06/03/golang%E5%AD%A6%E4%B9%A0/Go%E6%95%B0%E7%BB%84%E5%88%87%E7%89%87%E4%B8%8EMap/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E8%AF%AD%E8%A8%80%E5%85%A5%E9%97%A8%E4%B8%8E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&text=Go最佳实践与常见陷阱"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&is_video=false&description=Go最佳实践与常见陷阱"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go最佳实践与常见陷阱&body=Check out this article: https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&name=Go最佳实践与常见陷阱&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.</span> <span class="toc-text">最佳实践与常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC"><span class="toc-number">1.1.</span> <span class="toc-text">代码风格</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#go-fmt-go-vet"><span class="toc-number">1.1.1.</span> <span class="toc-text">go fmt &#x2F; go vet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.2.</span> <span class="toc-text">命名规范</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">错误处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E9%99%B7%E9%98%B1"><span class="toc-number">1.3.</span> <span class="toc-text">并发陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BE%AA%E7%8E%AF%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 循环变量捕获</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%91%E5%B7%B2%E5%85%B3%E9%97%AD-channel-%E5%8F%91%E9%80%81"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. 向已关闭 channel 发送</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-goroutine-%E6%B3%84%E6%BC%8F"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. goroutine 泄漏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Map-%E5%B9%B6%E5%8F%91%E8%AF%BB%E5%86%99"><span class="toc-number">1.3.4.</span> <span class="toc-text">4. Map 并发读写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E4%B8%8E%E6%80%A7%E8%83%BD"><span class="toc-number">1.4.</span> <span class="toc-text">内存与性能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E7%89%87%E9%A2%84%E5%88%86%E9%85%8D"><span class="toc-number">1.4.1.</span> <span class="toc-text">切片预分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8B%BC%E6%8E%A5"><span class="toc-number">1.4.2.</span> <span class="toc-text">字符串拼接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">1.4.3.</span> <span class="toc-text">避免不必要的指针</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-%E4%B8%8E%E9%9B%B6%E5%80%BC"><span class="toc-number">1.5.</span> <span class="toc-text">JSON 与零值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E5%B7%A5%E7%A8%8B%E5%8C%96"><span class="toc-number">1.6.</span> <span class="toc-text">项目工程化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.</span> <span class="toc-text">学习路线建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-number">1.8.</span> <span class="toc-text">系列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Go最佳实践与常见陷阱
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-06-02T14:00:00.000Z" itemprop="datePublished">2024-06-02</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/" class="leancloud-visitors" data-flag-title="Go最佳实践与常见陷阱" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/golang/" rel="tag">golang</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="最佳实践与常见陷阱"><a href="#最佳实践与常见陷阱" class="headerlink" title="最佳实践与常见陷阱"></a>最佳实践与常见陷阱</h1><p>本章汇总 Go 工程实践中的经验与常见坑，帮助写出更健壮、可维护的代码。</p>
+<h2 id="代码风格"><a href="#代码风格" class="headerlink" title="代码风格"></a>代码风格</h2><h3 id="go-fmt-go-vet"><a href="#go-fmt-go-vet" class="headerlink" title="go fmt / go vet"></a>go fmt / go vet</h3><p>提交前必跑：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go fmt ./...</span><br><span class="line">go vet ./...</span><br></pre></td></tr></table></figure>
+
+<p>Go 只有一种官方格式，团队无需争论缩进风格。</p>
+<h3 id="命名规范"><a href="#命名规范" class="headerlink" title="命名规范"></a>命名规范</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>规范</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>包名</td>
+<td>小写、简短、单数</td>
+<td><code>user</code>、<code>httputil</code></td>
+</tr>
+<tr>
+<td>导出</td>
+<td>大写开头</td>
+<td><code>UserService</code></td>
+</tr>
+<tr>
+<td>接口</td>
+<td>单方法接口以 er 结尾</td>
+<td><code>Reader</code>、<code>Writer</code></td>
+</tr>
+<tr>
+<td>缩写</td>
+<td>全大写或全小写</td>
+<td><code>HTTPClient</code>、<code>userID</code></td>
+</tr>
+</tbody></table>
+<h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 好：包装上下文</span></span><br><span class="line"><span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;save user %d: %w&quot;</span>, id, err)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 差：丢失原始错误</span></span><br><span class="line"><span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;save failed&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 好：早返回</span></span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 差：忽略 error</span></span><br><span class="line">data, _ := os.ReadFile(path)</span><br></pre></td></tr></table></figure>
+
+<h2 id="并发陷阱"><a href="#并发陷阱" class="headerlink" title="并发陷阱"></a>并发陷阱</h2><h3 id="1-循环变量捕获"><a href="#1-循环变量捕获" class="headerlink" title="1. 循环变量捕获"></a>1. 循环变量捕获</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误：所有 goroutine 可能共享同一个 i</span></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        fmt.Println(i)  <span class="comment">// 可能全部打印 10</span></span><br><span class="line">    &#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确</span></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(n <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">        fmt.Println(n)</span><br><span class="line">    &#125;(i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-向已关闭-channel-发送"><a href="#2-向已关闭-channel-发送" class="headerlink" title="2. 向已关闭 channel 发送"></a>2. 向已关闭 channel 发送</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">close</span>(ch)</span><br><span class="line">ch &lt;- <span class="number">1</span>  <span class="comment">// panic</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-goroutine-泄漏"><a href="#3-goroutine-泄漏" class="headerlink" title="3. goroutine 泄漏"></a>3. goroutine 泄漏</h3><p>无接收者的 channel 发送、无 cancel 的阻塞会导致 goroutine 永久阻塞，务必传递 Context。</p>
+<h3 id="4-Map-并发读写"><a href="#4-Map-并发读写" class="headerlink" title="4. Map 并发读写"></a>4. Map 并发读写</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// panic: concurrent map read and map write</span></span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; m[<span class="string">&quot;a&quot;</span>] = <span class="number">1</span> &#125;()</span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; _ = m[<span class="string">&quot;a&quot;</span>] &#125;()</span><br></pre></td></tr></table></figure>
+
+<h2 id="内存与性能"><a href="#内存与性能" class="headerlink" title="内存与性能"></a>内存与性能</h2><h3 id="切片预分配"><a href="#切片预分配" class="headerlink" title="切片预分配"></a>切片预分配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 好：已知大小时预分配</span></span><br><span class="line">s := <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">0</span>, <span class="number">1000</span>)</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ &#123;</span><br><span class="line">    s = <span class="built_in">append</span>(s, i)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 差：频繁扩容</span></span><br><span class="line"><span class="keyword">var</span> s []<span class="keyword">int</span></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++ &#123;</span><br><span class="line">    s = <span class="built_in">append</span>(s, i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串拼接"><a href="#字符串拼接" class="headerlink" title="字符串拼接"></a>字符串拼接</h3><p>大量拼接用 <code>strings.Builder</code>，避免 <code>+</code> 产生大量临时对象。</p>
+<h3 id="避免不必要的指针"><a href="#避免不必要的指针" class="headerlink" title="避免不必要的指针"></a>避免不必要的指针</h3><p>小 struct 传值可能比传指针更高效（减少 GC 压力）。</p>
+<h2 id="JSON-与零值"><a href="#JSON-与零值" class="headerlink" title="JSON 与零值"></a>JSON 与零值</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Config <span class="keyword">struct</span> &#123;</span><br><span class="line">    Port <span class="keyword">int</span> <span class="string">`json:&quot;port&quot;`</span>  <span class="comment">// 0 无法与&quot;未设置&quot;区分</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用指针表示可选</span></span><br><span class="line"><span class="keyword">type</span> Config <span class="keyword">struct</span> &#123;</span><br><span class="line">    Port *<span class="keyword">int</span> <span class="string">`json:&quot;port,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="项目工程化"><a href="#项目工程化" class="headerlink" title="项目工程化"></a>项目工程化</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Makefile 或脚本</span></span><br><span class="line">go fmt ./...</span><br><span class="line">go vet ./...</span><br><span class="line">go <span class="built_in">test</span> -race -cover ./...</span><br><span class="line">go build -o bin/app ./cmd/server</span><br></pre></td></tr></table></figure>
+
+<p>推荐工具：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>golangci-lint</td>
+<td>聚合多种 linter</td>
+</tr>
+<tr>
+<td>air</td>
+<td>热重载开发</td>
+</tr>
+<tr>
+<td>delve</td>
+<td>调试</td>
+</tr>
+</tbody></table>
+<h2 id="学习路线建议"><a href="#学习路线建议" class="headerlink" title="学习路线建议"></a>学习路线建议</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">入门 → 语法 &#x2F; 数据类型 &#x2F; 函数</span><br><span class="line">     → 切片 &#x2F; Map &#x2F; 结构体 &#x2F; 接口</span><br><span class="line">     → 错误处理</span><br><span class="line">     → goroutine &#x2F; channel &#x2F; context</span><br><span class="line">     → Modules &#x2F; 标准库 &#x2F; 测试</span><br><span class="line">     → 微服务框架（Gin、Echo）&#x2F; gRPC</span><br><span class="line">     → 源码阅读（net&#x2F;http、sync、runtime）</span><br></pre></td></tr></table></figure>
+
+<h2 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h2><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>主题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Go语言入门与环境搭建</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Go基础语法与数据类型</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Go流程控制与函数</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Go数组切片与Map</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Go结构体与方法</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Go接口</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Go错误处理</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Go并发编程基础</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Go Channel与并发模式</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Go Context上下文</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Go包管理与Modules</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Go标准库实战</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Go测试与性能分析</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Go最佳实践与常见陷阱（本文）</td>
+</tr>
+</tbody></table>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Go 强调简单、显式、实用。掌握错误处理、并发模型和接口设计，配合良好的测试与工程习惯，即可胜任大多数后端开发任务。持续阅读标准库与优秀开源项目（Kubernetes、Docker、Prometheus）是进阶的最佳路径。</p>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1"><span class="toc-number">1.</span> <span class="toc-text">最佳实践与常见陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E9%A3%8E%E6%A0%BC"><span class="toc-number">1.1.</span> <span class="toc-text">代码风格</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#go-fmt-go-vet"><span class="toc-number">1.1.1.</span> <span class="toc-text">go fmt &#x2F; go vet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.2.</span> <span class="toc-text">命名规范</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">错误处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E9%99%B7%E9%98%B1"><span class="toc-number">1.3.</span> <span class="toc-text">并发陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BE%AA%E7%8E%AF%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 循环变量捕获</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%91%E5%B7%B2%E5%85%B3%E9%97%AD-channel-%E5%8F%91%E9%80%81"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. 向已关闭 channel 发送</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-goroutine-%E6%B3%84%E6%BC%8F"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. goroutine 泄漏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Map-%E5%B9%B6%E5%8F%91%E8%AF%BB%E5%86%99"><span class="toc-number">1.3.4.</span> <span class="toc-text">4. Map 并发读写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E4%B8%8E%E6%80%A7%E8%83%BD"><span class="toc-number">1.4.</span> <span class="toc-text">内存与性能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E7%89%87%E9%A2%84%E5%88%86%E9%85%8D"><span class="toc-number">1.4.1.</span> <span class="toc-text">切片预分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8B%BC%E6%8E%A5"><span class="toc-number">1.4.2.</span> <span class="toc-text">字符串拼接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">1.4.3.</span> <span class="toc-text">避免不必要的指针</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSON-%E4%B8%8E%E9%9B%B6%E5%80%BC"><span class="toc-number">1.5.</span> <span class="toc-text">JSON 与零值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E5%B7%A5%E7%A8%8B%E5%8C%96"><span class="toc-number">1.6.</span> <span class="toc-text">项目工程化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.7.</span> <span class="toc-text">学习路线建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-number">1.8.</span> <span class="toc-text">系列目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&text=Go最佳实践与常见陷阱"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&is_video=false&description=Go最佳实践与常见陷阱"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go最佳实践与常见陷阱&body=Check out this article: https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&title=Go最佳实践与常见陷阱"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2024/06/02/golang%E5%AD%A6%E4%B9%A0/Go%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%B8%8E%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1/&name=Go最佳实践与常见陷阱&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

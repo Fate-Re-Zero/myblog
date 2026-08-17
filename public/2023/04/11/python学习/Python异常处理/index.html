@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="异常处理Python 用异常（Exception）处理错误，遵循 EAFP（Easier to Ask Forgiveness than Permission）风格：先尝试，出错再处理。 基本语法12345678910try:    result &#x3D; 10 &#x2F; 0except ZeroDivisionError as e:    print(f&quot;除零错误: &amp;#123;e&amp;#125;&amp;q">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python异常处理">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="异常处理Python 用异常（Exception）处理错误，遵循 EAFP（Easier to Ask Forgiveness than Permission）风格：先尝试，出错再处理。 基本语法12345678910try:    result &#x3D; 10 &#x2F; 0except ZeroDivisionError as e:    print(f&quot;除零错误: &amp;#123;e&amp;#125;&amp;q">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-04-11T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:43:41.892Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Python异常处理</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/04/12/python%E5%AD%A6%E4%B9%A0/Python%E8%AF%AD%E8%A8%80%E5%85%A5%E9%97%A8%E4%B8%8E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/04/10/python%E5%AD%A6%E4%B9%A0/Python%E6%96%87%E4%BB%B6%E4%B8%8EIO/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&text=Python异常处理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&is_video=false&description=Python异常处理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python异常处理&body=Check out this article: https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&name=Python异常处理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">异常处理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8"><span class="toc-number">1.2.</span> <span class="toc-text">抛出异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E9%93%BE"><span class="toc-number">1.3.</span> <span class="toc-text">异常链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%86%85%E7%BD%AE%E5%BC%82%E5%B8%B8"><span class="toc-number">1.4.</span> <span class="toc-text">常见内置异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8"><span class="toc-number">1.5.</span> <span class="toc-text">自定义异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%AD%E8%A8%80-assert"><span class="toc-number">1.6.</span> <span class="toc-text">断言 assert</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8"><span class="toc-number">1.7.</span> <span class="toc-text">上下文管理器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.8.</span> <span class="toc-text">最佳实践</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Python异常处理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-04-11T07:00:00.000Z" itemprop="datePublished">2023-04-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/" class="leancloud-visitors" data-flag-title="Python异常处理" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/python/" rel="tag">python</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><p>Python 用异常（Exception）处理错误，遵循 <strong>EAFP</strong>（Easier to Ask Forgiveness than Permission）风格：先尝试，出错再处理。</p>
+<h2 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    result = <span class="number">10</span> / <span class="number">0</span></span><br><span class="line"><span class="keyword">except</span> ZeroDivisionError <span class="keyword">as</span> e:</span><br><span class="line">    print(<span class="string">f&quot;除零错误: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"><span class="keyword">except</span> (TypeError, ValueError) <span class="keyword">as</span> e:</span><br><span class="line">    print(<span class="string">f&quot;类型或值错误: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">&quot;没有异常时执行&quot;</span>)</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    print(<span class="string">&quot;无论是否异常都执行&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="抛出异常"><a href="#抛出异常" class="headerlink" title="抛出异常"></a>抛出异常</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">divide</span>(<span class="params">a: <span class="built_in">float</span>, b: <span class="built_in">float</span></span>) -&gt; float:</span></span><br><span class="line">    <span class="keyword">if</span> b == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;除数不能为零&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line"></span><br><span class="line"><span class="keyword">raise</span> RuntimeError(<span class="string">&quot;something went wrong&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="异常链"><a href="#异常链" class="headerlink" title="异常链"></a>异常链</h2><p>保留原始异常上下文：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="built_in">int</span>(<span class="string">&quot;abc&quot;</span>)</span><br><span class="line"><span class="keyword">except</span> ValueError <span class="keyword">as</span> e:</span><br><span class="line">    <span class="keyword">raise</span> RuntimeError(<span class="string">&quot;解析失败&quot;</span>) <span class="keyword">from</span> e</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见内置异常"><a href="#常见内置异常" class="headerlink" title="常见内置异常"></a>常见内置异常</h2><table>
+<thead>
+<tr>
+<th>异常</th>
+<th>触发场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ValueError</code></td>
+<td>值合法但语义不对</td>
+</tr>
+<tr>
+<td><code>TypeError</code></td>
+<td>类型不匹配</td>
+</tr>
+<tr>
+<td><code>KeyError</code></td>
+<td>dict 键不存在</td>
+</tr>
+<tr>
+<td><code>IndexError</code></td>
+<td>序列索引越界</td>
+</tr>
+<tr>
+<td><code>FileNotFoundError</code></td>
+<td>文件不存在</td>
+</tr>
+<tr>
+<td><code>AttributeError</code></td>
+<td>对象无该属性</td>
+</tr>
+<tr>
+<td><code>StopIteration</code></td>
+<td>迭代器结束</td>
+</tr>
+</tbody></table>
+<h2 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AppError</span>(<span class="params">Exception</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;应用基础异常。&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NotFoundError</span>(<span class="params">AppError</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, resource: <span class="built_in">str</span>, <span class="built_in">id</span>: <span class="built_in">int</span></span>):</span></span><br><span class="line">        self.resource = resource</span><br><span class="line">        self.<span class="built_in">id</span> = <span class="built_in">id</span></span><br><span class="line">        <span class="built_in">super</span>().__init__(<span class="string">f&quot;<span class="subst">&#123;resource&#125;</span> <span class="subst">&#123;<span class="built_in">id</span>&#125;</span> not found&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_user</span>(<span class="params">user_id: <span class="built_in">int</span></span>) -&gt; dict:</span></span><br><span class="line">    user = db.find(user_id)</span><br><span class="line">    <span class="keyword">if</span> user <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> NotFoundError(<span class="string">&quot;User&quot;</span>, user_id)</span><br><span class="line">    <span class="keyword">return</span> user</span><br></pre></td></tr></table></figure>
+
+<h2 id="断言-assert"><a href="#断言-assert" class="headerlink" title="断言 assert"></a>断言 assert</h2><p>开发阶段检查不变量，生产环境可用 <code>-O</code> 禁用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assert</span> <span class="built_in">len</span>(items) &gt; <span class="number">0</span>, <span class="string">&quot;items must not be empty&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>不要</strong>用 assert 做业务逻辑校验或用户输入验证，应显式 raise。</p>
+<h2 id="上下文管理器"><a href="#上下文管理器" class="headerlink" title="上下文管理器"></a>上下文管理器</h2><p>自动释放资源（详见装饰器章节）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;data.txt&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    content = f.read()</span><br><span class="line"><span class="comment"># 文件自动关闭</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 好：捕获具体异常</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    value = <span class="built_in">int</span>(user_input)</span><br><span class="line"><span class="keyword">except</span> ValueError:</span><br><span class="line">    value = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 差：裸 except 或 except Exception 吞掉所有错误</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    risky()</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 好：使用 else 分离正常逻辑</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    data = load_config()</span><br><span class="line"><span class="keyword">except</span> FileNotFoundError:</span><br><span class="line">    data = default_config()</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    validate(data)</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>捕获具体异常类型，避免裸 <code>except</code></li>
+<li>自定义异常继承自 <code>Exception</code>，按业务分层</li>
+<li><code>raise ... from ...</code> 保留异常链便于调试</li>
+<li>资源管理优先用 <code>with</code> 语句</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">异常处理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">基本语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8"><span class="toc-number">1.2.</span> <span class="toc-text">抛出异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E9%93%BE"><span class="toc-number">1.3.</span> <span class="toc-text">异常链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%86%85%E7%BD%AE%E5%BC%82%E5%B8%B8"><span class="toc-number">1.4.</span> <span class="toc-text">常见内置异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8"><span class="toc-number">1.5.</span> <span class="toc-text">自定义异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%AD%E8%A8%80-assert"><span class="toc-number">1.6.</span> <span class="toc-text">断言 assert</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8"><span class="toc-number">1.7.</span> <span class="toc-text">上下文管理器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.8.</span> <span class="toc-text">最佳实践</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.9.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&text=Python异常处理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&is_video=false&description=Python异常处理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python异常处理&body=Check out this article: https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&title=Python异常处理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/11/python%E5%AD%A6%E4%B9%A0/Python%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86/&name=Python异常处理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="RabbitMQ 路由模式（Direct）介绍Direct模式是RabbitMQ中交换机（Exchange）的一种工作模式，通过精确匹配路由键（Routing Key）和绑定键（Binding Key），将消息路由到对应的队列。适用于需要根据特定规则精确分发消息的场景。 核心原理 生产者发送消息时指定一个路由键。 Direct Exchange 将消息转发给所有绑定键（Binding Key）与路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ路由模式与主题模式">
+<meta property="og:url" content="https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="RabbitMQ 路由模式（Direct）介绍Direct模式是RabbitMQ中交换机（Exchange）的一种工作模式，通过精确匹配路由键（Routing Key）和绑定键（Binding Key），将消息路由到对应的队列。适用于需要根据特定规则精确分发消息的场景。 核心原理 生产者发送消息时指定一个路由键。 Direct Exchange 将消息转发给所有绑定键（Binding Key）与路">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-1.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-2.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-3.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-4.png">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-5.png">
+<meta property="article:published_time" content="2021-07-03T00:32:16.000Z">
+<meta property="article:modified_time" content="2025-04-19T02:44:48.935Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/RabbitMQ/20210703-1.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>RabbitMQ路由模式与主题模式</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/07/03/RabbitMQ/RabbitMQ%20Producer%20Confirm%E4%B8%8EReturn%E6%9C%BA%E5%88%B6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2021/07/02/RabbitMQ/RabbitMQ%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85%E6%A8%A1%E5%BC%8F/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&text=RabbitMQ路由模式与主题模式"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&is_video=false&description=RabbitMQ路由模式与主题模式"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ路由模式与主题模式&body=Check out this article: https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&name=RabbitMQ路由模式与主题模式&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ-%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%EF%BC%88Direct%EF%BC%89%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 路由模式（Direct）介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">核心原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">3.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">4.</span> <span class="toc-text">注意事项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F%EF%BC%88TOPIC%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">RabbitMQ主题模式（TOPIC）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-number">6.</span> <span class="toc-text">示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="toc-number">7.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F%EF%BC%88TOPIC%EF%BC%89%E4%B8%8E%E7%9B%B4%E6%8E%A5%E6%A8%A1%E5%BC%8F%EF%BC%88DIRECT%EF%BC%89%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">8.</span> <span class="toc-text">主题模式（TOPIC）与直接模式（DIRECT）的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AF%B9%E6%AF%94"><span class="toc-number">9.</span> <span class="toc-text">具体对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        RabbitMQ路由模式与主题模式
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-07-03T00:32:16.000Z" itemprop="datePublished">2021-07-03</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/" class="leancloud-visitors" data-flag-title="RabbitMQ路由模式与主题模式" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/RabbitMQ/" rel="tag">RabbitMQ</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="RabbitMQ-路由模式（Direct）介绍"><a href="#RabbitMQ-路由模式（Direct）介绍" class="headerlink" title="RabbitMQ 路由模式（Direct）介绍"></a>RabbitMQ 路由模式（Direct）介绍</h3><p>Direct模式是RabbitMQ中交换机（Exchange）的一种工作模式，通过精确匹配路由键（Routing Key）和绑定键（Binding Key），将消息路由到对应的队列。适用于需要根据特定规则精确分发消息的场景。</p>
+<h3 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h3><ol>
+<li>生产者发送消息时指定一个路由键。</li>
+<li>Direct Exchange 将消息转发给所有绑定键（Binding Key）与路由键完全匹配的队列。</li>
+<li>消费者监听特定队列，处理匹配的消息。</li>
+</ol>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ol>
+<li>日志分级处理<br>不同级别的日志（如 error、info）分发到不同队列，由消费者独立处理。</li>
+<li>订单类型路由<br>根据订单类型（如 digital、physical）将消息路由到对应的业务处理服务。</li>
+<li>消息分类通知<br>例如，将sms、email消息分发到不同的通知通道。</li>
+</ol>
+<p><img src="/images/RabbitMQ/20210703-1.png" alt="image-20210703-1"></p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>● 精确匹配：路由键和绑定键需完全一致。<br>● 多队列绑定：若多个队列绑定相同键（如两个队列均绑定error），消息会同时分发到这些队列（类似广播）。<br>● 性能：Direct模式效率高，适合需要精确控制的场景，但不支持通配符（需使用Topic模式）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.LocalDate;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WeatherProducer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                Channel channel = connection.createChannel();) &#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 声明一个直连交换机。</span></span><br><span class="line"><span class="comment">             * </span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> exchange 交换机的名称，使用常量类 RabbitConstant 中定义的 EXCHANGE_WEATHER_DIRECT。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> type 交换机的类型，这里指定为 &quot;direct&quot;，表示直连交换机，根据路由键精确匹配队列。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> durable 是否持久化，设置为 true 表示该交换机在 RabbitMQ 服务器重启后不会丢失。</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            channel.exchangeDeclare(RabbitConstant.EXCHANGE_WEATHER_DIRECT, <span class="string">&quot;direct&quot;</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 声明一个队列，使用 RabbitMQ 通道的 queueDeclare 方法。</span></span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_BAIDU, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">            </span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 将队列绑定到交换机，并指定路由键。</span></span><br><span class="line"><span class="comment">             * </span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> queue 要绑定的队列名称，这里使用常量类 RabbitConstant 中定义的 QUEUE_BAIDU 队列。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> exchange 要绑定到的交换机名称，这里使用常量类 RabbitConstant 中定义的 EXCHANGE_WEATHER_DIRECT 交换机。</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> routingKey 绑定的路由键，用于指定消息的路由规则，这里设置为 &quot;baidu&quot;。</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_BAIDU, RabbitConstant.EXCHANGE_WEATHER_DIRECT, <span class="string">&quot;baidu&quot;</span>);</span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_BAIDU, RabbitConstant.EXCHANGE_WEATHER_DIRECT, <span class="string">&quot;duxiaoman&quot;</span>);</span><br><span class="line"></span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_SINA, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_SINA, RabbitConstant.EXCHANGE_WEATHER_DIRECT, <span class="string">&quot;sina&quot;</span>);</span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_SINA, RabbitConstant.EXCHANGE_WEATHER_DIRECT, <span class="string">&quot;weibo&quot;</span>);</span><br><span class="line"></span><br><span class="line">            Random random = <span class="keyword">new</span> Random();</span><br><span class="line">            String[] cities = &#123; <span class="string">&quot;Beijing&quot;</span>, <span class="string">&quot;New York&quot;</span>, <span class="string">&quot;Tokyo&quot;</span>, <span class="string">&quot;Paris&quot;</span>, <span class="string">&quot;London&quot;</span> &#125;;</span><br><span class="line">            String[] countries = &#123; <span class="string">&quot;China&quot;</span>, <span class="string">&quot;USA&quot;</span>, <span class="string">&quot;Japan&quot;</span>, <span class="string">&quot;France&quot;</span>, <span class="string">&quot;UK&quot;</span> &#125;;</span><br><span class="line">            String[] weathers = &#123; <span class="string">&quot;Sunny&quot;</span>, <span class="string">&quot;Rainy&quot;</span>, <span class="string">&quot;Cloudy&quot;</span>, <span class="string">&quot;Snowy&quot;</span> &#125;;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                String weather = weathers[random.nextInt(weathers.length)];</span><br><span class="line">                <span class="comment">// 根据天气类型生成合理温度</span></span><br><span class="line">                <span class="keyword">int</span> maxTemp, minTemp;</span><br><span class="line">                <span class="keyword">switch</span> (weather) &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Sunny&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">11</span>) + <span class="number">25</span>; <span class="comment">// 25-35℃</span></span><br><span class="line">                        minTemp = maxTemp - <span class="number">10</span>; <span class="comment">// 日温差约10℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Rainy&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">6</span>) + <span class="number">20</span>; <span class="comment">// 20-25℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">10</span>) + <span class="number">10</span>; <span class="comment">// 10-20℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Cloudy&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">9</span>) + <span class="number">20</span>; <span class="comment">// 20-28℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">8</span>) + <span class="number">15</span>; <span class="comment">// 15-22℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">default</span>: <span class="comment">// Snowy</span></span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">6</span>) - <span class="number">5</span>; <span class="comment">// -5~0℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">6</span>) - <span class="number">10</span>; <span class="comment">// -10~-5℃</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> idx = random.nextInt(countries.length);</span><br><span class="line">                String json = String.format(</span><br><span class="line">                        <span class="string">&quot;&#123;\&quot;date\&quot;:\&quot;%s\&quot;, \&quot;country\&quot;:\&quot;%s\&quot;, \&quot;city\&quot;:\&quot;%s\&quot;, \&quot;weather\&quot;:\&quot;%s\&quot;, &quot;</span> +</span><br><span class="line">                                <span class="string">&quot;\&quot;minTemp\&quot;:%d, \&quot;maxTemp\&quot;:%d&#125;&quot;</span>,</span><br><span class="line">                        LocalDate.now(),</span><br><span class="line">                        countries[idx],</span><br><span class="line">                        cities[idx],</span><br><span class="line">                        weather,</span><br><span class="line">                        minTemp,</span><br><span class="line">                        maxTemp);</span><br><span class="line">                String key = random.nextBoolean()?<span class="string">&quot;baidu&quot;</span>: <span class="string">&quot;sina&quot;</span>;</span><br><span class="line">                log.info(<span class="string">&quot;路由键:&#123;&#125;,天气信息：&#123;&#125;&quot;</span>,key, json);</span><br><span class="line">                <span class="comment">// 调用 RabbitMQ 通道的 basicPublish 方法，将生成的天气预报 JSON 数据发送到指定的交换机。</span></span><br><span class="line">                <span class="comment">// 参数解释：</span></span><br><span class="line">                <span class="comment">// 1. RabbitConstant.EXCHANGE_WEATHER：指定要将消息发布到的交换机名称，由常量类 RabbitConstant 定义。</span></span><br><span class="line">                <span class="comment">// 2. &quot;&quot;：路由键，发布订阅模式不需要。</span></span><br><span class="line">                <span class="comment">// 3. null：消息的属性，传入 null 表示使用默认的消息属性。</span></span><br><span class="line">                <span class="comment">// 4. json.getBytes()：要发送的消息内容，将之前生成的 JSON 字符串转换为字节数组。</span></span><br><span class="line">                channel.basicPublish(RabbitConstant.EXCHANGE_WEATHER_DIRECT, key, <span class="keyword">null</span>, json.getBytes());</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Baidu</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_BAIDU, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                log.info(<span class="string">&quot;百度收到气象信息：&#123;&#125;&quot;</span>, <span class="keyword">new</span> String(body));</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sina</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_SINA, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                log.info(<span class="string">&quot;新浪收到气象信息：&#123;&#125;&quot;</span>, <span class="keyword">new</span> String(body));</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="RabbitMQ主题模式（TOPIC）"><a href="#RabbitMQ主题模式（TOPIC）" class="headerlink" title="RabbitMQ主题模式（TOPIC）"></a>RabbitMQ主题模式（TOPIC）</h3><p>RabbitMQ 的主题模式（Topic Exchange）是一种支持基于消息路由键（Routing Key）进行灵活匹配的消息分发模式。它允许生产者发送带有特定路由键的消息，消费者通过绑定键（Binding Key）订阅符合规则的消息。<br>在主题模式中，路由键和绑定键可以包含多个单词，以点号（.）分隔，例如stock.usd.nyse或weather.europe.london。此外，绑定键支持两种通配符：<br>● *：匹配一个单词。<br>● #：匹配零个或多个单词。<br>工作原理</p>
+<ol>
+<li>生产者发送消息时，指定一个路由键。</li>
+<li>消息被发送到 Topic Exchange。</li>
+<li>Topic Exchange 根据绑定键的规则将消息路由到符合条件的队列。<br>○ 如果绑定键与路由键完全匹配，则消息会被路由到对应的队列。<br>○ 如果绑定键包含通配符，则会根据通配符规则进行匹配。</li>
+</ol>
+<p><img src="/images/RabbitMQ/20210703-2.png" alt="image-20210703-2"></p>
+<p><img src="/images/RabbitMQ/20210703-3.png" alt="image-20210703-3"></p>
+<p><img src="/images/RabbitMQ/20210703-4.png" alt="image-20210703-4"></p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>假设有一个Topic Exchange，以下是绑定键和路由键的例子：<br>● 绑定键：*.orange.*<br>  ○ 匹配路由键：quick.orange.rabbit、lazy.orange.elephant<br>  ○ 不匹配路由键：orange、quick.orange.male.rabbit<br>● 绑定键：lazy.#<br>  ○ 匹配路由键：lazy.orange.elephant、lazy.brown.fox、lazy<br>  ○ 不匹配路由键：quick.orange.rabbit</p>
+<h3 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h3><p>主题模式适用于需要对消息进行多维度分类和灵活订阅的场景。以下是一些典型的应用场景：</p>
+<ol>
+<li>日志系统：<br>○ 路由键可以表示日志的来源和级别，例如 app.error、db.warning。<br>○ 消费者可以根据不同的需求订阅特定类型的日志，例如 *.error 订阅所有错误日志。</li>
+<li>事件驱动架构：<br>○ 在微服务架构中，不同服务之间通过消息通信。<br>○ 主题模式允许服务根据事件类型和子类型灵活订阅感兴趣的消息，例如 order.created、payment.failed。</li>
+<li>物联网（IoT）数据处理：<br>○ 设备上报的数据可以用路由键标识设备类型和位置，例如 sensor.temp.zone1。<br>○ 数据处理模块可以根据绑定键订阅特定区域或特定类型的传感器数据。</li>
+</ol>
+<h3 id="主题模式（TOPIC）与直接模式（DIRECT）的区别"><a href="#主题模式（TOPIC）与直接模式（DIRECT）的区别" class="headerlink" title="主题模式（TOPIC）与直接模式（DIRECT）的区别"></a>主题模式（TOPIC）与直接模式（DIRECT）的区别</h3><p><img src="/images/RabbitMQ/20210703-5.png" alt="image-20210703-5"></p>
+<h3 id="具体对比"><a href="#具体对比" class="headerlink" title="具体对比"></a>具体对比</h3><ol>
+<li>灵活性：<br>○ DIRECT 模式要求路由键和绑定键完全匹配，适用于消息分类较为固定的场景。<br>○ TOPIC 模式支持通配符，允许更灵活的消息订阅，适合需要动态分类和多维度过滤的场景。</li>
+<li>性能：<br>○ DIRECT 模式的匹配逻辑简单，性能较高。<br>○ TOPIC 模式需要解析通配符规则，可能带来一定的性能开销，但通常在现代硬件上影响较小。</li>
+<li>使用场景选择：<br>○ 如果消息分类明确且固定（例如订单状态更新），建议使用 DIRECT 模式。<br>○ 如果需要支持多条件组合订阅（例如日志系统或事件驱动架构），建议使用 TOPIC 模式。</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>RabbitMQ 的主题模式（TOPIC）是一种强大的消息路由机制，通过支持通配符的方式提供了极大的灵活性，适合需要多维度分类和动态订阅的场景。而直接模式（DIRECT）则更加简单高效，适用于分类明确且固定的场景。在实际应用中，应根据业务需求选择合适的模式，从而实现高效的系统设计。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.LocalDate;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WeatherProducer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> (Connection connection = RabbitUtils.getConnection();</span><br><span class="line">                Channel channel = connection.createChannel();) &#123;</span><br><span class="line"></span><br><span class="line">            channel.exchangeDeclare(RabbitConstant.EXCHANGE_WEATHER_TOPIC, <span class="string">&quot;topic&quot;</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_BEIJING, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_BEIJING, RabbitConstant.EXCHANGE_WEATHER_TOPIC, <span class="string">&quot;city.Beijing.#&quot;</span>);</span><br><span class="line"></span><br><span class="line">            channel.queueDeclare(RabbitConstant.QUEUE_PARIS, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line">            channel.queueBind(RabbitConstant.QUEUE_PARIS, RabbitConstant.EXCHANGE_WEATHER_TOPIC, <span class="string">&quot;city.Paris.*&quot;</span>);</span><br><span class="line"></span><br><span class="line">            Random random = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">            String[] cities = &#123; <span class="string">&quot;Beijing&quot;</span>, <span class="string">&quot;New York&quot;</span>, <span class="string">&quot;Tokyo&quot;</span>, <span class="string">&quot;Paris&quot;</span>, <span class="string">&quot;London&quot;</span> &#125;;</span><br><span class="line">            String[] countries = &#123; <span class="string">&quot;China&quot;</span>, <span class="string">&quot;USA&quot;</span>, <span class="string">&quot;Japan&quot;</span>, <span class="string">&quot;France&quot;</span>, <span class="string">&quot;UK&quot;</span> &#125;;</span><br><span class="line">            String[] weathers = &#123; <span class="string">&quot;Sunny&quot;</span>, <span class="string">&quot;Rainy&quot;</span>, <span class="string">&quot;Cloudy&quot;</span>, <span class="string">&quot;Snowy&quot;</span> &#125;;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                String weather = weathers[random.nextInt(weathers.length)];</span><br><span class="line">                <span class="keyword">int</span> maxTemp, minTemp;</span><br><span class="line">                <span class="keyword">switch</span> (weather) &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Sunny&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">11</span>) + <span class="number">25</span>; <span class="comment">// 25-35℃</span></span><br><span class="line">                        minTemp = maxTemp - <span class="number">10</span>; <span class="comment">// 日温差约10℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Rainy&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">6</span>) + <span class="number">20</span>; <span class="comment">// 20-25℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">10</span>) + <span class="number">10</span>; <span class="comment">// 10-20℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&quot;Cloudy&quot;</span>:</span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">9</span>) + <span class="number">20</span>; <span class="comment">// 20-28℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">8</span>) + <span class="number">15</span>; <span class="comment">// 15-22℃</span></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">default</span>: <span class="comment">// Snowy</span></span><br><span class="line">                        maxTemp = random.nextInt(<span class="number">6</span>) - <span class="number">5</span>; <span class="comment">// -5~0℃</span></span><br><span class="line">                        minTemp = random.nextInt(<span class="number">6</span>) - <span class="number">10</span>; <span class="comment">// -10~-5℃</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> idx = random.nextInt(countries.length);</span><br><span class="line">                String json = String.format(</span><br><span class="line">                        <span class="string">&quot;&#123;\&quot;date\&quot;:\&quot;%s\&quot;, \&quot;country\&quot;:\&quot;%s\&quot;, \&quot;city\&quot;:\&quot;%s\&quot;, \&quot;weather\&quot;:\&quot;%s\&quot;, &quot;</span> +</span><br><span class="line">                                <span class="string">&quot;\&quot;minTemp\&quot;:%d, \&quot;maxTemp\&quot;:%d&#125;&quot;</span>,</span><br><span class="line">                        LocalDate.now(),</span><br><span class="line">                        countries[idx],</span><br><span class="line">                        cities[idx],</span><br><span class="line">                        weather,</span><br><span class="line">                        minTemp,</span><br><span class="line">                        maxTemp);</span><br><span class="line">                String routingKey = <span class="string">&quot;city.&quot;</span> + cities[idx] + <span class="string">&quot;.weather&quot;</span>;</span><br><span class="line">                log.info(<span class="string">&quot;路由键：&#123;&#125;，天气信息：&#123;&#125;&quot;</span>, routingKey, json);</span><br><span class="line"></span><br><span class="line">                channel.basicPublish(RabbitConstant.EXCHANGE_WEATHER_TOPIC, routingKey, <span class="keyword">null</span>, json.getBytes());</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BeijingConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_BEIJING, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                log.info(<span class="string">&quot;收到北京气象信息：&#123;&#125;&quot;</span>, <span class="keyword">new</span> String(body));</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.lixiang.rabbitmq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitConstant;</span><br><span class="line"><span class="keyword">import</span> com.lixiang.rabbitmq.utils.RabbitUtils;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ParisConsumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = RabbitUtils.getConnection();</span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        channel.basicQos(<span class="number">1</span>);</span><br><span class="line">        channel.basicConsume(RabbitConstant.QUEUE_PARIS, <span class="keyword">false</span>, <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                log.info(<span class="string">&quot;收到巴黎气象信息：&#123;&#125;&quot;</span>, <span class="keyword">new</span> String(body));</span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ-%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%EF%BC%88Direct%EF%BC%89%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 路由模式（Direct）介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">核心原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">3.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">4.</span> <span class="toc-text">注意事项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F%EF%BC%88TOPIC%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">RabbitMQ主题模式（TOPIC）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-number">6.</span> <span class="toc-text">示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="toc-number">7.</span> <span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F%EF%BC%88TOPIC%EF%BC%89%E4%B8%8E%E7%9B%B4%E6%8E%A5%E6%A8%A1%E5%BC%8F%EF%BC%88DIRECT%EF%BC%89%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">8.</span> <span class="toc-text">主题模式（TOPIC）与直接模式（DIRECT）的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AF%B9%E6%AF%94"><span class="toc-number">9.</span> <span class="toc-text">具体对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&text=RabbitMQ路由模式与主题模式"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&is_video=false&description=RabbitMQ路由模式与主题模式"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RabbitMQ路由模式与主题模式&body=Check out this article: https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&title=RabbitMQ路由模式与主题模式"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2021/07/03/RabbitMQ/RabbitMQ%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E4%B8%BB%E9%A2%98%E6%A8%A1%E5%BC%8F/&name=RabbitMQ路由模式与主题模式&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

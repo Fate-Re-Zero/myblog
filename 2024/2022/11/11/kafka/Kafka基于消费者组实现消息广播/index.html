@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="实现广播的方法：创建多个消费者组为了实现广播，需要为每个接收广播消息的实体创建一个独立的消费者组。例如，假设有一个主题topic1包含需要广播的消息，并且有3个不同的应用程序（或服务）需要接收这些消息。为每个应用程序创建一个消费者组，这样每个消费者组都可以独立地从topic1中消费消息，从而实现消息的广播。  配置和注意事项分区数量：● 要确保分区数量足够多，以避免消费者组内的消费者闲置。● 理想">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka基于消费者组实现消息广播">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="实现广播的方法：创建多个消费者组为了实现广播，需要为每个接收广播消息的实体创建一个独立的消费者组。例如，假设有一个主题topic1包含需要广播的消息，并且有3个不同的应用程序（或服务）需要接收这些消息。为每个应用程序创建一个消费者组，这样每个消费者组都可以独立地从topic1中消费消息，从而实现消息的广播。  配置和注意事项分区数量：● 要确保分区数量足够多，以避免消费者组内的消费者闲置。● 理想">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fate-re-zero.github.io/images/kafka/20221111-3.png">
+<meta property="article:published_time" content="2022-11-11T05:31:55.000Z">
+<meta property="article:modified_time" content="2025-04-19T13:32:36.285Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fate-re-zero.github.io/images/kafka/20221111-3.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Kafka基于消费者组实现消息广播</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/12/kafka/Kafka%E5%9F%BA%E4%BA%8E%E5%81%8F%E7%A7%BB%E9%87%8F%E5%92%8C%E6%97%B6%E9%97%B4%E9%87%8D%E6%94%BE%E6%B6%88%E6%81%AF/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/11/11/kafka/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E5%85%A5%E6%B5%81%E7%A8%8B/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&text=Kafka基于消费者组实现消息广播"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&is_video=false&description=Kafka基于消费者组实现消息广播"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka基于消费者组实现消息广播&body=Check out this article: https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&name=Kafka基于消费者组实现消息广播&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%B9%BF%E6%92%AD%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%A4%9A%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="toc-number">1.</span> <span class="toc-text">实现广播的方法：创建多个消费者组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%92%8C%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">2.</span> <span class="toc-text">配置和注意事项</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Kafka基于消费者组实现消息广播
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-11T05:31:55.000Z" itemprop="datePublished">2022-11-11</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/" class="leancloud-visitors" data-flag-title="Kafka基于消费者组实现消息广播" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Kafka/" rel="tag">Kafka</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="实现广播的方法：创建多个消费者组"><a href="#实现广播的方法：创建多个消费者组" class="headerlink" title="实现广播的方法：创建多个消费者组"></a>实现广播的方法：创建多个消费者组</h3><p>为了实现广播，需要为每个接收广播消息的实体创建一个独立的消费者组。例如，假设有一个主题topic1包含需要广播的消息，并且有3个不同的应用程序（或服务）需要接收这些消息。为每个应用程序创建一个消费者组，这样每个消费者组都可以独立地从topic1中消费消息，从而实现消息的广播。</p>
+<p><img src="/images/kafka/20221111-3.png" alt="image-20221111-3"></p>
+<h3 id="配置和注意事项"><a href="#配置和注意事项" class="headerlink" title="配置和注意事项"></a>配置和注意事项</h3><p>分区数量：<br>● 要确保分区数量足够多，以避免消费者组内的消费者闲置。<br>● 理想情况下，每个消费者组内的消费者应该能够分配到至少一个分区，否则会有消费者闲置，无法充分利用资源。<br>性能考虑：<br>● 创建多个消费者组会增加 Kafka 集群的负载，因为每个消费者组都需要进行消息拉取和处理。<br>● 要根据实际情况调整 poll 时间、消费者组的数量和分区数量，以达到性能和广播效果的平衡。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@Builder</span></span><br><span class="line"><span class="meta">@NoArgsConstructor</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IoTEvent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer deviceId;</span><br><span class="line">    <span class="keyword">private</span> Long eventTimestamp;</span><br><span class="line">    <span class="keyword">private</span> String deviceType;</span><br><span class="line">    <span class="keyword">private</span> Integer eventValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IoTEventSerializer</span> <span class="keyword">implements</span> <span class="title">org</span>.<span class="title">apache</span>.<span class="title">kafka</span>.<span class="title">common</span>.<span class="title">serialization</span>.<span class="title">Serializer</span>&lt;<span class="title">IoTEvent</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">byte</span>[] serialize(String topic, IoTEvent data) &#123;</span><br><span class="line">        <span class="keyword">return</span> objectMapper.writeValueAsBytes(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line"><span class="keyword">import</span> lombok.SneakyThrows;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IoTEventDeserializer</span> <span class="keyword">implements</span> <span class="title">org</span>.<span class="title">apache</span>.<span class="title">kafka</span>.<span class="title">common</span>.<span class="title">serialization</span>.<span class="title">Deserializer</span>&lt;<span class="title">IoTEvent</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> IoTEvent <span class="title">deserialize</span><span class="params">(String topic, <span class="keyword">byte</span>[] data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> objectMapper.readValue(data, IoTEvent.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.producer.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringSerializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IoTEventProducer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());</span><br><span class="line">        kaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IoTEventSerializer.class.getName());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (Producer&lt;String, IoTEvent&gt; producer = <span class="keyword">new</span> KafkaProducer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            Random random = <span class="keyword">new</span> Random();</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                IoTEvent event = IoTEvent.builder()</span><br><span class="line">                        .deviceId(random.nextInt(<span class="number">10</span>))</span><br><span class="line">                        .eventTimestamp(System.currentTimeMillis())</span><br><span class="line">                        .deviceType(<span class="string">&quot;BOT&quot;</span>)</span><br><span class="line">                        .eventValue(random.nextInt(<span class="number">101</span>))</span><br><span class="line">                        .build();</span><br><span class="line">                ProducerRecord&lt;String, IoTEvent&gt; producerRecord = <span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;iot-events&quot;</span>, event.getDeviceId().toString(), event);</span><br><span class="line">                RecordMetadata result = producer.send(producerRecord).get();</span><br><span class="line">                log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset = &#123;&#125;, timestamp = &#123;&#125;&quot;</span>, result.topic(), result.partition(), result.offset(), result.timestamp());</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>); <span class="comment">// Sleep for 1 second</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error sending message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Group1Consumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IoTEventDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;group-1&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, IoTEvent&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;iot-events&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, IoTEvent&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, IoTEvent&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.common.serialization.StringDeserializer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.time.Duration;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Group2Consumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Properties kaProperties = <span class="keyword">new</span> Properties();</span><br><span class="line">        kaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, <span class="string">&quot;192.168.31.230:9092&quot;</span>);</span><br><span class="line">        kaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IoTEventDeserializer.class.getName());</span><br><span class="line">        kaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, <span class="string">&quot;group-2&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (KafkaConsumer&lt;String, IoTEvent&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(kaProperties)) &#123;</span><br><span class="line">            consumer.subscribe(Collections.singletonList(<span class="string">&quot;iot-events&quot;</span>));</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 消费者从Kafka主题中拉取消息，等待时间为100毫秒，期间接收到新消息立即返回</span></span><br><span class="line">                ConsumerRecords&lt;String, IoTEvent&gt; records = consumer.poll(Duration.ofMillis(<span class="number">100</span>));</span><br><span class="line">                <span class="keyword">for</span> (ConsumerRecord&lt;String, IoTEvent&gt; record : records) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;topic=&#123;&#125;, partition=&#123;&#125;, offset=&#123;&#125;, key=&#123;&#125;, value=&#123;&#125;&quot;</span>, </span><br><span class="line">                             record.topic(), record.partition(), record.offset(), record.key(), record.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Error consuming message&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%B9%BF%E6%92%AD%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%A4%9A%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="toc-number">1.</span> <span class="toc-text">实现广播的方法：创建多个消费者组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%92%8C%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">2.</span> <span class="toc-text">配置和注意事项</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&text=Kafka基于消费者组实现消息广播"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&is_video=false&description=Kafka基于消费者组实现消息广播"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kafka基于消费者组实现消息广播&body=Check out this article: https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&title=Kafka基于消费者组实现消息广播"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/11/11/kafka/Kafka%E5%9F%BA%E4%BA%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD/&name=Kafka基于消费者组实现消息广播&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

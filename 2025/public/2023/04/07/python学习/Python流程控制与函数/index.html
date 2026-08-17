@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="流程控制与函数条件语句1234567891011121314151617181920score &#x3D; 85if score &gt;&#x3D; 90:    grade &#x3D; &quot;A&quot;elif score &gt;&#x3D; 80:    grade &#x3D; &quot;B&quot;else:    grade &#x3D; &quot;C&quot;# 三元表达式grade &#x3D; &quot;A&quot; i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python流程控制与函数">
+<meta property="og:url" content="https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="流程控制与函数条件语句1234567891011121314151617181920score &#x3D; 85if score &gt;&#x3D; 90:    grade &#x3D; &quot;A&quot;elif score &gt;&#x3D; 80:    grade &#x3D; &quot;B&quot;else:    grade &#x3D; &quot;C&quot;# 三元表达式grade &#x3D; &quot;A&quot; i">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-04-07T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:43:02.708Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Python流程控制与函数</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2023/04/08/python%E5%AD%A6%E4%B9%A0/Python%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2023/04/06/python%E5%AD%A6%E4%B9%A0/Python%E5%88%97%E8%A1%A8%E5%AD%97%E5%85%B8%E4%B8%8E%E9%9B%86%E5%90%88/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&text=Python流程控制与函数"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&is_video=false&description=Python流程控制与函数"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python流程控制与函数&body=Check out this article: https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&name=Python流程控制与函数&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">流程控制与函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E8%AF%AD%E5%8F%A5"><span class="toc-number">1.1.</span> <span class="toc-text">条件语句</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.</span> <span class="toc-text">循环</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#for-%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.1.</span> <span class="toc-text">for 循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#while-%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.2.</span> <span class="toc-text">while 循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#break-%E4%B8%8E-continue"><span class="toc-number">1.2.3.</span> <span class="toc-text">break 与 continue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#else-%E5%AD%90%E5%8F%A5"><span class="toc-number">1.2.4.</span> <span class="toc-text">else 子句</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89"><span class="toc-number">1.3.</span> <span class="toc-text">函数定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">可变参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%85%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.2.</span> <span class="toc-text">仅关键字参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.4.</span> <span class="toc-text">Lambda 表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F-LEGB"><span class="toc-number">1.5.</span> <span class="toc-text">作用域 LEGB</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E5%AF%BC%E5%BC%8F"><span class="toc-number">1.6.</span> <span class="toc-text">推导式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Python流程控制与函数
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-04-07T03:00:00.000Z" itemprop="datePublished">2023-04-07</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/" class="leancloud-visitors" data-flag-title="Python流程控制与函数" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/python/" rel="tag">python</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="流程控制与函数"><a href="#流程控制与函数" class="headerlink" title="流程控制与函数"></a>流程控制与函数</h1><h2 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">score = <span class="number">85</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> score &gt;= <span class="number">90</span>:</span><br><span class="line">    grade = <span class="string">&quot;A&quot;</span></span><br><span class="line"><span class="keyword">elif</span> score &gt;= <span class="number">80</span>:</span><br><span class="line">    grade = <span class="string">&quot;B&quot;</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    grade = <span class="string">&quot;C&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 三元表达式</span></span><br><span class="line">grade = <span class="string">&quot;A&quot;</span> <span class="keyword">if</span> score &gt;= <span class="number">90</span> <span class="keyword">else</span> <span class="string">&quot;B&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># match-case（Python 3.10+）</span></span><br><span class="line">match status:</span><br><span class="line">    case <span class="number">200</span>:</span><br><span class="line">        print(<span class="string">&quot;OK&quot;</span>)</span><br><span class="line">    case <span class="number">404</span>:</span><br><span class="line">        print(<span class="string">&quot;Not Found&quot;</span>)</span><br><span class="line">    case _:</span><br><span class="line">        print(<span class="string">&quot;Unknown&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><h3 id="for-循环"><a href="#for-循环" class="headerlink" title="for 循环"></a>for 循环</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5</span>):       <span class="comment"># 0, 1, 2, 3, 4</span></span><br><span class="line">    print(i)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">2</span>, <span class="number">10</span>, <span class="number">2</span>):  <span class="comment"># 2, 4, 6, 8</span></span><br><span class="line">    print(i)</span><br><span class="line"></span><br><span class="line">fruits = [<span class="string">&quot;apple&quot;</span>, <span class="string">&quot;banana&quot;</span>]</span><br><span class="line"><span class="keyword">for</span> fruit <span class="keyword">in</span> fruits:</span><br><span class="line">    print(fruit)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> idx, fruit <span class="keyword">in</span> <span class="built_in">enumerate</span>(fruits):</span><br><span class="line">    print(idx, fruit)</span><br></pre></td></tr></table></figure>
+
+<h3 id="while-循环"><a href="#while-循环" class="headerlink" title="while 循环"></a>while 循环</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">n = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> n &lt; <span class="number">5</span>:</span><br><span class="line">    print(n)</span><br><span class="line">    n += <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="break-与-continue"><a href="#break-与-continue" class="headerlink" title="break 与 continue"></a>break 与 continue</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    <span class="keyword">if</span> i == <span class="number">3</span>:</span><br><span class="line">        <span class="keyword">continue</span>   <span class="comment"># 跳过本次</span></span><br><span class="line">    <span class="keyword">if</span> i == <span class="number">7</span>:</span><br><span class="line">        <span class="keyword">break</span>      <span class="comment"># 退出循环</span></span><br><span class="line">    print(i)</span><br></pre></td></tr></table></figure>
+
+<h3 id="else-子句"><a href="#else-子句" class="headerlink" title="else 子句"></a>else 子句</h3><p>循环正常结束（未 break）时执行 else：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span> x &lt; <span class="number">0</span>:</span><br><span class="line">        print(<span class="string">&quot;found negative&quot;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">&quot;all positive&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="函数定义"><a href="#函数定义" class="headerlink" title="函数定义"></a>函数定义</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; int:</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;返回 a + b。&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认参数（默认值在定义时求值，可变默认值是常见陷阱）</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greet</span>(<span class="params">name: <span class="built_in">str</span>, prefix: <span class="built_in">str</span> = <span class="string">&quot;Hello&quot;</span></span>) -&gt; str:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;<span class="subst">&#123;prefix&#125;</span>, <span class="subst">&#123;name&#125;</span>!&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 关键字参数</span></span><br><span class="line">greet(name=<span class="string">&quot;Alice&quot;</span>, prefix=<span class="string">&quot;Hi&quot;</span>)</span><br><span class="line">greet(<span class="string">&quot;Bob&quot;</span>)  <span class="comment"># 位置参数</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum_all</span>(<span class="params">*args: <span class="built_in">int</span></span>) -&gt; int:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sum</span>(args)</span><br><span class="line"></span><br><span class="line">sum_all(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)  <span class="comment"># 10</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_info</span>(<span class="params">**kwargs</span>) -&gt; <span class="keyword">None</span>:</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> kwargs.items():</span><br><span class="line">        print(<span class="string">f&quot;<span class="subst">&#123;k&#125;</span>=<span class="subst">&#123;v&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">print_info(name=<span class="string">&quot;Alice&quot;</span>, age=<span class="number">25</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="仅关键字参数"><a href="#仅关键字参数" class="headerlink" title="仅关键字参数"></a>仅关键字参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">connect</span>(<span class="params">host: <span class="built_in">str</span>, *, port: <span class="built_in">int</span> = <span class="number">5432</span>, timeout: <span class="built_in">int</span> = <span class="number">30</span></span>):</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">connect(<span class="string">&quot;localhost&quot;</span>, port=<span class="number">8080</span>)  <span class="comment"># host 位置，port/timeout 必须关键字</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Lambda-表达式"><a href="#Lambda-表达式" class="headerlink" title="Lambda 表达式"></a>Lambda 表达式</h2><p>匿名函数，适合简单场景：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">square = <span class="keyword">lambda</span> x: x ** <span class="number">2</span></span><br><span class="line"><span class="built_in">sorted</span>(items, key=<span class="keyword">lambda</span> x: x[<span class="string">&quot;score&quot;</span>], reverse=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>复杂逻辑应使用 <code>def</code>，lambda 仅一行表达式。</p>
+<h2 id="作用域-LEGB"><a href="#作用域-LEGB" class="headerlink" title="作用域 LEGB"></a>作用域 LEGB</h2><p>查找顺序：<strong>L</strong>ocal → <strong>E</strong>nclosing → <strong>G</strong>lobal → <strong>B</strong>uilt-in</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="string">&quot;global&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">outer</span>():</span></span><br><span class="line">    x = <span class="string">&quot;enclosing&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">inner</span>():</span></span><br><span class="line">        x = <span class="string">&quot;local&quot;</span></span><br><span class="line">        print(x)</span><br><span class="line">    inner()</span><br><span class="line"></span><br><span class="line">outer()  <span class="comment"># local</span></span><br></pre></td></tr></table></figure>
+
+<p>修改外层变量用 <code>nonlocal</code>，修改全局用 <code>global</code>（尽量少用）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">counter</span>():</span></span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">inc</span>():</span></span><br><span class="line">        <span class="keyword">nonlocal</span> count</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> count</span><br><span class="line">    <span class="keyword">return</span> inc</span><br></pre></td></tr></table></figure>
+
+<h2 id="推导式"><a href="#推导式" class="headerlink" title="推导式"></a>推导式</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列表推导</span></span><br><span class="line">squares = [x ** <span class="number">2</span> <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>)]</span><br><span class="line">evens = [x <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>) <span class="keyword">if</span> x % <span class="number">2</span> == <span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 字典推导</span></span><br><span class="line">&#123;d: d ** <span class="number">2</span> <span class="keyword">for</span> d <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5</span>)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 集合推导</span></span><br><span class="line">&#123;x % <span class="number">3</span> <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>)&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成器表达式（惰性，省内存）</span></span><br><span class="line"><span class="built_in">sum</span>(x ** <span class="number">2</span> <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000000</span>))</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li><code>if/elif/else</code>、<code>for</code>、<code>while</code> 构成流程控制主干</li>
+<li>函数支持默认参数、<code>*args</code>、<code>**kwargs</code></li>
+<li>避免可变默认参数 <code>[ ]</code> 或 <code>&#123;&#125;</code>，改用 <code>None</code></li>
+<li>列表推导式简洁，但复杂逻辑仍用普通循环</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">流程控制与函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E8%AF%AD%E5%8F%A5"><span class="toc-number">1.1.</span> <span class="toc-text">条件语句</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.</span> <span class="toc-text">循环</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#for-%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.1.</span> <span class="toc-text">for 循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#while-%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.2.2.</span> <span class="toc-text">while 循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#break-%E4%B8%8E-continue"><span class="toc-number">1.2.3.</span> <span class="toc-text">break 与 continue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#else-%E5%AD%90%E5%8F%A5"><span class="toc-number">1.2.4.</span> <span class="toc-text">else 子句</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89"><span class="toc-number">1.3.</span> <span class="toc-text">函数定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">可变参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%85%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0"><span class="toc-number">1.3.2.</span> <span class="toc-text">仅关键字参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.4.</span> <span class="toc-text">Lambda 表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F-LEGB"><span class="toc-number">1.5.</span> <span class="toc-text">作用域 LEGB</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E5%AF%BC%E5%BC%8F"><span class="toc-number">1.6.</span> <span class="toc-text">推导式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.7.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&text=Python流程控制与函数"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&is_video=false&description=Python流程控制与函数"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Python流程控制与函数&body=Check out this article: https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&title=Python流程控制与函数"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2023/04/07/python%E5%AD%A6%E4%B9%A0/Python%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E4%B8%8E%E5%87%BD%E6%95%B0/&name=Python流程控制与函数&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

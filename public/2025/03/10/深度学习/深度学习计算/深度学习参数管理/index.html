@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="参数管理在选择了架构并设置了超参数后，我们就进入了训练阶段。此时，我们的目标是找到使损失函数最小化的模型参数值。经过训练后，我们将需要使用这些参数来做出未来的预测。此外，有时我们希望提取参数，以便在其他环境中复用它们，将模型保存下来，以便它可以在其他软件中执行，或者为了获得科学的理解而进行检查。 之前的介绍中，我们只依靠深度学习框架来完成训练的工作，而忽略了操作参数的具体细节。本节，我们将介绍以下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="参数管理">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="参数管理在选择了架构并设置了超参数后，我们就进入了训练阶段。此时，我们的目标是找到使损失函数最小化的模型参数值。经过训练后，我们将需要使用这些参数来做出未来的预测。此外，有时我们希望提取参数，以便在其他环境中复用它们，将模型保存下来，以便它可以在其他软件中执行，或者为了获得科学的理解而进行检查。 之前的介绍中，我们只依靠深度学习框架来完成训练的工作，而忽略了操作参数的具体细节。本节，我们将介绍以下">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-10T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:03:57.789Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>参数管理</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BB%B6%E5%90%8E%E5%88%9D%E5%A7%8B%E5%8C%96/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B1%82%E5%92%8C%E5%9D%97/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&text=参数管理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&is_video=false&description=参数管理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=参数管理&body=Check out this article: https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&name=参数管理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">参数管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BF%E9%97%AE"><span class="toc-number">1.1.</span> <span class="toc-text">参数访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.1.</span> <span class="toc-text">目标参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E6%AC%A1%E6%80%A7%E8%AE%BF%E9%97%AE%E6%89%80%E6%9C%89%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">一次性访问所有参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E5%B5%8C%E5%A5%97%E5%9D%97%E6%94%B6%E9%9B%86%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.3.</span> <span class="toc-text">从嵌套块收集参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">参数初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E7%BD%AE%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.</span> <span class="toc-text">内置初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.2.</span> <span class="toc-text">自定义初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">参数绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        参数管理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-10T02:00:00.000Z" itemprop="datePublished">2025-03-10</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/" class="leancloud-visitors" data-flag-title="参数管理" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="参数管理"><a href="#参数管理" class="headerlink" title="参数管理"></a>参数管理</h1><p>在选择了架构并设置了超参数后，我们就进入了训练阶段。<br>此时，我们的目标是找到使损失函数最小化的模型参数值。<br>经过训练后，我们将需要使用这些参数来做出未来的预测。<br>此外，有时我们希望提取参数，以便在其他环境中复用它们，<br>将模型保存下来，以便它可以在其他软件中执行，<br>或者为了获得科学的理解而进行检查。</p>
+<p>之前的介绍中，我们只依靠深度学习框架来完成训练的工作，<br>而忽略了操作参数的具体细节。<br>本节，我们将介绍以下内容：</p>
+<ul>
+<li>访问参数，用于调试、诊断和可视化；</li>
+<li>参数初始化；</li>
+<li>在不同模型组件间共享参数。</li>
+</ul>
+<p>我们首先看一下具有单隐藏层的多层感知机。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line">net = nn.Sequential(nn.Linear(<span class="number">4</span>, <span class="number">8</span>), nn.ReLU(), nn.Linear(<span class="number">8</span>, <span class="number">1</span>))</span><br><span class="line">X = torch.rand(size=(<span class="number">2</span>, <span class="number">4</span>))</span><br><span class="line">net(X)</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数访问"><a href="#参数访问" class="headerlink" title="参数访问"></a>参数访问</h2><p>我们从已有模型中访问参数。<br>当通过<code>Sequential</code>类定义模型时，<br>我们可以通过索引来访问模型的任意层。<br>这就像模型是一个列表一样，每层的参数都在其属性中。<br>如下所示，我们可以检查第二个全连接层的参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(net[<span class="number">1</span>].params)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(net[<span class="number">2</span>].state_dict())</span><br></pre></td></tr></table></figure>
+
+<p>输出的结果告诉我们一些重要的事情：<br>首先，这个全连接层包含两个参数，分别是该层的权重和偏置。<br>两者都存储为单精度浮点数（float32）。<br>注意，参数名称允许唯一标识每个参数，即使在包含数百个层的网络中也是如此。</p>
+<h3 id="目标参数"><a href="#目标参数" class="headerlink" title="目标参数"></a>目标参数</h3><p>注意，每个参数都表示为参数类的一个实例。<br>要对参数执行任何操作，首先我们需要访问底层的数值。<br>有几种方法可以做到这一点。有些比较简单，而另一些则比较通用。<br>下面的代码从第二个全连接层（即第三个神经网络层）提取偏置，<br>提取后返回的是一个参数类实例，并进一步访问该参数的值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="built_in">type</span>(net[<span class="number">1</span>].bias))</span><br><span class="line">print(net[<span class="number">1</span>].bias)</span><br><span class="line">print(net[<span class="number">1</span>].bias.data())</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="built_in">type</span>(net[<span class="number">2</span>].bias))</span><br><span class="line">print(net[<span class="number">2</span>].bias)</span><br><span class="line">print(net[<span class="number">2</span>].bias.data)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net[<span class="number">1</span>].weight.grad()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net[<span class="number">2</span>].weight.grad == <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="一次性访问所有参数"><a href="#一次性访问所有参数" class="headerlink" title="一次性访问所有参数"></a>一次性访问所有参数</h3><p>当我们需要对所有参数执行操作时，逐个访问它们可能会很麻烦。<br>当我们处理更复杂的块（例如，嵌套块）时，情况可能会变得特别复杂，<br>因为我们需要递归整个树来提取每个子块的参数。<br>下面，我们将通过演示来比较访问第一个全连接层的参数和访问所有层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(net[<span class="number">0</span>].collect_params())</span><br><span class="line">print(net.collect_params())</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(*[(name, param.shape) <span class="keyword">for</span> name, param <span class="keyword">in</span> net[<span class="number">0</span>].named_parameters()])</span><br><span class="line">print(*[(name, param.shape) <span class="keyword">for</span> name, param <span class="keyword">in</span> net.named_parameters()])</span><br></pre></td></tr></table></figure>
+
+<p>这为我们提供了另一种访问网络参数的方式，如下所示。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.collect_params()[<span class="string">&#x27;dense1_bias&#x27;</span>].data()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.state_dict()[<span class="string">&#x27;2.bias&#x27;</span>].data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从嵌套块收集参数"><a href="#从嵌套块收集参数" class="headerlink" title="从嵌套块收集参数"></a>从嵌套块收集参数</h3><p>让我们看看，如果我们将多个块相互嵌套，参数命名约定是如何工作的。<br>我们首先定义一个生成块的函数（可以说是“块工厂”），然后将这些块组合到更大的块中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">block1</span>():</span></span><br><span class="line">    net = nn.Sequential()</span><br><span class="line">    net.add(nn.Dense(<span class="number">32</span>, activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    net.add(nn.Dense(<span class="number">16</span>, activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> net</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">block2</span>():</span></span><br><span class="line">    net = nn.Sequential()</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        <span class="comment"># 在这里嵌套</span></span><br><span class="line">        net.add(block1())</span><br><span class="line">    <span class="keyword">return</span> net</span><br><span class="line"></span><br><span class="line">rgnet = nn.Sequential()</span><br><span class="line">rgnet.add(block2())</span><br><span class="line">rgnet.add(nn.Dense(<span class="number">10</span>))</span><br><span class="line">rgnet.initialize()</span><br><span class="line">rgnet(X)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">block1</span>():</span></span><br><span class="line">    <span class="keyword">return</span> nn.Sequential(nn.Linear(<span class="number">4</span>, <span class="number">8</span>), nn.ReLU(),</span><br><span class="line">                         nn.Linear(<span class="number">8</span>, <span class="number">4</span>), nn.ReLU())</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">block2</span>():</span></span><br><span class="line">    net = nn.Sequential()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        <span class="comment"># 在这里嵌套</span></span><br><span class="line">        net.add_module(<span class="string">f&#x27;block <span class="subst">&#123;i&#125;</span>&#x27;</span>, block1())</span><br><span class="line">    <span class="keyword">return</span> net</span><br><span class="line"></span><br><span class="line">rgnet = nn.Sequential(block2(), nn.Linear(<span class="number">4</span>, <span class="number">1</span>))</span><br><span class="line">rgnet(X)</span><br></pre></td></tr></table></figure>
+
+<p>设计了网络后，我们看看它是如何工作的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(rgnet.collect_params)</span><br><span class="line">print(rgnet.collect_params())</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(rgnet)</span><br></pre></td></tr></table></figure>
+
+<p>因为层是分层嵌套的，所以我们也可以像通过嵌套列表索引一样访问它们。<br>下面，我们访问第一个主要的块中、第二个子块的第一层的偏置项。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rgnet[<span class="number">0</span>][<span class="number">1</span>][<span class="number">0</span>].bias.data()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rgnet[<span class="number">0</span>][<span class="number">1</span>][<span class="number">0</span>].bias.data</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数初始化"><a href="#参数初始化" class="headerlink" title="参数初始化"></a>参数初始化</h2><p>知道了如何访问参数后，现在我们看看如何正确地初始化参数。<br>我们在 数值稳定性和模型初始化中讨论了良好初始化的必要性。<br>深度学习框架提供默认随机初始化，<br>也允许我们创建自定义初始化方法，<br>满足我们通过其他规则实现初始化权重。</p>
+<h3 id="内置初始化"><a href="#内置初始化" class="headerlink" title="内置初始化"></a>内置初始化</h3><p>让我们首先调用内置的初始化器。<br>下面的代码将所有权重参数初始化为标准差为0.01的高斯随机变量，<br>且将偏置参数设置为0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里的force_reinit确保参数会被重新初始化，不论之前是否已经被初始化</span></span><br><span class="line">net.initialize(init=init.Normal(sigma=<span class="number">0.01</span>), force_reinit=<span class="literal">True</span>)</span><br><span class="line">net[<span class="number">0</span>].weight.data()[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_normal</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.normal_(m.weight, mean=<span class="number">0</span>, std=<span class="number">0.01</span>)</span><br><span class="line">        nn.init.zeros_(m.bias)</span><br><span class="line">net.apply(init_normal)</span><br><span class="line">net[<span class="number">0</span>].weight.data[<span class="number">0</span>], net[<span class="number">0</span>].bias.data[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<p>我们还可以将所有参数初始化为给定的常数，比如初始化为1。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">net.initialize(init=init.Constant(<span class="number">1</span>), force_reinit=<span class="literal">True</span>)</span><br><span class="line">net[<span class="number">0</span>].weight.data()[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_constant</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.constant_(m.weight, <span class="number">1</span>)</span><br><span class="line">        nn.init.zeros_(m.bias)</span><br><span class="line">net.apply(init_constant)</span><br><span class="line">net[<span class="number">0</span>].weight.data[<span class="number">0</span>], net[<span class="number">0</span>].bias.data[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<p>我们还可以对某些块应用不同的初始化方法。<br>例如，下面我们使用Xavier初始化方法初始化第一个神经网络层，<br>然后将第三个神经网络层初始化为常量值42。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net[<span class="number">0</span>].weight.initialize(init=init.Xavier(), force_reinit=<span class="literal">True</span>)</span><br><span class="line">net[<span class="number">1</span>].initialize(init=init.Constant(<span class="number">42</span>), force_reinit=<span class="literal">True</span>)</span><br><span class="line">print(net[<span class="number">0</span>].weight.data()[<span class="number">0</span>])</span><br><span class="line">print(net[<span class="number">1</span>].weight.data())</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_xavier</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.xavier_uniform_(m.weight)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_42</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.constant_(m.weight, <span class="number">42</span>)</span><br><span class="line"></span><br><span class="line">net[<span class="number">0</span>].apply(init_xavier)</span><br><span class="line">net[<span class="number">2</span>].apply(init_42)</span><br><span class="line">print(net[<span class="number">0</span>].weight.data[<span class="number">0</span>])</span><br><span class="line">print(net[<span class="number">2</span>].weight.data)</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义初始化"><a href="#自定义初始化" class="headerlink" title="自定义初始化"></a>自定义初始化</h3><p>有时，深度学习框架没有提供我们需要的初始化方法。<br>在下面的例子中，我们使用以下的分布为任意权重参数$w$定义初始化方法：</p>
+<p>$$<br>\begin{aligned}<br> w \sim \begin{cases}<br> U(5, 10) &amp; \text{ 可能性 } \frac{1}{4} \<br> 0 &amp; \text{ 可能性 } \frac{1}{2} \<br> U(-10, -5) &amp; \text{ 可能性 } \frac{1}{4}<br> \end{cases}<br>\end{aligned}<br>$$</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyInit</span>(<span class="params">init.Initializer</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_init_weight</span>(<span class="params">self, name, data</span>):</span></span><br><span class="line">        print(<span class="string">&#x27;Init&#x27;</span>, name, data.shape)</span><br><span class="line">        data[:] = np.random.uniform(-<span class="number">10</span>, <span class="number">10</span>, data.shape)</span><br><span class="line">        data *= np.<span class="built_in">abs</span>(data) &gt;= <span class="number">5</span></span><br><span class="line"></span><br><span class="line">net.initialize(MyInit(), force_reinit=<span class="literal">True</span>)</span><br><span class="line">net[<span class="number">0</span>].weight.data()[:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_init</span>(<span class="params">m</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        print(<span class="string">&quot;Init&quot;</span>, *[(name, param.shape)</span><br><span class="line">                        <span class="keyword">for</span> name, param <span class="keyword">in</span> m.named_parameters()][<span class="number">0</span>])</span><br><span class="line">        nn.init.uniform_(m.weight, -<span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">        m.weight.data *= m.weight.data.<span class="built_in">abs</span>() &gt;= <span class="number">5</span></span><br><span class="line"></span><br><span class="line">net.apply(my_init)</span><br><span class="line">net[<span class="number">0</span>].weight[:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<p>注意，我们始终可以直接设置参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net[<span class="number">0</span>].weight.data()[:] += <span class="number">1</span></span><br><span class="line">net[<span class="number">0</span>].weight.data()[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">42</span></span><br><span class="line">net[<span class="number">0</span>].weight.data()[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net[<span class="number">0</span>].weight.data[:] += <span class="number">1</span></span><br><span class="line">net[<span class="number">0</span>].weight.data[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">42</span></span><br><span class="line">net[<span class="number">0</span>].weight.data[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数绑定"><a href="#参数绑定" class="headerlink" title="参数绑定"></a>参数绑定</h2><p>有时我们希望在多个层间共享参数：<br>我们可以定义一个稠密层，然后使用它的参数来设置另一个层的参数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">net = nn.Sequential()</span><br><span class="line"><span class="comment"># 我们需要给共享层一个名称，以便可以引用它的参数</span></span><br><span class="line">shared = nn.Dense(<span class="number">8</span>, activation=<span class="string">&#x27;relu&#x27;</span>)</span><br><span class="line">net.add(nn.Dense(<span class="number">8</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">        shared,</span><br><span class="line">        nn.Dense(<span class="number">8</span>, activation=<span class="string">&#x27;relu&#x27;</span>, params=shared.params),</span><br><span class="line">        nn.Dense(<span class="number">10</span>))</span><br><span class="line">net.initialize()</span><br><span class="line"></span><br><span class="line">X = np.random.uniform(size=(<span class="number">2</span>, <span class="number">20</span>))</span><br><span class="line">net(X)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查参数是否相同</span></span><br><span class="line">print(net[<span class="number">1</span>].weight.data()[<span class="number">0</span>] == net[<span class="number">2</span>].weight.data()[<span class="number">0</span>])</span><br><span class="line">net[<span class="number">1</span>].weight.data()[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">100</span></span><br><span class="line"><span class="comment"># 确保它们实际上是同一个对象，而不只是有相同的值</span></span><br><span class="line">print(net[<span class="number">1</span>].weight.data()[<span class="number">0</span>] == net[<span class="number">2</span>].weight.data()[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我们需要给共享层一个名称，以便可以引用它的参数</span></span><br><span class="line">shared = nn.Linear(<span class="number">8</span>, <span class="number">8</span>)</span><br><span class="line">net = nn.Sequential(nn.Linear(<span class="number">4</span>, <span class="number">8</span>), nn.ReLU(),</span><br><span class="line">                    shared, nn.ReLU(),</span><br><span class="line">                    shared, nn.ReLU(),</span><br><span class="line">                    nn.Linear(<span class="number">8</span>, <span class="number">1</span>))</span><br><span class="line">net(X)</span><br><span class="line"><span class="comment"># 检查参数是否相同</span></span><br><span class="line">print(net[<span class="number">2</span>].weight.data[<span class="number">0</span>] == net[<span class="number">4</span>].weight.data[<span class="number">0</span>])</span><br><span class="line">net[<span class="number">2</span>].weight.data[<span class="number">0</span>, <span class="number">0</span>] = <span class="number">100</span></span><br><span class="line"><span class="comment"># 确保它们实际上是同一个对象，而不只是有相同的值</span></span><br><span class="line">print(net[<span class="number">2</span>].weight.data[<span class="number">0</span>] == net[<span class="number">4</span>].weight.data[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>我们有几种方法可以访问、初始化和绑定模型参数。</li>
+<li>我们可以使用自定义初始化方法。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">参数管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BF%E9%97%AE"><span class="toc-number">1.1.</span> <span class="toc-text">参数访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.1.</span> <span class="toc-text">目标参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E6%AC%A1%E6%80%A7%E8%AE%BF%E9%97%AE%E6%89%80%E6%9C%89%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">一次性访问所有参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E5%B5%8C%E5%A5%97%E5%9D%97%E6%94%B6%E9%9B%86%E5%8F%82%E6%95%B0"><span class="toc-number">1.1.3.</span> <span class="toc-text">从嵌套块收集参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">参数初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E7%BD%AE%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.</span> <span class="toc-text">内置初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.2.</span> <span class="toc-text">自定义初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">参数绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&text=参数管理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&is_video=false&description=参数管理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=参数管理&body=Check out this article: https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&title=参数管理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/10/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%A1%E7%AE%97/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%82%E6%95%B0%E7%AE%A1%E7%90%86/&name=参数管理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

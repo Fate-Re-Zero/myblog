@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="模型选择、欠拟合和过拟合作为机器学习科学家，我们的目标是发现模式（pattern）。但是，我们如何才能确定模型是真正发现了一种泛化的模式，而不是简单地记住了数据呢？例如，我们想要在患者的基因数据与痴呆状态之间寻找模式，其中标签是从集合${\text{痴呆}, \text{轻度认知障碍}, \text{健康}}$中提取的。因为基因可以唯一确定每个个体（不考虑双胞胎），所以在这个任务中是有可能记住整个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模型选择、欠拟合和过拟合">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="模型选择、欠拟合和过拟合作为机器学习科学家，我们的目标是发现模式（pattern）。但是，我们如何才能确定模型是真正发现了一种泛化的模式，而不是简单地记住了数据呢？例如，我们想要在患者的基因数据与痴呆状态之间寻找模式，其中标签是从集合${\text{痴呆}, \text{轻度认知障碍}, \text{健康}}$中提取的。因为基因可以唯一确定每个个体（不考虑双胞胎），所以在这个任务中是有可能记住整个">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-19T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:06:36.033Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>模型选择、欠拟合和过拟合</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E3%80%81%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E5%92%8C%E8%AE%A1%E7%AE%97%E5%9B%BE/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/03/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA%E7%9A%84%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&text=模型选择、欠拟合和过拟合"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&is_video=false&description=模型选择、欠拟合和过拟合"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=模型选择、欠拟合和过拟合&body=Check out this article: https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&name=模型选择、欠拟合和过拟合&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88"><span class="toc-number">1.</span> <span class="toc-text">模型选择、欠拟合和过拟合</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E8%AF%AF%E5%B7%AE%E5%92%8C%E6%B3%9B%E5%8C%96%E8%AF%AF%E5%B7%AE"><span class="toc-number">1.1.</span> <span class="toc-text">训练误差和泛化误差</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">统计学习理论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="toc-number">1.1.2.</span> <span class="toc-text">模型复杂性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9"><span class="toc-number">1.2.</span> <span class="toc-text">模型选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E9%9B%86"><span class="toc-number">1.2.1.</span> <span class="toc-text">验证集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#K-%E6%8A%98%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81"><span class="toc-number">1.2.2.</span> <span class="toc-text">$K$折交叉验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AC%A0%E6%8B%9F%E5%90%88%E8%BF%98%E6%98%AF%E8%BF%87%E6%8B%9F%E5%90%88%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">欠拟合还是过拟合？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%A4%8D%E6%9D%82%E6%80%A7-1"><span class="toc-number">1.3.1.</span> <span class="toc-text">模型复杂性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%A4%A7%E5%B0%8F"><span class="toc-number">1.3.2.</span> <span class="toc-text">数据集大小</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%9B%9E%E5%BD%92"><span class="toc-number">1.4.</span> <span class="toc-text">多项式回归</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.4.1.</span> <span class="toc-text">生成数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%A8%A1%E5%9E%8B%E8%BF%9B%E8%A1%8C%E8%AE%AD%E7%BB%83%E5%92%8C%E6%B5%8B%E8%AF%95"><span class="toc-number">1.4.2.</span> <span class="toc-text">对模型进行训练和测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E9%98%B6%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%B8%B8"><span class="toc-number">1.4.3.</span> <span class="toc-text">三阶多项式函数拟合(正常)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E6%AC%A0%E6%8B%9F%E5%90%88"><span class="toc-number">1.4.4.</span> <span class="toc-text">线性函数拟合(欠拟合)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E9%98%B6%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E8%BF%87%E6%8B%9F%E5%90%88"><span class="toc-number">1.4.5.</span> <span class="toc-text">高阶多项式函数拟合(过拟合)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        模型选择、欠拟合和过拟合
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-03-19T04:00:00.000Z" itemprop="datePublished">2025-03-19</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/" class="leancloud-visitors" data-flag-title="模型选择、欠拟合和过拟合" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="模型选择、欠拟合和过拟合"><a href="#模型选择、欠拟合和过拟合" class="headerlink" title="模型选择、欠拟合和过拟合"></a>模型选择、欠拟合和过拟合</h1><p>作为机器学习科学家，我们的目标是发现<em>模式</em>（pattern）。<br>但是，我们如何才能确定模型是真正发现了一种泛化的模式，<br>而不是简单地记住了数据呢？<br>例如，我们想要在患者的基因数据与痴呆状态之间寻找模式，<br>其中标签是从集合${\text{痴呆}, \text{轻度认知障碍}, \text{健康}}$中提取的。<br>因为基因可以唯一确定每个个体（不考虑双胞胎），<br>所以在这个任务中是有可能记住整个数据集的。</p>
+<p>我们不想让模型只会做这样的事情：“那是鲍勃！我记得他！他有痴呆症！”。<br>原因很简单：当我们将来部署该模型时，模型需要判断从未见过的患者。<br>只有当模型真正发现了一种泛化模式时，才会作出有效的预测。</p>
+<p>更正式地说，我们的目标是发现某些模式，<br>这些模式捕捉到了我们训练集潜在总体的规律。<br>如果成功做到了这点，即使是对以前从未遇到过的个体，<br>模型也可以成功地评估风险。<br>如何发现可以泛化的模式是机器学习的根本问题。</p>
+<p>困难在于，当我们训练模型时，我们只能访问数据中的小部分样本。<br>最大的公开图像数据集包含大约一百万张图像。<br>而在大部分时候，我们只能从数千或数万个数据样本中学习。<br>在大型医院系统中，我们可能会访问数十万份医疗记录。<br>当我们使用有限的样本时，可能会遇到这样的问题：<br>当收集到更多的数据时，会发现之前找到的明显关系并不成立。</p>
+<p>将模型在训练数据上拟合的比在潜在分布中更接近的现象称为<em>过拟合</em>（overfitting），<br>用于对抗过拟合的技术称为<em>正则化</em>（regularization）。<br>在前面的章节中，有些读者可能在用Fashion-MNIST数据集做实验时已经观察到了这种过拟合现象。<br>在实验中调整模型架构或超参数时会发现：<br>如果有足够多的神经元、层数和训练迭代周期，<br>模型最终可以在训练集上达到完美的精度，此时测试集的准确性却下降了。</p>
+<h2 id="训练误差和泛化误差"><a href="#训练误差和泛化误差" class="headerlink" title="训练误差和泛化误差"></a>训练误差和泛化误差</h2><p>为了进一步讨论这一现象，我们需要了解训练误差和泛化误差。<br><em>训练误差</em>（training error）是指，<br>模型在训练数据集上计算得到的误差。<br><em>泛化误差</em>（generalization error）是指，<br>模型应用在同样从原始样本的分布中抽取的无限多数据样本时，模型误差的期望。</p>
+<p>问题是，我们永远不能准确地计算出泛化误差。<br>这是因为无限多的数据样本是一个虚构的对象。<br>在实际中，我们只能通过将模型应用于一个独立的测试集来估计泛化误差，<br>该测试集由随机选取的、未曾在训练集中出现的数据样本构成。</p>
+<p>下面的三个思维实验将有助于更好地说明这种情况。<br>假设一个大学生正在努力准备期末考试。<br>一个勤奋的学生会努力做好练习，并利用往年的考试题目来测试自己的能力。<br>尽管如此，在过去的考试题目上取得好成绩并不能保证他会在真正考试时发挥出色。<br>例如，学生可能试图通过死记硬背考题的答案来做准备。<br>他甚至可以完全记住过去考试的答案。<br>另一名学生可能会通过试图理解给出某些答案的原因来做准备。<br>在大多数情况下，后者会考得更好。</p>
+<p>类似地，考虑一个简单地使用查表法来回答问题的模型。<br>如果允许的输入集合是离散的并且相当小，<br>那么也许在查看许多训练样本后，该方法将执行得很好。<br>但当这个模型面对从未见过的例子时，它表现的可能比随机猜测好不到哪去。<br>这是因为输入空间太大了，远远不可能记住每一个可能的输入所对应的答案。<br>例如，考虑$28\times28$的灰度图像。<br>如果每个像素可以取$256$个灰度值中的一个，<br>则有$256^{784}$个可能的图像。<br>这意味着指甲大小的低分辨率灰度图像的数量比宇宙中的原子要多得多。<br>即使我们可能遇到这样的数据，我们也不可能存储整个查找表。</p>
+<p>最后，考虑对掷硬币的结果（类别0：正面，类别1：反面）进行分类的问题。<br>假设硬币是公平的，无论我们想出什么算法，泛化误差始终是$\frac{1}{2}$。<br>然而，对于大多数算法，我们应该期望训练误差会更低（取决于运气）。<br>考虑数据集{0，1，1，1，0，1}。<br>我们的算法不需要额外的特征，将倾向于总是预测<em>多数类</em>，<br>从我们有限的样本来看，它似乎是1占主流。<br>在这种情况下，总是预测类1的模型将产生$\frac{1}{3}$的误差，<br>这比我们的泛化误差要好得多。<br>当我们逐渐增加数据量，正面比例明显偏离$\frac{1}{2}$的可能性将会降低，<br>我们的训练误差将与泛化误差相匹配。</p>
+<h3 id="统计学习理论"><a href="#统计学习理论" class="headerlink" title="统计学习理论"></a>统计学习理论</h3><p>由于泛化是机器学习中的基本问题，<br>许多数学家和理论家毕生致力于研究描述这一现象的形式理论。<br>在<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Glivenko%E2%80%93Cantelli_theorem">同名定理（eponymous theorem）</a>中，<br>格里文科和坎特利推导出了训练误差收敛到泛化误差的速率。<br>在一系列开创性的论文中，<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Vapnik%E2%80%93Chervonenkis_theory">Vapnik和Chervonenkis</a><br>将这一理论扩展到更一般种类的函数。<br>这项工作为统计学习理论奠定了基础。</p>
+<p>在我们目前已探讨、并将在之后继续探讨的监督学习情景中，<br>我们假设训练数据和测试数据都是从相同的分布中独立提取的。<br>这通常被称为<em>独立同分布假设</em>（i.i.d. assumption），<br>这意味着对数据进行采样的过程没有进行“记忆”。<br>换句话说，抽取的第2个样本和第3个样本的相关性，<br>并不比抽取的第2个样本和第200万个样本的相关性更强。</p>
+<p>要成为一名优秀的机器学习科学家需要具备批判性思考能力。<br>假设是存在漏洞的，即很容易找出假设失效的情况。<br>如果我们根据从加州大学旧金山分校医学中心的患者数据训练死亡风险预测模型，<br>并将其应用于马萨诸塞州综合医院的患者数据，结果会怎么样？<br>这两个数据的分布可能不完全一样。<br>此外，抽样过程可能与时间有关。<br>比如当我们对微博的主题进行分类时，<br>新闻周期会使得正在讨论的话题产生时间依赖性，从而违反独立性假设。</p>
+<p>有时候我们即使轻微违背独立同分布假设，模型仍将继续运行得非常好。<br>比如，我们有许多有用的工具已经应用于现实，如人脸识别、语音识别和语言翻译。<br>毕竟，几乎所有现实的应用都至少涉及到一些违背独立同分布假设的情况。</p>
+<p>有些违背独立同分布假设的行为肯定会带来麻烦。<br>比如，我们试图只用来自大学生的人脸数据来训练一个人脸识别系统，<br>然后想要用它来监测疗养院中的老人。<br>这不太可能有效，因为大学生看起来往往与老年人有很大的不同。</p>
+<p>在接下来的章节中，我们将讨论因违背独立同分布假设而引起的问题。<br>目前，即使认为独立同分布假设是理所当然的，理解泛化性也是一个困难的问题。<br>此外，能够解释深层神经网络泛化性能的理论基础，<br>也仍在继续困扰着学习理论领域最伟大的学者们。</p>
+<p>当我们训练模型时，我们试图找到一个能够尽可能拟合训练数据的函数。<br>但是如果它执行地“太好了”，而不能对看不见的数据做到很好泛化，就会导致过拟合。<br>这种情况正是我们想要避免或控制的。<br>深度学习中有许多启发式的技术旨在防止过拟合。</p>
+<h3 id="模型复杂性"><a href="#模型复杂性" class="headerlink" title="模型复杂性"></a>模型复杂性</h3><p>当我们有简单的模型和大量的数据时，我们期望泛化误差与训练误差相近。<br>当我们有更复杂的模型和更少的样本时，我们预计训练误差会下降，但泛化误差会增大。<br>模型复杂性由什么构成是一个复杂的问题。<br>一个模型是否能很好地泛化取决于很多因素。<br>例如，具有更多参数的模型可能被认为更复杂，<br>参数有更大取值范围的模型可能更为复杂。<br>通常对于神经网络，我们认为需要更多训练迭代的模型比较复杂，<br>而需要<em>早停</em>（early stopping）的模型（即较少训练迭代周期）就不那么复杂。</p>
+<p>我们很难比较本质上不同大类的模型之间（例如，决策树与神经网络）的复杂性。<br>就目前而言，一条简单的经验法则相当有用：<br>统计学家认为，能够轻松解释任意事实的模型是复杂的，<br>而表达能力有限但仍能很好地解释数据的模型可能更有现实用途。<br>在哲学上，这与波普尔的科学理论的可证伪性标准密切相关：<br>如果一个理论能拟合数据，且有具体的测试可以用来证明它是错误的，那么它就是好的。<br>这一点很重要，因为所有的统计估计都是<em>事后归纳</em>。<br>也就是说，我们在观察事实之后进行估计，因此容易受到相关谬误的影响。<br>目前，我们将把哲学放在一边，坚持更切实的问题。</p>
+<p>本节为了给出一些直观的印象，我们将重点介绍几个倾向于影响模型泛化的因素。</p>
+<ol>
+<li>可调整参数的数量。当可调整参数的数量（有时称为<em>自由度</em>）很大时，模型往往更容易过拟合。</li>
+<li>参数采用的值。当权重的取值范围较大时，模型可能更容易过拟合。</li>
+<li>训练样本的数量。即使模型很简单，也很容易过拟合只包含一两个样本的数据集。而过拟合一个有数百万个样本的数据集则需要一个极其灵活的模型。</li>
+</ol>
+<h2 id="模型选择"><a href="#模型选择" class="headerlink" title="模型选择"></a>模型选择</h2><p>在机器学习中，我们通常在评估几个候选模型后选择最终的模型。<br>这个过程叫做<em>模型选择</em>。<br>有时，需要进行比较的模型在本质上是完全不同的（比如，决策树与线性模型）。<br>又有时，我们需要比较不同的超参数设置下的同一类模型。</p>
+<p>例如，训练多层感知机模型时，我们可能希望比较具有<br>不同数量的隐藏层、不同数量的隐藏单元以及不同的激活函数组合的模型。<br>为了确定候选模型中的最佳模型，我们通常会使用验证集。</p>
+<h3 id="验证集"><a href="#验证集" class="headerlink" title="验证集"></a>验证集</h3><p>原则上，在我们确定所有的超参数之前，我们不希望用到测试集。<br>如果我们在模型选择过程中使用测试数据，可能会有过拟合测试数据的风险，那就麻烦大了。<br>如果我们过拟合了训练数据，还可以在测试数据上的评估来判断过拟合。<br>但是如果我们过拟合了测试数据，我们又该怎么知道呢？</p>
+<p>因此，我们决不能依靠测试数据进行模型选择。<br>然而，我们也不能仅仅依靠训练数据来选择模型，因为我们无法估计训练数据的泛化误差。</p>
+<p>在实际应用中，情况变得更加复杂。<br>虽然理想情况下我们只会使用测试数据一次，<br>以评估最好的模型或比较一些模型效果，但现实是测试数据很少在使用一次后被丢弃。<br>我们很少能有充足的数据来对每一轮实验采用全新测试集。</p>
+<p>解决此问题的常见做法是将我们的数据分成三份，<br>除了训练和测试数据集之外，还增加一个<em>验证数据集</em>（validation dataset），<br>也叫<em>验证集</em>（validation set）。<br>但现实是验证数据和测试数据之间的边界模糊得令人担忧。<br>除非另有明确说明，否则在这本书的实验中，<br>我们实际上是在使用应该被正确地称为训练数据和验证数据的数据集，<br>并没有真正的测试数据集。<br>因此，书中每次实验报告的准确度都是验证集准确度，而不是测试集准确度。</p>
+<h3 id="K-折交叉验证"><a href="#K-折交叉验证" class="headerlink" title="$K$折交叉验证"></a>$K$折交叉验证</h3><p>当训练数据稀缺时，我们甚至可能无法提供足够的数据来构成一个合适的验证集。<br>这个问题的一个流行的解决方案是采用$K$<em>折交叉验证</em>。<br>这里，原始训练数据被分成$K$个不重叠的子集。<br>然后执行$K$次模型训练和验证，每次在$K-1$个子集上进行训练，<br>并在剩余的一个子集（在该轮中没有用于训练的子集）上进行验证。<br>最后，通过对$K$次实验的结果取平均来估计训练和验证误差。</p>
+<h2 id="欠拟合还是过拟合？"><a href="#欠拟合还是过拟合？" class="headerlink" title="欠拟合还是过拟合？"></a>欠拟合还是过拟合？</h2><p>当我们比较训练和验证误差时，我们要注意两种常见的情况。<br>首先，我们要注意这样的情况：训练误差和验证误差都很严重，<br>但它们之间仅有一点差距。<br>如果模型不能降低训练误差，这可能意味着模型过于简单（即表达能力不足），<br>无法捕获试图学习的模式。<br>此外，由于我们的训练和验证误差之间的<em>泛化误差</em>很小，<br>我们有理由相信可以用一个更复杂的模型降低训练误差。<br>这种现象被称为<em>欠拟合</em>（underfitting）。</p>
+<p>另一方面，当我们的训练误差明显低于验证误差时要小心，<br>这表明严重的<em>过拟合</em>（overfitting）。<br>注意，<em>过拟合</em>并不总是一件坏事。<br>特别是在深度学习领域，众所周知，<br>最好的预测模型在训练数据上的表现往往比在保留（验证）数据上好得多。<br>最终，我们通常更关心验证误差，而不是训练误差和验证误差之间的差距。</p>
+<p>是否过拟合或欠拟合可能取决于模型复杂性和可用训练数据集的大小，<br>这两个点将在下面进行讨论。</p>
+<h3 id="模型复杂性-1"><a href="#模型复杂性-1" class="headerlink" title="模型复杂性"></a>模型复杂性</h3><p>为了说明一些关于过拟合和模型复杂性的经典直觉，<br>我们给出一个多项式的例子。<br>给定由单个特征$x$和对应实数标签$y$组成的训练数据，<br>我们试图找到下面的$d$阶多项式来估计标签$y$。</p>
+<p>$$\hat{y}= \sum_{i=0}^d x^i w_i$$</p>
+<p>这只是一个线性回归问题，我们的特征是$x$的幂给出的，<br>模型的权重是$w_i$给出的，偏置是$w_0$给出的<br>（因为对于所有的$x$都有$x^0 = 1$）。<br>由于这只是一个线性回归问题，我们可以使用平方误差作为我们的损失函数。</p>
+<p>高阶多项式函数比低阶多项式函数复杂得多。<br>高阶多项式的参数较多，模型函数的选择范围较广。<br>因此在固定训练数据集的情况下，<br>高阶多项式函数相对于低阶多项式的训练误差应该始终更低（最坏也是相等）。<br>事实上，当数据样本包含了$x$的不同值时，<br>函数阶数等于数据样本数量的多项式函数可以完美拟合训练集。<br>在 fig_capacity_vs_error中，<br>我们直观地描述了多项式的阶数和欠拟合与过拟合之间的关系。</p>
+<p>（图：模型复杂度对欠拟合和过拟合的影响）</p>
+<h3 id="数据集大小"><a href="#数据集大小" class="headerlink" title="数据集大小"></a>数据集大小</h3><p>另一个重要因素是数据集的大小。<br>训练数据集中的样本越少，我们就越有可能（且更严重地）过拟合。<br>随着训练数据量的增加，泛化误差通常会减小。<br>此外，一般来说，更多的数据不会有什么坏处。<br>对于固定的任务和数据分布，模型复杂性和数据集大小之间通常存在关系。<br>给出更多的数据，我们可能会尝试拟合一个更复杂的模型。<br>能够拟合更复杂的模型可能是有益的。<br>如果没有足够的数据，简单的模型可能更有用。<br>对于许多任务，深度学习只有在有数千个训练样本时才优于线性模型。<br>从一定程度上来说，深度学习目前的生机要归功于<br>廉价存储、互联设备以及数字化经济带来的海量数据集。</p>
+<h2 id="多项式回归"><a href="#多项式回归" class="headerlink" title="多项式回归"></a>多项式回归</h2><p>我们现在可以通过多项式拟合来探索这些概念。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> math</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成数据集"><a href="#生成数据集" class="headerlink" title="生成数据集"></a>生成数据集</h3><p>给定$x$，我们将使用以下三阶多项式来生成训练和测试数据的标签：</p>
+<p>$$y = 5 + 1.2x - 3.4\frac{x^2}{2!} + 5.6 \frac{x^3}{3!} + \epsilon \text{ where }<br>\epsilon \sim \mathcal{N}(0, 0.1^2).$$</p>
+<p>噪声项$\epsilon$服从均值为0且标准差为0.1的正态分布。<br>在优化的过程中，我们通常希望避免非常大的梯度值或损失值。<br>这就是我们将特征从$x^i$调整为$\frac{x^i}{i!}$的原因，<br>这样可以避免很大的$i$带来的特别大的指数值。<br>我们将为训练集和测试集各生成100个样本。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">max_degree = <span class="number">20</span>  <span class="comment"># 多项式的最大阶数</span></span><br><span class="line">n_train, n_test = <span class="number">100</span>, <span class="number">100</span>  <span class="comment"># 训练和测试数据集大小</span></span><br><span class="line">true_w = np.zeros(max_degree)  <span class="comment"># 分配大量的空间</span></span><br><span class="line">true_w[<span class="number">0</span>:<span class="number">4</span>] = np.array([<span class="number">5</span>, <span class="number">1.2</span>, -<span class="number">3.4</span>, <span class="number">5.6</span>])</span><br><span class="line"></span><br><span class="line">features = np.random.normal(size=(n_train + n_test, <span class="number">1</span>))</span><br><span class="line">np.random.shuffle(features)</span><br><span class="line">poly_features = np.power(features, np.arange(max_degree).reshape(<span class="number">1</span>, -<span class="number">1</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(max_degree):</span><br><span class="line">    poly_features[:, i] /= math.gamma(i + <span class="number">1</span>)  <span class="comment"># gamma(n)=(n-1)!</span></span><br><span class="line"><span class="comment"># labels的维度:(n_train+n_test,)</span></span><br><span class="line">labels = np.dot(poly_features, true_w)</span><br><span class="line">labels += np.random.normal(scale=<span class="number">0.1</span>, size=labels.shape)</span><br></pre></td></tr></table></figure>
+
+<p>同样，存储在<code>poly_features</code>中的单项式由gamma函数重新缩放，<br>其中$\Gamma(n)=(n-1)!$。<br>从生成的数据集中查看一下前2个样本，<br>第一个值是与偏置相对应的常量特征。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">features[:<span class="number">2</span>], poly_features[:<span class="number">2</span>, :], labels[:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="对模型进行训练和测试"><a href="#对模型进行训练和测试" class="headerlink" title="对模型进行训练和测试"></a>对模型进行训练和测试</h3><p>首先让我们实现一个函数来评估模型在给定数据集上的损失。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">evaluate_loss</span>(<span class="params">net, data_iter, loss</span>):</span>  <span class="comment">#@save</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;评估给定数据集上模型的损失&quot;&quot;&quot;</span></span><br><span class="line">    metric = d2l.Accumulator(<span class="number">2</span>)  <span class="comment"># 损失的总和,样本数量</span></span><br><span class="line">    <span class="keyword">for</span> X, y <span class="keyword">in</span> data_iter:</span><br><span class="line">        out = net(X)</span><br><span class="line">        y = d2l.reshape(y, out.shape)</span><br><span class="line">        l = loss(out, y)</span><br><span class="line">        metric.add(d2l.reduce_sum(l), d2l.size(l))</span><br><span class="line">    <span class="keyword">return</span> metric[<span class="number">0</span>] / metric[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+
+<p>现在定义训练函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span>(<span class="params">train_features, test_features, train_labels, test_labels,</span></span></span><br><span class="line"><span class="function"><span class="params">          num_epochs=<span class="number">400</span></span>):</span></span><br><span class="line">    loss = nn.MSELoss(reduction=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">    input_shape = train_features.shape[-<span class="number">1</span>]</span><br><span class="line">    <span class="comment"># 不设置偏置，因为我们已经在多项式中实现了它</span></span><br><span class="line">    net = nn.Sequential(nn.Linear(input_shape, <span class="number">1</span>, bias=<span class="literal">False</span>))</span><br><span class="line">    batch_size = <span class="built_in">min</span>(<span class="number">10</span>, train_labels.shape[<span class="number">0</span>])</span><br><span class="line">    train_iter = d2l.load_array((train_features, train_labels.reshape(-<span class="number">1</span>,<span class="number">1</span>)),</span><br><span class="line">                                batch_size)</span><br><span class="line">    test_iter = d2l.load_array((test_features, test_labels.reshape(-<span class="number">1</span>,<span class="number">1</span>)),</span><br><span class="line">                               batch_size, is_train=<span class="literal">False</span>)</span><br><span class="line">    trainer = torch.optim.SGD(net.parameters(), lr=<span class="number">0.01</span>)</span><br><span class="line">    animator = d2l.Animator(xlabel=<span class="string">&#x27;epoch&#x27;</span>, ylabel=<span class="string">&#x27;loss&#x27;</span>, yscale=<span class="string">&#x27;log&#x27;</span>,</span><br><span class="line">                            xlim=[<span class="number">1</span>, num_epochs], ylim=[<span class="number">1e-3</span>, <span class="number">1e2</span>],</span><br><span class="line">                            legend=[<span class="string">&#x27;train&#x27;</span>, <span class="string">&#x27;test&#x27;</span>])</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        d2l.train_epoch_ch3(net, train_iter, loss, trainer)</span><br><span class="line">        <span class="keyword">if</span> epoch == <span class="number">0</span> <span class="keyword">or</span> (epoch + <span class="number">1</span>) % <span class="number">20</span> == <span class="number">0</span>:</span><br><span class="line">            animator.add(epoch + <span class="number">1</span>, (evaluate_loss(net, train_iter, loss),</span><br><span class="line">                                     evaluate_loss(net, test_iter, loss)))</span><br><span class="line">    print(<span class="string">&#x27;weight:&#x27;</span>, net[<span class="number">0</span>].weight.data.numpy())</span><br></pre></td></tr></table></figure>
+
+<h3 id="三阶多项式函数拟合-正常"><a href="#三阶多项式函数拟合-正常" class="headerlink" title="三阶多项式函数拟合(正常)"></a>三阶多项式函数拟合(正常)</h3><p>我们将首先使用三阶多项式函数，它与数据生成函数的阶数相同。<br>结果表明，该模型能有效降低训练损失和测试损失。<br>学习到的模型参数也接近真实值$w = [5, 1.2, -3.4, 5.6]$。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从多项式特征中选择前4个维度，即1,x,x^2/2!,x^3/3!</span></span><br><span class="line">train(poly_features[:n_train, :<span class="number">4</span>], poly_features[n_train:, :<span class="number">4</span>],</span><br><span class="line">      labels[:n_train], labels[n_train:])</span><br></pre></td></tr></table></figure>
+
+<h3 id="线性函数拟合-欠拟合"><a href="#线性函数拟合-欠拟合" class="headerlink" title="线性函数拟合(欠拟合)"></a>线性函数拟合(欠拟合)</h3><p>让我们再看看线性函数拟合，减少该模型的训练损失相对困难。<br>在最后一个迭代周期完成后，训练损失仍然很高。<br>当用来拟合非线性模式（如这里的三阶多项式函数）时，线性模型容易欠拟合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从多项式特征中选择前2个维度，即1和x</span></span><br><span class="line">train(poly_features[:n_train, :<span class="number">2</span>], poly_features[n_train:, :<span class="number">2</span>],</span><br><span class="line">      labels[:n_train], labels[n_train:])</span><br></pre></td></tr></table></figure>
+
+<h3 id="高阶多项式函数拟合-过拟合"><a href="#高阶多项式函数拟合-过拟合" class="headerlink" title="高阶多项式函数拟合(过拟合)"></a>高阶多项式函数拟合(过拟合)</h3><p>现在，让我们尝试使用一个阶数过高的多项式来训练模型。<br>在这种情况下，没有足够的数据用于学到高阶系数应该具有接近于零的值。<br>因此，这个过于复杂的模型会轻易受到训练数据中噪声的影响。<br>虽然训练损失可以有效地降低，但测试损失仍然很高。<br>结果表明，复杂模型对数据造成了过拟合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从多项式特征中选取所有维度</span></span><br><span class="line">train(poly_features[:n_train, :], poly_features[n_train:, :],</span><br><span class="line">      labels[:n_train], labels[n_train:], num_epochs=<span class="number">1500</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在接下来的章节中，我们将继续讨论过拟合问题和处理这些问题的方法，例如权重衰减和dropout。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>欠拟合是指模型无法继续减少训练误差。过拟合是指训练误差远小于验证误差。</li>
+<li>由于不能基于训练误差来估计泛化误差，因此简单地最小化训练误差并不一定意味着泛化误差的减小。机器学习模型需要注意防止过拟合，即防止泛化误差过大。</li>
+<li>验证集可以用于模型选择，但不能过于随意地使用它。</li>
+<li>我们应该选择一个复杂度适当的模型，避免使用数量不足的训练样本。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88"><span class="toc-number">1.</span> <span class="toc-text">模型选择、欠拟合和过拟合</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E8%AF%AF%E5%B7%AE%E5%92%8C%E6%B3%9B%E5%8C%96%E8%AF%AF%E5%B7%AE"><span class="toc-number">1.1.</span> <span class="toc-text">训练误差和泛化误差</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">统计学习理论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="toc-number">1.1.2.</span> <span class="toc-text">模型复杂性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9"><span class="toc-number">1.2.</span> <span class="toc-text">模型选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E9%9B%86"><span class="toc-number">1.2.1.</span> <span class="toc-text">验证集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#K-%E6%8A%98%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81"><span class="toc-number">1.2.2.</span> <span class="toc-text">$K$折交叉验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AC%A0%E6%8B%9F%E5%90%88%E8%BF%98%E6%98%AF%E8%BF%87%E6%8B%9F%E5%90%88%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">欠拟合还是过拟合？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E5%A4%8D%E6%9D%82%E6%80%A7-1"><span class="toc-number">1.3.1.</span> <span class="toc-text">模型复杂性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%A4%A7%E5%B0%8F"><span class="toc-number">1.3.2.</span> <span class="toc-text">数据集大小</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%9B%9E%E5%BD%92"><span class="toc-number">1.4.</span> <span class="toc-text">多项式回归</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.4.1.</span> <span class="toc-text">生成数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%A8%A1%E5%9E%8B%E8%BF%9B%E8%A1%8C%E8%AE%AD%E7%BB%83%E5%92%8C%E6%B5%8B%E8%AF%95"><span class="toc-number">1.4.2.</span> <span class="toc-text">对模型进行训练和测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E9%98%B6%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%B8%B8"><span class="toc-number">1.4.3.</span> <span class="toc-text">三阶多项式函数拟合(正常)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E6%AC%A0%E6%8B%9F%E5%90%88"><span class="toc-number">1.4.4.</span> <span class="toc-text">线性函数拟合(欠拟合)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E9%98%B6%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%87%BD%E6%95%B0%E6%8B%9F%E5%90%88-%E8%BF%87%E6%8B%9F%E5%90%88"><span class="toc-number">1.4.5.</span> <span class="toc-text">高阶多项式函数拟合(过拟合)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&text=模型选择、欠拟合和过拟合"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&is_video=false&description=模型选择、欠拟合和过拟合"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=模型选择、欠拟合和过拟合&body=Check out this article: https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&title=模型选择、欠拟合和过拟合"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/03/19/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E3%80%81%E6%AC%A0%E6%8B%9F%E5%90%88%E5%92%8C%E8%BF%87%E6%8B%9F%E5%90%88/&name=模型选择、欠拟合和过拟合&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="AdaGrad算法我们从有关特征学习中并不常见的问题入手。 稀疏特征和学习率假设我们正在训练一个语言模型。为了获得良好的准确性，我们大多希望在训练的过程中降低学习率，速度通常为$\mathcal{O}(t^{-\frac{1}{2}})$或更低。现在讨论关于稀疏特征（即只在偶尔出现的特征）的模型训练，这对自然语言来说很常见。例如，我们看到“预先条件”这个词比“学习”这个词的可能性要小得多。但是，它">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AdaGrad算法">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="AdaGrad算法我们从有关特征学习中并不常见的问题入手。 稀疏特征和学习率假设我们正在训练一个语言模型。为了获得良好的准确性，我们大多希望在训练的过程中降低学习率，速度通常为$\mathcal{O}(t^{-\frac{1}{2}})$或更低。现在讨论关于稀疏特征（即只在偶尔出现的特征）的模型训练，这对自然语言来说很常见。例如，我们看到“预先条件”这个词比“学习”这个词的可能性要小得多。但是，它">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-17T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:23:08.286Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>AdaGrad算法</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaDelta%E7%AE%97%E6%B3%95/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/16/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0Adam%E7%AE%97%E6%B3%95/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&text=AdaGrad算法"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&is_video=false&description=AdaGrad算法"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=AdaGrad算法&body=Check out this article: https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&name=AdaGrad算法&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AdaGrad%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">AdaGrad算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%80%E7%96%8F%E7%89%B9%E5%BE%81%E5%92%8C%E5%AD%A6%E4%B9%A0%E7%8E%87"><span class="toc-number">1.1.</span> <span class="toc-text">稀疏特征和学习率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">预处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.4.</span> <span class="toc-text">从零开始实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.5.</span> <span class="toc-text">简洁实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        AdaGrad算法
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-17T07:00:00.000Z" itemprop="datePublished">2025-04-17</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/" class="leancloud-visitors" data-flag-title="AdaGrad算法" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="AdaGrad算法"><a href="#AdaGrad算法" class="headerlink" title="AdaGrad算法"></a>AdaGrad算法</h1><p>我们从有关特征学习中并不常见的问题入手。</p>
+<h2 id="稀疏特征和学习率"><a href="#稀疏特征和学习率" class="headerlink" title="稀疏特征和学习率"></a>稀疏特征和学习率</h2><p>假设我们正在训练一个语言模型。<br>为了获得良好的准确性，我们大多希望在训练的过程中降低学习率，速度通常为$\mathcal{O}(t^{-\frac{1}{2}})$或更低。<br>现在讨论关于稀疏特征（即只在偶尔出现的特征）的模型训练，这对自然语言来说很常见。<br>例如，我们看到“预先条件”这个词比“学习”这个词的可能性要小得多。<br>但是，它在计算广告学和个性化协同过滤等其他领域也很常见。</p>
+<p>只有在这些不常见的特征出现时，与其相关的参数才会得到有意义的更新。<br>鉴于学习率下降，我们可能最终会面临这样的情况：常见特征的参数相当迅速地收敛到最佳值，而对于不常见的特征，我们仍缺乏足够的观测以确定其最佳值。<br>换句话说，学习率要么对于常见特征而言降低太慢，要么对于不常见特征而言降低太快。</p>
+<p>解决此问题的一个方法是记录我们看到特定特征的次数，然后将其用作调整学习率。<br>即我们可以使用大小为$\eta_i = \frac{\eta_0}{\sqrt{s(i, t) + c}}$的学习率，而不是$\eta = \frac{\eta_0}{\sqrt{t + c}}$。<br>在这里$s(i, t)$计下了我们截至$t$时观察到功能$i$的次数。<br>这其实很容易实施且不产生额外损耗。</p>
+<p>AdaGrad算法 通过将粗略的计数器$s(i, t)$替换为先前观察所得梯度的平方之和来解决这个问题。<br>它使用$s(i, t+1) = s(i, t) + \left(\partial_i f(\mathbf{x})\right)^2$来调整学习率。<br>这有两个好处：首先，我们不再需要决定梯度何时算足够大。<br>其次，它会随梯度的大小自动变化。通常对应于较大梯度的坐标会显著缩小，而其他梯度较小的坐标则会得到更平滑的处理。<br>在实际应用中，它促成了计算广告学及其相关问题中非常有效的优化程序。<br>但是，它遮盖了AdaGrad固有的一些额外优势，这些优势在预处理环境中很容易被理解。</p>
+<h2 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h2><p>凸优化问题有助于分析算法的特点。<br>毕竟对大多数非凸问题来说，获得有意义的理论保证很难，但是直觉和洞察往往会延续。<br>让我们来看看最小化$f(\mathbf{x}) = \frac{1}{2} \mathbf{x}^\top \mathbf{Q} \mathbf{x} + \mathbf{c}^\top \mathbf{x} + b$这一问题。</p>
+<p>正如在 动量法中那样，我们可以根据其特征分解$\mathbf{Q} = \mathbf{U}^\top \boldsymbol{\Lambda} \mathbf{U}$重写这个问题，来得到一个简化得多的问题，使每个坐标都可以单独解出：</p>
+<p>$$f(\mathbf{x}) = \bar{f}(\bar{\mathbf{x}}) = \frac{1}{2} \bar{\mathbf{x}}^\top \boldsymbol{\Lambda} \bar{\mathbf{x}} + \bar{\mathbf{c}}^\top \bar{\mathbf{x}} + b.$$</p>
+<p>在这里我们使用了$\mathbf{x} = \mathbf{U} \mathbf{x}$，且因此$\mathbf{c} = \mathbf{U} \mathbf{c}$。<br>修改后优化器为$\bar{\mathbf{x}} = -\boldsymbol{\Lambda}^{-1} \bar{\mathbf{c}}$且最小值为$-\frac{1}{2} \bar{\mathbf{c}}^\top \boldsymbol{\Lambda}^{-1} \bar{\mathbf{c}} + b$。<br>这样更容易计算，因为$\boldsymbol{\Lambda}$是一个包含$\mathbf{Q}$特征值的对角矩阵。</p>
+<p>如果稍微扰动$\mathbf{c}$，我们会期望在$f$的最小化器中只产生微小的变化。<br>遗憾的是，情况并非如此。<br>虽然$\mathbf{c}$的微小变化导致了$\bar{\mathbf{c}}$同样的微小变化，但$f$的（以及$\bar{f}$的）最小化器并非如此。<br>每当特征值$\boldsymbol{\Lambda}_i$很大时，我们只会看到$\bar{x}_i$和$\bar{f}$的最小值发声微小变化。<br>相反，对小的$\boldsymbol{\Lambda}_i$来说，$\bar{x}_i$的变化可能是剧烈的。<br>最大和最小的特征值之比称为优化问题的<em>条件数</em>（condition number）。</p>
+<p>$$\kappa = \frac{\boldsymbol{\Lambda}_1}{\boldsymbol{\Lambda}_d}.$$</p>
+<p>如果条件编号$\kappa$很大，准确解决优化问题就会很难。<br>我们需要确保在获取大量动态的特征值范围时足够谨慎：难道我们不能简单地通过扭曲空间来“修复”这个问题，从而使所有特征值都是$1$？<br>理论上这很容易：我们只需要$\mathbf{Q}$的特征值和特征向量即可将问题从$\mathbf{x}$整理到$\mathbf{z} := \boldsymbol{\Lambda}^{\frac{1}{2}} \mathbf{U} \mathbf{x}$中的一个。<br>在新的坐标系中，$\mathbf{x}^\top \mathbf{Q} \mathbf{x}$可以被简化为$|\mathbf{z}|^2$。<br>可惜，这是一个相当不切实际的想法。<br>一般而言，计算特征值和特征向量要比解决实际问题“贵”得多。</p>
+<p>虽然准确计算特征值可能会很昂贵，但即便只是大致猜测并计算它们，也可能已经比不做任何事情好得多。<br>特别是，我们可以使用$\mathbf{Q}$的对角线条目并相应地重新缩放它。<br>这比计算特征值开销小的多。</p>
+<p>$$\tilde{\mathbf{Q}} = \mathrm{diag}^{-\frac{1}{2}}(\mathbf{Q}) \mathbf{Q} \mathrm{diag}^{-\frac{1}{2}}(\mathbf{Q}).$$</p>
+<p>在这种情况下，我们得到了$\tilde{\mathbf{Q}}<em>{ij} = \mathbf{Q}</em>{ij} / \sqrt{\mathbf{Q}<em>{ii} \mathbf{Q}</em>{jj}}$，特别注意对于所有$i$，$\tilde{\mathbf{Q}}_{ii} = 1$。<br>在大多数情况下，这大大简化了条件数。<br>例如我们之前讨论的案例，它将完全消除眼下的问题，因为问题是轴对齐的。</p>
+<p>遗憾的是，我们还面临另一个问题：在深度学习中，我们通常情况甚至无法计算目标函数的二阶导数：对于$\mathbf{x} \in \mathbb{R}^d$，即使只在小批量上，二阶导数可能也需要$\mathcal{O}(d^2)$空间来计算，导致几乎不可行。<br>AdaGrad算法巧妙的思路是，使用一个代理来表示黑塞矩阵（Hessian）的对角线，既相对易于计算又高效。</p>
+<p>为了了解它是如何生效的，让我们来看看$\bar{f}(\bar{\mathbf{x}})$。<br>我们有</p>
+<p>$$\partial_{\bar{\mathbf{x}}} \bar{f}(\bar{\mathbf{x}}) = \boldsymbol{\Lambda} \bar{\mathbf{x}} + \bar{\mathbf{c}} = \boldsymbol{\Lambda} \left(\bar{\mathbf{x}} - \bar{\mathbf{x}}_0\right),$$</p>
+<p>其中$\bar{\mathbf{x}}_0$是$\bar{f}$的优化器。<br>因此，梯度的大小取决于$\boldsymbol{\Lambda}$和与最佳值的差值。<br>如果$\bar{\mathbf{x}} - \bar{\mathbf{x}}<em>0$没有改变，那这就是我们所求的。<br>毕竟在这种情况下，梯度$\partial</em>{\bar{\mathbf{x}}} \bar{f}(\bar{\mathbf{x}})$的大小就足够了。<br>由于AdaGrad算法是一种随机梯度下降算法，所以即使是在最佳值中，我们也会看到具有非零方差的梯度。<br>因此，我们可以放心地使用梯度的方差作为黑塞矩阵比例的廉价替代。<br>详尽的分析（要花几页解释）超出了本节的范围，请读者参考 。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>让我们接着上面正式开始讨论。<br>我们使用变量$\mathbf{s}_t$来累加过去的梯度方差，如下所示：</p>
+<p>$$\begin{aligned}<br> \mathbf{g}<em>t &amp; = \partial</em>{\mathbf{w}} l(y_t, f(\mathbf{x}<em>t, \mathbf{w})), \<br> \mathbf{s}<em>t &amp; = \mathbf{s}</em>{t-1} + \mathbf{g}_t^2, \<br> \mathbf{w}_t &amp; = \mathbf{w}</em>{t-1} - \frac{\eta}{\sqrt{\mathbf{s}_t + \epsilon}} \cdot \mathbf{g}_t.<br>\end{aligned}$$</p>
+<p>在这里，操作是按照坐标顺序应用。<br>也就是说，$\mathbf{v}^2$有条目$v_i^2$。<br>同样，$\frac{1}{\sqrt{v}}$有条目$\frac{1}{\sqrt{v_i}}$，<br>并且$\mathbf{u} \cdot \mathbf{v}$有条目$u_i v_i$。<br>与之前一样，$\eta$是学习率，$\epsilon$是一个为维持数值稳定性而添加的常数，用来确保我们不会除以$0$。<br>最后，我们初始化$\mathbf{s}_0 = \mathbf{0}$。</p>
+<p>就像在动量法中我们需要跟踪一个辅助变量一样，在AdaGrad算法中，我们允许每个坐标有单独的学习率。<br>与SGD算法相比，这并没有明显增加AdaGrad的计算代价，因为主要计算用在$l(y_t, f(\mathbf{x}_t, \mathbf{w}))$及其导数。</p>
+<p>请注意，在$\mathbf{s}_t$中累加平方梯度意味着$\mathbf{s}_t$基本上以线性速率增长（由于梯度从最初开始衰减，实际上比线性慢一些）。<br>这产生了一个学习率$\mathcal{O}(t^{-\frac{1}{2}})$，但是在单个坐标的层面上进行了调整。<br>对于凸问题，这完全足够了。<br>然而，在深度学习中，我们可能希望更慢地降低学习率。<br>这引出了许多AdaGrad算法的变体，我们将在后续章节中讨论它们。<br>眼下让我们先看看它在二次凸问题中的表现如何。<br>我们仍然以同一函数为例：</p>
+<p>$$f(\mathbf{x}) = 0.1 x_1^2 + 2 x_2^2.$$</p>
+<p>我们将使用与之前相同的学习率来实现AdaGrad算法，即$\eta = 0.4$。<br>可以看到，自变量的迭代轨迹较平滑。<br>但由于$\boldsymbol{s}_t$的累加效果使学习率不断衰减，自变量在迭代后期的移动幅度较小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">%matplotlib inline</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">adagrad_2d</span>(<span class="params">x1, x2, s1, s2</span>):</span></span><br><span class="line">    eps = <span class="number">1e-6</span></span><br><span class="line">    g1, g2 = <span class="number">0.2</span> * x1, <span class="number">4</span> * x2</span><br><span class="line">    s1 += g1 ** <span class="number">2</span></span><br><span class="line">    s2 += g2 ** <span class="number">2</span></span><br><span class="line">    x1 -= eta / math.sqrt(s1 + eps) * g1</span><br><span class="line">    x2 -= eta / math.sqrt(s2 + eps) * g2</span><br><span class="line">    <span class="keyword">return</span> x1, x2, s1, s2</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f_2d</span>(<span class="params">x1, x2</span>):</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.1</span> * x1 ** <span class="number">2</span> + <span class="number">2</span> * x2 ** <span class="number">2</span></span><br><span class="line"></span><br><span class="line">eta = <span class="number">0.4</span></span><br><span class="line">d2l.show_trace_2d(f_2d, d2l.train_2d(adagrad_2d))</span><br></pre></td></tr></table></figure>
+
+<p>我们将学习率提高到$2$，可以看到更好的表现。<br>这已经表明，即使在无噪声的情况下，学习率的降低可能相当剧烈，我们需要确保参数能够适当地收敛。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">eta = <span class="number">2</span></span><br><span class="line">d2l.show_trace_2d(f_2d, d2l.train_2d(adagrad_2d))</span><br></pre></td></tr></table></figure>
+
+<h2 id="从零开始实现"><a href="#从零开始实现" class="headerlink" title="从零开始实现"></a>从零开始实现</h2><p>同动量法一样，AdaGrad算法需要对每个自变量维护同它一样形状的状态变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_adagrad_states</span>(<span class="params">feature_dim</span>):</span></span><br><span class="line">    s_w = d2l.zeros((feature_dim, <span class="number">1</span>))</span><br><span class="line">    s_b = d2l.zeros(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> (s_w, s_b)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">adagrad</span>(<span class="params">params, states, hyperparams</span>):</span></span><br><span class="line">    eps = <span class="number">1e-6</span></span><br><span class="line">    <span class="keyword">for</span> p, s <span class="keyword">in</span> <span class="built_in">zip</span>(params, states):</span><br><span class="line">        s[:] += np.square(p.grad)</span><br><span class="line">        p[:] -= hyperparams[<span class="string">&#x27;lr&#x27;</span>] * p.grad / np.sqrt(s + eps)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_adagrad_states</span>(<span class="params">feature_dim</span>):</span></span><br><span class="line">    s_w = d2l.zeros((feature_dim, <span class="number">1</span>))</span><br><span class="line">    s_b = d2l.zeros(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> (s_w, s_b)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">adagrad</span>(<span class="params">params, states, hyperparams</span>):</span></span><br><span class="line">    eps = <span class="number">1e-6</span></span><br><span class="line">    <span class="keyword">for</span> p, s <span class="keyword">in</span> <span class="built_in">zip</span>(params, states):</span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            s[:] += torch.square(p.grad)</span><br><span class="line">            p[:] -= hyperparams[<span class="string">&#x27;lr&#x27;</span>] * p.grad / torch.sqrt(s + eps)</span><br><span class="line">        p.grad.data.zero_()</span><br></pre></td></tr></table></figure>
+
+<p>与 小批量随机梯度下降一节中的实验相比，这里使用更大的学习率来训练模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data_iter, feature_dim = d2l.get_data_ch11(batch_size=<span class="number">10</span>)</span><br><span class="line">d2l.train_ch11(adagrad, init_adagrad_states(feature_dim),</span><br><span class="line">               &#123;<span class="string">&#x27;lr&#x27;</span>: <span class="number">0.1</span>&#125;, data_iter, feature_dim);</span><br></pre></td></tr></table></figure>
+
+<h2 id="简洁实现"><a href="#简洁实现" class="headerlink" title="简洁实现"></a>简洁实现</h2><p>我们可直接使用深度学习框架中提供的AdaGrad算法来训练模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">d2l.train_concise_ch11(<span class="string">&#x27;adagrad&#x27;</span>, &#123;<span class="string">&#x27;learning_rate&#x27;</span>: <span class="number">0.1</span>&#125;, data_iter)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">trainer = torch.optim.Adagrad</span><br><span class="line">d2l.train_concise_ch11(trainer, &#123;<span class="string">&#x27;lr&#x27;</span>: <span class="number">0.1</span>&#125;, data_iter)</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>AdaGrad算法会在单个坐标层面动态降低学习率。</li>
+<li>AdaGrad算法利用梯度的大小作为调整进度速率的手段：用较小的学习率来补偿带有较大梯度的坐标。</li>
+<li>在深度学习问题中，由于内存和计算限制，计算准确的二阶导数通常是不可行的。梯度可以作为一个有效的代理。</li>
+<li>如果优化问题的结构相当不均匀，AdaGrad算法可以帮助缓解扭曲。</li>
+<li>AdaGrad算法对于稀疏特征特别有效，在此情况下由于不常出现的问题，学习率需要更慢地降低。</li>
+<li>在深度学习问题上，AdaGrad算法有时在降低学习率方面可能过于剧烈。我们将在 Adam算法一节讨论缓解这种情况的策略。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AdaGrad%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">AdaGrad算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%80%E7%96%8F%E7%89%B9%E5%BE%81%E5%92%8C%E5%AD%A6%E4%B9%A0%E7%8E%87"><span class="toc-number">1.1.</span> <span class="toc-text">稀疏特征和学习率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">预处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.4.</span> <span class="toc-text">从零开始实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.5.</span> <span class="toc-text">简洁实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&text=AdaGrad算法"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&is_video=false&description=AdaGrad算法"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=AdaGrad算法&body=Check out this article: https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&title=AdaGrad算法"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/17/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0AdaGrad%E7%AE%97%E6%B3%95/&name=AdaGrad算法&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

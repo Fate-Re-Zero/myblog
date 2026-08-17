@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="BeanFactory与FactoryBean理解: 如果使用BeanFactory接口,那么必须遵守springbean的生命周期,从实例化,到初始化,到invokeAwareMethod.invokeInitMethod,postProcessBeforeInitialization, postProcessAfterInitialization, 此流程非常复杂且麻烦，如果需要一种更加便捷简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码-FactoryBean">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="BeanFactory与FactoryBean理解: 如果使用BeanFactory接口,那么必须遵守springbean的生命周期,从实例化,到初始化,到invokeAwareMethod.invokeInitMethod,postProcessBeforeInitialization, postProcessAfterInitialization, 此流程非常复杂且麻烦，如果需要一种更加便捷简">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-13T05:28:38.000Z">
+<meta property="article:modified_time" content="2022-09-13T08:04:06.935Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring源码-FactoryBean</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%87%E7%AD%BE%E5%B9%B6%E5%AE%8C%E6%88%90%E8%A7%A3%E6%9E%90%E6%93%8D%E4%BD%9C/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&text=Spring源码-FactoryBean"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&is_video=false&description=Spring源码-FactoryBean"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码-FactoryBean&body=Check out this article: https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&name=Spring源码-FactoryBean&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#BeanFactory%E4%B8%8EFactoryBean"><span class="toc-number">1.</span> <span class="toc-text">BeanFactory与FactoryBean</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FactoryBean%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.</span> <span class="toc-text">FactoryBean接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FactoryBean%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">FactoryBean的执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">代码案例</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring源码-FactoryBean
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-13T05:28:38.000Z" itemprop="datePublished">2022-09-13</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/" class="leancloud-visitors" data-flag-title="Spring源码-FactoryBean" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/spring/" rel="tag">spring</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="BeanFactory与FactoryBean"><a href="#BeanFactory与FactoryBean" class="headerlink" title="BeanFactory与FactoryBean"></a>BeanFactory与FactoryBean</h3><p>理解: 如果使用BeanFactory接口,那么必须遵守springbean的生命周期,从实例化,到初始化,到invokeAwareMethod.invokeInitMethod,postProcessBeforeInitialization, postProcessAfterInitialization, 此流程非常复杂且麻烦，如果需要一种更加便捷简单的方式创建，就可以使用FactoryBean接口,不需要遵循此创建顺序;</p>
+<h3 id="FactoryBean接口"><a href="#FactoryBean接口" class="headerlink" title="FactoryBean接口"></a>FactoryBean接口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FactoryBean</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">	String OBJECT_TYPE_ATTRIBUTE = <span class="string">&quot;factoryBeanObjectType&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获取实例对象</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function">T <span class="title">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 返回对象类型</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	Class&lt;?&gt; getObjectType();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 返回对象是否为单例</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">isSingleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="FactoryBean的执行流程"><a href="#FactoryBean的执行流程" class="headerlink" title="FactoryBean的执行流程"></a>FactoryBean的执行流程</h3><p>1.在对象实例化之前，需要检查bean是否为FactoryBean;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isFactoryBean</span><span class="params">(String name)</span> <span class="keyword">throws</span> NoSuchBeanDefinitionException </span>&#123;</span><br><span class="line">	<span class="comment">// 1.拿到真正的beanName（去掉&amp;前缀、解析别名）</span></span><br><span class="line">	String beanName = transformedBeanName(name);</span><br><span class="line">	<span class="comment">// 2.尝试从缓存获取Bean实例对象</span></span><br><span class="line">	Object beanInstance = getSingleton(beanName, <span class="keyword">false</span>);</span><br><span class="line">	<span class="keyword">if</span> (beanInstance != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="comment">// 3.beanInstance存在，则直接判断类型是否为FactoryBean</span></span><br><span class="line">		<span class="keyword">return</span> (beanInstance <span class="keyword">instanceof</span> FactoryBean);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// No singleton instance found -&gt; check bean definition.</span></span><br><span class="line">	<span class="keyword">if</span> (!containsBeanDefinition(beanName) &amp;&amp; getParentBeanFactory() <span class="keyword">instanceof</span> ConfigurableBeanFactory) &#123;</span><br><span class="line">		<span class="comment">// No bean definition found in this factory -&gt; delegate to parent.</span></span><br><span class="line">		<span class="comment">// 5.如果缓存中不存在此beanName &amp;&amp; 父beanFactory是ConfigurableBeanFactory，则调用父BeanFactory判断是否为FactoryBean</span></span><br><span class="line">		<span class="keyword">return</span> ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 6.通过MergedBeanDefinition来检查beanName对应的Bean是否为FactoryBean</span></span><br><span class="line">	<span class="keyword">return</span> isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.获取实现了FacotryBean接口的bean对象,正常执行Bean的创建过程创建该对象并放入缓存, 对象的key为&amp; + bean的名称, value为实现了FactoryBean的实例对象;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isFactoryBean(beanName)) &#123;</span><br><span class="line">	<span class="comment">// 5.1 通过beanName获取FactoryBean实例</span></span><br><span class="line">	<span class="comment">// 通过getBean(&amp;beanName)拿到的是FactoryBean本身；通过getBean(beanName)拿到的是FactoryBean创建的Bean实例</span></span><br><span class="line">	Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3.从容器获取实现了FactoryBean接口的实例对象的getObject方法返回的对象,直接使用通过Bean的名称即可获取到该对象;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ApplicationContext context = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;test.xml&quot;</span>);</span><br><span class="line">Car car=(Car)context.getBean(<span class="string">&quot;car&quot;</span>);</span><br><span class="line">System.out.println(car);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">getBean</span><span class="params">(String name)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">	<span class="comment">// 获取name对应的bean实例，如果不存在，则创建一个</span></span><br><span class="line">	<span class="keyword">return</span> doGetBean(name, <span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>4.这里从缓存中获取到的是实现了FactoryBean接口的实例对象而不是getObject返回的实例对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> &lt;T&gt; <span class="function">T <span class="title">doGetBean</span><span class="params">(String name, <span class="meta">@Nullable</span> Class&lt;T&gt; requiredType, <span class="meta">@Nullable</span> Object[] args, <span class="keyword">boolean</span>  typeCheckOnly)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">	<span class="comment">// 1.解析beanName，主要是解析别名、去掉FactoryBean的前缀“&amp;”</span></span><br><span class="line">	String beanName = transformedBeanName(name);</span><br><span class="line">	Object bean;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Eagerly check singleton cache for manually registered singletons.</span></span><br><span class="line">	<span class="comment">// 2.尝试从缓存中获取beanName对应的实例</span></span><br><span class="line">	Object sharedInstance = getSingleton(beanName);</span><br><span class="line">	<span class="comment">// 3.如果beanName的实例存在于缓存中</span></span><br><span class="line">	<span class="keyword">if</span> (sharedInstance != <span class="keyword">null</span> &amp;&amp; args == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">			<span class="keyword">if</span> (isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">				logger.trace(<span class="string">&quot;Returning eagerly cached instance of singleton bean &#x27;&quot;</span> + beanName +</span><br><span class="line">						<span class="string">&quot;&#x27; that is not fully initialized yet - a consequence of a circular reference&quot;</span>);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> &#123;</span><br><span class="line">				logger.trace(<span class="string">&quot;Returning cached instance of singleton bean &#x27;&quot;</span> + beanName + <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 3.1 返回beanName对应的实例对象（主要用于FactoryBean的特殊处理，普通Bean会直接返回sharedInstance本身）</span></span><br><span class="line">		bean = getObjectForBeanInstance(sharedInstance, name, beanName, <span class="keyword">null</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5.检查对象是否为FactoryBean并强转为FactoryBean</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">getObjectForBeanInstance</span><span class="params">(Object beanInstance, String name, String beanName, <span class="meta">@Nullable</span> RootBeanDefinition mbd)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// Don&#x27;t let calling code try to dereference the factory if the bean isn&#x27;t a factory.</span></span><br><span class="line">	<span class="comment">// 1.如果name以“&amp;”为前缀，但是beanInstance不是FactoryBean，则抛异常</span></span><br><span class="line">	<span class="keyword">if</span> (BeanFactoryUtils.isFactoryDereference(name)) &#123;</span><br><span class="line">		<span class="comment">// 2.1 如果beanInstance不是FactoryBean（也就是普通bean），则直接返回beanInstance</span></span><br><span class="line">		<span class="comment">// 2.2 如果beanInstance是FactoryBean，并且name以“&amp;”为前缀，则直接返回beanInstance（以“&amp;”为前缀代表想获取的是FactoryBean本身）</span></span><br><span class="line">		<span class="keyword">if</span> (beanInstance <span class="keyword">instanceof</span> NullBean) &#123;</span><br><span class="line">			<span class="keyword">return</span> beanInstance;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (!(beanInstance <span class="keyword">instanceof</span> FactoryBean)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> BeanIsNotAFactoryException(beanName, beanInstance.getClass());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (mbd != <span class="keyword">null</span>) &#123;</span><br><span class="line">			mbd.isFactoryBean = <span class="keyword">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> beanInstance;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Now we have the bean instance, which may be a normal bean or a FactoryBean.</span></span><br><span class="line">	<span class="comment">// If it&#x27;s a FactoryBean, we use it to create a bean instance, unless the</span></span><br><span class="line">	<span class="comment">// caller actually wants a reference to the factory.</span></span><br><span class="line">	<span class="keyword">if</span> (!(beanInstance <span class="keyword">instanceof</span> FactoryBean)) &#123;</span><br><span class="line">		<span class="keyword">return</span> beanInstance;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 3.走到这边，代表beanInstance是FactoryBean，但name不带有“&amp;”前缀，表示想要获取的是FactoryBean创建的对象实例</span></span><br><span class="line">	Object object = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">if</span> (mbd != <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="comment">// 4.如果mbd为空，则尝试从factoryBeanObjectCache缓存中获取该FactoryBean创建的对象实例</span></span><br><span class="line">		mbd.isFactoryBean = <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> &#123;</span><br><span class="line">		object = getCachedObjectForFactoryBean(beanName);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="comment">// Return bean instance from factory.</span></span><br><span class="line">		<span class="comment">// 5.只有beanInstance是FactoryBean才能走到这边，因此直接强转</span></span><br><span class="line">		FactoryBean&lt;?&gt; factory = (FactoryBean&lt;?&gt;) beanInstance;</span><br><span class="line">		<span class="comment">// Caches object obtained from FactoryBean if it is a singleton.</span></span><br><span class="line">		<span class="keyword">if</span> (mbd == <span class="keyword">null</span> &amp;&amp; containsBeanDefinition(beanName)) &#123;</span><br><span class="line">			<span class="comment">// 6.mbd为空，但是该bean的BeanDefinition在缓存中存在，则获取该bean的MergedBeanDefinition</span></span><br><span class="line">			mbd = getMergedLocalBeanDefinition(beanName);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 7.mbd是否是合成的（这个字段比较复杂，mbd正常情况都不是合成的，也就是false，有兴趣的可以自己查阅资料看看）</span></span><br><span class="line">		<span class="keyword">boolean</span> synthetic = (mbd != <span class="keyword">null</span> &amp;&amp; mbd.isSynthetic());</span><br><span class="line">		<span class="comment">// 8.从FactoryBean获取对象实例</span></span><br><span class="line">		object = getObjectFromFactoryBean(factory, beanName, !synthetic);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 9.返回对象实例</span></span><br><span class="line">	<span class="keyword">return</span> object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>6.尝试从factoryBeanObjectCache缓存中获取, 获取不到调用getObject方法返回对象并放入缓存</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">getObjectFromFactoryBean</span><span class="params">(FactoryBean&lt;?&gt; factory, String beanName, <span class="keyword">boolean</span> shouldPostProcess)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 1.如果是单例，并且已经存在于单例对象缓存中</span></span><br><span class="line">	<span class="keyword">if</span> (factory.isSingleton() &amp;&amp; containsSingleton(beanName)) &#123;</span><br><span class="line">		<span class="keyword">synchronized</span> (getSingletonMutex()) &#123;</span><br><span class="line">			<span class="comment">// 2.从FactoryBean创建的单例对象的缓存中获取该bean实例</span></span><br><span class="line">			Object object = <span class="keyword">this</span>.factoryBeanObjectCache.get(beanName);</span><br><span class="line">			<span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 3.调用FactoryBean的getObject方法获取对象实例</span></span><br><span class="line">				object = doGetObjectFromFactoryBean(factory, beanName);</span><br><span class="line">				<span class="comment">// Only post-process and store if not put there already during getObject() call above</span></span><br><span class="line">				<span class="comment">// (e.g. because of circular reference processing triggered by custom getBean calls)</span></span><br><span class="line">				Object alreadyThere = <span class="keyword">this</span>.factoryBeanObjectCache.get(beanName);</span><br><span class="line">				<span class="comment">// 4.如果该beanName已经在缓存中存在，则将object替换成缓存中的</span></span><br><span class="line">				<span class="keyword">if</span> (alreadyThere != <span class="keyword">null</span>) &#123;</span><br><span class="line">					object = alreadyThere;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> &#123;</span><br><span class="line">					<span class="keyword">if</span> (shouldPostProcess) &#123;</span><br><span class="line">						<span class="keyword">if</span> (isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">							<span class="comment">// Temporarily return non-post-processed object, not storing it yet..</span></span><br><span class="line">							<span class="keyword">return</span> object;</span><br><span class="line">						&#125;</span><br><span class="line">						beforeSingletonCreation(beanName);</span><br><span class="line">						<span class="keyword">try</span> &#123;</span><br><span class="line">							<span class="comment">// 5.对bean实例进行后置处理，执行所有已注册的BeanPostProcessor的postProcessAfterInitialization方法</span></span><br><span class="line">							object = postProcessObjectFromFactoryBean(object, beanName);</span><br><span class="line">						&#125;</span><br><span class="line">						<span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">							<span class="keyword">throw</span> <span class="keyword">new</span> BeanCreationException(beanName,</span><br><span class="line">									<span class="string">&quot;Post-processing of FactoryBean&#x27;s singleton object failed&quot;</span>, ex);</span><br><span class="line">						&#125;</span><br><span class="line">						<span class="keyword">finally</span> &#123;</span><br><span class="line">							afterSingletonCreation(beanName);</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="comment">// 6.将beanName和object放到factoryBeanObjectCache缓存中</span></span><br><span class="line">					<span class="keyword">if</span> (containsSingleton(beanName)) &#123;</span><br><span class="line">						<span class="keyword">this</span>.factoryBeanObjectCache.put(beanName, object);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 7.返回object对象实例</span></span><br><span class="line">			<span class="keyword">return</span> object;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 8.调用FactoryBean的getObject方法获取对象实例</span></span><br><span class="line">		Object object = doGetObjectFromFactoryBean(factory, beanName);</span><br><span class="line">		<span class="keyword">if</span> (shouldPostProcess) &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">// 9.对bean实例进行后置处理，执行所有已注册的BeanPostProcessor的postProcessAfterInitialization方法</span></span><br><span class="line">				object = postProcessObjectFromFactoryBean(object, beanName);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> BeanCreationException(beanName, <span class="string">&quot;Post-processing of FactoryBean&#x27;s object failed&quot;</span>, ex);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 10.返回object对象实例</span></span><br><span class="line">		<span class="keyword">return</span> object;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>7.调用FactoryBean的getObject方法获取实例对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Object <span class="title">doGetObjectFromFactoryBean</span><span class="params">(FactoryBean&lt;?&gt; factory, String beanName)</span> <span class="keyword">throws</span> BeanCreationException </span>&#123;</span><br><span class="line">	Object object;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="comment">// 1.调用FactoryBean的getObject方法获取bean对象实例</span></span><br><span class="line">		<span class="keyword">if</span> (System.getSecurityManager() != <span class="keyword">null</span>) &#123;</span><br><span class="line">			AccessControlContext acc = getAccessControlContext();</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">// 1.1 带有权限验证的</span></span><br><span class="line">				object = AccessController.doPrivileged((PrivilegedExceptionAction&lt;Object&gt;) factory::getObject, acc);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (PrivilegedActionException pae) &#123;</span><br><span class="line">				<span class="keyword">throw</span> pae.getException();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 1.2 不带权限</span></span><br><span class="line">			object = factory.getObject();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (FactoryBeanNotInitializedException ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> BeanCurrentlyInCreationException(beanName, ex.toString());</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> BeanCreationException(beanName, <span class="string">&quot;FactoryBean threw exception on object creation&quot;</span>, ex);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Do not accept a null value for a FactoryBean that&#x27;s not fully</span></span><br><span class="line">	<span class="comment">// initialized yet: Many FactoryBeans just return null then.</span></span><br><span class="line">	<span class="comment">// 2.getObject返回的是空值，并且该FactoryBean正在初始化中，则直接抛异常，不接受一个尚未完全初始化的FactoryBean的getObject返回的空值</span></span><br><span class="line">	<span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> BeanCurrentlyInCreationException(</span><br><span class="line">					beanName, <span class="string">&quot;FactoryBean which is currently in creation returned null from getObject&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		object = <span class="keyword">new</span> NullBean();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 3.返回创建好的bean对象实例</span></span><br><span class="line">	<span class="keyword">return</span> object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码案例"><a href="#代码案例" class="headerlink" title="代码案例"></a>代码案例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String brand;</span><br><span class="line">    <span class="keyword">private</span> Integer speed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.FactoryBean;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CarFactoryBean</span> <span class="keyword">implements</span> <span class="title">FactoryBean</span>&lt;<span class="title">Car</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String carInfo;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getCarInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> carInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCarInfo</span><span class="params">(String carInfo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.carInfo = carInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Car <span class="title">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        Car car = <span class="keyword">new</span> Car();</span><br><span class="line">        String[] split = carInfo.split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">        car.setName(split[<span class="number">0</span>]);</span><br><span class="line">        car.setBrand(split[<span class="number">1</span>]);</span><br><span class="line">        car.setSpeed(Integer.valueOf(split[<span class="number">2</span>]));</span><br><span class="line">        <span class="keyword">return</span>  car;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; getObjectType() &#123;</span><br><span class="line">        <span class="keyword">return</span> Car.class;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isSingleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id=<span class="string">&quot;car&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.lixiang.test.CarFactoryBean&quot;</span> &gt;</span><br><span class="line">    &lt;property name=&quot;carInfo&quot; value=&quot;大黄蜂,玛莎拉蒂,250&quot;&gt;&lt;/property&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ApplicationContext context = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;test.xml&quot;</span>);</span><br><span class="line">        Car car=(Car)context.getBean(<span class="string">&quot;car&quot;</span>);</span><br><span class="line">        System.out.println(car);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#BeanFactory%E4%B8%8EFactoryBean"><span class="toc-number">1.</span> <span class="toc-text">BeanFactory与FactoryBean</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FactoryBean%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.</span> <span class="toc-text">FactoryBean接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FactoryBean%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">FactoryBean的执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">代码案例</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&text=Spring源码-FactoryBean"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&is_video=false&description=Spring源码-FactoryBean"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码-FactoryBean&body=Check out this article: https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&title=Spring源码-FactoryBean"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/&name=Spring源码-FactoryBean&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

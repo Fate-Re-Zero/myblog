@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="扩展initPropertySources方法理解:在refresh方法中的prepareRefresh方法，执行刷新前的准备工作中提供了initPropertySources模板方法,一般用于一些环境变量的设置 源码出处： 12345678910111213141516171819202122232425262728293031323334353637protected void prepare">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring常见的扩展点">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="扩展initPropertySources方法理解:在refresh方法中的prepareRefresh方法，执行刷新前的准备工作中提供了initPropertySources模板方法,一般用于一些环境变量的设置 源码出处： 12345678910111213141516171819202122232425262728293031323334353637protected void prepare">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-04T06:39:38.000Z">
+<meta property="article:modified_time" content="2022-09-07T15:06:28.882Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring常见的扩展点</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%87%E7%AD%BE%E5%B9%B6%E5%AE%8C%E6%88%90%E8%A7%A3%E6%9E%90%E6%93%8D%E4%BD%9C/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81(%E4%B8%80)/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&text=Spring常见的扩展点"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&is_video=false&description=Spring常见的扩展点"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring常见的扩展点&body=Check out this article: https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&name=Spring常见的扩展点&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95initPropertySources%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">扩展initPropertySources方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95%E5%AE%9E%E7%8E%B0customizeBeanFactory%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">扩展实现customizeBeanFactory方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#preProcessXml-root-postProcessXml-root"><span class="toc-number">3.</span> <span class="toc-text">preProcessXml(root),postProcessXml(root)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E7%BC%96%E8%BE%91%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">Spring如何扩展实现自定义属性编辑器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#postProcessBeanFactory%E8%BF%9B%E8%A1%8C%E7%BB%A7%E6%89%BF%E9%87%8D%E5%86%99%E8%AF%A5%E6%96%B9%E6%B3%95%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%AF%B9beanFactory%E8%BF%9B%E8%A1%8C%E6%89%A9%E5%B1%95%E6%93%8D%E4%BD%9C%EF%BC%9B"><span class="toc-number">5.</span> <span class="toc-text">postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BeanDefinitionRegistryPostProcessor%E5%92%8CBeanFactoryPostProcessor"><span class="toc-number">6.</span> <span class="toc-text">BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E4%BB%A5%E4%BA%A7%E7%94%9F%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E7%82%B9%EF%BC%9AAutowirte-Import"><span class="toc-number">7.</span> <span class="toc-text">可以产生循环依赖的点：Autowirte, Import</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring常见的扩展点
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-04T06:39:38.000Z" itemprop="datePublished">2022-09-04</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/" class="leancloud-visitors" data-flag-title="Spring常见的扩展点" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/spring/" rel="tag">spring</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="扩展initPropertySources方法"><a href="#扩展initPropertySources方法" class="headerlink" title="扩展initPropertySources方法"></a>扩展initPropertySources方法</h3><p>理解:在refresh方法中的prepareRefresh方法，执行刷新前的准备工作中提供了initPropertySources模板方法,一般用于一些环境变量的设置</p>
+<p>源码出处：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">prepareRefresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 设置容器启动时间</span></span><br><span class="line">	<span class="keyword">this</span>.startupDate = System.currentTimeMillis();</span><br><span class="line">	<span class="comment">// 设置关闭标志位为false和活跃标志位为true</span></span><br><span class="line">	<span class="keyword">this</span>.closed.set(<span class="keyword">false</span>);</span><br><span class="line">	<span class="keyword">this</span>.active.set(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">		<span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">			logger.trace(<span class="string">&quot;Refreshing &quot;</span> + <span class="keyword">this</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">			logger.debug(<span class="string">&quot;Refreshing &quot;</span> + getDisplayName());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Initialize any placeholder property sources in the context environment.</span></span><br><span class="line">	<span class="comment">// AbstractApplicationContext提供的模板方法,可以继承它或者其子类进行具体实现</span></span><br><span class="line">	initPropertySources();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 1.获取Environment对象,并加载当前系统属性值到Environment对象中</span></span><br><span class="line">	getEnvironment().validateRequiredProperties();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 准备监听器和事件的集合对象,默认为空集合</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">this</span>.earlyApplicationListeners == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">this</span>.earlyApplicationListeners = <span class="keyword">new</span> LinkedHashSet&lt;&gt;(<span class="keyword">this</span>.applicationListeners);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// Reset local application listeners to pre-refresh state.</span></span><br><span class="line">		<span class="keyword">this</span>.applicationListeners.clear();</span><br><span class="line">		<span class="keyword">this</span>.applicationListeners.addAll(<span class="keyword">this</span>.earlyApplicationListeners);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Allow for the collection of early ApplicationEvents,</span></span><br><span class="line">	<span class="comment">// to be published once the multicaster is available...</span></span><br><span class="line">	<span class="keyword">this</span>.earlyApplicationEvents = <span class="keyword">new</span> LinkedHashSet&lt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>继承具体的类并扩展实现,ClassPathXmlApplicationContext为AbstractApplicationContext的字类,可以进行一些环境变量的设置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClassPathXmlApplicationContext</span> <span class="keyword">extends</span> <span class="title">ClassPathXmlApplicationContext</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyClassPathXmlApplicationContext</span><span class="params">(String... configLocations)</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(configLocations);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initPropertySources</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        getEnvironment().setRequiredProperties(<span class="string">&quot;OS&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ApplicationContext context = <span class="keyword">new</span> MyClassPathXmlApplicationContext(<span class="string">&quot;test2.xml&quot;</span>);</span><br><span class="line">        User user=(User)context.getBean(<span class="string">&quot;testbean&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;username:&quot;</span>+user.getUserName()+<span class="string">&quot;  &quot;</span>+<span class="string">&quot;email:&quot;</span>+user.getEmail());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>该扩展点在Spring MVC中的具体应用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StandardServletEnvironment</span> <span class="keyword">extends</span> <span class="title">StandardEnvironment</span> <span class="keyword">implements</span> <span class="title">ConfigurableWebEnvironment</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** Servlet context init parameters property source name: &#123;<span class="doctag">@value</span>&#125;. */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = <span class="string">&quot;servletContextInitParams&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** Servlet config init parameters property source name: &#123;<span class="doctag">@value</span>&#125;. */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String SERVLET_CONFIG_PROPERTY_SOURCE_NAME = <span class="string">&quot;servletConfigInitParams&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** JNDI property source name: &#123;<span class="doctag">@value</span>&#125;. */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String JNDI_PROPERTY_SOURCE_NAME = <span class="string">&quot;jndiProperties&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">customizePropertySources</span><span class="params">(MutablePropertySources propertySources)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1.添加servletConfigInitParams属性源(作为占位符, 之后会被替换)</span></span><br><span class="line">		propertySources.addLast(<span class="keyword">new</span> StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));</span><br><span class="line">		<span class="comment">// 2.添加servletContextInitParams属性源(作为占位符, 之后会被替换)</span></span><br><span class="line">		propertySources.addLast(<span class="keyword">new</span> StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));</span><br><span class="line">		<span class="keyword">if</span> (JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) &#123;</span><br><span class="line">			<span class="comment">// 3.添加jndiProperties属性源</span></span><br><span class="line">			propertySources.addLast(<span class="keyword">new</span> JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 4.调用父类中的customizePropertySources方法</span></span><br><span class="line">		<span class="keyword">super</span>.customizePropertySources(propertySources);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initPropertySources</span><span class="params">(<span class="meta">@Nullable</span> ServletContext servletContext, <span class="meta">@Nullable</span> ServletConfig servletConfig)</span> </span>&#123;</span><br><span class="line">		WebApplicationContextUtils.initServletPropertySources(getPropertySources(), servletContext, servletConfig);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">WebApplicationContextUtils</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initServletPropertySources</span><span class="params">(MutablePropertySources propertySources, ServletContext servletContext)</span> </span>&#123;</span><br><span class="line">		initServletPropertySources(propertySources, servletContext, <span class="keyword">null</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initServletPropertySources</span><span class="params">(MutablePropertySources sources,</span></span></span><br><span class="line"><span class="function"><span class="params">			<span class="meta">@Nullable</span> ServletContext servletContext, <span class="meta">@Nullable</span> ServletConfig servletConfig)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">		Assert.notNull(sources, <span class="string">&quot;&#x27;propertySources&#x27; must not be null&quot;</span>);</span><br><span class="line">		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;</span><br><span class="line">		<span class="keyword">if</span> (servletContext != <span class="keyword">null</span> &amp;&amp; sources.get(name) <span class="keyword">instanceof</span> StubPropertySource) &#123;</span><br><span class="line">			<span class="comment">// 1.如果servletContext不为null &amp;&amp; propertySources中包含servletContextInitParams数据源 &amp;&amp; 该数据源的类型为StubPropertySource,</span></span><br><span class="line">			<span class="comment">// 则将servletContextInitParams的数据源替换成servletContext</span></span><br><span class="line">			sources.replace(name, <span class="keyword">new</span> ServletContextPropertySource(name, servletContext));</span><br><span class="line">		&#125;</span><br><span class="line">		name = StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;</span><br><span class="line">		<span class="keyword">if</span> (servletConfig != <span class="keyword">null</span> &amp;&amp; sources.get(name) <span class="keyword">instanceof</span> StubPropertySource) &#123;</span><br><span class="line">			<span class="comment">// 2.如果servletConfig不为null &amp;&amp; propertySources中包含servletConfigInitParams数据源 &amp;&amp; 该数据源的类型为StubPropertySource,</span></span><br><span class="line">			<span class="comment">// 则将servletConfigInitParams的数据源替换成servletConfig</span></span><br><span class="line">			sources.replace(name, <span class="keyword">new</span> ServletConfigPropertySource(name, servletConfig));</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="扩展实现customizeBeanFactory方法"><a href="#扩展实现customizeBeanFactory方法" class="headerlink" title="扩展实现customizeBeanFactory方法"></a>扩展实现customizeBeanFactory方法</h3><ol>
+<li><p>在创建BeanFactory后, 可以重写该方法, 为BeanFactory设置属性,源码出处:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractApplicationContext</span> <span class="keyword">extends</span> <span class="title">DefaultResourceLoader</span></span></span><br><span class="line"><span class="class">		<span class="keyword">implements</span> <span class="title">ConfigurableApplicationContext</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">refresh</span><span class="params">()</span> <span class="keyword">throws</span> BeansException, IllegalStateException </span>&#123;</span><br><span class="line">		......</span><br><span class="line">		<span class="comment">// Tell the subclass to refresh the internal bean factory.</span></span><br><span class="line">		ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();</span><br><span class="line">		......</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractApplicationContext</span> <span class="keyword">extends</span> <span class="title">DefaultResourceLoader</span></span></span><br><span class="line"><span class="class">		<span class="keyword">implements</span> <span class="title">ConfigurableApplicationContext</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">protected</span> ConfigurableListableBeanFactory <span class="title">obtainFreshBeanFactory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1.刷新 BeanFactory，由AbstractRefreshableApplicationContext实现</span></span><br><span class="line">		refreshBeanFactory();</span><br><span class="line">		<span class="comment">// 2.拿到刷新后的 BeanFactory</span></span><br><span class="line">		<span class="keyword">return</span> getBeanFactory();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractRefreshableApplicationContext</span> <span class="keyword">extends</span> <span class="title">AbstractApplicationContext</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">refreshBeanFactory</span><span class="params">()</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="comment">// 1.判断是否已经存在 BeanFactory，如果存在则先销毁、关闭该 BeanFactory</span></span><br><span class="line">		<span class="keyword">if</span> (hasBeanFactory()) &#123;</span><br><span class="line">			destroyBeans();</span><br><span class="line">			closeBeanFactory();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">// 2.创建一个新的BeanFactory</span></span><br><span class="line">			DefaultListableBeanFactory beanFactory = createBeanFactory();</span><br><span class="line">			beanFactory.setSerializationId(getId());</span><br><span class="line">			<span class="comment">// 可以继承该类或者其字类，重写该方法</span></span><br><span class="line">			customizeBeanFactory(beanFactory);</span><br><span class="line">			<span class="comment">// 3.加载 bean 定义。</span></span><br><span class="line">			loadBeanDefinitions(beanFactory);</span><br><span class="line">			<span class="keyword">this</span>.beanFactory = beanFactory;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (IOException ex) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> ApplicationContextException(<span class="string">&quot;I/O error parsing bean definition source for &quot;</span> + getDisplayName(), ex);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractRefreshableApplicationContext</span> <span class="keyword">extends</span> <span class="title">AbstractApplicationContext</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">customizeBeanFactory</span><span class="params">(DefaultListableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.allowBeanDefinitionOverriding != <span class="keyword">null</span>) &#123;</span><br><span class="line">			beanFactory.setAllowBeanDefinitionOverriding(<span class="keyword">this</span>.allowBeanDefinitionOverriding);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.allowCircularReferences != <span class="keyword">null</span>) &#123;</span><br><span class="line">			beanFactory.setAllowCircularReferences(<span class="keyword">this</span>.allowCircularReferences);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>此方法是用来实现BeanFactory的属性设置，主要是设置两个属性：<br>​    allowBeanDefinitionOverriding：是否允许覆盖同名称的不同定义的对象<br>​    allowCircularReferences：是否允许bean之间的循环依赖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClassPathXmlApplicationContext</span> <span class="keyword">extends</span> <span class="title">ClassPathXmlApplicationContext</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    MyClassPathXmlApplicationContext(String... locations)&#123;</span><br><span class="line">        <span class="keyword">super</span>(locations);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">customizeBeanFactory</span><span class="params">(DefaultListableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.setAllowBeanDefinitionOverriding(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">super</span>.setAllowCircularReferences(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">super</span>.customizeBeanFactory(beanFactory);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="preProcessXml-root-postProcessXml-root"><a href="#preProcessXml-root-postProcessXml-root" class="headerlink" title="preProcessXml(root),postProcessXml(root)"></a>preProcessXml(root),postProcessXml(root)</h3><h3 id="Spring如何扩展实现自定义属性编辑器"><a href="#Spring如何扩展实现自定义属性编辑器" class="headerlink" title="Spring如何扩展实现自定义属性编辑器"></a>Spring如何扩展实现自定义属性编辑器</h3><p>在日常的工作中，我们经常遇到一些特殊的案例需要自定义属性的解析器来完成对应的属性解析工作，大家需要理解它的本质来进行随意的扩展工作,但是此处的扩展没有大家想象的那么简单，详细的流程讲课的时候我大概讲一下，但是要复杂很多。主要有两种方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String district;</span><br><span class="line">    <span class="keyword">private</span> String city;</span><br><span class="line">    <span class="keyword">private</span> String province;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getDistrict</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> district;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDistrict</span><span class="params">(String district)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.district = district;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getCity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> city;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCity</span><span class="params">(String city)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.city = city;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getProvince</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> province;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setProvince</span><span class="params">(String province)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.province = province;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.province + <span class="string">&quot;省&quot;</span> + <span class="keyword">this</span>.city + <span class="string">&quot;市&quot;</span> + <span class="keyword">this</span>.district + <span class="string">&quot;区&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Customer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Address address;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Address <span class="title">getAddress</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> address;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAddress</span><span class="params">(Address address)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.address = address;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.beans.PropertyEditorSupport;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AddressPropertyEditor</span> <span class="keyword">extends</span> <span class="title">PropertyEditorSupport</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAsText</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String[] adds = text.split(<span class="string">&quot;-&quot;</span>);</span><br><span class="line">            Address address = <span class="keyword">new</span> Address();</span><br><span class="line">            address.setProvince(adds[<span class="number">0</span>]);</span><br><span class="line">            address.setCity(adds[<span class="number">1</span>]);</span><br><span class="line">            address.setDistrict(adds[<span class="number">2</span>]);</span><br><span class="line">            <span class="keyword">this</span>.setValue(address);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.PropertyEditorRegistrar;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.PropertyEditorRegistry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyPropertyEditorRegistrar</span> <span class="keyword">implements</span> <span class="title">PropertyEditorRegistrar</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerCustomEditors</span><span class="params">(PropertyEditorRegistry registry)</span> </span>&#123;</span><br><span class="line">        registry.registerCustomEditor(Address.class,<span class="keyword">new</span> AddressPropertyEditor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="line">&lt;beans xmlns=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span><br><span class="line">       xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="line">       xsi:schemaLocation=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span><br><span class="line">    &lt;bean id=<span class="string">&quot;customer&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;com.lixiang.propertyEditor.Customer&quot;</span>&gt;</span><br><span class="line">        &lt;property name=<span class="string">&quot;name&quot;</span> value=<span class="string">&quot;Jack&quot;</span> /&gt;</span><br><span class="line">        &lt;property name=<span class="string">&quot;address&quot;</span> value=<span class="string">&quot;浙江-杭州-西湖&quot;</span> /&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">    &lt;!--第一种方式--&gt;</span><br><span class="line">    &lt;bean <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;org.springframework.beans.factory.config.CustomEditorConfigurer&quot;</span>&gt;</span><br><span class="line">        &lt;property name=<span class="string">&quot;propertyEditorRegistrars&quot;</span>&gt;</span><br><span class="line">            &lt;list&gt;</span><br><span class="line">                &lt;bean class=&quot;com.lixiang.propertyEditor.MyPropertyEditorRegistrar&quot;&gt;&lt;/bean&gt;</span><br><span class="line">            &lt;/list&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">    &lt;!--第二种方式--&gt;</span><br><span class="line">    &lt;bean <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;org.springframework.beans.factory.config.CustomEditorConfigurer&quot;</span>&gt;</span><br><span class="line">        &lt;property name=<span class="string">&quot;customEditors&quot;</span>&gt;</span><br><span class="line">            &lt;map&gt;</span><br><span class="line">                &lt;entry key=<span class="string">&quot;com.lixiang.propertyEditor.Address&quot;</span>&gt;</span><br><span class="line">                    &lt;value&gt;com.lixiang.propertyEditor.AddressPropertyEditor&lt;/value&gt;</span><br><span class="line">                &lt;/entry&gt;</span><br><span class="line">            &lt;/map&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">&lt;/beans&gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test3</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ApplicationContext ac = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;propertyEditor.xml&quot;</span>);</span><br><span class="line">        Customer c = ac.getBean(<span class="string">&quot;customer&quot;</span>, Customer.class);</span><br><span class="line">        <span class="comment">//输出</span></span><br><span class="line">        System.out.println(c.getAddress());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；"><a href="#postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；" class="headerlink" title="postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；"></a>postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；</h3><h3 id="BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor"><a href="#BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor" class="headerlink" title="BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor"></a>BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor</h3><h3 id="可以产生循环依赖的点：Autowirte-Import"><a href="#可以产生循环依赖的点：Autowirte-Import" class="headerlink" title="可以产生循环依赖的点：Autowirte, Import"></a>可以产生循环依赖的点：Autowirte, Import</h3>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95initPropertySources%E6%96%B9%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">扩展initPropertySources方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%B1%95%E5%AE%9E%E7%8E%B0customizeBeanFactory%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">扩展实现customizeBeanFactory方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#preProcessXml-root-postProcessXml-root"><span class="toc-number">3.</span> <span class="toc-text">preProcessXml(root),postProcessXml(root)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7%E7%BC%96%E8%BE%91%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">Spring如何扩展实现自定义属性编辑器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#postProcessBeanFactory%E8%BF%9B%E8%A1%8C%E7%BB%A7%E6%89%BF%E9%87%8D%E5%86%99%E8%AF%A5%E6%96%B9%E6%B3%95%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%AF%B9beanFactory%E8%BF%9B%E8%A1%8C%E6%89%A9%E5%B1%95%E6%93%8D%E4%BD%9C%EF%BC%9B"><span class="toc-number">5.</span> <span class="toc-text">postProcessBeanFactory进行继承重写该方法，可以对beanFactory进行扩展操作；</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BeanDefinitionRegistryPostProcessor%E5%92%8CBeanFactoryPostProcessor"><span class="toc-number">6.</span> <span class="toc-text">BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E4%BB%A5%E4%BA%A7%E7%94%9F%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E7%82%B9%EF%BC%9AAutowirte-Import"><span class="toc-number">7.</span> <span class="toc-text">可以产生循环依赖的点：Autowirte, Import</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&text=Spring常见的扩展点"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&is_video=false&description=Spring常见的扩展点"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring常见的扩展点&body=Check out this article: https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&title=Spring常见的扩展点"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/04/Spring%E6%BA%90%E7%A0%81/Spring%E5%B8%B8%E8%A7%81%E7%9A%84%E6%89%A9%E5%B1%95%E7%82%B9/&name=Spring常见的扩展点&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

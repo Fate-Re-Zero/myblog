@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="InstantiationAwareBeanPostProcessor理解：InstantiationAwareBeanPostProcessor继承自BeanPostProcessor,常用于Bean实例化前生成代理对象，直接返回代理对象; 123456789101112131415161718192021222324252627282930public interface Instantiat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码-InstantiationAwareBeanPostProcessor">
+<meta property="og:url" content="https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="InstantiationAwareBeanPostProcessor理解：InstantiationAwareBeanPostProcessor继承自BeanPostProcessor,常用于Bean实例化前生成代理对象，直接返回代理对象; 123456789101112131415161718192021222324252627282930public interface Instantiat">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-09-13T06:27:38.000Z">
+<meta property="article:modified_time" content="2022-09-13T08:00:32.072Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Spring源码-InstantiationAwareBeanPostProcessor</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-%E9%80%9A%E8%BF%87Supplier%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-FactoryBean/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&text=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&is_video=false&description=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码-InstantiationAwareBeanPostProcessor&body=Check out this article: https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&name=Spring源码-InstantiationAwareBeanPostProcessor&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#InstantiationAwareBeanPostProcessor"><span class="toc-number">1.</span> <span class="toc-text">InstantiationAwareBeanPostProcessor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">调用流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">代码案例</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Spring源码-InstantiationAwareBeanPostProcessor
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-13T06:27:38.000Z" itemprop="datePublished">2022-09-13</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/" class="leancloud-visitors" data-flag-title="Spring源码-InstantiationAwareBeanPostProcessor" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/spring/" rel="tag">spring</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="InstantiationAwareBeanPostProcessor"><a href="#InstantiationAwareBeanPostProcessor" class="headerlink" title="InstantiationAwareBeanPostProcessor"></a>InstantiationAwareBeanPostProcessor</h3><p>理解：InstantiationAwareBeanPostProcessor继承自BeanPostProcessor,常用于Bean实例化前生成代理对象，直接返回代理对象;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InstantiationAwareBeanPostProcessor</span> <span class="keyword">extends</span> <span class="title">BeanPostProcessor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Bean实例化前,可以在此方法中生成代理对象</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> Object <span class="title">postProcessBeforeInstantiation</span><span class="params">(Class&lt;?&gt; beanClass, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Bean实例化后</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">postProcessAfterInstantiation</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 设置Bean的属性</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> PropertyValues <span class="title">postProcessProperties</span><span class="params">(PropertyValues pvs, Object bean, String beanName)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Deprecated</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> PropertyValues <span class="title">postProcessPropertyValues</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> pvs;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BeanPostProcessor</span> </span>&#123;</span><br><span class="line">	<span class="comment">// bean初始化之前</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> Object <span class="title">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> bean;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// bean初始化之前</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> Object <span class="title">postProcessAfterInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> bean;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="调用流程"><a href="#调用流程" class="headerlink" title="调用流程"></a>调用流程</h3><p>1.在实例化bean之前,给BeanPostProcessors一个机会返回代理对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">createBean</span><span class="params">(String beanName, RootBeanDefinition mbd, <span class="meta">@Nullable</span> Object[] args)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> BeanCreationException </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="comment">// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.</span></span><br><span class="line">		<span class="comment">// 在实例化bean之前,给BeanPostProcessors一个机会返回代理对象</span></span><br><span class="line">		Object bean = resolveBeforeInstantiation(beanName, mbdToUse);</span><br><span class="line">		<span class="keyword">if</span> (bean != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> bean;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> BeanCreationException(mbdToUse.getResourceDescription(), beanName,</span><br><span class="line">				<span class="string">&quot;BeanPostProcessor before instantiation of bean failed&quot;</span>, ex);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		Object beanInstance = doCreateBean(beanName, mbdToUse, args);</span><br><span class="line">		<span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">			logger.trace(<span class="string">&quot;Finished creating instance of bean &#x27;&quot;</span> + beanName + <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> beanInstance;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (BeanCreationException | ImplicitlyAppearedSingletonException ex) &#123;</span><br><span class="line">		<span class="comment">// A previously detected exception with proper bean creation context already,</span></span><br><span class="line">		<span class="comment">// or illegal singleton state to be communicated up to DefaultSingletonBeanRegistry.</span></span><br><span class="line">		<span class="keyword">throw</span> ex;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> BeanCreationException(</span><br><span class="line">				mbdToUse.getResourceDescription(), beanName, <span class="string">&quot;Unexpected exception during bean creation&quot;</span>, ex);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.执行InstantiationAwareBeanPostProcessors的Before方法返回Bean对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">resolveBeforeInstantiation</span><span class="params">(String beanName, RootBeanDefinition mbd)</span> </span>&#123;</span><br><span class="line">	Object bean = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">if</span> (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) &#123;</span><br><span class="line">		<span class="comment">// Make sure bean class is actually resolved at this point.</span></span><br><span class="line">		<span class="keyword">if</span> (!mbd.isSynthetic() &amp;&amp; hasInstantiationAwareBeanPostProcessors()) &#123;</span><br><span class="line">			Class&lt;?&gt; targetType = determineTargetType(beanName, mbd);</span><br><span class="line">			<span class="keyword">if</span> (targetType != <span class="keyword">null</span>) &#123;</span><br><span class="line">				<span class="comment">// 执行InstantiationAwareBeanPostProcessors的Before方法</span></span><br><span class="line">				bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);</span><br><span class="line">				<span class="keyword">if</span> (bean != <span class="keyword">null</span>) &#123;</span><br><span class="line">					<span class="comment">// 执行InstantiationAwareBeanPostProcessors的After方法</span></span><br><span class="line">					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		mbd.beforeInstantiationResolved = (bean != <span class="keyword">null</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> bean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码案例"><a href="#代码案例" class="headerlink" title="代码案例"></a>代码案例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BeforeInstantiation</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSomeThing</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;执行do some thing ...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.cglib.proxy.MethodInterceptor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cglib.proxy.MethodProxy;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyMethodInterceptor</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object o, Method method, Object[] objects, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;目标方法前：&quot;</span>+method);</span><br><span class="line">        Object o1 = methodProxy.invokeSuper(o, objects);</span><br><span class="line">        System.out.println(<span class="string">&quot;目标方法后：&quot;</span>+method);</span><br><span class="line">        <span class="keyword">return</span> o1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.beans.BeansException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.PropertyValues;</span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cglib.proxy.Enhancer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyInstantiationAwareBeanPostProcessor</span>  <span class="keyword">implements</span> <span class="title">InstantiationAwareBeanPostProcessor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">postProcessBeforeInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;beanName:&quot;</span>+beanName+<span class="string">&quot;执行..postProcessBeforeInitialization\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">postProcessAfterInitialization</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;beanName:&quot;</span>+beanName+<span class="string">&quot;执行..postProcessAfterInitialization\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> bean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">postProcessAfterInstantiation</span><span class="params">(Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;beanName:&quot;</span>+beanName+<span class="string">&quot;执行..postProcessAfterInstantiation\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">postProcessBeforeInstantiation</span><span class="params">(Class&lt;?&gt; beanClass, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;beanName:&quot;</span>+beanName+<span class="string">&quot;执行..postProcessBeforeInstantiation\n&quot;</span>);</span><br><span class="line">        <span class="comment">//利用 其 生成动态代理</span></span><br><span class="line">        <span class="keyword">if</span>(beanClass==BeforeInstantiation.class)&#123;</span><br><span class="line">            Enhancer enhancer = <span class="keyword">new</span> Enhancer();</span><br><span class="line">            enhancer.setSuperclass(beanClass);</span><br><span class="line">            enhancer.setCallback(<span class="keyword">new</span> MyMethodInterceptor());</span><br><span class="line">            BeforeInstantiation beforeInstantiation = (BeforeInstantiation)enhancer.create();</span><br><span class="line">            System.out.print(<span class="string">&quot;返回动态代理\n&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> beforeInstantiation;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> PropertyValues <span class="title">postProcessProperties</span><span class="params">(PropertyValues pvs, Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;beanName:&quot;</span>+beanName+<span class="string">&quot;执行..postProcessProperties\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> pvs;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="line">&lt;beans xmlns=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span><br><span class="line">       xmlns:xsi=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="line">       xsi:schemaLocation=<span class="string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span><br><span class="line"></span><br><span class="line">    &lt;bean id=&quot;beforeInstantiation&quot; class=&quot;com.lixiang.resolveBeforeInstantiation.BeforeInstantiation&quot;&gt;&lt;/bean&gt;</span><br><span class="line">    &lt;bean id=&quot;myInstantiationAwareBeanPostProcessor&quot; class=&quot;com.lixiang.resolveBeforeInstantiation.MyInstantiationAwareBeanPostProcessor&quot;&gt;&lt;/bean&gt;</span><br><span class="line">&lt;/beans&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.support.ClassPathXmlApplicationContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ApplicationContext ac = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">&quot;resolveBeforeInstantiation.xml&quot;</span>);</span><br><span class="line">        BeforeInstantiation bean = ac.getBean(BeforeInstantiation.class);</span><br><span class="line">        bean.doSomeThing();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#InstantiationAwareBeanPostProcessor"><span class="toc-number">1.</span> <span class="toc-text">InstantiationAwareBeanPostProcessor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">调用流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%88%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">代码案例</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&text=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&is_video=false&description=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spring源码-InstantiationAwareBeanPostProcessor&body=Check out this article: https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&title=Spring源码-InstantiationAwareBeanPostProcessor"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2022/09/13/Spring%E6%BA%90%E7%A0%81/Spring%E6%BA%90%E7%A0%81-InstantiationAwareBeanPostProcessor/&name=Spring源码-InstantiationAwareBeanPostProcessor&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2025 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+

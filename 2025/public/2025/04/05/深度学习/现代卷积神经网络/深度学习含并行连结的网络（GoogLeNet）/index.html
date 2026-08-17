@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="含并行连结的网络（GoogLeNet）在2014年的ImageNet图像识别挑战赛中，一个名叫GoogLeNet 的网络架构大放异彩。GoogLeNet吸收了NiN中串联网络的思想，并在此基础上做了改进。这篇论文的一个重点是解决了什么样大小的卷积核最合适的问题。毕竟，以前流行的网络使用小到$1 \times 1$，大到$11 \times 11$的卷积核。本文的一个观点是，有时使用不同大小的卷积核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="含并行连结的网络（GoogLeNet）">
+<meta property="og:url" content="https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/index.html">
+<meta property="og:site_name" content="祥祥要起飞">
+<meta property="og:description" content="含并行连结的网络（GoogLeNet）在2014年的ImageNet图像识别挑战赛中，一个名叫GoogLeNet 的网络架构大放异彩。GoogLeNet吸收了NiN中串联网络的思想，并在此基础上做了改进。这篇论文的一个重点是解决了什么样大小的卷积核最合适的问题。毕竟，以前流行的网络使用小到$1 \times 1$，大到$11 \times 11$的卷积核。本文的一个观点是，有时使用不同大小的卷积核">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-05T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-17T09:14:38.967Z">
+<meta property="article:author" content="祥祥要起飞">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>含并行连结的网络（GoogLeNet）</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="祥祥要起飞" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2025/04/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%B7%B1%E5%BA%A6%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88AlexNet%EF%BC%89/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2025/04/04/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%BA%8F%E5%88%97%E5%88%B0%E5%BA%8F%E5%88%97%E5%AD%A6%E4%B9%A0%EF%BC%88seq2seq%EF%BC%89/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&text=含并行连结的网络（GoogLeNet）"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&is_video=false&description=含并行连结的网络（GoogLeNet）"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=含并行连结的网络（GoogLeNet）&body=Check out this article: https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&name=含并行连结的网络（GoogLeNet）&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">含并行连结的网络（GoogLeNet）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Inception%E5%9D%97"><span class="toc-number">1.1.</span> <span class="toc-text">Inception块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GoogLeNet%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">GoogLeNet模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.3.</span> <span class="toc-text">训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        含并行连结的网络（GoogLeNet）
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">祥祥要起飞</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-05T04:00:00.000Z" itemprop="datePublished">2025-04-05</time>
+        
+      
+    </div>
+
+
+      <div class="posteye">
+    <i class="fas fa-eye"></i>
+    <span id="/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/" class="leancloud-visitors" data-flag-title="含并行连结的网络（GoogLeNet）" style="display: inline;">
+        <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="含并行连结的网络（GoogLeNet）"><a href="#含并行连结的网络（GoogLeNet）" class="headerlink" title="含并行连结的网络（GoogLeNet）"></a>含并行连结的网络（GoogLeNet）</h1><p>在2014年的ImageNet图像识别挑战赛中，一个名叫<em>GoogLeNet</em> 的网络架构大放异彩。<br>GoogLeNet吸收了NiN中串联网络的思想，并在此基础上做了改进。<br>这篇论文的一个重点是解决了什么样大小的卷积核最合适的问题。<br>毕竟，以前流行的网络使用小到$1 \times 1$，大到$11 \times 11$的卷积核。<br>本文的一个观点是，有时使用不同大小的卷积核组合是有利的。<br>本节将介绍一个稍微简化的GoogLeNet版本：我们省略了一些为稳定训练而添加的特殊特性，现在有了更好的训练方法，这些特性不是必要的。</p>
+<h2 id="Inception块"><a href="#Inception块" class="headerlink" title="Inception块"></a>Inception块</h2><p>在GoogLeNet中，基本的卷积块被称为<em>Inception块</em>（Inception block）。这很可能得名于电影《盗梦空间》（Inception），因为电影中的一句话“我们需要走得更深”（“We need to go deeper”）。</p>
+<p>（图：Inception块的架构。）</p>
+<p>如 Inception块结构图所示，Inception块由四条并行路径组成。<br>前三条路径使用窗口大小为$1\times 1$、$3\times 3$和$5\times 5$的卷积层，从不同空间大小中提取信息。<br>中间的两条路径在输入上执行$1\times 1$卷积，以减少通道数，从而降低模型的复杂性。<br>第四条路径使用$3\times 3$最大汇聚层，然后使用$1\times 1$卷积层来改变通道数。<br>这四条路径都使用合适的填充来使输入与输出的高和宽一致，最后我们将每条线路的输出在通道维度上连结，并构成Inception块的输出。在Inception块中，通常调整的超参数是每层输出通道数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Inception</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># c1--c4是每条路径的输出通道数</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, in_channels, c1, c2, c3, c4, **kwargs</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(Inception, self).__init__(**kwargs)</span><br><span class="line">        <span class="comment"># 线路1，单1x1卷积层</span></span><br><span class="line">        self.p1_1 = nn.Conv2d(in_channels, c1, kernel_size=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># 线路2，1x1卷积层后接3x3卷积层</span></span><br><span class="line">        self.p2_1 = nn.Conv2d(in_channels, c2[<span class="number">0</span>], kernel_size=<span class="number">1</span>)</span><br><span class="line">        self.p2_2 = nn.Conv2d(c2[<span class="number">0</span>], c2[<span class="number">1</span>], kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># 线路3，1x1卷积层后接5x5卷积层</span></span><br><span class="line">        self.p3_1 = nn.Conv2d(in_channels, c3[<span class="number">0</span>], kernel_size=<span class="number">1</span>)</span><br><span class="line">        self.p3_2 = nn.Conv2d(c3[<span class="number">0</span>], c3[<span class="number">1</span>], kernel_size=<span class="number">5</span>, padding=<span class="number">2</span>)</span><br><span class="line">        <span class="comment"># 线路4，3x3最大汇聚层后接1x1卷积层</span></span><br><span class="line">        self.p4_1 = nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">1</span>, padding=<span class="number">1</span>)</span><br><span class="line">        self.p4_2 = nn.Conv2d(in_channels, c4, kernel_size=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        p1 = F.relu(self.p1_1(x))</span><br><span class="line">        p2 = F.relu(self.p2_2(F.relu(self.p2_1(x))))</span><br><span class="line">        p3 = F.relu(self.p3_2(F.relu(self.p3_1(x))))</span><br><span class="line">        p4 = F.relu(self.p4_2(self.p4_1(x)))</span><br><span class="line">        <span class="comment"># 在通道维度上连结输出</span></span><br><span class="line">        <span class="keyword">return</span> torch.cat((p1, p2, p3, p4), dim=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>那么为什么GoogLeNet这个网络如此有效呢？<br>首先我们考虑一下滤波器（filter）的组合，它们可以用各种滤波器尺寸探索图像，这意味着不同大小的滤波器可以有效地识别不同范围的图像细节。<br>同时，我们可以为不同的滤波器分配不同数量的参数。</p>
+<h2 id="GoogLeNet模型"><a href="#GoogLeNet模型" class="headerlink" title="GoogLeNet模型"></a>GoogLeNet模型</h2><p>如 fig_inception_full所示，GoogLeNet一共使用9个Inception块和全局平均汇聚层的堆叠来生成其估计值。Inception块之间的最大汇聚层可降低维度。<br>第一个模块类似于AlexNet和LeNet，Inception块的组合从VGG继承，全局平均汇聚层避免了在最后使用全连接层。</p>
+<p>（图：GoogLeNet架构。）</p>
+<p>现在，我们逐一实现GoogLeNet的每个模块。第一个模块使用64个通道、$7\times 7$卷积层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b1 = nn.Sequential()</span><br><span class="line">b1.add(nn.Conv2D(<span class="number">64</span>, kernel_size=<span class="number">7</span>, strides=<span class="number">2</span>, padding=<span class="number">3</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">       nn.MaxPool2D(pool_size=<span class="number">3</span>, strides=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b1 = nn.Sequential(nn.Conv2d(<span class="number">1</span>, <span class="number">64</span>, kernel_size=<span class="number">7</span>, stride=<span class="number">2</span>, padding=<span class="number">3</span>),</span><br><span class="line">                   nn.ReLU(),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>第二个模块使用两个卷积层：第一个卷积层是64个通道、$1\times 1$卷积层；第二个卷积层使用将通道数量增加三倍的$3\times 3$卷积层。<br>这对应于Inception块中的第二条路径。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">b2 = nn.Sequential()</span><br><span class="line">b2.add(nn.Conv2D(<span class="number">64</span>, kernel_size=<span class="number">1</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">       nn.Conv2D(<span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>, activation=<span class="string">&#x27;relu&#x27;</span>),</span><br><span class="line">       nn.MaxPool2D(pool_size=<span class="number">3</span>, strides=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">b2 = nn.Sequential(nn.Conv2d(<span class="number">64</span>, <span class="number">64</span>, kernel_size=<span class="number">1</span>),</span><br><span class="line">                   nn.ReLU(),</span><br><span class="line">                   nn.Conv2d(<span class="number">64</span>, <span class="number">192</span>, kernel_size=<span class="number">3</span>, padding=<span class="number">1</span>),</span><br><span class="line">                   nn.ReLU(),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>第三个模块串联两个完整的Inception块。<br>第一个Inception块的输出通道数为$64+128+32+32=256$，四个路径之间的输出通道数量比为$64:128:32:32=2:4:1:1$。<br>第二个和第三个路径首先将输入通道的数量分别减少到$96/192=1/2$和$16/192=1/12$，然后连接第二个卷积层。第二个Inception块的输出通道数增加到$128+192+96+64=480$，四个路径之间的输出通道数量比为$128:192:96:64 = 4:6:3:2$。<br>第二条和第三条路径首先将输入通道的数量分别减少到$128/256=1/2$和$32/256=1/8$。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">b3 = nn.Sequential()</span><br><span class="line">b3.add(Inception(<span class="number">64</span>, (<span class="number">96</span>, <span class="number">128</span>), (<span class="number">16</span>, <span class="number">32</span>), <span class="number">32</span>),</span><br><span class="line">       Inception(<span class="number">128</span>, (<span class="number">128</span>, <span class="number">192</span>), (<span class="number">32</span>, <span class="number">96</span>), <span class="number">64</span>),</span><br><span class="line">       nn.MaxPool2D(pool_size=<span class="number">3</span>, strides=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">b3 = nn.Sequential(Inception(<span class="number">192</span>, <span class="number">64</span>, (<span class="number">96</span>, <span class="number">128</span>), (<span class="number">16</span>, <span class="number">32</span>), <span class="number">32</span>),</span><br><span class="line">                   Inception(<span class="number">256</span>, <span class="number">128</span>, (<span class="number">128</span>, <span class="number">192</span>), (<span class="number">32</span>, <span class="number">96</span>), <span class="number">64</span>),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>第四模块更加复杂，<br>它串联了5个Inception块，其输出通道数分别是$192+208+48+64=512$、$160+224+64+64=512$、$128+256+64+64=512$、$112+288+64+64=528$和$256+320+128+128=832$。<br>这些路径的通道数分配和第三模块中的类似，首先是含$3×3$卷积层的第二条路径输出最多通道，其次是仅含$1×1$卷积层的第一条路径，之后是含$5×5$卷积层的第三条路径和含$3×3$最大汇聚层的第四条路径。<br>其中第二、第三条路径都会先按比例减小通道数。<br>这些比例在各个Inception块中都略有不同。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">b4 = nn.Sequential()</span><br><span class="line">b4.add(Inception(<span class="number">192</span>, (<span class="number">96</span>, <span class="number">208</span>), (<span class="number">16</span>, <span class="number">48</span>), <span class="number">64</span>),</span><br><span class="line">       Inception(<span class="number">160</span>, (<span class="number">112</span>, <span class="number">224</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">       Inception(<span class="number">128</span>, (<span class="number">128</span>, <span class="number">256</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">       Inception(<span class="number">112</span>, (<span class="number">144</span>, <span class="number">288</span>), (<span class="number">32</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">       Inception(<span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">       nn.MaxPool2D(pool_size=<span class="number">3</span>, strides=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">b4 = nn.Sequential(Inception(<span class="number">480</span>, <span class="number">192</span>, (<span class="number">96</span>, <span class="number">208</span>), (<span class="number">16</span>, <span class="number">48</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">160</span>, (<span class="number">112</span>, <span class="number">224</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">128</span>, (<span class="number">128</span>, <span class="number">256</span>), (<span class="number">24</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">512</span>, <span class="number">112</span>, (<span class="number">144</span>, <span class="number">288</span>), (<span class="number">32</span>, <span class="number">64</span>), <span class="number">64</span>),</span><br><span class="line">                   Inception(<span class="number">528</span>, <span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   nn.MaxPool2d(kernel_size=<span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>第五模块包含输出通道数为$256+320+128+128=832$和$384+384+128+128=1024$的两个Inception块。<br>其中每条路径通道数的分配思路和第三、第四模块中的一致，只是在具体数值上有所不同。<br>需要注意的是，第五模块的后面紧跟输出层，该模块同NiN一样使用全局平均汇聚层，将每个通道的高和宽变成1。<br>最后我们将输出变成二维数组，再接上一个输出个数为标签类别数的全连接层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">b5 = nn.Sequential()</span><br><span class="line">b5.add(Inception(<span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">       Inception(<span class="number">384</span>, (<span class="number">192</span>, <span class="number">384</span>), (<span class="number">48</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">       nn.GlobalAvgPool2D())</span><br><span class="line"></span><br><span class="line">net = nn.Sequential()</span><br><span class="line">net.add(b1, b2, b3, b4, b5, nn.Dense(<span class="number">10</span>))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">b5 = nn.Sequential(Inception(<span class="number">832</span>, <span class="number">256</span>, (<span class="number">160</span>, <span class="number">320</span>), (<span class="number">32</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   Inception(<span class="number">832</span>, <span class="number">384</span>, (<span class="number">192</span>, <span class="number">384</span>), (<span class="number">48</span>, <span class="number">128</span>), <span class="number">128</span>),</span><br><span class="line">                   nn.AdaptiveAvgPool2d((<span class="number">1</span>,<span class="number">1</span>)),</span><br><span class="line">                   nn.Flatten())</span><br><span class="line"></span><br><span class="line">net = nn.Sequential(b1, b2, b3, b4, b5, nn.Linear(<span class="number">1024</span>, <span class="number">10</span>))</span><br></pre></td></tr></table></figure>
+
+<p>GoogLeNet模型的计算复杂，而且不如VGG那样便于修改通道数。<br>为了使Fashion-MNIST上的训练短小精悍，我们将输入的高和宽从224降到96，这简化了计算。下面演示各个模块输出的形状变化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X = np.random.uniform(size=(<span class="number">1</span>, <span class="number">1</span>, <span class="number">96</span>, <span class="number">96</span>))</span><br><span class="line">net.initialize()</span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> net:</span><br><span class="line">    X = layer(X)</span><br><span class="line">    print(layer.name, <span class="string">&#x27;output shape:\t&#x27;</span>, X.shape)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">X = torch.rand(size=(<span class="number">1</span>, <span class="number">1</span>, <span class="number">96</span>, <span class="number">96</span>))</span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> net:</span><br><span class="line">    X = layer(X)</span><br><span class="line">    print(layer.__class__.__name__,<span class="string">&#x27;output shape:\t&#x27;</span>, X.shape)</span><br></pre></td></tr></table></figure>
+
+<h2 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h2><p>和以前一样，我们使用Fashion-MNIST数据集来训练我们的模型。在训练之前，我们将图片转换为$96 \times 96$分辨率。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lr, num_epochs, batch_size = <span class="number">0.1</span>, <span class="number">10</span>, <span class="number">128</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size, resize=<span class="number">96</span>)</span><br><span class="line">d2l.train_ch6(net, train_iter, test_iter, num_epochs, lr, d2l.try_gpu())</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>Inception块相当于一个有4条路径的子网络。它通过不同窗口形状的卷积层和最大汇聚层来并行抽取信息，并使用$1×1$卷积层减少每像素级别上的通道维数从而降低模型复杂度。</li>
+<li>GoogLeNet将多个设计精细的Inception块与其他层（卷积层、全连接层）串联起来。其中Inception块的通道数分配之比是在ImageNet数据集上通过大量的实验得来的。</li>
+<li>GoogLeNet和它的后继者们一度是ImageNet上最有效的模型之一：它以较低的计算复杂度提供了类似的测试精度。</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>  
+    <div id="vcomments" class="blog-post-comments"></div>
+    <script>        
+        new Valine({
+            el: '#vcomments',
+            visitor: true,
+            appId: 'gqmHGHyrnzRPUSxqADLhUzlT-gzGzoHsz',
+            appKey: 'q8uQ7rKeukTuQ3L35peaOhkC',
+            placeholder: '好哥哥，说几句吧！',
+            avatar: 'retro'
+        })
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">含并行连结的网络（GoogLeNet）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Inception%E5%9D%97"><span class="toc-number">1.1.</span> <span class="toc-text">Inception块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GoogLeNet%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">GoogLeNet模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.3.</span> <span class="toc-text">训练模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">小结</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&text=含并行连结的网络（GoogLeNet）"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&is_video=false&description=含并行连结的网络（GoogLeNet）"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=含并行连结的网络（GoogLeNet）&body=Check out this article: https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&title=含并行连结的网络（GoogLeNet）"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://fate-re-zero.github.io/2025/04/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E7%8E%B0%E4%BB%A3%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%90%AB%E5%B9%B6%E8%A1%8C%E8%BF%9E%E7%BB%93%E7%9A%84%E7%BD%91%E7%BB%9C%EF%BC%88GoogLeNet%EF%BC%89/&name=含并行连结的网络（GoogLeNet）&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; <a target="_blank" rel="noopener" href="https://beian.miit.gov.cn">2026 祥祥要起飞</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/lib/particles/particles.min.js"></script>
+
+
+<script src="/lib/typing/typing.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
