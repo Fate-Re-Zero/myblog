@@ -6,7 +6,7 @@
   <link href="https://fate-re-zero.github.io/atom.xml" rel="self"/>
   
   <link href="https://fate-re-zero.github.io/"/>
-  <updated>2026-08-17T07:45:31.219Z</updated>
+  <updated>2022-06-26T15:18:52.221Z</updated>
   <id>https://fate-re-zero.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://fate-re-zero.github.io/2026/08/17/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/"/>
+    <id>https://fate-re-zero.github.io/2026/08/17/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/</id>
+    <published>2026-08-17T12:25:53.703Z</published>
+    <updated>2022-06-26T15:18:52.221Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;算法基础学习：&lt;br&gt;   打印整数的二进制数：&lt;br&gt;   static void print(int num) {&lt;br&gt;        for (int i = 31; i &amp;gt;= 0; i–) {&lt;br&gt;           </summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>业务Agent介绍</title>
@@ -444,29 +465,6 @@
         
         
     <summary type="html">&lt;h1 id=&quot;实战-Kaggle-比赛：图像分类-CIFAR-10&quot;&gt;&lt;a href=&quot;#实战-Kaggle-比赛：图像分类-CIFAR-10&quot; class=&quot;headerlink&quot; title=&quot;实战 Kaggle 比赛：图像分类 (CIFAR-10)&quot;&gt;&lt;/a&gt;实战</summary>
-        
-      
-    
-    
-    
-    
-    <category term="深度学习" scheme="https://fate-re-zero.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>全卷积网络</title>
-    <link href="https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/"/>
-    <id>https://fate-re-zero.github.io/2025/04/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C/</id>
-    <published>2025-04-09T11:00:00.000Z</published>
-    <updated>2026-08-17T09:19:15.310Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;全卷积网络&quot;&gt;&lt;a href=&quot;#全卷积网络&quot; class=&quot;headerlink&quot; title=&quot;全卷积网络&quot;&gt;&lt;/a&gt;全卷积网络&lt;/h1&gt;&lt;p&gt;如</summary>
         
       
     
